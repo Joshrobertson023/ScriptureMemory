@@ -1,4 +1,6 @@
+using DataAccess.Models;
 using DataAccess.Requests;
+using Microsoft.AspNetCore.Identity.Data;
 using ScriptureMemoryLibrary;
 using System.Net.Http.Json;
 using static ScriptureMemoryLibrary.Enums;
@@ -10,7 +12,7 @@ public class UserTests : BaseIntegrationTest
     public UserTests(IntegrationTestWebAppFactory factory) : base(factory) { }
 
     [Fact]
-    public async Task CreateUser_ShouldAddUser()
+    public async Task CreateUser_ShouldCreateUserAccount()
     {
         var request = new CreateUserRequest
         {
@@ -24,15 +26,18 @@ public class UserTests : BaseIntegrationTest
 
         var result = await client.PostAsJsonAsync("/users", request);
 
-        var createdUser = await userService.Login(request.Username, request.Password);
+        var loginResponse = await client.PostAsJsonAsync("/auth/login", new { Username = request.Username, Password = request.Password });
+        loginResponse.EnsureSuccessStatusCode();
 
-        Assert.NotNull(createdUser);
-        Assert.Equal(request.Username, createdUser.Username);
-        Assert.Equal(request.FirstName, createdUser.FirstName);
-        Assert.Equal(request.LastName, createdUser.LastName);
-        Assert.Equal(request.Email, createdUser.Email);
-        Assert.NotNull(createdUser.HashedPassword);
-        Assert.NotNull(createdUser.DateRegistered);
-        Assert.NotNull(createdUser.AuthToken);
+        var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
+
+        Assert.NotNull(loggedInUser);
+        Assert.Equal(request.Username, loggedInUser.Username);
+        Assert.Equal(request.FirstName, loggedInUser.FirstName);
+        Assert.Equal(request.LastName, loggedInUser.LastName);
+        Assert.Equal(request.Email, loggedInUser.Email);
+        Assert.NotNull(loggedInUser.HashedPassword);
+        Assert.NotNull(loggedInUser.DateRegistered);
+        Assert.NotNull(loggedInUser.AuthToken);
     }
 }

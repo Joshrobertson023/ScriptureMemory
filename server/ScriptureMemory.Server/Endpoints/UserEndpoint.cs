@@ -18,6 +18,7 @@ public static class UserEndpoint
 {
     public static void ConfigureUserEndpoints(this WebApplication app)
     {
+        // Get user by username directly from data context
         app.MapGet("/users/{username}", async (
             string username,
             [FromServices] IUserData data,
@@ -36,6 +37,7 @@ public static class UserEndpoint
             return Results.Ok(results);
         });
 
+        // Search for a user
         app.MapGet("/users/search/{query}", async (
             string query,
             [FromServices] IUserData data) =>
@@ -44,6 +46,7 @@ public static class UserEndpoint
             return Results.Ok(results);
         });
 
+        // Create a new user account
         app.MapPost("/users", async (
             [FromBody] CreateUserRequest request,
             [FromServices] IUserService userService) =>
@@ -52,6 +55,7 @@ public static class UserEndpoint
             return Results.Created();
         });
 
+        // Set a user as active
         app.MapPut("/users/setAsActive/{username}", async (
             string username,
             [FromServices] IUserData data) =>
@@ -60,6 +64,7 @@ public static class UserEndpoint
             return Results.Ok();
         });
 
+        // Get users with a specific email address
         app.MapGet("/users/email/{email}", async (
             string email,
             [FromServices] IUserData data) =>
@@ -70,6 +75,7 @@ public static class UserEndpoint
             return Results.Ok(results);
         });
 
+        // Get a user's password hash
         app.MapGet("/users/password/{username}", async (
             [FromBody] string username,
             [FromServices] IUserData data) =>
@@ -80,20 +86,23 @@ public static class UserEndpoint
             return Results.Ok(result);
         });
 
-        app.MapGet("/users/username", async (
+        // Login a user with username and password
+        app.MapPost("/users/username", async (
             [FromBody] LoginRequest request,
             [FromServices] IUserService userService) =>
         {
             return await userService.Login(request.Username, request.Password);
         });
 
-        app.MapGet("/users/token", async (
+        // Login a user from a login token
+        app.MapPost("/users/token", async (
             [FromBody] string token,
             [FromServices] IUserService userService) =>
         {
             return await userService.Login(token);
         });
 
+        // Increment the number of verses a user has memorized
         app.MapPut("/users/incrementVersesMemorized/{username}", async (
             string username,
             [FromServices] IUserData data) =>
