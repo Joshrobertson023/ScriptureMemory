@@ -13,7 +13,7 @@
 //using System.Text;
 //using System.Text.Json;
 //using System.Threading.Tasks;
-//using VerseAppLibrary;
+//using ScriptureMemoryLibrary;
 
 //namespace DataAccess.Data;
 //public class CollectionData : ICollectionData

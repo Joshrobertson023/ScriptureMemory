@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +9,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 
 namespace DataAccess.Data;
 

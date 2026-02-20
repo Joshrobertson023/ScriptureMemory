@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Po7kOTHicI4=",
+  "dgSpecHash": "88tM9/QS0+Q=",
   "success": true,
-  "projectFilePath": "C:\\Users\\there\\source\\repos\\VerseAppNew\\VerseApp.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+  "projectFilePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\there\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",

@@ -2,7 +2,7 @@
 //using DataAccess.Models;
 //using Microsoft.AspNetCore.Mvc;
 //using System.Linq;
-//using VerseAppLibrary;
+//using ScriptureMemoryLibrary;
 //using VerseAppNew.Server.Services;
 
 //namespace VerseAppNew.Server.Endpoints;

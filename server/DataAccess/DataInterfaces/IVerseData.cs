@@ -1,4 +1,4 @@
-﻿using DataAccess.Models;
+using DataAccess.Models;
 
 namespace DataAccess.DataInterfaces;
 public interface IVerseData

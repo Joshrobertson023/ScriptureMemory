@@ -1,9 +1,9 @@
-﻿using DataAccess.DataInterfaces;
+using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using DataAccess.Requests;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 using VerseAppNew.Server.Services;
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace VerseAppNew.Server.Bogus;
 

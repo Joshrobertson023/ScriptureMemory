@@ -1,6 +1,6 @@
-﻿//using DataAccess.DataInterfaces;
+//using DataAccess.DataInterfaces;
 //using Microsoft.AspNetCore.Mvc;
-//using static VerseAppLibrary.Enums;
+//using static ScriptureMemoryLibrary.Enums;
 
 //namespace VerseAppNew.Server.Endpoints;
 

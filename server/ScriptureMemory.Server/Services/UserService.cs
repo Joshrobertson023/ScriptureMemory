@@ -1,12 +1,12 @@
-﻿using DataAccess.DataInterfaces;
+using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using DataAccess.Requests;
 using DataAccess.Requests.UpdateRequests;
 using Microsoft.AspNetCore.Identity;
 using System.Text.Json;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace VerseAppNew.Server.Services;
 

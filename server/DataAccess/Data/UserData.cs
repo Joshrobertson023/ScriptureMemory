@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using Microsoft.Data.SqlClient;
@@ -10,7 +10,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace DataAccess.Data;
 public class UserData : IUserData

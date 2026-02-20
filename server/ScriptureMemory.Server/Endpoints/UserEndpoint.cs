@@ -10,7 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using VerseAppNew.Server.Services;
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace VerseAppNew.Server.Apis;
 

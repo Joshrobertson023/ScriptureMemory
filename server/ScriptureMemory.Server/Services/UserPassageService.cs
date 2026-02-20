@@ -1,7 +1,7 @@
-﻿using DataAccess.DataInterfaces;
+using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using System.Diagnostics;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 
 namespace VerseAppNew.Server.Services;
 

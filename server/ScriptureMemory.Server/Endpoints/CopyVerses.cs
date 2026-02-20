@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using Microsoft.Data.SqlClient;
@@ -46,7 +46,7 @@ namespace DataAccess
                 await insertCmd.ExecuteNonQueryAsync();
             }
 
-            Console.WriteLine("✅ Verse data successfully synced from Oracle to SQL Server.");
+            Console.WriteLine("? Verse data successfully synced from Oracle to SQL Server.");
         }
     }
 }

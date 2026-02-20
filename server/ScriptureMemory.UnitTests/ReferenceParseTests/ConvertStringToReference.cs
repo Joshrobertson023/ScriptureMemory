@@ -1,4 +1,4 @@
-﻿using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 using Xunit;
 
 namespace VerseApp.UnitTests.ReferenceParseTests;

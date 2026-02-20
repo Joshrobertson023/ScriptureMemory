@@ -1,5 +1,5 @@
-﻿using DataAccess.Models;
-using static VerseAppLibrary.Enums;
+using DataAccess.Models;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace DataAccess.DataInterfaces;
 public interface IUserData

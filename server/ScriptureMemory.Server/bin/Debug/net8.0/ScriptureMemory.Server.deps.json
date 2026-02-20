@@ -856,12 +856,6 @@
         }
       },
       "ScriptureMemoryLibrary/1.0.0": {
-        "dependencies": {
-          "Lucene.Net": "4.8.0-beta00017",
-          "Lucene.Net.Analysis.Common": "4.8.0-beta00017",
-          "Lucene.Net.QueryParser": "4.8.0-beta00017",
-          "Oracle.ManagedDataAccess.Core": "23.26.0"
-        },
         "runtime": {
           "ScriptureMemoryLibrary.dll": {
             "assemblyVersion": "1.0.0.0",

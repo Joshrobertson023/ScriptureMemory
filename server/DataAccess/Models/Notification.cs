@@ -1,5 +1,5 @@
 using System;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 
 namespace DataAccess.Models;
 

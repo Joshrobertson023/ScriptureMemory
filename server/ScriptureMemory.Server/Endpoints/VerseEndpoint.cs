@@ -1,10 +1,10 @@
-﻿//using DataAccess.DataInterfaces;
+//using DataAccess.DataInterfaces;
 //using DataAccess.Models;
 //using Microsoft.AspNetCore.Mvc;
 //using System.Diagnostics;
 //using System.Security.Cryptography.Xml;
 //using System.Text.Json;
-//using VerseAppLibrary;
+//using ScriptureMemoryLibrary;
 
 //namespace VerseAppNew.Server.Endpoints;
 

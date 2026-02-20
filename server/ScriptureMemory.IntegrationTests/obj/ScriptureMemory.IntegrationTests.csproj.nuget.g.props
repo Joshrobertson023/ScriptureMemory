@@ -24,7 +24,7 @@
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <Pkgxunit_analyzers Condition=" '$(Pkgxunit_analyzers)' == '' ">C:\Users\there\.nuget\packages\xunit.analyzers\1.18.0</Pkgxunit_analyzers>
     <PkgMicrosoft_Extensions_ApiDescription_Server Condition=" '$(PkgMicrosoft_Extensions_ApiDescription_Server)' == '' ">C:\Users\there\.nuget\packages\microsoft.extensions.apidescription.server\9.0.0</PkgMicrosoft_Extensions_ApiDescription_Server>
-    <PkgLucene_Net Condition=" '$(PkgLucene_Net)' == '' ">C:\Users\there\.nuget\packages\lucene.net\4.8.0-beta00017</PkgLucene_Net>
     <PkgMicrosoft_VisualStudio_Azure_Containers_Tools_Targets Condition=" '$(PkgMicrosoft_VisualStudio_Azure_Containers_Tools_Targets)' == '' ">C:\Users\there\.nuget\packages\microsoft.visualstudio.azure.containers.tools.targets\1.23.0</PkgMicrosoft_VisualStudio_Azure_Containers_Tools_Targets>
+    <PkgLucene_Net Condition=" '$(PkgLucene_Net)' == '' ">C:\Users\there\.nuget\packages\lucene.net\4.8.0-beta00017</PkgLucene_Net>
   </PropertyGroup>
 </Project>

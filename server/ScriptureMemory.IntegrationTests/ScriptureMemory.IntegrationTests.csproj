@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <AssemblyName>ScriptureMemory.IntegrationTests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VerseAppNew.Server\VerseAppNew.Server.csproj" />
+    <ProjectReference Include="..\ScriptureMemory.Server\ScriptureMemory.Server.csproj" />
   </ItemGroup>
 
   <ItemGroup>

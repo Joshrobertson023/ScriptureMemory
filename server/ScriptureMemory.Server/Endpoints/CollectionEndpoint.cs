@@ -8,7 +8,7 @@
 //using System.Text.Json;
 //using System.Xml;
 //using VerseAppNew.Server.Services;
-//using VerseAppLibrary;
+//using ScriptureMemoryLibrary;
 //using DataAccess.DataInterfaces;
 
 //namespace VerseAppNew.Server.Endpoints;

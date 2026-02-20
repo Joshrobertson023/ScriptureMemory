@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VerseAppLibrary\ScriptureMemoryLibrary.csproj" />
+    <ProjectReference Include="..\ScriptureMemoryLibrary\ScriptureMemoryLibrary.csproj" />
   </ItemGroup>
 
 </Project>

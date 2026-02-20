@@ -1,6 +1,6 @@
-﻿using DataAccess.Data;
+using DataAccess.Data;
 using DataAccess.Models;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 
 namespace DataAccess.DataInterfaces;
 

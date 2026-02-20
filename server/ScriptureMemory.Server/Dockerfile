@@ -12,21 +12,21 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["VerseAppNew.Server/VerseAppNew.Server.csproj", "VerseAppNew.Server/"]
+COPY ["ScriptureMemory.Server/ScriptureMemory.Server.csproj", "ScriptureMemory.Server/"]
 COPY ["DataAccess/DataAccess.csproj", "DataAccess/"]
-COPY ["VerseAppLibrary/VerseAppLibrary.csproj", "VerseAppLibrary/"]
-RUN dotnet restore "./VerseAppNew.Server/VerseAppNew.Server.csproj"
+COPY ["ScriptureMemoryLibrary/ScriptureMemoryLibrary.csproj", "ScriptureMemoryLibrary/"]
+RUN dotnet restore "./ScriptureMemory.Server/ScriptureMemory.Server.csproj"
 COPY . .
-WORKDIR "/src/VerseAppNew.Server"
-RUN dotnet build "./VerseAppNew.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/ScriptureMemory.Server"
+RUN dotnet build "./ScriptureMemory.Server.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./VerseAppNew.Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./ScriptureMemory.Server.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "VerseAppNew.Server.dll"]
+ENTRYPOINT ["dotnet", "ScriptureMemory.Server.dll"]

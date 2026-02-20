@@ -1,4 +1,4 @@
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace DataAccess.Models;
 

@@ -1,7 +1,7 @@
-﻿using DataAccess.DataInterfaces;
+using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using System.DirectoryServices.Protocols;
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace VerseAppNew.Server.Services;
 

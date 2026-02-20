@@ -18,8 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
-    <ProjectReference Include="..\VerseAppLibrary\ScriptureMemoryLibrary.csproj" />
-    <ProjectReference Include="..\VerseAppNew.Server\VerseAppNew.Server.csproj" />
+    <ProjectReference Include="..\ScriptureMemoryLibrary\ScriptureMemoryLibrary.csproj" />
+    <ProjectReference Include="..\ScriptureMemory.Server\ScriptureMemory.Server.csproj" />
   </ItemGroup>
 
   <ItemGroup>

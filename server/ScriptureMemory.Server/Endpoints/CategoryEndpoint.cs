@@ -1,6 +1,6 @@
 //using DataAccess.DataInterfaces;
 //using Microsoft.AspNetCore.Mvc;
-//using VerseAppLibrary;
+//using ScriptureMemoryLibrary;
 
 //namespace VerseAppNew.Server.Endpoints;
 

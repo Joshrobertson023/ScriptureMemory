@@ -1,4 +1,4 @@
-﻿using DataAccess.DataInterfaces;
+using DataAccess.DataInterfaces;
 
 namespace VerseAppNew.Server.Services;
 

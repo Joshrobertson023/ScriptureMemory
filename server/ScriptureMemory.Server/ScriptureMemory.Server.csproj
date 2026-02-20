@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <SpaRoot>..\verseappnew.client</SpaRoot>
+    <SpaRoot>..\client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:54573</SpaProxyServerUrl>
     <UserSecretsId>5f84360c-d42f-4df7-b8e5-e9ecbc01d406</UserSecretsId>
@@ -32,7 +32,7 @@
 
 	<ItemGroup>
     <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
-    <ProjectReference Include="..\VerseAppLibrary\ScriptureMemoryLibrary.csproj" />
+    <ProjectReference Include="..\ScriptureMemoryLibrary\ScriptureMemoryLibrary.csproj" />
   </ItemGroup>
 
 

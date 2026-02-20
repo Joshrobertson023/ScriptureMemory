@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DataAccess.Data;
 using DataAccess.DataInterfaces;
 using System;
@@ -82,7 +82,7 @@ app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-//app.ConfigureUserEndpoints();
+app.ConfigureUserEndpoints();
 //app.ConfigureVerseEndpoints();
 //app.ConfigureVerseOfDayEndpoints();
 //app.ConfigureUserPassageEndpoints();

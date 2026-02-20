@@ -3,7 +3,7 @@
 "ServerUrl": "https://localhost:54573",
 "RedirectUrl": "",
 "LaunchCommand": "npm run dev",
-"WorkingDirectory": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.Server\\..\\verseappnew.client",
+"WorkingDirectory": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.Server\\..\\client",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }

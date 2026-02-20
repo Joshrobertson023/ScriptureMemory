@@ -4,7 +4,7 @@ using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using Dapper;
 using DataAccess.DataInterfaces;
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace DataAccess.Data;
 

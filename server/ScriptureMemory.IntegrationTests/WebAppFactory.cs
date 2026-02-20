@@ -1,20 +1,37 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
+using Testcontainers.Oracle;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using J2N.Collections.Generic.Extensions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
+namespace ScriptureMemory.IntegrationTests;
 
-namespace VerseApp.IntegrationTests;
-
-public class WebAppFactory : WebApplicationFactory<Program>
+public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private const string testConnectionString = "";
+    private OracleContainer? _dbContainer;
+
+    public async Task InitializeAsync()
+    {
+        _dbContainer = new OracleBuilder()
+            .WithImage("gvenzl/oracle-xe")
+            .WithPassword("oracle")
+            .Build();
+        
+        await _dbContainer.StartAsync();
+    }
+
+    public new async Task DisposeAsync()
+    {
+        if (_dbContainer is not null)
+        {
+            await _dbContainer.StopAsync();
+            await _dbContainer.DisposeAsync();
+        }
+    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -23,7 +40,7 @@ public class WebAppFactory : WebApplicationFactory<Program>
             services.RemoveAll<IDbConnection>();
 
             services.AddScoped<IDbConnection>(_ =>
-                new OracleConnection(testConnectionString));
+                new OracleConnection(_dbContainer!.GetConnectionString()));
         });
     }
 }

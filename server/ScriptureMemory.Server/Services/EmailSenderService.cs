@@ -1,9 +1,9 @@
-﻿using DataAccess.DataInterfaces;
+using DataAccess.DataInterfaces;
 using DataAccess.Requests;
 using RestSharp;
 using RestSharp.Authenticators;
 using System.Security.Cryptography;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VerseAppNew.Server.Services;

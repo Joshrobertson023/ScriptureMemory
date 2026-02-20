@@ -1,5 +1,5 @@
 using DataAccess.Models;
-using static VerseAppLibrary.Enums;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace DataAccess.DataInterfaces;
 

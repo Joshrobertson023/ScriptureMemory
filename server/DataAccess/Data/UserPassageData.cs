@@ -1,4 +1,4 @@
-﻿//using DataAccess.DBAccess;
+//using DataAccess.DBAccess;
 //using DataAccess.Models;
 //using Microsoft.Extensions.Configuration;
 //using System;
@@ -10,7 +10,7 @@
 //using System.Threading.Tasks;
 //using System.Text.Json;
 //using Dapper;
-//using VerseAppLibrary;
+//using ScriptureMemoryLibrary;
 //using Oracle.ManagedDataAccess.Client;
 //using DataAccess.DataInterfaces;
 

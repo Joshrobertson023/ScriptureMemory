@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using VerseAppLibrary;
+using ScriptureMemoryLibrary;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DataAccess.Data;

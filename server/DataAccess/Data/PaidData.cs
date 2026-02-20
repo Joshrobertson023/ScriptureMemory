@@ -1,4 +1,4 @@
-﻿using DataAccess.DataInterfaces;
+using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
 using System;

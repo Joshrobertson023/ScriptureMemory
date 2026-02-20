@@ -1,4 +1,4 @@
-﻿using Bogus;
+using Bogus;
 using DataAccess.Models;
 
 namespace VerseAppNew.Server.Bogus;
@@ -20,6 +20,6 @@ public sealed class SearchGenerator : Faker<Search>
     public SearchGenerator()
     {
         RuleFor(s => s.SearchTerm, f => f.Lorem.Word());
-        RuleFor(s => s.SearchType, f => f.PickRandom<VerseAppLibrary.Enums.SearchType>());
+        RuleFor(s => s.SearchType, f => f.PickRandom<ScriptureMemoryLibrary.Enums.SearchType>());
     }
 }
