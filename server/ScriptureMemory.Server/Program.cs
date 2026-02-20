@@ -4,7 +4,6 @@ using DataAccess.DataInterfaces;
 using System;
 using VerseAppNew.Server.Apis;
 using VerseAppNew.Server.Bogus;
-using VerseAppNew.Server.Endpoints;
 using VerseAppNew.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,8 +70,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseCors();
 app.UseDefaultFiles();

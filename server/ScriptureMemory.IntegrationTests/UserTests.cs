@@ -1,3 +1,4 @@
+using Azure;
 using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Identity.Data;
 using ScriptureMemoryLibrary;
 using System.Net.Http.Json;
 using static ScriptureMemoryLibrary.Enums;
+using System;
 
 namespace ScriptureMemory.IntegrationTests;
 
@@ -17,7 +19,7 @@ public class UserTests : BaseIntegrationTest
     {
         var request = new CreateUserRequest
         {
-            Username = "testuser123",
+            Username = $"testuser_{Guid.NewGuid():N}",
             FirstName = "Test",
             LastName = "User",
             Email = "testuser@gmail.com",
@@ -26,12 +28,21 @@ public class UserTests : BaseIntegrationTest
         };
 
         var result = await client.PostAsJsonAsync("/users", request);
-        result.EnsureSuccessStatusCode();
+
+        if (!result.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"{await result.Content.ReadAsStringAsync()}");
+        }
 
 
         // Get the new user and assert
         var loginResponse = await client.PostAsJsonAsync("/auth/login", new { Username = request.Username, Password = request.Password });
-        loginResponse.EnsureSuccessStatusCode();
+
+        if (!loginResponse.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"{await result.Content.ReadAsStringAsync()}");
+        }
+
         var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
 
         Assert.NotNull(loggedInUser);

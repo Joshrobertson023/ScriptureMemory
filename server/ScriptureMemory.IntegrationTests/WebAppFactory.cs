@@ -18,7 +18,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         _dbContainer = new OracleBuilder()
             .WithImage("gvenzl/oracle-xe")
-            .WithPassword("oracle")
+            .WithPassword("Oracle123!")
             .Build();
         
         await _dbContainer.StartAsync();
@@ -28,11 +28,20 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     public new async Task DisposeAsync()
     {
-        if (_dbContainer is not null)
+        if (_dbContainer is null)
+            return;
+
+        try
         {
-            await _dbContainer.StopAsync();
-            await _dbContainer.DisposeAsync();
+            await CleanDatabaseAsync();
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cleaning test database: {ex}");
+        }
+
+        await _dbContainer.StopAsync();
+        await _dbContainer.DisposeAsync();
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -41,14 +50,51 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         {
             services.RemoveAll<IDbConnection>();
 
-            services.AddScoped<IDbConnection>(_ =>
-                new OracleConnection(_dbContainer!.GetConnectionString()));
+            var host = _dbContainer.Hostname;
+            var port = _dbContainer.GetMappedPublicPort(1521);
+            var connString = $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
+
+            services.AddScoped<IDbConnection>(_ => new OracleConnection(connString));
         });
+        builder.UseEnvironment("Development");
+        builder.CaptureStartupErrors(true);
+        builder.UseSetting("detailedErrors", "true");
+    }
+
+    private async Task CleanDatabaseAsync()
+    {
+        var host = _dbContainer!.Hostname;
+        var port = _dbContainer.GetMappedPublicPort(1521);
+        var connString = $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
+
+        using var connection = new OracleConnection(connString);
+        await connection.OpenAsync();
+
+        var commands = new[]
+        {
+            "DELETE FROM NOTIFICATIONS",
+            "DELETE FROM ACTIVITY_LOGS",
+            "DELETE FROM USER_PREFERENCES",
+            "DELETE FROM USERS"
+        };
+
+        foreach (var cmdText in commands)
+        {
+            using var command = new OracleCommand(cmdText, connection);
+            await command.ExecuteNonQueryAsync();
+        }
+
+        await connection.CloseAsync();
     }
 
     private async Task InitializeDatabaseTablesAsync()
     {
-        using var connection = new OracleConnection(_dbContainer!.GetConnectionString());
+
+        var host = _dbContainer.Hostname;
+        var port = _dbContainer.GetMappedPublicPort(1521);
+        var connString = $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
+
+        using var connection = new OracleConnection(connString);
         await connection.OpenAsync();
         
         var commands = new[]

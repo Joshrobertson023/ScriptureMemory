@@ -4,7 +4,7 @@ services:
   verseapp.api:
     build:
       context: .
-      dockerfile: ScriptureMemory.Server/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "5000:8080"
     depends_on:
