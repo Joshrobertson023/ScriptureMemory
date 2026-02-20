@@ -19,7 +19,7 @@ public class UserTests : BaseIntegrationTest
     {
         var request = new CreateUserRequest
         {
-            Username = $"testuser_{Guid.NewGuid():N}",
+            Username = $"testuser123",
             FirstName = "Test",
             LastName = "User",
             Email = "testuser@gmail.com",
@@ -36,11 +36,11 @@ public class UserTests : BaseIntegrationTest
 
 
         // Get the new user and assert
-        var loginResponse = await client.PostAsJsonAsync("/auth/login", new { Username = request.Username, Password = request.Password });
+        var loginResponse = await client.PostAsJsonAsync("/users/username", new { Username = request.Username, Password = request.Password });
 
         if (!loginResponse.IsSuccessStatusCode)
         {
-            throw new HttpRequestException($"{await result.Content.ReadAsStringAsync()}");
+            throw new HttpRequestException($"{await loginResponse.Content.ReadAsStringAsync()}");
         }
 
         var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
