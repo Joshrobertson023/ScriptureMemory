@@ -1,0 +1,12 @@
+versegamedb_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-ashburn-1.oraclecloud.com))(connect_data=(service_name=gd119454c26aea7_versegamedb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+versegamedb_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-ashburn-1.oraclecloud.com))(connect_data=(service_name=gd119454c26aea7_versegamedb_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+versegamedb_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-ashburn-1.oraclecloud.com))(connect_data=(service_name=gd119454c26aea7_versegamedb_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+versegamedb_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-ashburn-1.oraclecloud.com))(connect_data=(service_name=gd119454c26aea7_versegamedb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+versegamedb_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-ashburn-1.oraclecloud.com))(connect_data=(service_name=gd119454c26aea7_versegamedb_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+

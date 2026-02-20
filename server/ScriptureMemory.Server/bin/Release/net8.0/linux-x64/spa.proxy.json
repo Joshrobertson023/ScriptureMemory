@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "https://localhost:54573",
+"RedirectUrl": "",
+"LaunchCommand": "npm run dev",
+"WorkingDirectory": "C:\\Users\\there\\source\\repos\\VerseAppNew\\VerseAppNew.Server\\..\\verseappnew.client",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}

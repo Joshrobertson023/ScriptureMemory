@@ -1,0 +1,15 @@
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.csproj.AssemblyReference.cache
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.AssemblyInfoInputs.cache
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.AssemblyInfo.cs
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.dll
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\refint\DataAccess.dll
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.pdb
+C:\Users\there\ScriptureMemory\server\DataAccess\bin\Debug\net8.0\DataAccess.deps.json
+c:\Users\there\ScriptureMemory\server\DataAccess\bin\Debug\net8.0\DataAccess.dll
+c:\Users\there\ScriptureMemory\server\DataAccess\bin\Debug\net8.0\DataAccess.pdb
+c:\Users\there\ScriptureMemory\server\DataAccess\bin\Debug\net8.0\ScriptureMemoryLibrary.dll
+c:\Users\there\ScriptureMemory\server\DataAccess\bin\Debug\net8.0\ScriptureMemoryLibrary.pdb
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\DataAccess.csproj.Up2Date
+C:\Users\there\ScriptureMemory\server\DataAccess\obj\Debug\net8.0\ref\DataAccess.dll

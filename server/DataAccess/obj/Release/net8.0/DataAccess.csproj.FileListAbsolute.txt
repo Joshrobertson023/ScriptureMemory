@@ -1,0 +1,16 @@
+C:\Users\there\source\repos\VerseAppNew\DataAccess\bin\Release\net8.0\DataAccess.deps.json
+C:\Users\there\source\repos\VerseAppNew\DataAccess\bin\Release\net8.0\DataAccess.dll
+C:\Users\there\source\repos\VerseAppNew\DataAccess\bin\Release\net8.0\DataAccess.pdb
+C:\Users\there\source\repos\VerseAppNew\DataAccess\bin\Release\net8.0\VerseAppLibrary.dll
+C:\Users\there\source\repos\VerseAppNew\DataAccess\bin\Release\net8.0\VerseAppLibrary.pdb
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.csproj.AssemblyReference.cache
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.AssemblyInfoInputs.cache
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.AssemblyInfo.cs
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.sourcelink.json
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.csproj.Up2Date
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.dll
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\refint\DataAccess.dll
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\DataAccess.pdb
+C:\Users\there\source\repos\VerseAppNew\DataAccess\obj\Release\net8.0\ref\DataAccess.dll
