@@ -159,7 +159,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                         
               CREATE TABLE "NOTIFICATIONS" 
                (	
-               "ID" NUMBER, 
+               "ID" NUMBER generated always as identity, 
             	"MESSAGE" VARCHAR2(1000) NOT NULL, 
             	"CREATEDDATE" DATE NOT NULL, 
             	"ISREAD" NUMBER(1,0) DEFAULT 0, 

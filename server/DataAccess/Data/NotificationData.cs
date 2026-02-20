@@ -1,3 +1,5 @@
+using Dapper;
+using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
@@ -6,8 +8,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
-using DataAccess.DataInterfaces;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DataAccess.Data;
 
@@ -25,15 +26,15 @@ public class NotificationData : INotificationData
     public async Task CreateNotification(Notification notification)
     {
         var sql = @"INSERT INTO NOTIFICATIONS
-                    (USERNAME, SENDERUSERNAME, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE, EXPIRATION_DATE)
+                    (RECEIVER, SENDER, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE, EXPIRATION_DATE)
                     VALUES 
-                    (:Username, :SenderUsername, :Message, :CreatedDate, 0, :NotificationType, :ExpirationDate)";
+                    (:Receiver, :Sender, :Message, :CreatedDate, 0, :NotificationType, :ExpirationDate)";
         
         using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new
         {
-            Username = notification.Receiver,
-            SenderUsername = notification.Sender,
+            Receiver = notification.Receiver,
+            Sender = notification.Sender,
             Message = notification.Message,
             CreatedDate = notification.CreatedDate,
             NotificationType = notification.NotificationType,

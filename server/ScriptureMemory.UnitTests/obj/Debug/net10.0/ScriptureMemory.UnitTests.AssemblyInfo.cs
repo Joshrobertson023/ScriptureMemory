@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScriptureMemory.UnitTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ad867241ab85b3a1e67754b319234001d58986e3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+56f339b61ab34368fd1cf4d153db6a28a1d99837")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScriptureMemory.UnitTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScriptureMemory.UnitTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
