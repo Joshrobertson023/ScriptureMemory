@@ -1,3 +1,4 @@
+using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
 using Microsoft.AspNetCore.Identity.Data;
@@ -25,10 +26,12 @@ public class UserTests : BaseIntegrationTest
         };
 
         var result = await client.PostAsJsonAsync("/users", request);
+        result.EnsureSuccessStatusCode();
 
+
+        // Get the new user and assert
         var loginResponse = await client.PostAsJsonAsync("/auth/login", new { Username = request.Username, Password = request.Password });
         loginResponse.EnsureSuccessStatusCode();
-
         var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
 
         Assert.NotNull(loggedInUser);
@@ -39,5 +42,32 @@ public class UserTests : BaseIntegrationTest
         Assert.NotNull(loggedInUser.HashedPassword);
         Assert.NotNull(loggedInUser.DateRegistered);
         Assert.NotNull(loggedInUser.AuthToken);
+        Assert.NotNull(loggedInUser.Settings);
+        Assert.Equal(request.BibleVersion, loggedInUser.Settings.BibleVersion);
+        Assert.True(loggedInUser.Settings.PushNotificationsEnabled);
+
+
+        // Get the created log and assert
+        PagedLogs<ActivityLog> logResponse = await activityLogContext.GetByUser(request.Username);
+        ActivityLog log = logResponse.Items.First();
+
+        Assert.NotNull(logResponse);
+        Assert.Single(logResponse.Items);
+        Assert.Equal(request.Username, log.Username);
+        Assert.Equal(ActionType.Create, log.ActionType);
+        Assert.Equal(EntityType.User, log.EntityType);
+        Assert.Equal("Created user account", log.ContextDescription);
+
+
+        // Get the welcome notification and assert
+        List<Notification> notifications = await notificationContext.GetUserNotifications(request.Username);
+        Notification latestNotification = notifications.First();
+
+        Assert.NotNull(notifications);
+        Assert.Single(notifications);
+        Assert.Equal(request.Username, latestNotification.Receiver);
+        Assert.Equal(Data.welcomeNotificationBody, latestNotification.Message);
+        Assert.Equal(Data.notifificationSystemName, latestNotification.Sender);
+        Assert.Equal(NotificationType.Welcome, latestNotification.NotificationType);
     }
 }

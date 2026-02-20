@@ -14,6 +14,9 @@ public class Data
 
     public static string emailFromAddress = "therealjoshrobertson@gmail.com";
 
+    public static string notifificationSystemName = "Scripture Memory Staff";
+    public static string welcomeNotificationBody = "To interact with people you know, visit the search page to send them a friend request.";
+
     public static int MIN_PASSWORD_LENGTH = 12;
 
     public const int MAX_PASSAGES_PER_COLLECTION = 50;
@@ -45,6 +48,7 @@ public class Data
         "Jude", "Revelation"
     };
 
+    // Allowed search terms for each book of the Bible
     public static Dictionary<string, string[]> booksOfBibleSearch { get; } = new Dictionary<string, string[]>
     {
         ["Genesis"] = new[] { "genesis", "gen", "geneses", "genisis", },

@@ -16,7 +16,8 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
     protected readonly IUserData userContext;
     protected readonly IUserService userService;
     protected readonly IActivityLogger activityLogger;
-    protected readonly IActivityData activityContext;
+    protected readonly IActivityLoggingData activityLogContext;
+    protected readonly INotificationData notificationContext;
 
     public BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
@@ -26,6 +27,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
         userContext = scope.ServiceProvider.GetRequiredService<IUserData>();
         userService = scope.ServiceProvider.GetRequiredService<IUserService>();
         activityLogger = scope.ServiceProvider.GetRequiredService<IActivityLogger>();
-        activityContext = scope.ServiceProvider.GetRequiredService<IActivityData>();    
+        activityLogContext = scope.ServiceProvider.GetRequiredService<IActivityLoggingData>();
+        notificationContext = scope.ServiceProvider.GetRequiredService<INotificationData>();
     }
 }

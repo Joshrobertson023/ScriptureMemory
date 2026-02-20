@@ -26,20 +26,20 @@ public sealed class UserService : IUserService
     private readonly IUserData userContext;
     private readonly IUserSettingsData settingsContext;
     //private readonly IPaidData paidContext;
-    //private readonly INotificationService notificationService;
+    private readonly INotificationService notificationService;
     private readonly IActivityLogger logger;
 
     public UserService(
         IUserData userContext, 
         IUserSettingsData settingsContext, 
         //IPaidData paidContext,
-        //INotificationService notificationService,
+        INotificationService notificationService,
         IActivityLogger logger)
     {
         this.userContext = userContext;
         this.settingsContext = settingsContext;
         //this.paidContext = paidContext;
-        //this.notificationService = notificationService;
+        this.notificationService = notificationService;
         this.logger = logger;
     }
 
@@ -74,15 +74,15 @@ public sealed class UserService : IUserService
             )
         );
 
-        // Send welcome notification
-        //await notificationService.SendNotification(
-        //    new Notification(
-        //        request.Username.Trim(),
-        //        "System",
-        //        "To interact with people you know, visit the search page to send them a friend request.",
-        //        NotificationType.Welcome
-        //    )
-        //);
+       //Send welcome notification
+       await notificationService.SendNotification(
+           new Notification(
+               request.Username.Trim(),
+               Data.notifificationSystemName,
+               Data.welcomeNotificationBody,
+               NotificationType.Welcome
+           )
+       );
     }
 
     public async Task<IResult> Login(string username, string password)
