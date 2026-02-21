@@ -35,9 +35,9 @@ public sealed class ActivityLog
         EntityType = entityType;
     }
 
-    public ActivityLog(string username, Enums.ActionType actionType, Enums.EntityType entityType)
+    public ActivityLog(int userId, Enums.ActionType actionType, Enums.EntityType entityType)
     {
-        Username = username;
+        UserId = userId;
         ActionType = actionType;
         EntityType = entityType;
     }
@@ -49,9 +49,9 @@ public sealed class ActivityLog
         EntityId = entityId;
     }
 
-    public ActivityLog(string username, Enums.ActionType actionType, Enums.EntityType entityType, int entityId)
+    public ActivityLog(int userId, Enums.ActionType actionType, Enums.EntityType entityType, int entityId)
     {
-        Username = username;
+        UserId = userId;
         ActionType = actionType;
         EntityType = entityType;
         EntityId = entityId;
@@ -64,7 +64,7 @@ public sealed class ActivityLog
     /// SeverityLevel (optional), IsAdminAction (optional)
     /// </summary>
     public ActivityLog(
-        string username,
+        int? userId,
         Enums.ActionType actionType,
         Enums.EntityType entityType,
         int? entityId,
@@ -73,7 +73,7 @@ public sealed class ActivityLog
         Enums.SeverityLevel severityLevel = Enums.SeverityLevel.Info,
         bool isAdminAction = false)
     {
-        Username = username;
+        UserId = userId;
         ActionType = actionType;
         EntityType = entityType;
         EntityId = entityId;
@@ -90,8 +90,8 @@ public sealed class ActivityLog
 
         if (Id != 0)
             returnString.Append("Id: ").Append(Id).Append("\n");
-        if (!string.IsNullOrWhiteSpace(Username))
-            returnString.Append("Username: ").Append(Username).Append("\n");
+        if (UserId is not null)
+            returnString.Append("UserId: ").Append(UserId).Append("\n");
         returnString.Append("ActionType: ").Append(ActionType).Append("\n");
         returnString.Append("EntityType: ").Append(EntityType).Append("\n");
         if (EntityId is not null)

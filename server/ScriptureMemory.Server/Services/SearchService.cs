@@ -36,7 +36,7 @@ public sealed class SearchService : ISearchService
         // Log the search
         await logger.Log(
             new ActivityLog(
-                request.Username,
+                request.UserId,
                 ActionType.Search,
                 EntityType.Verse,
                 null,

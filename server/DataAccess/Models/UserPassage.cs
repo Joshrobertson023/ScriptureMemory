@@ -19,9 +19,9 @@ public class UserPassage
     public List<Verse> Verses { get; set; } = new();
     public DateTime? DueDate { get; set; }
 
-    public UserPassage(string username, int collectionId, Reference reference)
+    public UserPassage(int userId, int collectionId, Reference reference)
     {
-        Username = username;
+        UserId = userId;
         CollectionId = collectionId;
         Reference = reference;
         DateAdded = DateTime.UtcNow;

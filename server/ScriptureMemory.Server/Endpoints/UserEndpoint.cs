@@ -57,16 +57,16 @@ public static class UserEndpoint
 
         // Set a user as active
         app.MapPut("/users/setAsActive", async (
-            [FromBody] string username,
+            [FromBody] int userId,
             [FromServices] IUserData data) =>
         {
-            await data.UpdateLastSeen(username);
+            await data.UpdateLastSeen(userId);
             return Results.Ok();
         });
 
         // Get users with a specific email address
-        app.MapGet("/users/email/{email}", async (
-            string email,
+        app.MapGet("/users/email", async (
+            [FromBody] string email,
             [FromServices] IUserData data) =>
         {
             var results = await data.GetUsersFromEmail(email);
@@ -104,10 +104,10 @@ public static class UserEndpoint
 
         // Increment the number of verses a user has memorized
         app.MapPut("/users/incrementVersesMemorized", async (
-            [FromBody] string username,
+            [FromBody] int userId,
             [FromServices] IUserData data) =>
         {
-            await data.IncrementVersesMemorized(username);
+            await data.IncrementVersesMemorized(userId);
             return Results.Ok();
         });
 
@@ -174,20 +174,20 @@ public static class UserEndpoint
             return Results.Ok(await data.GetLeaderboard(request.Page, request.PageSize));
         });
 
-        app.MapGet("/leaderboard/rank/{username}", async (
-            string username,
+        app.MapGet("/leaderboard/rank", async (
+            [FromBody] int userId,
             [FromServices] IUserData data,
             [FromServices] IActivityLogger logger) =>
         {
             await logger.Log(new ActivityLog(
-                username,
+                userId,
                 ActionType.View,
                 EntityType.Page,
                 null,
                 "User viewed leaderboard",
                 null));
-            var rank = await data.GetUserRank(username);
-            return Results.Ok(new { rank });
+            //var rank = await data.GetUserRank(userId);
+            //return Results.Ok(new { rank });
         });
     }
 }

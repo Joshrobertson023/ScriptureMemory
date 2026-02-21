@@ -9,7 +9,7 @@ namespace DataAccess.Requests.UpdateRequests;
 
 public sealed class UpdateNameRequest
 {
-    [Required] public string Username { get; set; } = string.Empty;
+    [Required] public int UserId { get; set; }
     [Required] public string FirstName { get; set; } = string.Empty;
     [Required] public string LastName { get; set; } = string.Empty;
 }

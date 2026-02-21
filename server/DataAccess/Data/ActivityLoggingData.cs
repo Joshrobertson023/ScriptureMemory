@@ -24,7 +24,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     private readonly IConfiguration _config;
     private readonly string connectionString;
 
-    private const string selectClause = @"ID, USER_ID as UserId, USERNAME, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
+    private const string selectClause = @"ID, USER_ID as UserId, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
                                         ENTITY_ID as EntityId, CONTEXT_DESCRIPTION as ContextDescription,
                                         METADATA_JSON as JsonMetadata, SEVERITY_LEVEL as SeverityLevel,
                                         IS_ADMIN_ACTION as IsAdminAction, CREATED_AT as CreatedAt";

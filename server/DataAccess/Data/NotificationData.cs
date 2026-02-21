@@ -44,7 +44,15 @@ public class NotificationData : INotificationData
 
     public async Task<List<Notification>> GetUserNotifications(int userId)
     {
-        var sql = @"SELECT * FROM NOTIFICATIONS 
+        var sql = @"SELECT ID as Id, 
+                           MESSAGE as Message, 
+                           CREATEDDATE as CreatedDate, 
+                           ISREAD as IsRead, 
+                           EXPIRATION_DATE as ExpirationDate,
+                           NOTIFICATIONTYPE as NotificationType,
+                           SENDER_ID as SenderId,
+                           RECEIVER_ID as ReceiverId
+                    FROM NOTIFICATIONS 
                     WHERE RECEIVER_ID = :UserId 
                     ORDER BY CREATEDDATE DESC";
         
@@ -59,7 +67,15 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             SELECT * FROM (
-                SELECT * FROM NOTIFICATIONS 
+                SELECT ID as Id,
+                       MESSAGE as Message,
+                       CREATEDDATE as CreatedDate,
+                       ISREAD as IsRead,
+                       EXPIRATION_DATE as ExpirationDate,
+                       NOTIFICATIONTYPE as NotificationType,
+                       SENDER_ID as SenderId,
+                       RECEIVER_ID as ReceiverId
+                FROM NOTIFICATIONS 
                 WHERE RECEIVER_ID = :UserId 
                 ORDER BY CREATEDDATE DESC, ID DESC
             )
@@ -81,7 +97,15 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             SELECT * FROM (
-                SELECT * FROM NOTIFICATIONS 
+                SELECT ID as Id,
+                       MESSAGE as Message,
+                       CREATEDDATE as CreatedDate,
+                       ISREAD as IsRead,
+                       EXPIRATION_DATE as ExpirationDate,
+                       NOTIFICATIONTYPE as NotificationType,
+                       SENDER_ID as SenderId,
+                       RECEIVER_ID as ReceiverId
+                FROM NOTIFICATIONS 
                 WHERE RECEIVER_ID = :UserId 
                   AND (ID < :CursorId)
                 ORDER BY CREATEDDATE DESC, ID DESC
@@ -157,10 +181,9 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             INSERT INTO NOTIFICATIONS 
-            (SENDER_ID, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
-            VALUES
-            (:SenderUsername, :Message, :CreatedDate, 0, :NotificationType
-            FROM USERS
+            (SENDER_ID, RECEIVER_ID, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
+            SELECT :SenderId, u.ID, :Message, :CreatedDate, 0, :NotificationType
+            FROM USERS u
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
@@ -168,7 +191,7 @@ public class NotificationData : INotificationData
             sql, 
             new 
             { 
-                SenderUsername = notification.SenderId, 
+                SenderId = notification.SenderId, 
                 Message = notification.Message,
                 CreatedDate = notification.CreatedDate,
                 NotificationType = notification.NotificationType,
@@ -180,9 +203,9 @@ public class NotificationData : INotificationData
         var sql = @"
             INSERT INTO NOTIFICATIONS 
             (RECEIVER_ID, SENDER_ID, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
-            SELECT u.RECEIVER, :SenderUsername, :Message, :CreatedDate, 0, :NotificationType
+            SELECT u.ID, :SenderId, :Message, :CreatedDate, 0, :NotificationType
             FROM USERS u
-            INNER JOIN ADMINS a ON a.RECEIVER = u.RECEIVER
+            WHERE u.ISADMIN = 1
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
@@ -190,22 +213,22 @@ public class NotificationData : INotificationData
             sql, 
             new 
             { 
-                SenderUsername = notification.SenderId, 
+                SenderId = notification.SenderId, 
                 Message = notification.Message,
                 CreatedDate = DateTime.UtcNow,
                 NotificationType = notification.NotificationType
             });
     }
 
-    public async Task DeleteNotificationsByUsername(string username)
+    public async Task DeleteNotificationsByUserId(int userId)
     {
         
         var sql = @"
             DELETE FROM NOTIFICATIONS 
-            WHERE RECEIVER = :Username OR SENDERUSERNAME = :Username
+            WHERE RECEIVER_ID = :UserId OR SENDER_ID = :UserId
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { Username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { UserId = userId }, commandType: CommandType.Text);
     }
 }

@@ -20,12 +20,12 @@ public sealed class NotificationService : INotificationService
 
     public async Task SendNotification(Notification notification)
     {
-        if (notification.Sender is null)
-            notification.Sender = notification.NotificationType == Enums.NotificationType.System 
-                ? "System" 
-                : throw new ArgumentNullException(notification.Sender);
+        if (notification.SenderId is null)
+            notification.SenderId = notification.NotificationType == Enums.NotificationType.System 
+                ? Data.NOTIFICATION_SYSTEM_SENDER_ID
+                : throw new ArgumentNullException(nameof(notification.SenderId));
 
-        if (notification.Receiver is null)
+        if (notification.ReceiverId is null)
         {
             // Send to all usres
             await notificationContext.SendNotificationToAllUsers(notification);

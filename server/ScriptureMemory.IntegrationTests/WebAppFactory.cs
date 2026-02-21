@@ -72,10 +72,10 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         var commands = new[]
         {
-            "DELETE FROM NOTIFICATIONS",
-            "DELETE FROM ACTIVITY_LOGS",
-            "DELETE FROM USER_PREFERENCES",
-            "DELETE FROM USERS"
+            "DROP TABLE NOTIFICATIONS CASCADE CONSTRAINTS",
+            "DROP TABLE ACTIVITY_LOGS CASCADE CONSTRAINTS",
+            "DROP TABLE USER_PREFERENCES CASCADE CONSTRAINTS",
+            "DROP TABLE USERS CASCADE CONSTRAINTS"
         };
 
         foreach (var cmdText in commands)
@@ -101,16 +101,17 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         {
             """
             CREATE TABLE "USERS" (
-                "USERNAME" VARCHAR2(4000) PRIMARY KEY,
-                "FIRSTNAME" VARCHAR2(4000),
-                "LASTNAME" VARCHAR2(4000),
+                "ID" NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                "USERNAME" VARCHAR2(100) UNIQUE NOT NULL,
+                "FIRST_NAME" VARCHAR2(4000),
+                "LAST_NAME" VARCHAR2(4000),
                 "EMAIL" VARCHAR2(4000),
-                "AUTHTOKEN" VARCHAR2(4000),
+                "AUTH_TOKEN" VARCHAR2(4000),
                 "STATUS" NUMBER,
-                "HASHEDPASSWORD" VARCHAR2(4000),
-                "DATEREGISTERED" DATE,
-                "LASTSEEN" DATE,
-                "DESCRIPTION" VARCHAR2(4000),
+                "HASHED_PASSWORD" VARCHAR2(4000),
+                "DATE_REGISTERED" DATE,
+                "LAST_SEEN" DATE,
+                "PROFILE_DESCRIPTION" VARCHAR2(4000),
                 "VERSES_MEMORIZED" NUMBER DEFAULT 0,
                 "POINTS" NUMBER DEFAULT 0,
                 "PROFILE_PICTURE_URL" VARCHAR2(500)
@@ -120,7 +121,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                         
               CREATE TABLE "USER_PREFERENCES" 
                (	
-                "USERNAME" VARCHAR2(100), 
+                "USER_ID" NUMBER PRIMARY KEY REFERENCES USERS(ID),
             	"THEME" NUMBER, 
             	"VERSION" NUMBER, 
             	"COLLECTIONS_SORT" NUMBER, 
@@ -134,16 +135,15 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             	"STREAK_REMINDERS_ENABLED" NUMBER, 
             	"APP_BADGES_ENABLED" NUMBER, 
             	"PRACTICE_TAB_BADGES_ENABLED" NUMBER, 
-            	"TYPE_OUT_REFERENCE" NUMBER, 
-            	 PRIMARY KEY ("USERNAME")
+            	"TYPE_OUT_REFERENCE" NUMBER
             )
             """,
             """
                         
               CREATE TABLE "ACTIVITY_LOGS" 
                (	
-               "ID" NUMBER GENERATED ALWAYS AS IDENTITY, 
-            	"USERNAME" VARCHAR2(100), 
+               "ID" NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+                "USER_ID" NUMBER REFERENCES USERS(ID),
             	"ACTION_TYPE" VARCHAR2(100), 
             	"ENTITY_TYPE" VARCHAR2(100), 
             	"ENTITY_ID" NUMBER, 
@@ -151,23 +151,21 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             	"METADATA_JSON" VARCHAR2(2000), 
             	"SEVERITY_LEVEL" NUMBER DEFAULT 0 NOT NULL, 
             	"IS_ADMIN_ACTION" NUMBER DEFAULT 0 NOT NULL, 
-            	"CREATED_AT" DATE DEFAULT SYSDATE NOT NULL, 
-            	 PRIMARY KEY ("ID")
+            	"CREATED_AT" DATE DEFAULT SYSDATE NOT NULL
             )
             """,
             """
                         
               CREATE TABLE "NOTIFICATIONS" 
                (	
-               "ID" NUMBER GENERATED ALWAYS AS IDENTITY, 
+               "ID" NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
             	"MESSAGE" VARCHAR2(1000) NOT NULL, 
             	"CREATEDDATE" DATE NOT NULL, 
             	"ISREAD" NUMBER(1,0) DEFAULT 0, 
             	"EXPIRATION_DATE" DATE, 
             	"NOTIFICATIONTYPE" NUMBER, 
-            	"SENDER" VARCHAR2(100), 
-            	"RECEIVER" VARCHAR2(100), 
-            	 PRIMARY KEY ("ID")
+            	"SENDER_ID" NUMBER REFERENCES USERS(ID), 
+            	"RECEIVER_ID" NUMBER REFERENCES USERS(ID)
             )
             """
         };

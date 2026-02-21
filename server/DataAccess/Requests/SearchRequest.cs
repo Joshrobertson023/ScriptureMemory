@@ -10,13 +10,13 @@ namespace DataAccess.Requests;
 
 public sealed class SearchRequest
 {
-    [Required] public string Username { get; set; } = string.Empty;
+    [Required] public int UserId { get; set; }
     [Required] public string Search { get; set; } = string.Empty;
     [Required] public SearchType SearchType { get; set; }
 
-    public SearchRequest(string username, string search, SearchType searchType)
+    public SearchRequest(int userId, string search, SearchType searchType)
     {
-        Username = username.Trim();
+        UserId = userId;
         Search = search.Trim();
         SearchType = searchType;
     }

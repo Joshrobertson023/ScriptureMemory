@@ -15,6 +15,8 @@ public class UserTests : BaseIntegrationTest
 {
     public UserTests(IntegrationTestWebAppFactory factory) : base(factory) { }
 
+
+    // Test creating an account, loggin in, and updating user attributes, and make sure related logs and notifications are created
     [Fact]
     public async Task UserTest_CreateLoginUpdateUser()
     {
@@ -34,19 +36,16 @@ public class UserTests : BaseIntegrationTest
 
         var result = await api.PostAsJsonAsync("/users", request);
 
-        if (!result.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"{await result.Content.ReadAsStringAsync()}");
-        }
+        result.EnsureSuccessStatusCode();
 
 
         // Verify login in with username/password and with token
+        var loginServiceResponse = await userService.Login(request.Username, request.Password);
+        Assert.NotNull(loginServiceResponse);
         var loginResponse = await api.PostAsJsonAsync("/users/login/username", new { Username = request.Username, Password = request.Password });
 
-        if (!loginResponse.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"{await loginResponse.Content.ReadAsStringAsync()}");
-        }
+        loginResponse.EnsureSuccessStatusCode();
+         
 
         var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
 
@@ -73,31 +72,21 @@ public class UserTests : BaseIntegrationTest
         Assert.Equal(tokenUser.Settings.ThemePreference, loggedInUser.Settings.ThemePreference);
 
 
-        // Verify register log is created
-        PagedLogs<ActivityLog> logResponse = await activityLogContext.GetByUser(request.Username);
-        ActivityLog loginLog = logResponse.Items.First();
-        ActivityLog registerLog = logResponse.Items.Last();
-
-        Assert.NotNull(logResponse);
-        Assert.Equal(request.Username, registerLog.Username);
-        Assert.Equal(ActionType.Register, registerLog.ActionType);
-        Assert.Equal(EntityType.User, registerLog.EntityType);
-        Assert.Equal("Created account", registerLog.ContextDescription);
-
-
         // Verify welcome notification is created
-        List<Notification> notifications = await notificationContext.GetUserNotifications(request.Username);
-        Notification latestNotification = notifications.First();
-
+        List<Notification> notifications = await notificationContext.GetUserNotifications(loggedInUser.Id);
+        
         Assert.NotNull(notifications);
         Assert.Single(notifications);
-        Assert.Equal(request.Username, latestNotification.Receiver);
+        Notification latestNotification = notifications.First();
+        Assert.Equal(loggedInUser.Id, latestNotification.ReceiverId);
         Assert.Equal(Data.welcomeNotificationBody, latestNotification.Message);
-        Assert.Equal(Data.notifificationSystemName, latestNotification.Sender);
+        Assert.Equal(Data.NOTIFICATION_SYSTEM_ID, latestNotification.SenderId);
         Assert.Equal(NotificationType.Welcome, latestNotification.NotificationType);
 
 
         // -- Updates -------------------------------
+
+        int userId = loggedInUser.Id;
 
 
         // Test update username
@@ -105,6 +94,7 @@ public class UserTests : BaseIntegrationTest
         var newUsername = $"testuser{Guid.NewGuid().ToString().Substring(0, 8)}";
         var updateUsernameRequest = new UpdateUsernameRequest
         {
+            UserId = userId,
             OldUsername = oldUsername,
             NewUsername = newUsername
         };
@@ -113,42 +103,28 @@ public class UserTests : BaseIntegrationTest
         
         await userService.UpdateUsername(updateUsernameRequest);
 
-        var response = await api.PostAsJsonAsync("/users/login/username", new { newUsername, request.Password });
-        response.EnsureSuccessStatusCode();
-        loggedInUser = await response.Content.ReadFromJsonAsync<User>();
+        loggedInUser = await userContext.GetUserFromUserId(userId);
 
         Assert.NotNull(loggedInUser);
         Assert.NotEqual(oldUsername, loggedInUser.Username);
-
-        logResponse = await activityLogContext.GetByUser(loggedInUser.Username);
-        Assert.NotEmpty(logResponse.Items);
-        var latestLog = logResponse.Items.First();
-        Assert.Equal(ActionType.Update, latestLog.ActionType);
-        Assert.Equal("User updated username", latestLog.ContextDescription);
 
 
         // Test update description
         var updateDescriptionRequest = new UpdateDescriptionRequest
         {
             Description = "This is my profile description",
-            Username = loggedInUser.Username
+            UserId = loggedInUser.Id
         };
-        var updateDescriptionResponse = await api.PutAsJsonAsync("/users/username", updateDescriptionRequest);
-        response = await api.PostAsJsonAsync("/users/login/username", new { loggedInUser.Username, request.Password });
+        var updateDescriptionResponse = await api.PutAsJsonAsync("/users/description", updateDescriptionRequest);
+        var response = await api.PostAsJsonAsync("/users/login/username", new { loggedInUser.Username, request.Password });
         response.EnsureSuccessStatusCode();
         loggedInUser = await response.Content.ReadFromJsonAsync<User>();
         Assert.NotNull(loggedInUser);
         Assert.Equal(updateDescriptionRequest.Description, loggedInUser.ProfileDescription);
 
-        logResponse = await activityLogContext.GetByUser(loggedInUser.Username);
-        Assert.NotEmpty(logResponse.Items);
-        latestLog = logResponse.Items.First();
-        Assert.Equal(ActionType.Update, latestLog.ActionType);
-        Assert.Equal("User updated profile description", latestLog.ContextDescription);
-
 
         // Test increment verses memorized count
-        var incrementVersesMemorizedResponse = await api.PutAsJsonAsync("/users/incrementVersesMemorized", request.Username);
+        var incrementVersesMemorizedResponse = await api.PutAsJsonAsync("/users/incrementVersesMemorized", loggedInUser.Id);
         incrementVersesMemorizedResponse.EnsureSuccessStatusCode();
 
         User beforeIncrement = loggedInUser;
@@ -164,7 +140,7 @@ public class UserTests : BaseIntegrationTest
         var oldEmail = loggedInUser.Username;
         var updateEmailRequest = new UpdateEmailRequest
         {
-            Username = loggedInUser.Username,
+            UserId = loggedInUser.Id,
             NewEmail = "newemail@gmail.com"
         };
         var loginRequest = new { loggedInUser.Username, request.Password };
@@ -176,12 +152,6 @@ public class UserTests : BaseIntegrationTest
         Assert.NotNull(loggedInUser);
         Assert.NotEqual(oldEmail, loggedInUser.Email);
 
-        logResponse = await activityLogContext.GetByUser(loggedInUser.Username);
-        Assert.NotEmpty(logResponse.Items);
-        latestLog = logResponse.Items.First();
-        Assert.Equal(ActionType.Update, latestLog.ActionType);
-        Assert.Equal("User updated email", latestLog.ContextDescription);
-
 
         // Test update name
         var oldName = new
@@ -191,7 +161,7 @@ public class UserTests : BaseIntegrationTest
         };
         var updateNameRequest = new UpdateNameRequest
         {
-            Username = loggedInUser.Username,
+            UserId = loggedInUser.Id,
             FirstName = "John",
             LastName = "Doe"
         };

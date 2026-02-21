@@ -15,7 +15,10 @@ public class Data
     public static string emailFromAddress = "therealjoshrobertson@gmail.com";
 
     public static int NOTIFICATION_SYSTEM_ID = 1;
+    public static string notificationSystemName = "Scripture Memory Staff";
     public static string welcomeNotificationBody = "To interact with people you know, visit the search page to send them a friend request.";
+
+    public static int NOTIFICATION_SYSTEM_SENDER_ID = 1;
 
     public static int MIN_PASSWORD_LENGTH = 12;
 

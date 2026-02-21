@@ -71,7 +71,7 @@ public sealed class PopulateDatabase
         {
             var randomSearch = generatedSearches[random.Next(generatedSearches.Count)];
             SearchRequest request = new(
-                users[random.Next(users.Count)].Username,
+                users[random.Next(users.Count)].Id,
                 randomSearch.SearchTerm,
                 randomSearch.SearchType
             );

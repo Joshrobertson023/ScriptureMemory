@@ -17,7 +17,7 @@ public sealed class PasswordResetService : IPasswordResetService
 {
     private readonly IUserData userContext;
     private readonly IEmailSenderService emailSender;
-    private readonly IActivityLogger activityLogger
+    private readonly IActivityLogger activityLogger;
 
     public PasswordResetService(
         IUserData userContext,
@@ -31,7 +31,7 @@ public sealed class PasswordResetService : IPasswordResetService
 
     public async Task<IResult> VerifyOtp(VerifyOtpRequest request)
     {
-        var record = await userContext.GetPasswordResetToken(request.Username.Trim(), request.Otp.Trim());
+        var record = await userContext.GetPasswordResetToken(request.UserId, request.Otp.Trim());
         if (record is null)
         {
             return Results.Ok(new { valid = false, reason = "invalid" });
@@ -51,7 +51,7 @@ public sealed class PasswordResetService : IPasswordResetService
         if (request.NewPassword.Length < Data.MIN_PASSWORD_LENGTH)
             return Results.BadRequest($"Password must be at least {Data.MIN_PASSWORD_LENGTH} characters long.");
 
-        var record = await userContext.GetPasswordResetToken(request.Username.Trim(), request.Otp.Trim());
+        var record = await userContext.GetPasswordResetToken(request.UserId, request.Otp.Trim());
         if (record == null)
         {
             return Results.BadRequest("Invalid OTP.");
@@ -63,8 +63,8 @@ public sealed class PasswordResetService : IPasswordResetService
             return Results.BadRequest("OTP has expired.");
         }
 
-        await userContext.UpdatePassword(request.Username.Trim(), request.NewPassword);
-        await userContext.DeletePasswordResetToken(request.Username.Trim());
+        await userContext.UpdatePassword(request.UserId, request.NewPassword);
+        await userContext.DeletePasswordResetToken(request.UserId);
 
         return Results.Ok();
     }
@@ -80,7 +80,7 @@ public sealed class PasswordResetService : IPasswordResetService
         var fullName = request.FirstName + " " + request.LastName;
         await activityLogger.Log(
             new ActivityLog(
-                fullName,
+                null,
                 ActionType.Forgot,
                 EntityType.User,
                 null,

@@ -139,7 +139,12 @@ public sealed class EmailSenderService : IEmailSenderService
 
         var otp = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
 
-        await userContext.UpsertPasswordResetToken(request.Username.Trim(), otp);
+        var user = await userContext.GetUserFromUsername(request.Username.Trim());
+
+        if (user is null)
+            return Results.Problem("Username not found");
+
+        await userContext.UpsertPasswordResetToken(user.Id, otp);
 
         var body = $@"Hi {request.Username.Trim()},
 

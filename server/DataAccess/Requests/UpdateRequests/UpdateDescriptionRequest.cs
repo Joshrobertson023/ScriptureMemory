@@ -9,6 +9,6 @@ namespace DataAccess.Requests.UpdateRequests;
 
 public sealed class UpdateDescriptionRequest
 {
-    [Required] public string Username { get; set; } = string.Empty;
+    [Required] public int UserId { get; set; }
     [Required] public string Description { get; set; } = string.Empty;
 }

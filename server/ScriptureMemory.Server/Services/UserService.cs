@@ -66,11 +66,13 @@ public sealed class UserService : IUserService
         );
 
         await userContext.CreateUser(user);
-        await settingsContext.CreateUserSettings(user.Settings, user.Username.Trim());
+        user.Id = await userContext.GetUserIdFromUsername(user.Username);
+
+        await settingsContext.CreateUserSettings(user.Settings, user.Id);
 
         await logger.Log(
             new ActivityLog(
-                request.Username.Trim(),
+                user.Id,
                 ActionType.Register,
                 EntityType.User,
                 null,
@@ -79,13 +81,13 @@ public sealed class UserService : IUserService
             )
         );
 
-       //Send welcome notification
-       await notificationService.SendNotification(
-           new Notification(
-               request.Username.Trim(),
-               Data.notifificationSystemName,
-               Data.welcomeNotificationBody,
-               NotificationType.Welcome
+        //Send welcome notification
+        await notificationService.SendNotification(
+            new Notification(
+                user.Id,
+                Data.NOTIFICATION_SYSTEM_ID,
+                Data.welcomeNotificationBody,
+                NotificationType.Welcome
            )
        );
     }
@@ -104,11 +106,11 @@ public sealed class UserService : IUserService
             return Results.Unauthorized();
         }
 
-        user.Settings = await settingsContext.GetUserSettingsFromUsername(username);
+        user.Settings = await settingsContext.GetUserSettingsFromUserId(user.Id);
 
         await logger.Log(
             new ActivityLog(
-                user.Username,
+                user.Id,
                 ActionType.Login,
                 EntityType.User,
                 null,
@@ -127,11 +129,11 @@ public sealed class UserService : IUserService
         if (user is null)
             return Results.NotFound("Invalid auth token.");
 
-        user.Settings = await settingsContext.GetUserSettingsFromUsername(user.Username);
+        user.Settings = await settingsContext.GetUserSettingsFromUserId(user.Id);
 
         await logger.Log(
             new ActivityLog(
-                user.Username,
+                user.Id,
                 ActionType.Login,
                 EntityType.User,
                 null,
@@ -161,11 +163,11 @@ public sealed class UserService : IUserService
             return Results.Problem("Username is not available");
 
         user.Username = request.NewUsername;
-        await userContext.UpdateUsername(request.OldUsername, request.NewUsername);
+        await userContext.UpdateUsername(request.UserId, request.NewUsername);
 
         await logger.Log(
             new ActivityLog(
-                user.Username,
+                user.Id,
                 ActionType.Update,
                 EntityType.User,
                 null,
@@ -183,15 +185,14 @@ public sealed class UserService : IUserService
 
     public async Task<IResult> UpdateEmail(UpdateEmailRequest request)
     {
-        var user = await userContext.GetUserFromUsername(request.Username);
+        var user = await userContext.GetUserFromUserId(request.UserId);
         if (user is null)
             return Results.NotFound();
 
-        await userContext.UpdateEmail(request.Username, request.NewEmail);
-
+        await userContext.UpdateEmail(request.UserId, request.NewEmail);
         await logger.Log(
             new ActivityLog(
-                request.Username,
+                request.UserId,
                 ActionType.Update,
                 EntityType.User,
                 null,
@@ -209,15 +210,14 @@ public sealed class UserService : IUserService
 
     public async Task<IResult> UpdateName(UpdateNameRequest request)
     {
-        var user = await userContext.GetUserFromUsername(request.Username);
+        var user = await userContext.GetUserFromUserId(request.UserId);
         if (user is null)
             return Results.NotFound();
 
-        await userContext.UpdateName(request.Username, request.FirstName, request.LastName);
-
+        await userContext.UpdateName(request.UserId, request.FirstName, request.LastName);
         await logger.Log(
             new ActivityLog(
-                request.Username,
+                request.UserId,
                 ActionType.Update,
                 EntityType.User,
                 null,
@@ -237,15 +237,14 @@ public sealed class UserService : IUserService
 
     public async Task<IResult> UpdateDescription(UpdateDescriptionRequest request)
     {
-        var user = await userContext.GetUserFromUsername(request.Username);
+        var user = await userContext.GetUserFromUserId(request.UserId);
         if (user is null)
             return Results.NotFound();
 
-        await userContext.UpdateDescription(request.Username, request.Description);
-
+        await userContext.UpdateDescription(request.UserId, request.Description);
         await logger.Log(
             new ActivityLog(
-                request.Username,
+                request.UserId,
                 ActionType.Update,
                 EntityType.User,
                 null,

@@ -9,7 +9,7 @@ namespace DataAccess.Requests;
 
 public sealed class ResetPasswordRequest
 {
-    [Required] public string Username { get; set; } = string.Empty;
+    [Required] public int UserId { get; set; }
     [Required] public string Otp { get; set; } = string.Empty;
     [Required] public string NewPassword { get; set; } = string.Empty;
 }
