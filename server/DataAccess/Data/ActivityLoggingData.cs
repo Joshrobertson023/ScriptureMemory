@@ -24,7 +24,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     private readonly IConfiguration _config;
     private readonly string connectionString;
 
-    private const string selectClause = @"ID, USERNAME, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
+    private const string selectClause = @"ID, USER_ID as UserId, USERNAME, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
                                         ENTITY_ID as EntityId, CONTEXT_DESCRIPTION as ContextDescription,
                                         METADATA_JSON as JsonMetadata, SEVERITY_LEVEL as SeverityLevel,
                                         IS_ADMIN_ACTION as IsAdminAction, CREATED_AT as CreatedAt";
@@ -38,10 +38,10 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     public async Task Create(ActivityLog log)
     {
         var sql = @"INSERT INTO ACTIVITY_LOGS
-                    (USERNAME, ACTION_TYPE, ENTITY_TYPE, ENTITY_ID, CONTEXT_DESCRIPTION, 
+                    (USER_ID, ACTION_TYPE, ENTITY_TYPE, ENTITY_ID, CONTEXT_DESCRIPTION, 
                      METADATA_JSON, SEVERITY_LEVEL, IS_ADMIN_ACTION, CREATED_AT)
                     VALUES
-                    (:Username, :ActionType, :EntityType, :EntityId, :ContextDescription,
+                    (:UserId, :ActionType, :EntityType, :EntityId, :ContextDescription,
                      :MetadataJson, :SeverityLevel, :IsAdminAction, :CreatedAt)";
 
         await using var conn = new OracleConnection(connectionString);
@@ -50,7 +50,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
         await conn.ExecuteAsync(sql,
             new
             {
-                Username = log.Username,
+                UserId = log.UserId,
                 ActionType = log.ActionType,
                 EntityType = log.EntityType,
                 EntityId = log.EntityId,
@@ -74,10 +74,10 @@ public sealed class ActivityLoggingData : IActivityLoggingData
             new { Id = id });
     }
 
-    public async Task<PagedLogs<ActivityLog>> GetByUser(string username, int page = 1, int pageSize = 50)
+    public async Task<PagedLogs<ActivityLog>> GetByUser(int userId, int page = 1, int pageSize = 50)
     {
         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
-                     WHERE USERNAME = :Username
+                     WHERE USER_ID = :UserId
                      ORDER BY CREATED_AT DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
@@ -88,7 +88,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                 sql,
                 new
                 {
-                    Username = username,
+                    UserId = userId,
                     Offset = (page - 1) * pageSize,
                     PageSize = pageSize
                 })).AsList(),

@@ -6,8 +6,8 @@ namespace DataAccess.Models;
 public class Notification
 {
     public int Id { get; set; }
-    public string? Receiver { get; set; }
-    public string? Sender { get; set; }
+    public int SenderId { get; set; }
+    public int ReceiverId { get; set; }
     public string? Message { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime? ExpirationDate { get; set; }
@@ -15,8 +15,8 @@ public class Notification
     public Enums.NotificationType NotificationType { get; set; }
 
     public Notification(
-        string receiver,
-        string sender,
+        int receiver,
+        int sender,
         string message,
         Enums.NotificationType type)
     {

@@ -17,7 +17,7 @@ namespace DataAccess.Models;
 public sealed class ActivityLog
 {
     public int Id { get; set; } = 0;
-    public string? Username { get; set; }
+    public int? UserId { get; set; }
     public Enums.ActionType ActionType { get; set; }
     public Enums.EntityType EntityType { get; set; } // Entity being acted upon
     public int? EntityId { get; set; }

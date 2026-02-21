@@ -26,15 +26,15 @@ public class NotificationData : INotificationData
     public async Task CreateNotification(Notification notification)
     {
         var sql = @"INSERT INTO NOTIFICATIONS
-                    (RECEIVER, SENDER, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE, EXPIRATION_DATE)
+                    (RECEIVER_ID, SENDER_ID, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE, EXPIRATION_DATE)
                     VALUES 
                     (:Receiver, :Sender, :Message, :CreatedDate, 0, :NotificationType, :ExpirationDate)";
         
         using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new
         {
-            Receiver = notification.Receiver,
-            Sender = notification.Sender,
+            Receiver = notification.ReceiverId,
+            Sender = notification.SenderId,
             Message = notification.Message,
             CreatedDate = notification.CreatedDate,
             NotificationType = notification.NotificationType,
@@ -42,41 +42,47 @@ public class NotificationData : INotificationData
         });
     }
 
-    public async Task<List<Notification>> GetUserNotifications(string username)
+    public async Task<List<Notification>> GetUserNotifications(int userId)
     {
         var sql = @"SELECT * FROM NOTIFICATIONS 
-                    WHERE RECEIVER = :Username 
+                    WHERE RECEIVER_ID = :UserId 
                     ORDER BY CREATEDDATE DESC";
         
         using IDbConnection conn = new OracleConnection(connectionString);
         var notifications = await conn.QueryAsync<Notification>(
             sql, 
-            new { Username = username });
+            new { UserId = userId });
         return notifications.ToList();
     }
 
-    public async Task<List<Notification>> GetTopNotifications(string username, int limit)
+    public async Task<List<Notification>> GetTopNotifications(int userId, int limit)
     {
         var sql = @"
             SELECT * FROM (
                 SELECT * FROM NOTIFICATIONS 
-                WHERE RECEIVER = :Username 
+                WHERE RECEIVER_ID = :UserId 
                 ORDER BY CREATEDDATE DESC, ID DESC
             )
             WHERE ROWNUM <= :Limit
         ";
 
         using IDbConnection conn = new OracleConnection(connectionString);
-        var notifications = await conn.QueryAsync<Notification>(sql, new { Username = username, Limit = limit }, commandType: CommandType.Text);
+        var notifications = await conn.QueryAsync<Notification>(
+            sql, 
+            new 
+            { 
+                UserId = userId,
+                Limit = limit 
+            });
         return notifications.ToList();
     }
 
-    public async Task<List<Notification>> GetNotificationsBefore(string username, int cursorId, int limit)
+    public async Task<List<Notification>> GetNotificationsBefore(int userId, int cursorId, int limit)
     {
         var sql = @"
             SELECT * FROM (
                 SELECT * FROM NOTIFICATIONS 
-                WHERE RECEIVER = :Username 
+                WHERE RECEIVER_ID = :UserId 
                   AND (ID < :CursorId)
                 ORDER BY CREATEDDATE DESC, ID DESC
             )
@@ -86,7 +92,7 @@ public class NotificationData : INotificationData
         using IDbConnection conn = new OracleConnection(connectionString);
         var notifications = await conn.QueryAsync<Notification>(sql, new
         {
-            Username = username,
+            UserId = userId,
             CursorId = cursorId,
             Limit = limit
         }, commandType: CommandType.Text);
@@ -105,16 +111,16 @@ public class NotificationData : INotificationData
         await conn.ExecuteAsync(sql, new { NotificationId = notificationId }, commandType: CommandType.Text);
     }
 
-    public async Task MarkAllNotificationsAsRead(string username)
+    public async Task MarkAllNotificationsAsRead(int userId)
     {
         var sql = @"
             UPDATE NOTIFICATIONS 
             SET ISREAD = 1 
-            WHERE RECEIVER = :Username AND ISREAD = 0
+            WHERE RECEIVER_ID = :UserId AND ISREAD = 0
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { Username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { UserId = userId }, commandType: CommandType.Text);
     }
 
     public async Task ExpireNotification(int notificationId)
@@ -135,15 +141,15 @@ public class NotificationData : INotificationData
             });
     }
 
-    public async Task<int> GetUnreadNotificationCount(string username)
+    public async Task<int> GetUnreadNotificationCount(int userId)
     {
         var sql = @"
             SELECT COUNT(*) FROM NOTIFICATIONS 
-            WHERE RECEIVER = :Username AND ISREAD = 0
+            WHERE RECEIVER_ID = :UserId AND ISREAD = 0
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
-        var count = await conn.QueryFirstOrDefaultAsync<int>(sql, new { Username = username }, commandType: CommandType.Text);
+        var count = await conn.QueryFirstOrDefaultAsync<int>(sql, new { UserId = userId }, commandType: CommandType.Text);
         return count;
     }
 
@@ -151,7 +157,7 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             INSERT INTO NOTIFICATIONS 
-            (SENDERUSERNAME, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
+            (SENDER_ID, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
             VALUES
             (:SenderUsername, :Message, :CreatedDate, 0, :NotificationType
             FROM USERS
@@ -162,7 +168,7 @@ public class NotificationData : INotificationData
             sql, 
             new 
             { 
-                SenderUsername = notification.Sender, 
+                SenderUsername = notification.SenderId, 
                 Message = notification.Message,
                 CreatedDate = notification.CreatedDate,
                 NotificationType = notification.NotificationType,
@@ -173,7 +179,7 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             INSERT INTO NOTIFICATIONS 
-            (RECEIVER, SENDERUSERNAME, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
+            (RECEIVER_ID, SENDER_ID, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
             SELECT u.RECEIVER, :SenderUsername, :Message, :CreatedDate, 0, :NotificationType
             FROM USERS u
             INNER JOIN ADMINS a ON a.RECEIVER = u.RECEIVER
@@ -184,7 +190,7 @@ public class NotificationData : INotificationData
             sql, 
             new 
             { 
-                SenderUsername = notification.Sender, 
+                SenderUsername = notification.SenderId, 
                 Message = notification.Message,
                 CreatedDate = DateTime.UtcNow,
                 NotificationType = notification.NotificationType

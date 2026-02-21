@@ -62,10 +62,8 @@ public class UserTests : BaseIntegrationTest
         Assert.Equal(request.BibleVersion, loggedInUser.Settings.BibleVersion);
         Assert.True(loggedInUser.Settings.PushNotificationsEnabled);
 
-        var tokenLoginResponse = await api.PostAsJsonAsync("/users/login/token", new { loggedInUser.AuthToken });
-
-        if (!tokenLoginResponse.IsSuccessStatusCode)
-            throw new HttpRequestException($"{await loginResponse.Content.ReadAsStringAsync()}");
+        var tokenLoginResponse = await api.PostAsJsonAsync("/users/login/token", loggedInUser.AuthToken );
+        tokenLoginResponse.EnsureSuccessStatusCode();
 
         var tokenUser = await tokenLoginResponse.Content.ReadFromJsonAsync<User>();
 
@@ -104,15 +102,21 @@ public class UserTests : BaseIntegrationTest
 
         // Test update username
         var oldUsername = request.Username;
+        var newUsername = $"testuser{Guid.NewGuid().ToString().Substring(0, 8)}";
         var updateUsernameRequest = new UpdateUsernameRequest
         {
-            OldUsername = request.Username,
-            NewUsername = $"testuser{Guid.NewGuid().ToString().Substring(0, 8)}"
+            OldUsername = oldUsername,
+            NewUsername = newUsername
         };
-        var updateUsernameResponse = await api.PutAsJsonAsync("/users/username", updateUsernameRequest);
-        var response = await api.PostAsJsonAsync("/users/login/username", new { request.Username, request.Password });
+        var usernameAvailable = await userService.IsUsernameAvailable(newUsername);
+        Assert.True(usernameAvailable);
+        
+        await userService.UpdateUsername(updateUsernameRequest);
+
+        var response = await api.PostAsJsonAsync("/users/login/username", new { newUsername, request.Password });
         response.EnsureSuccessStatusCode();
         loggedInUser = await response.Content.ReadFromJsonAsync<User>();
+
         Assert.NotNull(loggedInUser);
         Assert.NotEqual(oldUsername, loggedInUser.Username);
 
@@ -130,7 +134,7 @@ public class UserTests : BaseIntegrationTest
             Username = loggedInUser.Username
         };
         var updateDescriptionResponse = await api.PutAsJsonAsync("/users/username", updateDescriptionRequest);
-        response = await api.PostAsJsonAsync("/users/login/username", new { request.Username, request.Password });
+        response = await api.PostAsJsonAsync("/users/login/username", new { loggedInUser.Username, request.Password });
         response.EnsureSuccessStatusCode();
         loggedInUser = await response.Content.ReadFromJsonAsync<User>();
         Assert.NotNull(loggedInUser);
@@ -148,7 +152,7 @@ public class UserTests : BaseIntegrationTest
         incrementVersesMemorizedResponse.EnsureSuccessStatusCode();
 
         User beforeIncrement = loggedInUser;
-        response = await api.PostAsJsonAsync("users/login/username", new { request.Username, request.Password });
+        response = await api.PostAsJsonAsync("/users/login/username", new { loggedInUser.Username, request.Password });
         response.EnsureSuccessStatusCode();
         loggedInUser = await response.Content.ReadFromJsonAsync<User>();
         Assert.NotNull(loggedInUser);
@@ -163,7 +167,7 @@ public class UserTests : BaseIntegrationTest
             Username = loggedInUser.Username,
             NewEmail = "newemail@gmail.com"
         };
-        var loginRequest = new { loggedInUser.Username, loggedInUser.HashedPassword };
+        var loginRequest = new { loggedInUser.Username, request.Password };
         var updateResponse = await api.PutAsJsonAsync("/users/email", updateEmailRequest);
         updateResponse.EnsureSuccessStatusCode();
         response = await api.PostAsJsonAsync("/users/login/username", loginRequest);

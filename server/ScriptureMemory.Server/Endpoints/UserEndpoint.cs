@@ -56,8 +56,8 @@ public static class UserEndpoint
         });
 
         // Set a user as active
-        app.MapPut("/users/setAsActive/{username}", async (
-            string username,
+        app.MapPut("/users/setAsActive", async (
+            [FromBody] string username,
             [FromServices] IUserData data) =>
         {
             await data.UpdateLastSeen(username);

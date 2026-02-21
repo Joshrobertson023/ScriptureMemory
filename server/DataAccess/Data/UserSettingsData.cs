@@ -24,15 +24,15 @@ public sealed class UserSettingsData : IUserSettingsData
         connectionString = _config.GetConnectionString("Default")!;
     }
 
-    public async Task CreateUserSettings(UserSettings settings, string username)
+    public async Task CreateUserSettings(UserSettings settings, int userId)
     {
         var sql = @"INSERT INTO USER_PREFERENCES
-                    (USERNAME, THEME, VERSION, COLLECTIONS_SORT, SUBSCRIBED_VOD,
+                    (USER_ID, THEME, VERSION, COLLECTIONS_SORT, SUBSCRIBED_VOD,
                      PUSH_NOTIFICATIONS_ENABLED, NOTIFY_MEMORIZED_VERSE, NOTIFY_PUBLISHED_COLLECTION,
                      NOTIFY_COLLECTION_SAVED, NOTIFY_NOTE_LIKED, FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED,
                      STREAK_REMINDERS_ENABLED, APP_BADGES_ENABLED, PRACTICE_TAB_BADGES_ENABLED, TYPE_OUT_REFERENCE)
                     VALUES
-                    (:Username, :Theme, :Version, :CollectionsSort, :SubscribedVod,
+                    (:UserId, :Theme, :Version, :CollectionsSort, :SubscribedVod,
                      :PushNotifications, :NotifyMemorizedVerse, :NotifyPublishedCollection,
                      :NotifyCollectionSaved, :NotifyNoteLiked, :FriendsActivityEnabled, 
                      :StreakReminders, :AppBadgesEnabled, :PracticeTabBadgesEnabled, :TypeOutReference)";
@@ -42,7 +42,7 @@ public sealed class UserSettingsData : IUserSettingsData
             sql,
             new
             {
-                Username = username,
+                UserId = userId,
                 Theme = settings.ThemePreference,
                 Version = settings.BibleVersion,
                 CollectionsSort = settings.CollectionsSort,
@@ -60,101 +60,101 @@ public sealed class UserSettingsData : IUserSettingsData
             });
     }
 
-    public async Task<UserSettings> GetUserSettingsFromUsername(string username)
+    public async Task<UserSettings> GetUserSettingsFromUserId(int userId)
     {
         var sql = @"SELECT THEME, VERSION, COLLECTIONS_SORT, SUBSCRIBED_VOD, PUSH_NOTIFICATIONS_ENABLED,
                     NOTIFY_MEMORIZED_VERSE, NOTIFY_PUBLISHED_COLLECTION, NOTIFY_COLLECTION_SAVED,
                     NOTIFY_NOTE_LIKED, FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED, STREAK_REMINDERS_ENABLED,
                     APP_BADGES_ENABLED, PRACTICE_TAB_BADGES_ENABLED, TYPE_OUT_REFERENCE
-                    FROM USER_PREFERENCES WHERE USERNAME = :username";
+                    FROM USER_PREFERENCES WHERE USERNAME = :userId";
         await using var conn = new OracleConnection(connectionString);
-        var result = await conn.QuerySingleOrDefaultAsync<UserSettings>(sql, new { username });
+        var result = await conn.QuerySingleOrDefaultAsync<UserSettings>(sql, new { userId });
         if (result is null)
-            throw new Exception($"No user settings found for username: {username}");
+            throw new Exception($"No user settings found for user id: {userId}");
         return result;
     }
 
-    public async Task UpdateCollectionsSort(Enums.CollectionsSort sortBy, string username)
+    public async Task UpdateCollectionsSort(Enums.CollectionsSort sortBy, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET COLLECTIONS_SORT = :sortBy WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET COLLECTIONS_SORT = :sortBy WHERE USER_ID = :userId";
         await using var conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { sortBy = sortBy, username = username });
+        await conn.ExecuteAsync(sql, new { sortBy = sortBy, userId = userId });
     }
 
-    public async Task UpdateSubscribedVerseOfDay(bool subscribed, string username)
+    public async Task UpdateSubscribedVerseOfDay(bool subscribed, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET SUBSCRIBED_VOD = :subscribed WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET SUBSCRIBED_VOD = :subscribed WHERE USER_ID = :userId";
         await using var conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { subscribed = subscribed, username = username });
+        await conn.ExecuteAsync(sql, new { subscribed = subscribed, userId = userId });
     }
 
-    public async Task UpdatePushNotificationsEnabled(bool enabled, string username)
+    public async Task UpdatePushNotificationsEnabled(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET PUSH_NOTIFICATIONS_ENABLED = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET PUSH_NOTIFICATIONS_ENABLED = :enabled WHERE USER_ID = :userId";
         await using var conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username });
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId });
     }
 
-    public async Task UpdateNotifyMemorizedVerse(bool enabled, string username)
+    public async Task UpdateNotifyMemorizedVerse(bool enabled, int userId)
     {
-        var sql = @"UPDATE USERS SET NOTIFY_MEMORIZED_VERSE = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USERS SET NOTIFY_MEMORIZED_VERSE = :enabled WHERE USER_ID = :userId";
         await using var conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username });
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId });
     }
 
-    public async Task UpdateNotifyPublishedCollection(bool enabled, string username)
+    public async Task UpdateNotifyPublishedCollection(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET NOTIFY_PUBLISHED_COLLECTION = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET NOTIFY_PUBLISHED_COLLECTION = :enabled WHERE USER_ID = :userId";
         await using var conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username });
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId });
     }
 
-    public async Task UpdateNotifyCollectionSaved(bool enabled, string username)
+    public async Task UpdateNotifyCollectionSaved(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET NOTIFY_COLLECTION_SAVED = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET NOTIFY_COLLECTION_SAVED = :enabled WHERE USER_ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateNotifyNoteLiked(bool enabled, string username)
+    public async Task UpdateNotifyNoteLiked(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET NOTIFY_NOTE_LIKED = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET NOTIFY_NOTE_LIKED = :enabled WHERE USER_ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateFriendsActivityNotifications(bool enabled, string username)
+    public async Task UpdateFriendsActivityNotifications(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED = :enabled WHERE USER_ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateStreakReminders(bool enabled, string username)
+    public async Task UpdateStreakReminders(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET STREAK_REMINDERS_ENABLED = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET STREAK_REMINDERS_ENABLED = :enabled WHERE USER_ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateAppBadgesEnabled(bool enabled, string username)
+    public async Task UpdateAppBadgesEnabled(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET APP_BADGES_ENABLED = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET APP_BADGES_ENABLED = :enabled WHERE USER_ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdatePracticeTabBadgesEnabled(bool enabled, string username)
+    public async Task UpdatePracticeTabBadgesEnabled(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET PRACTICE_TAB_BADGES_ENABLED = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET PRACTICE_TAB_BADGES_ENABLED = :enabled WHERE USER_ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateTypeOutReference(bool enabled, string username)
+    public async Task UpdateTypeOutReference(bool enabled, int userId)
     {
-        var sql = @"UPDATE USER_PREFERENCES SET TYPE_OUT_REFERENCE = :enabled WHERE USERNAME = :username";
+        var sql = @"UPDATE USER_PREFERENCES SET TYPE_OUT_REFERENCE = :enabled WHERE USER_ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { enabled = enabled, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { enabled = enabled, userId = userId }, commandType: CommandType.Text);
     }
 }

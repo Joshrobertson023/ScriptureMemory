@@ -66,7 +66,7 @@ public class UserData : IUserData
 
     public async Task<User?> GetUserFromUsername(string username)
     {
-        var sql = @"SELECT USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
                     HASHEDPASSWORD, LASTSEEN, ""DESCRIPTION"" AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATEREGISTERED
@@ -81,7 +81,7 @@ public class UserData : IUserData
 
     public async Task<User?> GetUserFromToken(string token)
     {
-        var sql = @"SELECT USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
                     HASHEDPASSWORD, LASTSEEN, ""DESCRIPTION"" AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATEREGISTERED
@@ -108,7 +108,7 @@ public class UserData : IUserData
 
     public async Task<List<User>> GetUsersFromEmail(string email)
     {
-        var sql = @"SELECT USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
                     HASHEDPASSWORD, LASTSEEN, ""DESCRIPTION"" AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATEREGISTERED
@@ -147,7 +147,7 @@ public class UserData : IUserData
 
     public async Task<List<User>> GetUsers(int count = 100)
     {
-        var sql = @"SELECT USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRSTNAME, LASTNAME, EMAIL, AUTHTOKEN, ""STATUS"",
                     HASHEDPASSWORD, LASTSEEN, ""DESCRIPTION"" AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATEREGISTERED
@@ -163,18 +163,18 @@ public class UserData : IUserData
     //  Increment
     // -------------------------------------------------------
 
-    public async Task IncrementVersesMemorized(string username)
+    public async Task IncrementVersesMemorized(int userId)
     {
-        var sql = @"UPDATE USERS SET VERSES_MEMORIZED = NVL(VERSES_MEMORIZED, 0) + 1 WHERE USERNAME = :username";
+        var sql = @"UPDATE USERS SET VERSES_MEMORIZED = NVL(VERSES_MEMORIZED, 0) + 1 WHERE ID = :Id";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { Id = userId }, commandType: CommandType.Text);
     }
 
-    public async Task AddPoints(string username, int points)
+    public async Task AddPoints(int userId, int points)
     {
-        var sql = @"UPDATE USERS SET POINTS = NVL(POINTS, 0) + :points WHERE USERNAME = :username";
+        var sql = @"UPDATE USERS SET POINTS = NVL(POINTS, 0) + :points WHERE ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { points, username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { points, userId }, commandType: CommandType.Text);
     }
 
 
@@ -234,53 +234,53 @@ public class UserData : IUserData
     //  Update
     // -------------------------------------------------------
 
-    public async Task UpdatePassword(string username, string hashedPassword)
+    public async Task UpdatePassword(int userId, string hashedPassword)
     {
-        var sql = @"UPDATE USERS SET HASHEDPASSWORD = :hashedPassword WHERE USERNAME = :username";
+        var sql = @"UPDATE USERS SET HASHEDPASSWORD = :hashedPassword WHERE ID = :userId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { hashedPassword, username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { hashedPassword, userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateUsername(string username, string newUsername)
+    public async Task UpdateUsername(int userId, string newUsername)
     {
-        var sql = @"UPDATE USERS SET USERNAME = :NewUsername WHERE USERNAME = :Username";
+        var sql = @"UPDATE USERS SET USERNAME = :NewUsername WHERE ID = :UserId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { NewUsername = newUsername, Username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { NewUsername = newUsername, UserId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateEmail(string username, string newEmail)
+    public async Task UpdateEmail(int userId, string newEmail)
     {
-        var sql = @"UPDATE USERS SET EMAIL = :NewEmail WHERE USERNAME = :Username";
+        var sql = @"UPDATE USERS SET EMAIL = :NewEmail WHERE ID = :UserId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { NewEmail = newEmail, Username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { NewEmail = newEmail, UserId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateName(string username, string newEmail)
+    public async Task UpdateName(int userId, string newEmail)
     {
-        var sql = @"UPDATE USERS SET EMAIL = :NewEmail WHERE USERNAME = :Username";
+        var sql = @"UPDATE USERS SET EMAIL = :NewEmail WHERE ID = :UserId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { NewEmail = newEmail, Username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { NewEmail = newEmail, UserId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateLastSeen(string username)
+    public async Task UpdateLastSeen(int userId)
     {
-        var sql = @"UPDATE USERS SET LASTSEEN = :CurrentDate WHERE USERNAME = :Username";
+        var sql = @"UPDATE USERS SET LASTSEEN = :CurrentDate WHERE ID = :UserId";
         await using var conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { CurrentDate = DateTime.UtcNow, Username = username });
+        await conn.ExecuteAsync(sql, new { CurrentDate = DateTime.UtcNow, UserId = userId });
     }
 
-    public async Task UpdateDescription(string description, string username)
+    public async Task UpdateDescription(int userId, string description)
     {
-        var sql = @"UPDATE USERS SET ""DESCRIPTION"" = :description WHERE USERNAME = :username";
+        var sql = @"UPDATE USERS SET ""DESCRIPTION"" = :description WHERE ID = :UserId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { description = description, username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { description = description, UserId = userId }, commandType: CommandType.Text);
     }
 
-    public async Task UpdateName(string username, string firstName, string lastName)
+    public async Task UpdateName(int userId, string firstName, string lastName)
     {
-        var sql = @"UPDATE USERS SET FIRSTNAME = :firstName, LASTNAME = :lastName WHERE USERNAME = :Username";
+        var sql = @"UPDATE USERS SET FIRSTNAME = :firstName, LASTNAME = :lastName WHERE ID = :UserId";
         using IDbConnection conn = new OracleConnection(connectionString);
-        await conn.ExecuteAsync(sql, new { firstName = firstName, lastName = lastName, Username = username }, commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { firstName = firstName, lastName = lastName, UserId = userId }, commandType: CommandType.Text);
     }
 
 

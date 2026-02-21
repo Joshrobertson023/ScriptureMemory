@@ -1,12 +1,13 @@
+using Azure.Core;
 using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using DataAccess.Requests;
 using DataAccess.Requests.UpdateRequests;
 using Microsoft.AspNetCore.Identity;
-using System.Text.Json;
 using ScriptureMemoryLibrary;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Text.Json;
 using static ScriptureMemoryLibrary.Enums;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VerseAppNew.Server.Services;
 
@@ -19,6 +20,7 @@ public interface IUserService
     Task<IResult> UpdateEmail(UpdateEmailRequest request);
     Task<IResult> UpdateName(UpdateNameRequest request);
     Task<IResult> UpdateDescription(UpdateDescriptionRequest request);
+    Task<bool> IsUsernameAvailable(string username);
 }
 
 public sealed class UserService : IUserService
@@ -28,19 +30,22 @@ public sealed class UserService : IUserService
     //private readonly IPaidData paidContext;
     private readonly INotificationService notificationService;
     private readonly IActivityLogger logger;
+    private readonly IEmailSenderService emailSender;
 
     public UserService(
         IUserData userContext, 
         IUserSettingsData settingsContext, 
         //IPaidData paidContext,
         INotificationService notificationService,
-        IActivityLogger logger)
+        IActivityLogger logger,
+        IEmailSenderService emailSender)
     {
         this.userContext = userContext;
         this.settingsContext = settingsContext;
         //this.paidContext = paidContext;
         this.notificationService = notificationService;
         this.logger = logger;
+        this.emailSender = emailSender;
     }
 
     public async Task CreateUserFromRequest(CreateUserRequest request)
@@ -92,7 +97,7 @@ public sealed class UserService : IUserService
         PasswordHasher<User> hasher = new();
 
         if (user is null)
-            return Results.NotFound("Username does not exist.");
+            return Results.Problem("Username does not exist.");
         else if (hasher.VerifyHashedPassword(null!, user.HashedPassword!, password)
             == PasswordVerificationResult.Failed)
         {
@@ -138,16 +143,22 @@ public sealed class UserService : IUserService
         return Results.Ok(user);
     }
 
+    public async Task<bool> IsUsernameAvailable(string username)
+    {
+        var existingUser = await userContext.GetUserFromUsername(username);
+
+        return (existingUser is null);
+    }
+
     public async Task<IResult> UpdateUsername(UpdateUsernameRequest request)
     {
         var user = await userContext.GetUserFromUsername(request.OldUsername);
-        if (user is null)
-            return Results.NotFound();
 
-        // Check if new username is available
-        var existingUser = await userContext.GetUserFromUsername(request.NewUsername);
-        if (existingUser is not null)
-            return Results.BadRequest("Username already taken");
+        if (user is null)
+            return Results.Problem("Old username does not exist");
+
+        if (!await IsUsernameAvailable(request.NewUsername))
+            return Results.Problem("Username is not available");
 
         user.Username = request.NewUsername;
         await userContext.UpdateUsername(request.OldUsername, request.NewUsername);

@@ -1,6 +1,8 @@
 using DataAccess.DataInterfaces;
+using DataAccess.Models;
 using DataAccess.Requests;
 using ScriptureMemoryLibrary;
+using static ScriptureMemoryLibrary.Enums;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VerseAppNew.Server.Services;
@@ -14,10 +16,17 @@ public interface IPasswordResetService
 public sealed class PasswordResetService : IPasswordResetService
 {
     private readonly IUserData userContext;
+    private readonly IEmailSenderService emailSender;
+    private readonly IActivityLogger activityLogger
 
-    public PasswordResetService(IUserData userContext)
+    public PasswordResetService(
+        IUserData userContext,
+        IEmailSenderService emailSender,
+        IActivityLogger activityLogger)
     {
         this.userContext = userContext;
+        this.emailSender = emailSender;
+        this.activityLogger = activityLogger;
     }
 
     public async Task<IResult> VerifyOtp(VerifyOtpRequest request)
@@ -56,6 +65,33 @@ public sealed class PasswordResetService : IPasswordResetService
 
         await userContext.UpdatePassword(request.Username.Trim(), request.NewPassword);
         await userContext.DeletePasswordResetToken(request.Username.Trim());
+
+        return Results.Ok();
+    }
+
+
+
+    // -- Forgot ------------------------------------
+
+    public async Task<IResult> ForgotUsername(ForgotUsernameRequest request)
+    {
+        var emailSenderResults = await emailSender.SendForgotUsernameEmail(request);
+
+        var fullName = request.FirstName + " " + request.LastName;
+        await activityLogger.Log(
+            new ActivityLog(
+                fullName,
+                ActionType.Forgot,
+                EntityType.User,
+                null,
+                "User forgot username",
+                new
+                {
+                    Context = "Username not logged",
+                    FullName = fullName
+                }
+            )
+        );
 
         return Results.Ok();
     }

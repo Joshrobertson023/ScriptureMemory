@@ -82,6 +82,7 @@ namespace ScriptureMemoryLibrary
             Register,
             Login,
             Logout,
+            Forgot,
 
             Create,
             Edit,
@@ -93,7 +94,6 @@ namespace ScriptureMemoryLibrary
             Like,
             Report,
 
-            CheckedUsernameAvailability,
             PracticeSession,
             ReadChapter,
             Search,

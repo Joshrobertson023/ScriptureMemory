@@ -8,7 +8,7 @@ namespace DataAccess.Models;
 public class UserPassage
 {
     public int Id { get; set; }
-    public string Username { get; set; } = string.Empty;
+    public int UserId { get; set; }
     public int CollectionId { get; set; }
     public Reference Reference { get; set; }
     public DateTime LastPracticed { get; set; } = DateTime.UtcNow;
