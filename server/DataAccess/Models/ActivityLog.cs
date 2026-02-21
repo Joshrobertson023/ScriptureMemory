@@ -27,6 +27,8 @@ public sealed class ActivityLog
     public bool IsAdminAction { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public ActivityLog() { }
+
     public ActivityLog(Enums.ActionType actionType, Enums.EntityType entityType)
     {
         ActionType = actionType;

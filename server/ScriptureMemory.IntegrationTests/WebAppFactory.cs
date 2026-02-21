@@ -61,7 +61,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         builder.UseSetting("detailedErrors", "true");
     }
 
-    private async Task CleanDatabaseAsync()
+    public async Task CleanDatabaseAsync()
     {
         var host = _dbContainer!.Hostname;
         var port = _dbContainer.GetMappedPublicPort(1521);
@@ -159,7 +159,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
                         
               CREATE TABLE "NOTIFICATIONS" 
                (	
-               "ID" NUMBER generated always as identity, 
+               "ID" NUMBER GENERATED ALWAYS AS IDENTITY, 
             	"MESSAGE" VARCHAR2(1000) NOT NULL, 
             	"CREATEDDATE" DATE NOT NULL, 
             	"ISREAD" NUMBER(1,0) DEFAULT 0, 

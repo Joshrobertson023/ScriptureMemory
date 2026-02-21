@@ -25,4 +25,6 @@ public class Notification
         Message = message;
         NotificationType = type;
     }
+
+    public Notification() { }
 }

@@ -45,7 +45,7 @@ public class NotificationData : INotificationData
     public async Task<List<Notification>> GetUserNotifications(string username)
     {
         var sql = @"SELECT * FROM NOTIFICATIONS 
-                    WHERE USERNAME = :Username 
+                    WHERE RECEIVER = :Username 
                     ORDER BY CREATEDDATE DESC";
         
         using IDbConnection conn = new OracleConnection(connectionString);
@@ -60,7 +60,7 @@ public class NotificationData : INotificationData
         var sql = @"
             SELECT * FROM (
                 SELECT * FROM NOTIFICATIONS 
-                WHERE USERNAME = :Username 
+                WHERE RECEIVER = :Username 
                 ORDER BY CREATEDDATE DESC, ID DESC
             )
             WHERE ROWNUM <= :Limit
@@ -76,7 +76,7 @@ public class NotificationData : INotificationData
         var sql = @"
             SELECT * FROM (
                 SELECT * FROM NOTIFICATIONS 
-                WHERE USERNAME = :Username 
+                WHERE RECEIVER = :Username 
                   AND (ID < :CursorId)
                 ORDER BY CREATEDDATE DESC, ID DESC
             )
@@ -110,7 +110,7 @@ public class NotificationData : INotificationData
         var sql = @"
             UPDATE NOTIFICATIONS 
             SET ISREAD = 1 
-            WHERE USERNAME = :Username AND ISREAD = 0
+            WHERE RECEIVER = :Username AND ISREAD = 0
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
@@ -139,7 +139,7 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             SELECT COUNT(*) FROM NOTIFICATIONS 
-            WHERE USERNAME = :Username AND ISREAD = 0
+            WHERE RECEIVER = :Username AND ISREAD = 0
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
@@ -151,8 +151,9 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             INSERT INTO NOTIFICATIONS 
-            (USERNAME, SENDERUSERNAME, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
-            SELECT USERNAME, :SenderUsername, :Message, :CreatedDate, 0, :NotificationType
+            (SENDERUSERNAME, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
+            VALUES
+            (:SenderUsername, :Message, :CreatedDate, 0, :NotificationType
             FROM USERS
         ";
         
@@ -172,10 +173,10 @@ public class NotificationData : INotificationData
     {
         var sql = @"
             INSERT INTO NOTIFICATIONS 
-            (USERNAME, SENDERUSERNAME, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
-            SELECT u.USERNAME, :SenderUsername, :Message, :CreatedDate, 0, :NotificationType
+            (RECEIVER, SENDERUSERNAME, MESSAGE, CREATEDDATE, ISREAD, NOTIFICATIONTYPE)
+            SELECT u.RECEIVER, :SenderUsername, :Message, :CreatedDate, 0, :NotificationType
             FROM USERS u
-            INNER JOIN ADMINS a ON a.USERNAME = u.USERNAME
+            INNER JOIN ADMINS a ON a.RECEIVER = u.RECEIVER
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);
@@ -195,7 +196,7 @@ public class NotificationData : INotificationData
         
         var sql = @"
             DELETE FROM NOTIFICATIONS 
-            WHERE USERNAME = :Username OR SENDERUSERNAME = :Username
+            WHERE RECEIVER = :Username OR SENDERUSERNAME = :Username
         ";
         
         using IDbConnection conn = new OracleConnection(connectionString);

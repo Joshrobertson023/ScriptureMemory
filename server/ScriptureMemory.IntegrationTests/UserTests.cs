@@ -19,10 +19,10 @@ public class UserTests : BaseIntegrationTest
     {
         var request = new CreateUserRequest
         {
-            Username = $"testuser123",
+            Username = $"testuser{Guid.NewGuid().ToString().Substring(0, 8)}",
             FirstName = "Test",
             LastName = "User",
-            Email = "testuser@gmail.com",
+            Email = $"testuser@gmail.com",
             Password = "password1234455",
             BibleVersion = BibleVersion.Kjv
         };
@@ -60,14 +60,14 @@ public class UserTests : BaseIntegrationTest
 
         // Get the created log and assert
         PagedLogs<ActivityLog> logResponse = await activityLogContext.GetByUser(request.Username);
-        ActivityLog log = logResponse.Items.First();
+        ActivityLog loginLog = logResponse.Items.First();
+        ActivityLog registerLog = logResponse.Items.Last();
 
         Assert.NotNull(logResponse);
-        Assert.Single(logResponse.Items);
-        Assert.Equal(request.Username, log.Username);
-        Assert.Equal(ActionType.Create, log.ActionType);
-        Assert.Equal(EntityType.User, log.EntityType);
-        Assert.Equal("Created user account", log.ContextDescription);
+        Assert.Equal(request.Username, registerLog.Username);
+        Assert.Equal(ActionType.Register, registerLog.ActionType);
+        Assert.Equal(EntityType.User, registerLog.EntityType);
+        Assert.Equal("Created account", registerLog.ContextDescription);
 
 
         // Get the welcome notification and assert

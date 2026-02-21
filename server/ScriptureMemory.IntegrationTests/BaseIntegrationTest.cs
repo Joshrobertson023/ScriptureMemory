@@ -7,9 +7,10 @@ using VerseAppNew.Server.Services;
 
 namespace ScriptureMemory.IntegrationTests;
 
-public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>
+public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IServiceScope scope;
+    private readonly IntegrationTestWebAppFactory factory;
 
     protected readonly HttpClient client;
 
@@ -21,6 +22,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
 
     public BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
+        this.factory = factory;
         scope = factory.Services.CreateScope();
         client = factory.CreateClient();
 
@@ -29,5 +31,15 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
         activityLogger = scope.ServiceProvider.GetRequiredService<IActivityLogger>();
         activityLogContext = scope.ServiceProvider.GetRequiredService<IActivityLoggingData>();
         notificationContext = scope.ServiceProvider.GetRequiredService<INotificationData>();
+    }
+
+    public async Task InitializeAsync()
+    {
+        await factory.CleanDatabaseAsync();
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 }
