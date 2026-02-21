@@ -87,7 +87,7 @@ public static class UserEndpoint
         });
 
         // Login a user with username and password
-        app.MapPost("/users/username", async (
+        app.MapPost("/users/login/username", async (
             [FromBody] LoginRequest request,
             [FromServices] IUserService userService) =>
         {
@@ -95,7 +95,7 @@ public static class UserEndpoint
         });
 
         // Login a user from a login token
-        app.MapPost("/users/token", async (
+        app.MapPost("/users/login/token", async (
             [FromBody] string token,
             [FromServices] IUserService userService) =>
         {
@@ -103,8 +103,8 @@ public static class UserEndpoint
         });
 
         // Increment the number of verses a user has memorized
-        app.MapPut("/users/incrementVersesMemorized/{username}", async (
-            string username,
+        app.MapPut("/users/incrementVersesMemorized", async (
+            [FromBody] string username,
             [FromServices] IUserData data) =>
         {
             await data.IncrementVersesMemorized(username);

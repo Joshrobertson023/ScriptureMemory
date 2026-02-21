@@ -12,7 +12,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
     private readonly IServiceScope scope;
     private readonly IntegrationTestWebAppFactory factory;
 
-    protected readonly HttpClient client;
+    protected readonly HttpClient api;
 
     protected readonly IUserData userContext;
     protected readonly IUserService userService;
@@ -24,7 +24,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
     {
         this.factory = factory;
         scope = factory.Services.CreateScope();
-        client = factory.CreateClient();
+        api = factory.CreateClient();
 
         userContext = scope.ServiceProvider.GetRequiredService<IUserData>();
         userService = scope.ServiceProvider.GetRequiredService<IUserService>();
