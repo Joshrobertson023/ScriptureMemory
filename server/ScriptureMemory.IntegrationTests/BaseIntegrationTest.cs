@@ -19,6 +19,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
     protected readonly IActivityLogger activityLogger;
     protected readonly IActivityLoggingData activityLogContext;
     protected readonly INotificationData notificationContext;
+    protected readonly IVerseData verseContext;
 
     public BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
@@ -31,6 +32,7 @@ public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppF
         activityLogger = scope.ServiceProvider.GetRequiredService<IActivityLogger>();
         activityLogContext = scope.ServiceProvider.GetRequiredService<IActivityLoggingData>();
         notificationContext = scope.ServiceProvider.GetRequiredService<INotificationData>();
+        verseContext = scope.ServiceProvider.GetRequiredService<IVerseData>();
     }
 
     public async Task InitializeAsync()

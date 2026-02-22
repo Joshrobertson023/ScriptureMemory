@@ -3,6 +3,7 @@ using DataAccess.Models;
 namespace DataAccess.DataInterfaces;
 public interface IVerseData
 {
+    Task InsertVerse(Verse verse);
     Task<Verse?> GetVerse(string reference);
     Task<List<Verse>> GetChapterVerses(string book, int chapter);
     Task UpdateUsersMemorizedVerse(string reference);

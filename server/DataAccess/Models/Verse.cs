@@ -15,6 +15,8 @@ public class Verse
     public int UsersMemorizedCount { get; set; } = 0;
     public string VerseNumbers { get; set; }
 
+    public Verse() { }
+
     public Verse(string reference, string text, string verseNumbers)
     {
         Reference = reference;

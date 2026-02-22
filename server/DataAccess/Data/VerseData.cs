@@ -44,13 +44,19 @@ public class VerseData : IVerseData
 
     public async Task InsertVerse(Verse verse)
     {
-        var sql = $@"INSERT INTO VERSES (verse_reference, Text)
+        var sql = $@"INSERT INTO VERSES 
+                    (verse_reference, Text, users_saved_verse, users_memorized)
                      VALUES
-                     (:Reference, :Text)";
+                     (:Reference, :Text, :UsersSavedCount, :UsersMemorizedCount)";
         using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql,
-            new { verse.Reference, verse.Text },
-            commandType: CommandType.Text);
+            new 
+            { 
+                verse.Reference, 
+                verse.Text,
+                verse.UsersSavedCount,
+                verse.UsersMemorizedCount
+            });
     }
 
     public async Task<Verse?> GetVerse(string reference)
@@ -141,7 +147,7 @@ public class VerseData : IVerseData
     {
         var limit = Math.Max(1, top);
         var sql = $@"SELECT * FROM (
-                        SELECT * FROM VERSES
+                        SELECT {selectSql} FROM VERSES
                         ORDER BY USERS_MEMORIZED DESC, VERSE_ID DESC
                         FETCH FIRST 20 ROWS ONLY
                     )
@@ -154,7 +160,7 @@ public class VerseData : IVerseData
     public async Task<List<Verse>> GetAllVersesFromReferenceList(List<string> references)
     {
         bool first = true;
-        StringBuilder sql = new("SELECT * FROM VERSES WHERE verse_reference IN (");
+        StringBuilder sql = new($"SELECT {selectSql} FROM VERSES WHERE verse_reference IN (");
         using IDbConnection conn = new OracleConnection(connectionString);
         foreach (var reference in references)
         {
