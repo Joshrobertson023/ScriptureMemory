@@ -22,149 +22,155 @@ public class VerseData : IVerseData
     private readonly string connectionString;
     private readonly ICategoryData? _categoryData;
 
+    private string selectSql = @"VERSE_ID AS Id, VERSE_REFERENCE as Reference, 
+                                USERS_SAVED_VERSE AS UsersSavedCount, USERS_MEMORIZED AS UsersMemorizedCount,
+                                TEXT AS Text";
+
     public VerseData(IConfiguration config, ICategoryData? categoryData = null)
     {
         _config = config;
         connectionString = _config.GetConnectionString("Default") ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
         _categoryData = categoryData;
     }
+
+    public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)
+    {
+        var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";
+        await using var conn = new OracleConnection(connectionString);
+        var results = await conn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });
+
+        return results.ToList();
+    }
+
+    public async Task InsertVerse(Verse verse)
+    {
+        var sql = $@"INSERT INTO VERSES (verse_reference, Text)
+                     VALUES
+                     (:Reference, :Text)";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        await conn.ExecuteAsync(sql,
+            new { verse.Reference, verse.Text },
+            commandType: CommandType.Text);
+    }
+
+    public async Task<Verse?> GetVerse(string reference)
+    {
+        string sql = $@"SELECT 
+                        {selectSql}
+                        FROM VERSES WHERE verse_reference = :Reference";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        var results = await conn.QueryAsync<Verse?>(sql, new { Reference = reference });
+        return results.FirstOrDefault();
+    }
+
+    public async Task<List<Verse>> GetChapterVerses(string book, int chapter)
+    {
+        var verseReferences = new List<string>();
+        const int mostVersesInChapter = 176;
+
+        for (int verse = 1; verse <= mostVersesInChapter; verse++)
+        {
+            verseReferences.Add($"{book} {chapter}:{verse}");
+        }
+
+        bool first = true;
+        StringBuilder sql = new StringBuilder($"SELECT {selectSql} FROM VERSES WHERE verse_reference IN (");
+        foreach (var reference in verseReferences)
+        {
+            if (first) sql.Append($"\'{reference}\'");
+            else sql.Append($",\'{reference}\'");
+            first = false;
+        }
+        sql.Append(")");
+
+        await using var conn = new OracleConnection(connectionString);
+        var verses = await conn.QueryAsync<Verse>(sql.ToString(), commandType: CommandType.Text);
+        return verses.ToList();
+    }
+
+    public async Task<Verse?> GetVerseFromId(int id)
+    {
+        var sql = $@"SELECT {selectSql} WHERE verse_id = :id";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        var userVerses = await conn.QueryAsync<Verse?>(sql, new { id = id },
+            commandType: CommandType.Text);
+        return userVerses.FirstOrDefault();
+    }
+
+    public async Task UpdateVerseText(string text, int id)
+    {
+        var sql = "update verses set text = :newText where verse_id = :id";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        await conn.ExecuteAsync(sql, new { newText = text, id = id },
+            commandType: CommandType.Text);
+        return;
+    }
+
+    public async Task UpdateUsersSavedVerse(string reference)
+    {
+        var sql = @"UPDATE VERSES SET Users_Saved_Verse = Users_Saved_Verse + 1
+                     WHERE verse_reference = :Reference";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        await conn.ExecuteAsync(sql, new { Reference = reference },
+            commandType: CommandType.Text);
+    }
+
+    public async Task UpdateUsersMemorizedVerse(string reference)
+    {
+        var sql = @"UPDATE VERSES SET Users_Memorized = Users_Memorized + 1
+                     WHERE verse_reference = :Reference";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        await conn.ExecuteAsync(sql, new { Reference = reference },
+            commandType: CommandType.Text);
+    }
+
+    public async Task<List<Verse>> GetTopSavedVerses(int top)
+    {
+        var sql = $@"SELECT * FROM (
+                        SELECT * FROM VERSES
+                        ORDER BY USERS_SAVED_VERSE DESC, VERSE_ID DESC
+                        FETCH FIRST 20 ROWS ONLY
+                    )
+                    WHERE USERS_SAVED_VERSE > 0";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        var verses = await conn.QueryAsync<Verse>(sql, commandType: CommandType.Text);
+        return verses.ToList();
+    }
+
+    public async Task<List<Verse>> GetTopMemorizedVerses(int top)
+    {
+        var limit = Math.Max(1, top);
+        var sql = $@"SELECT * FROM (
+                        SELECT * FROM VERSES
+                        ORDER BY USERS_MEMORIZED DESC, VERSE_ID DESC
+                        FETCH FIRST 20 ROWS ONLY
+                    )
+                    WHERE USERS_MEMORIZED > 0";
+        using IDbConnection conn = new OracleConnection(connectionString);
+        var verses = await conn.QueryAsync<Verse>(sql, commandType: CommandType.Text);
+        return verses.ToList();
+    }
+
+    public async Task<List<Verse>> GetAllVersesFromReferenceList(List<string> references)
+    {
+        bool first = true;
+        StringBuilder sql = new("SELECT * FROM VERSES WHERE verse_reference IN (");
+        using IDbConnection conn = new OracleConnection(connectionString);
+        foreach (var reference in references)
+        {
+            if (first) sql.Append($"\'{reference}\'");
+            else sql.Append($",\'{reference}\'");
+            first = false;
+        }
+        sql.Append(")");
+
+        Debug.WriteLine(sql);
+
+        var resultVerses = await conn.QueryAsync<Verse>(sql.ToString(), commandType: CommandType.Text);
+
+        return resultVerses.ToList();
+    }
 }
-
-//    public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)
-//    {
-//        var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";
-//        await using var conn = new OracleConnection(connectionString);
-//        var results = await conn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });
-
-//        return results.ToList();
-//    }
-
-//    public async Task InsertVerse(Verse verse)
-//    {
-//        var sql = $@"INSERT INTO VERSES (verse_reference, Text)
-//                     VALUES
-//                     (:Reference, :Text)";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        await conn.ExecuteAsync(sql,
-//            new { verse.Reference, verse.Text },
-//            commandType: CommandType.Text);
-//    }
-
-//    public async Task<Verse?> GetVerse(string reference)
-//    {
-//        string sql = $@"SELECT * FROM VERSES WHERE verse_reference = :Reference";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var results = await conn.QueryAsync<Verse?>(sql, new { Reference = reference });
-//        return results.FirstOrDefault();
-//    }
-
-//    public async Task<List<Verse>> GetChapterVerses(string book, int chapter)
-//    {
-//        var verseReferences = new List<string>();
-//        const int mostVersesInChapter = 176;
-
-//        for (int verse = 1; verse <= mostVersesInChapter; verse++)
-//        {
-//            verseReferences.Add($"{book} {chapter}:{verse}");
-//        }
-
-//        bool first = true;
-//        StringBuilder sql = new StringBuilder("SELECT * FROM VERSES WHERE verse_reference IN (");
-//        foreach (var reference in verseReferences)
-//        {
-//            if (first) sql.Append($"\'{reference}\'");
-//            else sql.Append($",\'{reference}\'");
-//            first = false;
-//        }
-//        sql.Append(")");
-
-//        await using var conn = new OracleConnection(connectionString);
-//        var verses = await conn.QueryAsync<Verse>(sql.ToString(), commandType: CommandType.Text);
-//        return verses.ToList();
-//    }
-
-//    public async Task<Verse?> GetVerseFromId(int id)
-//    {
-//        var sql = "SELECT * FROM VERSES WHERE verse_id = :id";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var userVerses = await conn.QueryAsync<Verse?>(sql, new { id = id },
-//            commandType: CommandType.Text);
-//        return userVerses.FirstOrDefault();
-//    }
-
-//    public async Task UpdateVerseText(string text, int id)
-//    {
-//        var sql = "update verses set text = :newText where verse_id = :id";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        await conn.ExecuteAsync(sql, new { newText = text, id = id },
-//            commandType: CommandType.Text);
-//        return;
-//    }
-
-//    public async Task UpdateUsersSavedVerse(string reference)
-//    {
-//        var sql = @"UPDATE VERSES SET Users_Saved_Verse = Users_Saved_Verse + 1
-//                     WHERE verse_reference = :Reference";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        await conn.ExecuteAsync(sql, new { Reference = reference },
-//            commandType: CommandType.Text);
-//    }
-
-//    public async Task UpdateUsersMemorizedVerse(string reference)
-//    {
-//        var sql = @"UPDATE VERSES SET Users_Memorized = Users_Memorized + 1
-//                     WHERE verse_reference = :Reference";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        await conn.ExecuteAsync(sql, new { Reference = reference },
-//            commandType: CommandType.Text);
-//    }
-
-//    public async Task<IEnumerable<Verse>> GetTopSavedVerses(int top)
-//    {
-//        var sql = $@"SELECT * FROM (
-//                        SELECT * FROM VERSES
-//                        ORDER BY USERS_SAVED_VERSE DESC, VERSE_ID DESC
-//                        FETCH FIRST 20 ROWS ONLY
-//                    )
-//                    WHERE USERS_SAVED_VERSE > 0";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var verses = await conn.QueryAsync<Verse>(sql, commandType: CommandType.Text);
-//        return verses;
-//    }
-
-//    public async Task<IEnumerable<Verse>> GetTopMemorizedVerses(int top)
-//    {
-//        var limit = Math.Max(1, top);
-//        var sql = $@"SELECT * FROM (
-//                        SELECT * FROM VERSES
-//                        ORDER BY USERS_MEMORIZED DESC, VERSE_ID DESC
-//                        FETCH FIRST 20 ROWS ONLY
-//                    )
-//                    WHERE USERS_MEMORIZED > 0";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var verses = await conn.QueryAsync<Verse>(sql, commandType: CommandType.Text);
-//        return verses;
-//    }
-
-//    public async Task<List<Verse>> GetAllVersesFromReferenceList(List<string> references)
-//    {
-//        bool first = true;
-//        StringBuilder sql = new("SELECT * FROM VERSES WHERE verse_reference IN (");
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        foreach (var reference in references)
-//        {
-//            if (first) sql.Append($"\'{reference}\'");
-//            else sql.Append($",\'{reference}\'");
-//            first = false;
-//        }
-//        sql.Append(")");
-
-//        Debug.WriteLine(sql);
-
-//        var resultVerses = await conn.QueryAsync<Verse>(sql.ToString(), commandType: CommandType.Text);
-
-//        return resultVerses.ToList();
-//    }
 
 //    public async Task<Models.SearchData> GetVerseSearchResults(string search)
 //    {
