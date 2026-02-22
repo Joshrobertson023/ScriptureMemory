@@ -88,5 +88,71 @@ public class VerseTests : BaseIntegrationTest
         {
             await verseContext.InsertVerse(chapterVerse);
         }
+
+        var chapterVerses = await verseContext.GetChapterVerses("John", 3);
+        Assert.NotNull(chapterVerses);
+        Assert.Equal(4, chapterVerses.Count);
+        var firstFirst = chapterVerses.FirstOrDefault(v => v.Reference == "John 3:16");
+        Assert.NotNull(firstFirst);
+        Assert.Equal(john316.Text, firstFirst.Text);
+    }
+
+    [Fact]
+    public async Task VerseTest_GetAllVersesFromReferenceList()
+    {
+        List<string> references = new();
+        var john316 = new Verse
+        {
+            Reference = "John 3:16",
+            Text = "For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.",
+            UsersSavedCount = 0,
+            UsersMemorizedCount = 0,
+        };
+        var john317 = new Verse
+        {
+            Reference = "John 3:17",
+            Text = "For God did not send his Son into the world to condemn the world, but to save the world through him.",
+            UsersSavedCount = 0,
+            UsersMemorizedCount = 0,
+        };
+        var john318 = new Verse
+        {
+            Reference = "John 3:18",
+            Text = "Whoever believes in him is not condemned, but whoever does not believe stands condemned already because they have not believed in the name of God's one and only Son.",
+            UsersSavedCount = 0,
+            UsersMemorizedCount = 0,
+        };
+        var john319 = new Verse
+        {
+            Reference = "John 3:19",
+            Text = "This is the verdict: Light has come into the world, but people loved darkness instead of light because their deeds were evil.",
+            UsersSavedCount = 0,
+            UsersMemorizedCount = 0,
+        };
+
+        List<Verse> newChapter = new()
+        {
+            john316,
+            john317,
+            john318,
+            john319
+        };
+
+        foreach (var chapterVerse in newChapter)
+        {
+            references.Add(chapterVerse.Reference);
+        }
+
+        foreach (var chapterVerse in newChapter)
+        {
+            await verseContext.InsertVerse(chapterVerse);
+        }
+
+        var versesFromReferences = await verseContext.GetAllVersesFromReferenceList(references);
+        Assert.NotNull(versesFromReferences);
+        Assert.Equal(4, versesFromReferences.Count);
+        var firstVerse = versesFromReferences.FirstOrDefault(v => v.Reference == "John 3:16");
+        Assert.NotNull(firstVerse);
+        Assert.Equal(john316.Text, firstVerse.Text);
     }
 }
