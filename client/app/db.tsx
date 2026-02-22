@@ -3,52 +3,6 @@ import { Activity, Collection, SearchData, User, UserVerse, Verse } from "./stor
 const baseUrl = 'https://verseappnewserver-app-2025111008.agreeablestone-f22c316f.eastus.azurecontainerapps.io'
 //const baseUrl = 'https://10.154.116.121:8080'
 
-const normalizeUser = <T extends Partial<User> & Record<string, any>>(user: T): T & { isAdmin?: boolean } => {
-    if (!user) {
-        return user;
-    }
-    const rawValue = user.isAdmin ?? user.IsAdmin;
-    const normalizedIsAdmin = rawValue === true || rawValue === 'true'
-        ? true
-        : rawValue === false || rawValue === 'false'
-            ? false
-            : typeof rawValue === 'number'
-                ? rawValue === 1
-                : Boolean(rawValue);
-
-    const rawPoints = user.points ?? user.Points;
-    const normalizedPoints =
-        typeof rawPoints === 'number'
-            ? rawPoints
-            : typeof rawPoints === 'string'
-                ? Number.parseInt(rawPoints, 10) || 0
-                : 0;
-
-    const rawHasShownBibleHelp = user.hasShownBibleHelp ?? user.HasShownBibleHelp;
-    const normalizedHasShownBibleHelp = rawHasShownBibleHelp === true || rawHasShownBibleHelp === 'true'
-        ? true
-        : rawHasShownBibleHelp === false || rawHasShownBibleHelp === 'false'
-            ? false
-            : typeof rawHasShownBibleHelp === 'number'
-                ? rawHasShownBibleHelp === 1
-                : Boolean(rawHasShownBibleHelp);
-
-    // Normalize profile picture URL - convert relative URLs to absolute
-    const rawProfilePictureUrl = user.profilePictureUrl ?? user.ProfilePictureUrl;
-    let normalizedProfilePictureUrl = rawProfilePictureUrl;
-    if (normalizedProfilePictureUrl && !normalizedProfilePictureUrl.startsWith('http')) {
-        normalizedProfilePictureUrl = `${baseUrl}${normalizedProfilePictureUrl.startsWith('/') ? '' : '/'}${normalizedProfilePictureUrl}`;
-    }
-
-    return {
-        ...user,
-        isAdmin: normalizedIsAdmin,
-        points: normalizedPoints,
-        hasShownBibleHelp: normalizedHasShownBibleHelp,
-        profilePictureUrl: normalizedProfilePictureUrl,
-    };
-};
-
 export default async function checkUsernameAvailable(username: string): Promise<boolean> {
     try {
         const response = await fetch(`${baseUrl}/users/${username}`);

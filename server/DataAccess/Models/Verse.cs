@@ -9,7 +9,7 @@ namespace DataAccess.Models;
 public class Verse
 {
     public int Id { get; set; } = 0;
-    public string Reference { get; set; }
+    public Reference Reference { get; set; }
     public string Text { get; set; }
     public int UsersSavedCount { get; set; } = 0;
     public int UsersMemorizedCount { get; set; } = 0;
@@ -17,17 +17,17 @@ public class Verse
 
     public Verse() { }
 
-    public Verse(string reference, string text, string verseNumbers)
+    public Verse(Reference reference, string text, string verseNumbers)
     {
         Reference = reference;
         Text = text;
         VerseNumbers = verseNumbers;
     }
 
-    public Verse(string reference, string text)
+    public Verse(Reference reference, string text)
     {
         Reference = reference;
         Text = text;
-        VerseNumbers = ReferenceParse.GetVersesHalfOfReference(this.Reference);
+        VerseNumbers = ReferenceParse.GetVersesHalfOfReference(this.Reference.ReadableReference);
     }
 }

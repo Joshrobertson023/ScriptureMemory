@@ -5,12 +5,12 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Modal, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { Divider, TextInput } from 'react-native-paper';
-import { ProfileDrawerLink } from './components/ProfileContent';
-import { deleteUser, refreshUser, submitBugReport, updateActivityNotifications, updateBadgeNotificationsEnabled, updateBadgeOverdueEnabled, updateBibleVersion, updateEmail, updateNotifyCollectionSaved, updateNotifyMemorizedVerse, updateNotifyNoteLiked, updateNotifyOfFriends, updateNotifyPublishedCollection, updatePassword, updatePracticeReminders, updatePushNotifications, updateReceiveStreakReminders, updateSubscribedVerseOfDay, updateThemeDb, updateTypeOutReference, updateUsername, updateUserProfile } from './db';
+import { ProfileDrawerLink } from '../../components/ProfileContent';
+import { deleteUser, refreshUser, submitBugReport, updateActivityNotifications, updateBadgeNotificationsEnabled, updateBadgeOverdueEnabled, updateBibleVersion, updateEmail, updateNotifyCollectionSaved, updateNotifyMemorizedVerse, updateNotifyNoteLiked, updateNotifyOfFriends, updateNotifyPublishedCollection, updatePassword, updatePracticeReminders, updatePushNotifications, updateReceiveStreakReminders, updateSubscribedVerseOfDay, updateThemeDb, updateTypeOutReference, updateUsername, updateUserProfile } from '../../db';
 import { ensurePushTokenRegistered, unregisterStoredPushToken } from './pushTokenManager';
-import { ThemePreference, useAppStore } from './store';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import { ThemePreference, useAppStore } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 import { updateAppBadge } from './utils/badgeManager';
 
 const RECENT_SEARCHES_KEY = '@verseApp:recentSearches';

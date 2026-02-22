@@ -1,8 +1,8 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 export const options = { headerShown: true };
 

@@ -5,12 +5,12 @@ import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SaveVerseToCollectionSheet from './components/saveVerseToCollectionSheet';
-import { formatRelativeTime, isDateExpired, minutesSince } from './dateUtils';
-import { addUserVersesToNewCollection, checkRelationship, createCollectionDB, getCollectionById, getMostRecentCollectionId, getUserCollections, getUserNotificationsPaged, getUserNotificationsTop, getUserProfile, getUserVersesByCollectionWithVerses, markAllNotificationsAsRead, populateVersesForUserVerses, refreshUser, respondToFriendRequest, updateCollectionDB, updateCollectionsOrder } from './db';
-import { Collection, Notification, UserVerse, Verse, useAppStore } from './store';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import SaveVerseToCollectionSheet from '../../components/saveVerseToCollectionSheet';
+import { formatRelativeTime, isDateExpired, minutesSince } from '../../utils/dateUtils';
+import { addUserVersesToNewCollection, checkRelationship, createCollectionDB, getCollectionById, getMostRecentCollectionId, getUserCollections, getUserNotificationsPaged, getUserNotificationsTop, getUserProfile, getUserVersesByCollectionWithVerses, markAllNotificationsAsRead, populateVersesForUserVerses, refreshUser, respondToFriendRequest, updateCollectionDB, updateCollectionsOrder } from '../../db';
+import { Collection, Notification, UserVerse, Verse, useAppStore } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 export default function NotificationsScreen() {
   const styles = useStyles();

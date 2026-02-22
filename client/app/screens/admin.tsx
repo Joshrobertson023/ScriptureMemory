@@ -3,11 +3,11 @@ import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { DataTable } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppStore } from './store';
-import useStyles from './styles';
-import useAppTheme from './theme';
-import { AdminSummary, createVerseOfDay, deleteVerseOfDay, getAllUsers, getUpcomingVerseOfDay, sendNotificationToAll, getAllReports, ReportItem, deleteReport, makeUserAdmin, removeUserAdmin, deleteUser, banUser, getSiteBanner, updateSiteBanner, deleteSiteBanner, getAdmins, resetVerseOfDayQueue, getUnapprovedNotes, approveNote, denyNote, VerseNote, getVerseOfDaySuggestions, approveVerseOfDaySuggestion, deleteVerseOfDaySuggestion, VerseOfDaySuggestion, getPendingCollections, approveCollection, rejectCollection, PublishedCollection, makeUserPaid, removeUserPaid, getPaidUsers } from './db';
-import { formatDate as formatDateUtil } from './dateUtils';
+import { useAppStore } from '../store';
+import useStyles from '../styles';
+import useAppTheme from '../theme';
+import { AdminSummary, createVerseOfDay, deleteVerseOfDay, getAllUsers, getUpcomingVerseOfDay, sendNotificationToAll, getAllReports, ReportItem, deleteReport, makeUserAdmin, removeUserAdmin, deleteUser, banUser, getSiteBanner, updateSiteBanner, deleteSiteBanner, getAdmins, resetVerseOfDayQueue, getUnapprovedNotes, approveNote, denyNote, VerseNote, getVerseOfDaySuggestions, approveVerseOfDaySuggestion, deleteVerseOfDaySuggestion, VerseOfDaySuggestion, getPendingCollections, approveCollection, rejectCollection, PublishedCollection, makeUserPaid, removeUserPaid, getPaidUsers } from '../db';
+import { formatDate as formatDateUtil } from '../utils/dateUtils';
 
 type VerseOfDayQueueItem = {
   id: number;

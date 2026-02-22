@@ -14,12 +14,12 @@ import { Image, Platform, TouchableOpacity, type TouchableOpacityProps, View } f
 import 'react-native-gesture-handler'; // MUST be at the very top - before any other imports
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider, Portal } from 'react-native-paper';
-import { checkIfBanned, getActiveBan, getAdminUsernames, getCurrentVerseOfDayAsUserVerse, getPopularSearches, getStreakLength, getUserCollections, loginUserWithToken, updateLastSeen } from './db';
-import { useAppStore } from './store';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import { checkIfBanned, getActiveBan, getAdminUsernames, getCurrentVerseOfDayAsUserVerse, getPopularSearches, getStreakLength, getUserCollections, loginUserWithToken, updateLastSeen } from '../db';
+import { useAppStore } from '../store';
+import useStyles from '../styles';
+import useAppTheme from '../theme';
 // REMOVED: import { registerBackgroundNotificationTask, unregisterBackgroundNotificationTask } from './backgroundNotifications';
-import { ensurePushTokenRegistered, unregisterStoredPushToken } from './pushTokenManager';
+import { ensurePushTokenRegistered, unregisterStoredPushToken } from '../pushTokenManager';
 import { updateAppBadge } from './utils/badgeManager';
 
 const TouchableOpacityWithDefaults = TouchableOpacity as typeof TouchableOpacity & {

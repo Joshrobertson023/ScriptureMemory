@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 export const options = { headerShown: true };
 

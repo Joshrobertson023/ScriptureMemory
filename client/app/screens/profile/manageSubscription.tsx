@@ -3,8 +3,8 @@ import { Stack, router } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppStore } from './store';
-import useAppTheme from './theme';
+import { useAppStore } from '../../store';
+import useAppTheme from '../../theme';
 
 export default function ManageSubscriptionScreen() {
   const theme = useAppTheme();

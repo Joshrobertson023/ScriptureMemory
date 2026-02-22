@@ -3,11 +3,11 @@ import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Snackbar } from 'react-native-paper';
-import PracticeModeModal from './components/practiceModeModal';
-import { getOverdueVerses, getVerseSearchResult } from './db';
-import { useAppStore, UserVerse } from './store';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import PracticeModeModal from '../../components/practiceModeModal';
+import { getOverdueVerses, getVerseSearchResult } from '../../db';
+import { useAppStore, UserVerse } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 export default function OverdueScreen() {
   const styles = useStyles();

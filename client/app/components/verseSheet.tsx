@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Dimensions, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Checkbox, Portal, Snackbar } from 'react-native-paper';
-import { formatDate } from '../dateUtils';
+import { formatDate } from '../utils/dateUtils';
 import { addHighlight, addUserVersesToNewCollection, checkHighlight, createCollectionDB, createNote, deleteNote, getMostRecentCollectionId, getNotesByVerseReference, getPublicNotesByVerseReference, getUserCollections, likeNote, refreshUser, removeHighlight, unlikeNote, updateCollectionDB, updateCollectionsOrder, updateNote, VerseNote } from '../db';
 import { Collection, useAppStore, UserVerse } from '../store';
 import useStyles from '../styles';

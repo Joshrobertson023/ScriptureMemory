@@ -1,8 +1,8 @@
 import { Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 export default function ProScreen() {
   const styles = useStyles();

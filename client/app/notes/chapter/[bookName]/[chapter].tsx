@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { formatDate } from '../../../dateUtils';
+import { formatDate } from '../../../utils/dateUtils';
 import { getAllNotesByChapter, likeNote, unlikeNote, VerseNote } from '../../../db';
 import { useAppStore } from '../../../store';
 import useAppTheme from '../../../theme';

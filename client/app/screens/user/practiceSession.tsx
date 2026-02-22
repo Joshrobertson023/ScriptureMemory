@@ -21,10 +21,10 @@ import {
   memorizeVerseOfDay,
   UserVerseMemorizedInfo,
   UserVerseParts,
-} from "./db";
-import { useAppStore } from "./store";
-import useStyles from "./styles";
-import useAppTheme from "./theme";
+} from "../../db";
+import { useAppStore } from "../../store";
+import useStyles from "../../styles";
+import useAppTheme from "../../theme";
 
 const MIN_STAGES = 3;
 const MAX_STAGES = 6;

@@ -2,11 +2,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Modal, ScrollView, Text, TextInput as RNTextInput, TouchableOpacity, View } from 'react-native';
-import useStyles from './styles';
-import useAppTheme from './theme';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 import { TextInput } from 'react-native-paper';
-import { useAppStore } from './store';
-import { suggestVerseOfDay } from './db';
+import { useAppStore } from '../../store';
+import { suggestVerseOfDay } from '../../db';
 
 export default function AboutScreen() {
   const styles = useStyles();
