@@ -181,6 +181,14 @@ public class UserData : IUserData
         return results.First();
     }
 
+    public async Task<bool> CheckUsernameExists(string username)
+    {
+        var sql = @"SELECT COUNT(1) FROM USERS WHERE USERNAME = :Username";
+        await using var conn = new OracleConnection(connectionString);
+        var count = await conn.ExecuteScalarAsync<int>(sql, new { Username = username });
+        return count > 0;
+    }
+
 
     // -------------------------------------------------------
     //  Increment

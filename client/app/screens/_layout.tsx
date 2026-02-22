@@ -1,9 +1,7 @@
-import { Lora_400Regular, Lora_700Bold } from '@expo-google-fonts/lora';
-import { Merriweather_400Regular, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
-import { SourceSansPro_400Regular, SourceSansPro_600SemiBold } from '@expo-google-fonts/source-sans-pro';
+// Fonts: simplified to use system fonts or static assets in /assets/fonts
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFonts } from 'expo-font';
+// not loading fonts at runtime
 import * as Notifications from 'expo-notifications';
 import { Stack, router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -22,16 +20,6 @@ import useAppTheme from '../theme';
 import { ensurePushTokenRegistered, unregisterStoredPushToken } from '../pushTokenManager';
 import { updateAppBadge } from './utils/badgeManager';
 
-const TouchableOpacityWithDefaults = TouchableOpacity as typeof TouchableOpacity & {
-  defaultProps?: Partial<TouchableOpacityProps>;
-};
-
-TouchableOpacityWithDefaults.defaultProps = {
-  ...(TouchableOpacityWithDefaults.defaultProps ?? {}),
-  activeOpacity: 0.8,
-};
-
-const RECENT_SEARCHES_KEY = '@verseApp:recentSearches';
 
 SplashScreen.preventAutoHideAsync().catch(() => {
   // ignore error if splash screen was already hidden
@@ -49,36 +37,9 @@ Notifications.setNotificationHandler({
 });
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    'Noto Serif': require('../assets/fonts/Noto_Serif/NotoSerif-VariableFont_wdth,wght.ttf'),
-    'Noto Serif light': require('../assets/fonts/Noto_Serif/static/NotoSerif-Light.ttf'),
-    'Noto Serif extralight': require('../assets/fonts/Noto_Serif/static/NotoSerif-ExtraLight.ttf'),
-    'Noto Serif medium': require('../assets/fonts/Noto_Serif/static/NotoSerif-Medium.ttf'),
-    'Noto Serif semibold': require('../assets/fonts/Noto_Serif/static/NotoSerif-SemiBold.ttf'),
-    'Noto Serif bold': require('../assets/fonts/Noto_Serif/static/NotoSerif-Bold.ttf'),
-    'Noto Serif extrabold': require('../assets/fonts/Noto_Serif/static/NotoSerif-ExtraBold.ttf'),
-    'Noto Serif black': require('../assets/fonts/Noto_Serif/static/NotoSerif-Black.ttf'),
-    'Noto Serif italic': require('../assets/fonts/Noto_Serif/static/NotoSerif-Italic.ttf'),
-    'Noto Serif bolditalic': require('../assets/fonts/Noto_Serif/static/NotoSerif-BoldItalic.ttf'),
-    Inter: require('../assets/fonts/Inter/Inter-VariableFont_opsz,wght.ttf'),
-    'Inter thin': require('../assets/fonts/Inter/static/Inter_18pt-Thin.ttf'),
-    'Inter extralight': require('../assets/fonts/Inter/static/Inter_18pt-ExtraLight.ttf'),
-    'Inter light': require('../assets/fonts/Inter/static/Inter_18pt-Light.ttf'),
-    'Inter regular': require('../assets/fonts/Inter/static/Inter_18pt-Regular.ttf'),
-    'Inter medium': require('../assets/fonts/Inter/static/Inter_18pt-Medium.ttf'),
-    'Inter semibold': require('../assets/fonts/Inter/static/Inter_18pt-SemiBold.ttf'),
-    'Inter bold': require('../assets/fonts/Inter/static/Inter_18pt-Bold.ttf'),
-    'Inter extrabold': require('../assets/fonts/Inter/static/Inter_18pt-ExtraBold.ttf'),
-    'Inter black': require('../assets/fonts/Inter/static/Inter_18pt-Black.ttf'),
-    'Inter italic': require('../assets/fonts/Inter/static/Inter_18pt-Italic.ttf'),
-    'Inter bolditalic': require('../assets/fonts/Inter/static/Inter_18pt-BoldItalic.ttf'),
-    Merriweather: Merriweather_400Regular,
-    'Merriweather bold': Merriweather_700Bold,
-    Lora: Lora_400Regular,
-    'Lora bold': Lora_700Bold,
-    'Source Sans Pro': SourceSansPro_400Regular,
-    'Source Sans Pro semibold': SourceSansPro_600SemiBold,
-  });
+  // Fonts are no longer loaded at runtime. The app will use system fonts
+  // by default. If you want to use static asset fonts, keep the files in
+  // `assets/fonts` and follow the instructions below to register them.
 
   const theme = useAppTheme();
 
@@ -97,14 +58,7 @@ export default function RootLayout() {
   const notificationListener = useRef<Notifications.Subscription | null>(null);
   const responseListener = useRef<Notifications.Subscription | null>(null);
 
-  // Handle font loading errors gracefully
-  React.useEffect(() => {
-    if (error) {
-      console.error('Font loading error:', error);
-      // Continue app initialization even if fonts fail to load
-      // The app will use system fonts as fallback
-    }
-  }, [error]);
+  // No runtime font loading; proceed with app initialization immediately
 
   // Set up notification channel and listeners
   useEffect(() => {
@@ -254,11 +208,7 @@ export default function RootLayout() {
   ]
 
   React.useEffect(() => {
-    // Continue even if fonts failed to load (error state)
-    // This ensures the app doesn't hang if fonts are missing
-    if (!loaded && !error) {
-      return;
-    }
+    // Proceed immediately without waiting for fonts
 
     const login = async () => {
       const TIMEOUT_MS = 4000; 
@@ -394,7 +344,7 @@ export default function RootLayout() {
     };
 
     login();
-  }, [loaded, error]);
+  }, []);
 
   React.useEffect(() => {
     if (appIsReady) {

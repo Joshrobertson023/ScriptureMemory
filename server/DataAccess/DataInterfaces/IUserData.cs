@@ -12,6 +12,7 @@ public interface IUserData
     Task<List<User>> GetUsersFromEmail(string email);
     Task<string?> GetPasswordHash(string username);
     Task<List<User>> GetUsers(int count = 100);
+    Task<bool> CheckUsernameExists(string username);
     Task<int> GetUserIdFromUsername(string username);
     Task<User> GetUserFromUserId(int userId);
     Task IncrementVersesMemorized(int userId);

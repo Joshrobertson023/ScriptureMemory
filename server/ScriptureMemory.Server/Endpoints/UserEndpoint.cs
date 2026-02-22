@@ -55,6 +55,14 @@ public static class UserEndpoint
             return Results.Created();
         });
 
+        // Check if username exists
+        app.MapGet("/users/exists/{username}", async (
+            string username,
+            [FromServices] IUserData data) =>
+        {
+            return Results.Ok(await data.CheckUsernameExists(username));
+        });
+
         // Set a user as active
         app.MapPut("/users/setAsActive", async (
             [FromBody] int userId,
