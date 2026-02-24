@@ -2,26 +2,24 @@ import { HelperText, TextInput } from "react-native-paper";
 import useStyles from "../../styles";
 import { useState } from "react";
 import { useAppStore } from "../../store";
+import { useFormStore } from "../../stores/form.store";
 
-interface UsernameInputProps {
-    errorMessage: string;
-    setErrorMessage: (message: string) => void;
-}
 
-export const UsernameInput = ({errorMessage, setErrorMessage}: UsernameInputProps) => {
+export const UsernameInput = () => {
     const styles = useStyles();
     const [usernameEmpty, setUsernameEmtpy] = useState(false);
-    const username = useAppStore(s => s.loginInfo.username);
-    const loginInfo = useAppStore(s => s.loginInfo);
-    const setLoginInfo = useAppStore(s => s.setLoginInfo);
+    const username = useFormStore(s => s.registerForm.username);
+    const updateForm = useFormStore(s => s.updateRegister);
+    const errorMessage = useFormStore(s => s.registerForm.errorMessage);
 
     return (
         <>
             <TextInput style={{...styles.input}} error={usernameEmpty} value={username} 
                 onChangeText={ (text) => {
-                    setLoginInfo({...loginInfo, username});
-                    if (errorMessage) setErrorMessage('');
+                    updateForm({username: username});
+                    if (errorMessage) updateForm({errorMessage: ''})
                     if (text) setUsernameEmtpy(false);
+                    else setUsernameEmtpy(true);
                 }
                 } />
 

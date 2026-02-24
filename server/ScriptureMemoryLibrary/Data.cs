@@ -20,7 +20,7 @@ public class Data
 
     public static int NOTIFICATION_SYSTEM_SENDER_ID = 1;
 
-    public static int MIN_PASSWORD_LENGTH = 12;
+    public static int MIN_PASSWORD_LENGTH = 11;
 
     public const int MAX_PASSAGES_PER_COLLECTION = 50;
 

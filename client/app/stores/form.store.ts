@@ -1,45 +1,73 @@
 import { create } from "zustand";
+import { generateUsername } from "../utils/loginUtils";
 
-interface Form {
-    firstName: string;
-    lastName: string;
-    username: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
+export interface RegisterForm {
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  errorMessage: string;
+  errors: Record<string, string>;
 }
 
-interface RegisterForm {
-
-    form: {
-        firstName: string;
-        lastName: string;
-        username: string;
-        email: string;
-        password: string;
-        confirmPassword: string;
-    };
-    errors: Record<string, string>;
-    errorMessage: string;
-
-    setForm: (f: Form) => void;
-    setErrorMessage: (err: string) => void;
-    setErrors: (errors: Record<string, string>) => void;
+export interface LoginForm {
+  username: string;
+  password: string;
+  errorMessage: string;
+  errors: Record<string, string>;
 }
 
-export const useFormStore = create<RegisterForm>((set) => ({
-    form: {
-        firstName: '',
-        lastName: '',
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-    },
-    errorMessage: '',
-    errors: {},
+interface FormStore {
+  registerForm: RegisterForm;
+  loginForm: LoginForm;
 
-    setForm: (form: Form) => set({form}),
-    setErrorMessage: (msg: string) => set({errorMessage: msg}),
-    setErrors: (errors: Record<string, string>) => set({errors})
-}))
+  updateRegister: (updates: Partial<RegisterForm>) => void;
+  updateLogin: (updates: Partial<LoginForm>) => void;
+
+  resetRegister: () => void;
+  resetLogin: () => void;
+}
+
+const initialRegister: RegisterForm = {
+  firstName: '',
+  lastName: '',
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  errorMessage: '',
+  errors: {}
+};
+
+const initialLogin: LoginForm = {
+  username: '',
+  password: '',
+  errorMessage: '',
+  errors: {}
+};
+
+export const useFormStore = create<FormStore>((set, get) => ({
+  registerForm: initialRegister,
+  loginForm: initialLogin,
+
+  updateRegister: (updates) =>
+    set((state) => {
+      const newForm = { ...state.registerForm, ...updates };
+
+      if ((newForm.firstName && newForm.lastName) 
+        && (updates.firstName || updates.lastName))
+        newForm.username = generateUsername(newForm.firstName, newForm.lastName);
+
+      return {registerForm: newForm}
+    }),
+
+  updateLogin: (updates) =>
+    set((state) => ({
+      loginForm: { ...state.loginForm, ...updates }
+    })),
+
+  resetRegister: () => set({ registerForm: initialRegister }),
+  resetLogin: () => set({ loginForm: initialLogin }),
+}));

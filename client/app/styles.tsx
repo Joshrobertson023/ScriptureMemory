@@ -15,7 +15,7 @@ const colors = {
 export default function useStyles() {  
   const theme = useAppTheme();
   return StyleSheet.create({
-    container: {
+    screen: {
       flex: 1,
       backgroundColor: theme.colors.background,
       alignItems: 'flex-start',

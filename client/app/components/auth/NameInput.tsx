@@ -3,29 +3,30 @@ import { ActivityIndicator, HelperText, TextInput } from 'react-native-paper';
 import useStyles from "../../styles";
 import { useAppStore } from '../../store';
 import { useState } from 'react';
-import { RegisterForm } from '../../screens/(auth)/createAccount.screen';
+import { useFormStore } from '../../stores/form.store';
 
-interface NameInputProps {
-    form: RegisterForm;
-    setForm: (f: RegisterForm) => void;
-}
 
-export const NameInput = ({ form, setForm }: NameInputProps) => {
+export const NameInput = () => {
     
     const styles = useStyles();
-    const firstName = useAppStore(s => s.loginInfo.firstName);
-    const lastName = useAppStore(s => s.loginInfo.lastName);
-    const loginInfo = useAppStore(s => s.loginInfo);
-    const setLoginInfo = useAppStore(s => s.setLoginInfo);
+    const firstName = useFormStore(s => s.registerForm.firstName);
+    const lastName = useFormStore(s => s.registerForm.lastName);
+    const updateForm = useFormStore(s => s.updateRegister);
+    const errorMessage = useFormStore(s => s.registerForm.errorMessage);
+    const suggestUsername = useFormStore(s => s.suggestUsername);
+
+    const [firstNameEmpty, setFirstNameEmpty] = useState(false);
+    const [lastNameEmpty, setLastNameEmpty] = useState(false);
 
     return (
         <>
             <TextInput style={styles.input} value={firstName}
                 error={firstNameEmpty}
                 onChangeText={(text) => {
-                    setLoginInfo({...loginInfo, firstName});
-                    if (errorMessage.includes('enter all fields')) setErrorMessage('');
+                    updateForm({firstName: text});
+                    if (errorMessage) updateForm({errorMessage: ''})
                     if (text) setFirstNameEmpty(false);
+                    else setFirstNameEmpty(true);
                 }} />
 
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={firstNameEmpty}>
@@ -35,9 +36,10 @@ export const NameInput = ({ form, setForm }: NameInputProps) => {
             <TextInput label="Last Name" mode="outlined" style={styles.input} value={lastName}
                 error={lastNameEmpty}
                 onChangeText={(text) => {
-                    setLoginInfo({...loginInfo, lastName});
-                    if (errorMessage) setErrorMessage('');
+                    updateForm({lastName: text})
+                    if (errorMessage) updateForm({errorMessage: ''})
                     if (text) setLastNameEmpty(false);
+                    else setLastNameEmpty(true);
                 }} />
 
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={lastNameEmpty}>
