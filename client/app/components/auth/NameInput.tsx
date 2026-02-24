@@ -13,7 +13,6 @@ export const NameInput = () => {
     const lastName = useFormStore(s => s.registerForm.lastName);
     const updateForm = useFormStore(s => s.updateRegister);
     const errorMessage = useFormStore(s => s.registerForm.errorMessage);
-    const suggestUsername = useFormStore(s => s.suggestUsername);
 
     const [firstNameEmpty, setFirstNameEmpty] = useState(false);
     const [lastNameEmpty, setLastNameEmpty] = useState(false);

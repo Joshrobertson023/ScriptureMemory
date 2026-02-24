@@ -3,7 +3,7 @@ import useStyles from "../../styles";
 import { useFormStore } from "../../stores/form.store";
 import { useState } from "react";
 
-export const PasswordInput = () => {
+export const CreatePasswordInput = () => {
     const styles = useStyles();
     const password = useFormStore(s => s.registerForm.password);
     const confirmPassword = useFormStore(s => s.registerForm.confirmPassword);

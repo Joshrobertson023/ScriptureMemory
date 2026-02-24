@@ -10,7 +10,7 @@ import { NameInput } from '../../components/auth/NameInput';
 import { UsernameInput } from '../../components/auth/UsernameInput';
 import { useFormStore } from '../../stores/form.store';
 import { EmailInput } from '../../components/auth/EmailInput';
-import { PasswordInput } from '../../components/auth/PasswordInput';
+import { CreatePasswordInput } from '../../components/auth/CreatePasswordInput';
 
 export default function CreateAccountScreen() {
     const styles = useStyles();
@@ -35,7 +35,7 @@ export default function CreateAccountScreen() {
                 <UsernameInput />
                 <LoginButton />
                 <EmailInput />
-                <PasswordInput />
+                <CreatePasswordInput />
                 {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
             </TouchableWithoutFeedback>
         </SafeAreaView>

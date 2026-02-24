@@ -17,6 +17,8 @@ export interface LoginForm {
   password: string;
   errorMessage: string;
   errors: Record<string, string>;
+  usernameIncorrect: boolean;
+  passwordIncorrect: boolean;
 }
 
 interface FormStore {
@@ -45,7 +47,9 @@ const initialLogin: LoginForm = {
   username: '',
   password: '',
   errorMessage: '',
-  errors: {}
+  errors: {},
+  usernameIncorrect: false,
+  passwordIncorrect: false,
 };
 
 export const useFormStore = create<FormStore>((set, get) => ({
