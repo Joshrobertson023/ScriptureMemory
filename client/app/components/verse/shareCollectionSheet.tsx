@@ -2,10 +2,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Portal } from 'react-native-paper';
-import { getFriendNames, shareCollection } from '../db';
-import { Collection, useAppStore, User } from '../store';
-import useStyles from '../styles';
-import useAppTheme from '../theme';
+import { getFriendNames, shareCollection } from '../../db';
+import { Collection, useAppStore, User } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 interface ShareCollectionSheetProps {
   visible: boolean;

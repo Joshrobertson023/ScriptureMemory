@@ -5,7 +5,7 @@ import useAppTheme from '../../theme';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import CreateNameScreen from "./createName";
+import CreateAccountScreen from "./createAccount.screen";
 
 
 const Stack = createNativeStackNavigator();
@@ -19,7 +19,7 @@ export default function AuthNavigator() {
     <Stack.Navigator>
       <Stack.Screen 
       name="createName" 
-      component={CreateNameScreen} 
+      component={CreateAccountScreen} 
       options={{ 
         headerShown: false, 
         headerStyle: {

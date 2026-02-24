@@ -7,10 +7,10 @@ import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { deleteProfilePicture, getAllUserVerses, getUserActivity, refreshUser, suggestVerseOfDay, updateActivityNotifications, updateUserProfile, uploadProfilePicture } from '../db';
-import { Activity, loggedOutUser, useAppStore } from '../store';
-import useStyles from '../styles';
-import useAppTheme from '../theme';
+import { deleteProfilePicture, getAllUserVerses, getUserActivity, refreshUser, suggestVerseOfDay, updateActivityNotifications, updateUserProfile, uploadProfilePicture } from '../../db';
+import { Activity, loggedOutUser, useAppStore } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 const RECENT_SEARCHES_KEY = '@verseApp:recentSearches';
 

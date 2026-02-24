@@ -14,10 +14,10 @@ import {
   PublishedCollection,
   refreshUser,
   updateCollectionsOrder,
-} from '../db';
-import { Collection, useAppStore, UserVerse, Verse } from '../store';
-import useStyles from '../styles';
-import useAppTheme from '../theme';
+} from '../../db';
+import { Collection, useAppStore, UserVerse, Verse } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 interface Props {
   collection: PublishedCollection;

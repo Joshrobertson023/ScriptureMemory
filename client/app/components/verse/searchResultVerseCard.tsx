@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { useAppStore, Verse } from '../store';
-import useAppTheme from '../theme';
+import { useAppStore, Verse } from '../../store';
+import useAppTheme from '../../theme';
 
 interface Props {
   verse: Verse;

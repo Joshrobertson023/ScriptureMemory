@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Collection, useAppStore, Verse } from '../store';
-import useStyles from '../styles';
-import useAppTheme from '../theme';
+import { Collection, useAppStore, Verse } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 import { Ionicons } from '@expo/vector-icons';
 
 interface SaveVerseToCollectionSheetProps {

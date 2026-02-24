@@ -109,16 +109,6 @@ export interface Activity {
     username: string;
 }
 
-export interface loginInfo {
-    firstName: string;
-    lastName: string;
-    username: string;
-    password: string;
-    confirmPassword: string;
-    email: string;
-    bibleVersion?: number;
-}
-
 export interface homePageStats {
     totalMemorized: number;
     overdue: number;
@@ -206,16 +196,6 @@ const defaultSiteBanner: SiteBannerState = {
     message: null,
 };
 
-const emptyLoginInfo: loginInfo = {
-    firstName: '',
-    lastName: '',
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    bibleVersion: 0,
-};
-
 const emptyNewCollection: Collection = {
     title: 'New Collection',
     authorUsername: undefined,
@@ -274,7 +254,6 @@ export const loggedOutUser: User = {
 interface AppState {
   user: User;
   collections: Collection[];
-  loginInfo: loginInfo;
   homePageStats: homePageStats;
   showStreakOnHomepage: boolean;
   sendStreakNotifications: boolean;
@@ -302,7 +281,6 @@ interface AppState {
   addCollection: (newCollection: Collection) => void;
   removeCollection: (id: number) => void;
   updateCollection: (updated: Collection) => void;
-  setLoginInfo: (info: loginInfo) => void;
   setShowStreakOnHomepage?: (show: boolean) => void;
   setSendStreakNotifications?: (send: boolean) => void;
   setSendVerseOfDayNotifications?: (send: boolean) => void;
@@ -332,7 +310,6 @@ interface AppState {
 export const useAppStore = create<AppState>((set) => ({
     user: loggedOutUser,
     collections: defaultCollections,
-    loginInfo: emptyLoginInfo,
     homePageStats: { totalMemorized: 0, overdue: 0, published: 0 },
     showStreakOnHomepage: true,
     sendStreakNotifications: true,
@@ -367,7 +344,6 @@ export const useAppStore = create<AppState>((set) => ({
     collections: state.collections.map((c) =>
         c.collectionId === updated.collectionId ? updated : c
     ),})), // const updateCollection = useAppStore((s) => s.updateCollection);
-    setLoginInfo: (info: loginInfo) => set({ loginInfo: info }),
     setStreak: (streak: Streak[]) => set((state) => ({ user: { ...state.user, streak } })),
     setStreakLength: (length: number) => set((state) => ({ user: { ...state.user, streakLength: length }})),
     setSendStreakNotifications: (send: boolean) => set({ sendStreakNotifications: send }),
