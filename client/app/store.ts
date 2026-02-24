@@ -1,5 +1,5 @@
     import { create } from 'zustand';
-import Status from './Enums';
+import { Status } from '../types/enums';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 

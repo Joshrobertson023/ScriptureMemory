@@ -1,4 +1,4 @@
-import ProfileContent from '../components/ProfileContent';
-export { router } from 'expo-router';
+// import ProfileContent from '../components/ProfileContent';
+// export { router } from 'expo-router';
 
-export default ProfileContent;
+// export default ProfileContent;

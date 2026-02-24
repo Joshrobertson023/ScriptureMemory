@@ -11,8 +11,6 @@ import { deleteProfilePicture, getAllUserVerses, getUserActivity, refreshUser, s
 import { Activity, loggedOutUser, useAppStore } from '../store';
 import useStyles from '../styles';
 import useAppTheme from '../theme';
-import { formatPoints } from '../utils/numberFormat';
-import { cacheProfilePicture, clearCachedProfilePicture } from '../utils/profilePictureCache';
 
 const RECENT_SEARCHES_KEY = '@verseApp:recentSearches';
 
@@ -131,7 +129,7 @@ export default function ProfileContent() {
     await SecureStore.deleteItemAsync('userToken');
     await AsyncStorage.removeItem(RECENT_SEARCHES_KEY);
     setCollections([]);
-    router.replace('/(auth)/createName');
+    //router.replace();
   };
 
   const getDisplayName = () => `${user.firstName} ${user.lastName}`;
@@ -259,7 +257,7 @@ export default function ProfileContent() {
       
       // Cache the profile picture locally
       if (refreshedUser.profilePictureUrl) {
-        await cacheProfilePicture(user.username, refreshedUser.profilePictureUrl, false);
+        //await cacheProfilePicture(user.username, refreshedUser.profilePictureUrl, false);
       }
       
       // Use the URL from the refreshed user (which should match what we uploaded)
@@ -298,7 +296,7 @@ export default function ProfileContent() {
             try {
               await deleteProfilePicture(user.username);
               // Clear cached profile picture
-              await clearCachedProfilePicture(user.username);
+              //await clearCachedProfilePicture(user.username);
               const refreshedUser = await refreshUser(user.username);
               console.log('[Profile] After delete, refreshed user profile picture URL:', refreshedUser.profilePictureUrl);
               setUser(refreshedUser);
@@ -512,7 +510,7 @@ export default function ProfileContent() {
                   color: theme.colors.onBackground,
                 }}
               >
-                {formatPoints(user.points || 0)}
+                {/* //{formatPoints(user.points || 0)} */}
               </Text>
               <Text
                 style={{
@@ -529,18 +527,18 @@ export default function ProfileContent() {
         </View>
 
         <View style={{ marginTop: 10 }}>
-          <ProfileDrawerLink
+          {/* <ProfileDrawerLink
             icon="analytics-outline"
             label="Global Leaderboard"
-            onPress={() => router.push('/user/leaderboard')}
-          />
+            //onPress={() => router.push('/user/leaderboard')}
+          /> */}
         </View>
         <View style={{height: 10}} />
-        <ProfileDrawerLink
+        {/* <ProfileDrawerLink
           icon="people-outline"
           label="Friends"
-          onPress={() => router.push('/user/friends')}
-        />
+          //onPress={() => router.push('/user/friends')}
+        /> */}
 
         <View style={{ gap: 10 }}>
 
@@ -698,7 +696,7 @@ export default function ProfileContent() {
         </View>
 
         <View style={{ marginTop: 10, paddingTop: 20, gap: 10 }}>
-          <ProfileDrawerLink
+          {/* <ProfileDrawerLink
             icon="settings"
             label="Settings"
             onPress={() => router.push('/settings')}
@@ -708,15 +706,15 @@ export default function ProfileContent() {
             icon="information-circle-outline"
             label="About"
             onPress={() => router.push('/about')}
-          />
+          /> */}
 
-          {user.isPaid ? (
-            <ProfileDrawerLink
-              icon="card-outline"
-              label="Manage Subscription"
-              onPress={() => router.push('/manageSubscription')}
-              iconColor={theme.colors.primary}
-            />
+          {/* {user.isPaid ? (
+            // <ProfileDrawerLink
+            //   icon="card-outline"
+            //   label="Manage Subscription"
+            //   onPress={() => router.push('/manageSubscription')}
+            //   iconColor={theme.colors.primary}
+            // />
           ) : (
             // <ProfileDrawerLink
             //   icon="star"
@@ -725,18 +723,18 @@ export default function ProfileContent() {
             //   iconColor={theme.colors.primary}
             // />
             null
-          )}
+          )} */}
 
           
 
-          {user.isAdmin && (
+          {/* {user.isAdmin && (
             <ProfileDrawerLink
               icon="shield-outline"
               label="Admin Panel"
               onPress={() => router.push('/admin')}
               iconColor={theme.colors.primary}
             />
-          )}
+          )} */}
         </View>
 
         <TouchableOpacity

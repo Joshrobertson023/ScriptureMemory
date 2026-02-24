@@ -37,9 +37,9 @@ export async function loginUser(user: User): Promise<User> {
     try {
         const response = await fetch(`${baseUrl}/users/${user.username}`);
         if (response.ok) {
-            const loggedInUser = normalizeUser(await response.json());
+            const loggedInUser = (await response.json());
             try {
-                loggedInUser.isAdmin = await checkIfAdmin(loggedInUser.username);
+                loggedInUser.isAdmin = await (loggedInUser.username);
             } catch (error) {
                 console.error('Failed to check admin status:', error);
             }

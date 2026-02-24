@@ -1,12 +1,11 @@
-import { Link, router } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { HelperText, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Logo from '../components/logo';
-import { useAppStore } from '../store';
-import useStyles from '../styles';
-import useAppTheme from '../theme';
+import Logo from '../../components/logo';
+import { useAppStore } from '../../store';
+import useStyles from '../../styles';
+import useAppTheme from '../../theme';
 
 export default function CreateNameScreen() {
   const styles = useStyles();
@@ -65,9 +64,9 @@ export default function CreateNameScreen() {
                     <Text style={styles.buttonText_filled}>Next</Text>
                 </TouchableOpacity>
                 <Text style={{...styles.tinyText, marginTop: 20}}>Already have an account?</Text>
-                <Link href="/(auth)/login" style={{marginTop: 0, paddingVertical: 10}}>
+                {/* <Link href="/(auth)/login" style={{marginTop: 0, paddingVertical: 10}}>
                     <Text style={{...styles.tinyText, color: theme.colors.primary, textDecorationLine: 'underline'}}>Log In</Text>
-                </Link>
+                </Link> */}
                     </View>
                     </TouchableWithoutFeedback>
         </SafeAreaView>

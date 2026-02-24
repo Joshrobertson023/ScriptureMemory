@@ -14,15 +14,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PaperProvider, Portal } from 'react-native-paper';
 
 import useAppTheme from './theme';
+import AuthNavigator from './screens/(auth)/_layout';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const Stack = createNativeStackNavigator();
 
-// ─── Startup ──────────────────────────────────────────────────────────────────
-async function runStartup() {
-  
-}
 
 // ─── Root component ───────────────────────────────────────────────────────────
 export default function RootLayout() {
@@ -42,15 +39,11 @@ export default function RootLayout() {
   } as const;
 
 
-  // ── Android system background ──────────────────────────────────────────────────
-  useEffect(() => {
-    SystemUI.setBackgroundColorAsync(theme.colors.background).catch((e) =>
-      console.warn('Failed to set system UI background:', e),
-    );
-  }, [theme.colors.background]);
+  // ─── Startup ──────────────────────────────────────────────────────────────────
+  async function runStartup() {
+    
+  }
 
-
-  // ── App startup ───────────────────────────────────────────────────────────
   useEffect(() => {
     const TIMEOUT_MS = 4000;
 
@@ -68,6 +61,14 @@ export default function RootLayout() {
         setAppIsReady(true);
       });
   }, []);
+
+  // ── Android system background ──────────────────────────────────────────────────
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(theme.colors.background).catch((e) =>
+      console.warn('Failed to set system UI background:', e),
+    );
+  }, [theme.colors.background]);
+
 
 
   // ── Hide splash screen once ready ────────────────────────────────────────
@@ -89,39 +90,33 @@ export default function RootLayout() {
               screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
             >
               {/* Tab / auth roots */}
-              <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'fade' }} />
+              {/* <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'fade' }} /> */}
               <Stack.Screen name="(auth)"  component={AuthNavigator}  options={{ headerShown: false }} />
 
               {/* Settings & info screens */}
-              <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />
+              {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />
               <Stack.Screen name="terms"         component={TermsScreen}         options={{ title: 'Terms of Service',            ...sharedHeaderStyle }} />
               <Stack.Screen name="activity"      component={ActivityScreen}      options={{ title: 'Activity Tracking & Sharing', ...sharedHeaderStyle }} />
               <Stack.Screen name="about"         component={AboutScreen}         options={{ title: 'About',                       ...sharedHeaderStyle }} />
               <Stack.Screen name="notifications" component={NotificationsScreen} options={{ title: 'Notifications',               ...sharedHeaderStyle }} />
               <Stack.Screen name="admin"         component={AdminScreen}         options={{ title: 'Admin Panel',                 ...sharedHeaderStyle }} />
               <Stack.Screen name="settings"      component={SettingsScreen}      options={{ title: 'Settings',                    ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="practiceSession" component={PracticeSessionScreen} options={{ title: 'Practice',               ...sharedHeaderStyle }} />
-
-              <Stack.Screen
-                name="push-notifications-tutorial"
-                component={PushNotificationsTutorialScreen}
-                options={{ title: 'Push Notifications', ...sharedHeaderStyleNoShadow }}
-              />
+              <Stack.Screen name="practiceSession" component={PracticeSessionScreen} options={{ title: 'Practice',               ...sharedHeaderStyle }} /> */}
 
               {/* Profile / content screens */}
-              <Stack.Screen name="user"     component={UserScreen}     options={{ headerShown: false }} />
+              {/* <Stack.Screen name="user"     component={UserScreen}     options={{ headerShown: false }} />
               <Stack.Screen name="book"     component={BookScreen}     options={{ headerShown: false }} />
-              <Stack.Screen name="chapters" component={ChaptersScreen} options={{ headerShown: false }} />
+              <Stack.Screen name="chapters" component={ChaptersScreen} options={{ headerShown: false }} /> */}
 
               {/* Collections screens */}
-              <Stack.Screen name="collections/addnew"                component={AddNewCollectionScreen}       options={{ title: 'New Collection',      ...sharedHeaderStyleNoShadow }} />
+              {/* <Stack.Screen name="collections/addnew"                component={AddNewCollectionScreen}       options={{ title: 'New Collection',      ...sharedHeaderStyleNoShadow }} />
               <Stack.Screen name="collections/reorderCollections"    component={ReorderCollectionsScreen}     options={{ title: 'Reorder Collections',  ...sharedHeaderStyleNoShadow }} />
               <Stack.Screen name="collections/reorderVerses"         component={ReorderVersesScreen}          options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
               <Stack.Screen name="collections/reorderExistingVerses" component={ReorderExistingVersesScreen}  options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
               <Stack.Screen name="collections/editCollection"        component={EditCollectionScreen}         options={{ title: 'Edit Collection',      ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="collections/publishCollection"     component={PublishCollectionScreen}      options={{ title: 'Publish Collection',   ...sharedHeaderStyleNoShadow }} />
+              <Stack.Screen name="collections/publishCollection"     component={PublishCollectionScreen}      options={{ title: 'Publish Collection',   ...sharedHeaderStyleNoShadow }} /> */}
 
-              <Stack.Screen
+              {/* <Stack.Screen
                 name="collections/[id]"
                 component={CollectionDetailScreen}
                 options={{
@@ -129,7 +124,7 @@ export default function RootLayout() {
                   ...sharedHeaderStyleNoShadow,
                   headerRight: () => (
                     <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
-                      <TouchableOpacity onPress={() => { /* TODO: wire up collection settings sheet */ }}>
+                      <TouchableOpacity onPress={() => {}}>
                         <Ionicons
                           style={{ marginTop: 4 }}
                           name="ellipsis-vertical"
@@ -140,13 +135,13 @@ export default function RootLayout() {
                     </View>
                   ),
                 }}
-              />
+              /> */}
 
-              <Stack.Screen
+              {/* <Stack.Screen
                 name="explore/collection/[id]"
                 component={ExploreCollectionScreen}
                 options={{ title: '', ...sharedHeaderStyle }}
-              />
+              /> */}
             </Stack.Navigator>
           </NavigationContainer>
         </Portal.Host>

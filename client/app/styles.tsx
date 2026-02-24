@@ -1,7 +1,16 @@
 import { StyleSheet } from 'react-native';
-import colors from './colors';
 import useAppTheme from './theme';
 
+
+const colors = {
+  primaryWhite: '#FFFFFF',
+  error: '#FF3B30',
+  primary: '#6200EE',
+  secondary: '#03DAC6',
+  black: '#000000',
+  gray: '#8E8E93',
+  lightGray: '#E5E5EA',
+}
 
 export default function useStyles() {  
   const theme = useAppTheme();

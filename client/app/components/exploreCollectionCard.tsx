@@ -15,7 +15,7 @@ import {
   refreshUser,
   updateCollectionsOrder,
 } from '../db';
-import { Collection, useAppStore, UserVerse } from '../store';
+import { Collection, useAppStore, UserVerse, Verse } from '../store';
 import useStyles from '../styles';
 import useAppTheme from '../theme';
 
@@ -95,7 +95,7 @@ export default function ExploreCollectionCard({ collection, onSaved, fullWidth =
       const preparedUserVerses: UserVerse[] = (publishedVerses || []).map((uv) => {
         const readableReference = normalizeReference(uv.readableReference) ?? '';
         const seenVerseRefs = new Set<string>();
-        const dedupedVerses = (uv.verses || []).filter((verse) => {
+        const dedupedVerses = (uv.verses || []).filter((verse: Verse) => {
           const ref = normalizeReference(verse.verse_reference);
           if (!ref) return false;
           const key = ref.toLowerCase();
