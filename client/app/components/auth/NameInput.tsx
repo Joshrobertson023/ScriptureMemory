@@ -3,21 +3,20 @@ import { ActivityIndicator, HelperText, TextInput } from 'react-native-paper';
 import useStyles from "../../styles";
 import { useAppStore } from '../../store';
 import { useState } from 'react';
+import { RegisterForm } from '../../screens/(auth)/createAccount.screen';
 
 interface NameInputProps {
-    errorMessage: string;
-    setErrorMessage: (message: string) => void;
+    form: RegisterForm;
+    setForm: (f: RegisterForm) => void;
 }
 
-export const NameInput = ({ errorMessage, setErrorMessage }: NameInputProps) => {
+export const NameInput = ({ form, setForm }: NameInputProps) => {
+    
     const styles = useStyles();
     const firstName = useAppStore(s => s.loginInfo.firstName);
     const lastName = useAppStore(s => s.loginInfo.lastName);
     const loginInfo = useAppStore(s => s.loginInfo);
     const setLoginInfo = useAppStore(s => s.setLoginInfo);
-
-    const [firstNameEmpty, setFirstNameEmpty] = useState(false);
-    const [lastNameEmpty, setLastNameEmpty] = useState(false);
 
     return (
         <>
@@ -37,7 +36,7 @@ export const NameInput = ({ errorMessage, setErrorMessage }: NameInputProps) => 
                 error={lastNameEmpty}
                 onChangeText={(text) => {
                     setLoginInfo({...loginInfo, lastName});
-                    if (errorMessage.includes('enter all fields')) setErrorMessage('');
+                    if (errorMessage) setErrorMessage('');
                     if (text) setLastNameEmpty(false);
                 }} />
 

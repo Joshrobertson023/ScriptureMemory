@@ -10,16 +10,35 @@ import useAppTheme from '../../theme';
 import { LoginButton } from '../../components/auth/LoginButton';
 import { NameInput } from '../../components/auth/NameInput';
 
+export interface RegisterForm {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    errors: Record<string, string>;
+}
+
 export default function CreateAccountScreen() {
     const styles = useStyles();
     const theme = useAppTheme();
     const store = useAppStore();
 
-    const [errorMessage, setErrorMessage] = useState('')
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const [form, setForm] = useState<RegisterForm>({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        errors: {} as Record<string, string>
+    });
     
     const nextClick = () => {
         Keyboard.dismiss();
-        
     };
 
 
@@ -36,7 +55,7 @@ export default function CreateAccountScreen() {
                 }}>
                     Create an Account
                 </Text>
-                <NameInput errorMessage={errorMessage} setErrorMessage={setErrorMessage} />
+                <NameInput f />
                 <LoginButton />
                 {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
             </TouchableWithoutFeedback>
