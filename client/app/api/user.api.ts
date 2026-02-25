@@ -1,3 +1,4 @@
+import { BibleVersion } from "../../types/enums";
 import { User } from "../../types/user/user";
 import { baseUrl } from "./baseUrl";
 
@@ -16,7 +17,12 @@ export async function usernameExists(
 }
 
 export async function createUser(
-    newUser: User
+    username: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+    bibleVersion: BibleVersion
 ): Promise<void> {
     const response = await fetch(
         `${baseUrl}/users`, {
@@ -24,7 +30,7 @@ export async function createUser(
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(newUser),
+            body: JSON.stringify({username, firstName, lastName, email, password, bibleVersion}),
         }
     );
     if (!response.ok) {

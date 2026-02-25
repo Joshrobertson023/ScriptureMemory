@@ -11,12 +11,31 @@ import { UsernameInput } from '../../components/auth/UsernameInput';
 import { useFormStore } from '../../stores/form.store';
 import { EmailInput } from '../../components/auth/EmailInput';
 import { CreatePasswordInput } from '../../components/auth/CreatePasswordInput';
+import { Button } from 'react-native-paper';
+import { usernameExists, createUser } from '../../api/user.api';
 
 export default function CreateAccountScreen() {
     const styles = useStyles();
     const theme = useAppTheme();
 
-    const errorMessage = useFormStore(s => s.registerForm.errorMessage);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [doesUsernameExist, setDoesUsernameExist] = useState(false);
+    const form = useFormStore(s => s.registerForm);
+
+    const createAccount = async () => {
+        setLoading(true);
+        if (await usernameExists(form.username) || !form.firstName || !form.lastName 
+            || !form.username || !form.email || !form.password || !form.confirmPassword)
+            return;
+        try {
+            
+        } catch (error) {
+            setErrorMessage("There was a problem creating an account. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <SafeAreaView style={styles.screen}>
@@ -36,6 +55,7 @@ export default function CreateAccountScreen() {
                 <LoginButton />
                 <EmailInput />
                 <CreatePasswordInput />
+                <Button style={styles.buttonFilled} onPress={() => createAccount()}>Create Account</Button>
                 {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
             </TouchableWithoutFeedback>
         </SafeAreaView>
