@@ -125,7 +125,7 @@ export default function RootLayout() {
 
   if (!appIsReady) 
     return (
-      <Text style={styles.text}>An error has occurred. Please restart the app.</Text>
+      <Text style={styles.text}>An error has occurred.</Text>
     );
   
 

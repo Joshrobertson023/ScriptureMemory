@@ -16,10 +16,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 builder.Services.AddScoped<IActivityLogger, ActivityLogger>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
-builder.Services.AddScoped<IVerseService, VerseService>();
 builder.Services.AddScoped<PopulateDatabase>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IVerseService, VerseService>();
 
 // Data Access
 builder.Services.AddScoped<IUserData, UserData>();
@@ -27,7 +27,7 @@ builder.Services.AddScoped<IUserSettingsData, UserSettingsData>();
 builder.Services.AddScoped<IActivityLoggingData, ActivityLoggingData>();
 builder.Services.AddScoped<ISearchData, DataAccess.Data.SearchData>();
 builder.Services.AddScoped<INotificationData, NotificationData>();
-//builder.Services.AddScoped<IVerseData, VerseData>();
+builder.Services.AddScoped<IVerseData, VerseData>();
 //builder.Services.AddScoped<IPaidData, PaidData>();
 //builder.Services.AddScoped<ICategoryData, CategoryData>();
 //builder.Services.AddScoped<IUserPassageData, UserPassageData>();

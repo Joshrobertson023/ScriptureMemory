@@ -21,4 +21,12 @@ public sealed class Reference
         Verses = verses;
         ReadableReference = ReferenceParse.ConvertToReadableReference(Book, Chapter, Verses);
     }
+
+    public Reference(string readableReference)
+    {
+        ReadableReference = readableReference;
+        Book = ReferenceParse.GetBook(readableReference);
+        Chapter = ReferenceParse.GetChapter(readableReference);
+        Verses = ReferenceParse.GetIndividualVerses(readableReference);
+    }
 }
