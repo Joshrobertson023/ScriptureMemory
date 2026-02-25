@@ -83,17 +83,24 @@ export default function RootLayout() {
       }   
   })
 
+  // On startup try to login user with auth token, retry if could not, then navigate
   async function runStartup() {
     await loadToken();
     let retryCount = 3;
-    if (token !== '') {
+    if (token !== '' || token) {
       for (let i = 0; i < retryCount; i++, retryCount++) {
         await loginMutation.mutateAsync({authToken: token})
         if (isAuthenticated) break;
       }
-      if (isAuthenticated)
+      if (isAuthenticated) {
+        setAppIsReady(true);
         navigation.navigate("(tabs)");
+      }
+      // Default to going to auth
+      setAppIsReady(true);
+      navigation.navigate("(auth)");
     } else {
+      setAppIsReady(true);
       navigation.navigate("(auth)");
       console.log("No stored auth token found, navigating to (auth)");
     }
@@ -121,7 +128,7 @@ export default function RootLayout() {
       <Text style={styles.text}>An error has occurred. Please restart the app.</Text>
     );
   
-  // ── Main navigator ────────────────────────────────────────────────────────
+
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <PaperProvider theme={theme}>
