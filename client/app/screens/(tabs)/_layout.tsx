@@ -13,6 +13,42 @@
 // import useAppTheme from '../theme';
 // import { updateAppBadge } from '../utils/badgeManager';
 
+import * as SystemUI from 'expo-system-ui';
+import React from 'react';
+import useAppTheme from '../../theme';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { HomeScreen } from '.';
+
+
+const Stack = createNativeStackNavigator();
+
+export default function TabsNavigator() {
+
+  const theme = useAppTheme();
+  SystemUI.setBackgroundColorAsync(theme.colors.background);
+
+  return ( 
+    <Stack.Navigator>
+      <Stack.Screen 
+      name="home" 
+      component={HomeScreen} 
+      options={({ route }) => ({
+        headerShown: false, 
+        headerStyle: {
+          backgroundColor: theme.colors.background,
+        },
+        headerShadowVisible: false,
+        //   title: 'Custom animation',
+        //     cardStyleInterpolator: !route.params?.disabledAnimation
+        //       ? undefined
+        //       : CardStyleInterpolators.forNoAnimation,
+          })} />
+    </Stack.Navigator>    
+  )
+}
+
 // export default function TabLayout() {
 //   const theme = useAppTheme();
 //   const insets = useSafeAreaInsets();

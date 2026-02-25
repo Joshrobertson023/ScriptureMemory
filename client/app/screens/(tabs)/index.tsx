@@ -18,6 +18,14 @@
 
 // const { height } = Dimensions.get('window');
 
+export const HomeScreen = () => {
+    return (
+        <>
+            
+        </>
+    )
+}
+
 // // Generates a RFC4122-like GUID string
 // function generateGUID() {
 //   const s4 = () =>

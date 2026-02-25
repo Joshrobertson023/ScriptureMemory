@@ -27,8 +27,8 @@ export const UsernameInput = () => {
                     if (await usernameExists(text)) 
                         setDoesUsernameExist(true);
                     updateForm({username: text});
-                }
-                } />
+                }} 
+                maxLength={30}/>
 
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={usernameEmpty}>
                 Create a username

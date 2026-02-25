@@ -18,23 +18,24 @@ export const CreatePasswordInput = () => {
     return (
         <>
             <TextInput keyboardType="default"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        autoComplete="password"
-                        textContentType="password"
-                        secureTextEntry={!showPassword}
-                        error={passwordEmpty}
-                        label="Password" mode="outlined" style={styles.input} value={password}
-                        right={<TextInput.Icon icon={showPassword ? 'eye-off' : 'eye'} onPress={() => setShowPassword((prev) => !prev)} />}
-                        onChangeText={(text) => {
-                            const trimmed = text.trim();
-                            updateForm({password: trimmed})
-                            if (text) setPasswordEmpty(false);
-                            if (trimmed.length > 0 && trimmed.length < 11)
-                                setPasswordTooShort(true);
-                            else 
-                                setPasswordTooShort(false);
-                        }} />
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="password"
+                textContentType="password"
+                secureTextEntry={!showPassword}
+                error={passwordEmpty}
+                label="Password" mode="outlined" style={styles.input} value={password}
+                right={<TextInput.Icon icon={showPassword ? 'eye-off' : 'eye'} onPress={() => setShowPassword((prev) => !prev)} />}
+                onChangeText={(text) => {
+                    const trimmed = text.trim();
+                    updateForm({password: trimmed})
+                    if (text) setPasswordEmpty(false);
+                    if (trimmed.length > 0 && trimmed.length < 11)
+                        setPasswordTooShort(true);
+                    else 
+                        setPasswordTooShort(false);
+                }} 
+                maxLength={30}/>
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={passwordEmpty}>
                 Enter your password
             </HelperText>
@@ -42,15 +43,16 @@ export const CreatePasswordInput = () => {
                 Password must be at least 11 characters long.
             </HelperText>
             <TextInput keyboardType="default"
-                        autoCapitalize="none"
-                        autoCorrect={false}
-                        autoComplete="password"
-                        textContentType="password"
-                        secureTextEntry={!showConfirmPassword}
-                        error={confirmEmpty}
-                        label="Confirm Password" mode="outlined" style={styles.input} value={confirmPassword} 
-                        right={<TextInput.Icon icon={showConfirmPassword ? 'eye-off' : 'eye'} onPress={() => setShowConfirmPassword((prev) => !prev)} />}
-                        onChangeText={(text) => updateForm({confirmPassword: text}) }/>
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="password"
+                textContentType="password"
+                secureTextEntry={!showConfirmPassword}
+                error={confirmEmpty}
+                label="Confirm Password" mode="outlined" style={styles.input} value={confirmPassword} 
+                right={<TextInput.Icon icon={showConfirmPassword ? 'eye-off' : 'eye'} onPress={() => setShowConfirmPassword((prev) => !prev)} />}
+                onChangeText={(text) => updateForm({confirmPassword: text}) }
+                maxLength={30}/>
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={confirmEmpty}>
                 Confirm your password
             </HelperText>

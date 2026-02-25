@@ -26,7 +26,8 @@ export const NameInput = () => {
                     if (errorMessage) updateForm({errorMessage: ''})
                     if (text) setFirstNameEmpty(false);
                     else setFirstNameEmpty(true);
-                }} />
+                }} 
+                maxLength={30}/>
 
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={firstNameEmpty}>
                 Enter your first name
@@ -39,7 +40,8 @@ export const NameInput = () => {
                     if (errorMessage) updateForm({errorMessage: ''})
                     if (text) setLastNameEmpty(false);
                     else setLastNameEmpty(true);
-                }} />
+                }} 
+                maxLength={30}/>
 
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={lastNameEmpty}>
                 Enter your last name

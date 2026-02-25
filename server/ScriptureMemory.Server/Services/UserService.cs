@@ -52,6 +52,9 @@ public sealed class UserService : IUserService
     {
         PasswordHasher<User> hasher = new();
 
+        if (await userContext.CheckUsernameExists(request.Username))
+            throw new ArgumentException("Username is already taken.");
+
         if (request.Password.Trim().Length < Data.MIN_PASSWORD_LENGTH)
            throw new ArgumentException($"Password must be at least {Data.MIN_PASSWORD_LENGTH} characters long.");
 
@@ -66,7 +69,7 @@ public sealed class UserService : IUserService
         );
 
         await userContext.CreateUser(user);
-        user.Id = await userContext.GetUserIdFromUsername(user.Username);
+        user.Id = await userContext.GetUserIdFromUsername(user.Username.Trim());
 
         await settingsContext.CreateUserSettings(user.Settings, user.Id);
 
@@ -94,13 +97,13 @@ public sealed class UserService : IUserService
 
     public async Task<IResult> Login(string username, string password)
     {
-        var user = await userContext.GetUserFromUsername(username);
+        var user = await userContext.GetUserFromUsername(username.Trim());
 
         PasswordHasher<User> hasher = new();
 
         if (user is null)
             return Results.Problem("Username does not exist.");
-        else if (hasher.VerifyHashedPassword(null!, user.HashedPassword!, password)
+        else if (hasher.VerifyHashedPassword(null!, user.HashedPassword!, password.Trim())
             == PasswordVerificationResult.Failed)
         {
             return Results.Unauthorized();

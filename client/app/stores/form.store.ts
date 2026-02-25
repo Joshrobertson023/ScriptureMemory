@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { generateUsername } from "../utils/loginUtils";
+import { BibleVersion } from "../../types/enums";
 
 export interface RegisterForm {
   firstName: string;
@@ -8,6 +9,7 @@ export interface RegisterForm {
   email: string;
   password: string;
   confirmPassword: string;
+  bibleVersion: BibleVersion;
   errorMessage: string;
   errors: Record<string, string>;
 }
@@ -39,6 +41,7 @@ const initialRegister: RegisterForm = {
   email: '',
   password: '',
   confirmPassword: '',
+  bibleVersion: 0,
   errorMessage: '',
   errors: {}
 };

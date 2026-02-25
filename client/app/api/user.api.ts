@@ -39,9 +39,15 @@ export async function createUser(
     }
 }
 
-export async function loginUser(user: User): Promise<User> {
+export async function loginUser(username: string, password: string): Promise<User> {
     try {
-        const response = await fetch(`${baseUrl}/users/${user.username}`);
+        const response = await fetch(`${baseUrl}/users/login/username`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({username, password}),
+        });
         if (response.ok) {
             const loggedInUser = (await response.json());
             try {

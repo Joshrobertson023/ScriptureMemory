@@ -27,7 +27,8 @@ export default function LoginPasswordInput() {
                             const trimmed = text.trim();
                             updateForm({password: trimmed})
                             if (text) setPasswordEmpty(false);
-                        }} />
+                        }} 
+                        maxLength={30}/>
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={passwordEmpty}>
                 Enter your password
             </HelperText>

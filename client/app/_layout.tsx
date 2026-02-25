@@ -11,14 +11,30 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import { TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { PaperProvider, Portal } from 'react-native-paper';
+import { ActivityIndicator, PaperProvider, Portal } from 'react-native-paper';
 
 import useAppTheme from './theme';
 import AuthNavigator from './screens/(auth)/_layout';
 
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+import TabsNavigator from './screens/(tabs)/_layout';
+
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-const Stack = createNativeStackNavigator();
+// Tells Typescript what routes are available
+export type RootStackParamList = {
+  '(tabs)': undefined;
+  '(auth)': undefined;
+};
+const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const queryClient = new QueryClient();
 
 
 // ─── Root component ───────────────────────────────────────────────────────────
@@ -76,9 +92,10 @@ export default function RootLayout() {
     if (appIsReady) SplashScreen.hideAsync().catch(() => {});
   }, [appIsReady]);
 
-  if (!appIsReady) return null;
-
-
+  if (!appIsReady) 
+    return (
+      <ActivityIndicator />
+    );
   
   // ── Main navigator ────────────────────────────────────────────────────────
   return (
@@ -86,63 +103,65 @@ export default function RootLayout() {
       <PaperProvider theme={theme}>
         <Portal.Host>
           <NavigationContainer>
-            <Stack.Navigator
-              screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
-            >
-              {/* Tab / auth roots */}
-              {/* <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'fade' }} /> */}
-              <Stack.Screen name="(auth)"  component={AuthNavigator}  options={{ headerShown: false }} />
+            <QueryClientProvider client={queryClient}>
+              <Stack.Navigator
+                screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
+              >
+                {/* Tab / auth roots */}
+                <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'none' }} />
+                <Stack.Screen name="(auth)"  component={AuthNavigator}  options={{ headerShown: false }} />
 
-              {/* Settings & info screens */}
-              {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />
-              <Stack.Screen name="terms"         component={TermsScreen}         options={{ title: 'Terms of Service',            ...sharedHeaderStyle }} />
-              <Stack.Screen name="activity"      component={ActivityScreen}      options={{ title: 'Activity Tracking & Sharing', ...sharedHeaderStyle }} />
-              <Stack.Screen name="about"         component={AboutScreen}         options={{ title: 'About',                       ...sharedHeaderStyle }} />
-              <Stack.Screen name="notifications" component={NotificationsScreen} options={{ title: 'Notifications',               ...sharedHeaderStyle }} />
-              <Stack.Screen name="admin"         component={AdminScreen}         options={{ title: 'Admin Panel',                 ...sharedHeaderStyle }} />
-              <Stack.Screen name="settings"      component={SettingsScreen}      options={{ title: 'Settings',                    ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="practiceSession" component={PracticeSessionScreen} options={{ title: 'Practice',               ...sharedHeaderStyle }} /> */}
+                {/* Settings & info screens */}
+                {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />
+                <Stack.Screen name="terms"         component={TermsScreen}         options={{ title: 'Terms of Service',            ...sharedHeaderStyle }} />
+                <Stack.Screen name="activity"      component={ActivityScreen}      options={{ title: 'Activity Tracking & Sharing', ...sharedHeaderStyle }} />
+                <Stack.Screen name="about"         component={AboutScreen}         options={{ title: 'About',                       ...sharedHeaderStyle }} />
+                <Stack.Screen name="notifications" component={NotificationsScreen} options={{ title: 'Notifications',               ...sharedHeaderStyle }} />
+                <Stack.Screen name="admin"         component={AdminScreen}         options={{ title: 'Admin Panel',                 ...sharedHeaderStyle }} />
+                <Stack.Screen name="settings"      component={SettingsScreen}      options={{ title: 'Settings',                    ...sharedHeaderStyleNoShadow }} />
+                <Stack.Screen name="practiceSession" component={PracticeSessionScreen} options={{ title: 'Practice',               ...sharedHeaderStyle }} /> */}
 
-              {/* Profile / content screens */}
-              {/* <Stack.Screen name="user"     component={UserScreen}     options={{ headerShown: false }} />
-              <Stack.Screen name="book"     component={BookScreen}     options={{ headerShown: false }} />
-              <Stack.Screen name="chapters" component={ChaptersScreen} options={{ headerShown: false }} /> */}
+                {/* Profile / content screens */}
+                {/* <Stack.Screen name="user"     component={UserScreen}     options={{ headerShown: false }} />
+                <Stack.Screen name="book"     component={BookScreen}     options={{ headerShown: false }} />
+                <Stack.Screen name="chapters" component={ChaptersScreen} options={{ headerShown: false }} /> */}
 
-              {/* Collections screens */}
-              {/* <Stack.Screen name="collections/addnew"                component={AddNewCollectionScreen}       options={{ title: 'New Collection',      ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="collections/reorderCollections"    component={ReorderCollectionsScreen}     options={{ title: 'Reorder Collections',  ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="collections/reorderVerses"         component={ReorderVersesScreen}          options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="collections/reorderExistingVerses" component={ReorderExistingVersesScreen}  options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="collections/editCollection"        component={EditCollectionScreen}         options={{ title: 'Edit Collection',      ...sharedHeaderStyleNoShadow }} />
-              <Stack.Screen name="collections/publishCollection"     component={PublishCollectionScreen}      options={{ title: 'Publish Collection',   ...sharedHeaderStyleNoShadow }} /> */}
+                {/* Collections screens */}
+                {/* <Stack.Screen name="collections/addnew"                component={AddNewCollectionScreen}       options={{ title: 'New Collection',      ...sharedHeaderStyleNoShadow }} />
+                <Stack.Screen name="collections/reorderCollections"    component={ReorderCollectionsScreen}     options={{ title: 'Reorder Collections',  ...sharedHeaderStyleNoShadow }} />
+                <Stack.Screen name="collections/reorderVerses"         component={ReorderVersesScreen}          options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
+                <Stack.Screen name="collections/reorderExistingVerses" component={ReorderExistingVersesScreen}  options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
+                <Stack.Screen name="collections/editCollection"        component={EditCollectionScreen}         options={{ title: 'Edit Collection',      ...sharedHeaderStyleNoShadow }} />
+                <Stack.Screen name="collections/publishCollection"     component={PublishCollectionScreen}      options={{ title: 'Publish Collection',   ...sharedHeaderStyleNoShadow }} /> */}
 
-              {/* <Stack.Screen
-                name="collections/[id]"
-                component={CollectionDetailScreen}
-                options={{
-                  title: '',
-                  ...sharedHeaderStyleNoShadow,
-                  headerRight: () => (
-                    <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
-                      <TouchableOpacity onPress={() => {}}>
-                        <Ionicons
-                          style={{ marginTop: 4 }}
-                          name="ellipsis-vertical"
-                          size={32}
-                          color={theme.colors.onBackground}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  ),
-                }}
-              /> */}
+                {/* <Stack.Screen
+                  name="collections/[id]"
+                  component={CollectionDetailScreen}
+                  options={{
+                    title: '',
+                    ...sharedHeaderStyleNoShadow,
+                    headerRight: () => (
+                      <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
+                        <TouchableOpacity onPress={() => {}}>
+                          <Ionicons
+                            style={{ marginTop: 4 }}
+                            name="ellipsis-vertical"
+                            size={32}
+                            color={theme.colors.onBackground}
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    ),
+                  }}
+                /> */}
 
-              {/* <Stack.Screen
-                name="explore/collection/[id]"
-                component={ExploreCollectionScreen}
-                options={{ title: '', ...sharedHeaderStyle }}
-              /> */}
-            </Stack.Navigator>
+                {/* <Stack.Screen
+                  name="explore/collection/[id]"
+                  component={ExploreCollectionScreen}
+                  options={{ title: '', ...sharedHeaderStyle }}
+                /> */}
+              </Stack.Navigator>
+            </QueryClientProvider>
           </NavigationContainer>
         </Portal.Host>
       </PaperProvider>

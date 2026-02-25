@@ -19,7 +19,8 @@ export const LoginUsernameInput = () => {
                     if (errorMessage) updateForm({errorMessage: ''})
                     if (text) setUsernameEmpty(false);
                     else setUsernameEmpty(true);
-                }} />
+                }} 
+                maxLength={30}/>
 
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={usernameEmpty}>
                 Enter your username

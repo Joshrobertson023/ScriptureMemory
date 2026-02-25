@@ -19,7 +19,8 @@ export const EmailInput = () => {
                     if (errorMessage) updateForm({errorMessage: ''});
                     if (text) setEmailEmpty(false);
                     else setEmailEmpty(true);
-                }} />
+                }} 
+                maxLength={40}/>
 
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={emailEmpty}>
                 Enter your email
