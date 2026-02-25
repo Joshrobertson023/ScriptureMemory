@@ -37,8 +37,6 @@ export default function CreateAccountScreen() {
     const form = useFormStore(s => s.registerForm);
     const setToken = useUserAuthStore(s => s.setToken);
 
-    const queryClient = useQueryClient();
-
     // -- Mutations ----------------------------------
     const createMutation = useMutation({
         mutationFn: () =>
@@ -69,7 +67,7 @@ export default function CreateAccountScreen() {
         }   
     })
 
-    // -- Create Account ------------------------------
+    // Create account
     const createAccount = async () => {
         setLoading(true);
         if (await usernameExists(form.username) || form.firstName === '' || form.lastName === ''

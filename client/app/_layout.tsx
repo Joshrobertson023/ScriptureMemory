@@ -4,8 +4,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
@@ -24,6 +24,8 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import TabsNavigator from './screens/(tabs)/_layout';
+import { useUserAuthStore } from './stores/userAuth.store';
+import { loginUserWithToken } from './api/user.api';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -54,10 +56,33 @@ export default function RootLayout() {
     headerShadowVisible: false,
   } as const;
 
-
+    type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+    const navigation = useNavigation<NavigationProp>();
+  
   // ─── Startup ──────────────────────────────────────────────────────────────────
+  const loadToken = useUserAuthStore(s => s.loadToken);
+  const token = useUserAuthStore(s => s.authToken);
+  const setToken = useUserAuthStore(s => s.setToken);
+
+  const loginMutation = useMutation({
+      mutationFn: (data: { authToken: string; }) => loginUserWithToken(token),
+      onSuccess: async (data) => {
+          if (data.authToken) {
+            await setToken(data.authToken);
+          }
+          else {
+            console.log("Error logging in with stored token.");
+            return;
+          }
+          navigation.navigate('(tabs)');
+      }   
+  })
+
   async function runStartup() {
-    
+    await loadToken();
+    if (token !== '') {
+      await loginMutation.mutateAsync({authToken: token})
+    }
   }
 
   useEffect(() => {

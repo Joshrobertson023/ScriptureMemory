@@ -50,11 +50,26 @@ export async function loginUser(username: string, password: string): Promise<Use
         });
         if (response.ok) {
             const loggedInUser = (await response.json());
-            try {
-                loggedInUser.isAdmin = await (loggedInUser.username);
-            } catch (error) {
-                console.error('Failed to check admin status:', error);
-            }
+            return loggedInUser as User;
+        } else {
+            throw new Error('Login failed');
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function loginUserWithToken(token: string): Promise<User> {
+    try {
+        const response = await fetch(`${baseUrl}/users/login/token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(token),
+        });
+        if (response.ok) {
+            const loggedInUser = (await response.json());
             return loggedInUser as User;
         } else {
             throw new Error('Login failed');
