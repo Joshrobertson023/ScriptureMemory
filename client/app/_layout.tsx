@@ -11,7 +11,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import { TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ActivityIndicator, PaperProvider, Portal } from 'react-native-paper';
+import { ActivityIndicator, PaperProvider, Portal, Text } from 'react-native-paper';
 
 import useAppTheme from './theme';
 import AuthNavigator from './screens/(auth)/_layout';
@@ -26,6 +26,7 @@ import {
 import TabsNavigator from './screens/(tabs)/_layout';
 import { useUserAuthStore } from './stores/userAuth.store';
 import { loginUserWithToken } from './api/user.api';
+import useStyles from './styles';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -42,6 +43,7 @@ const queryClient = new QueryClient();
 // ─── Root component ───────────────────────────────────────────────────────────
 export default function RootLayout() {
   const theme = useAppTheme();
+  const styles = useStyles();
 
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -56,14 +58,16 @@ export default function RootLayout() {
     headerShadowVisible: false,
   } as const;
 
-    type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-    const navigation = useNavigation<NavigationProp>();
+  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+  const navigation = useNavigation<NavigationProp>();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   const loadToken = useUserAuthStore(s => s.loadToken);
   const token = useUserAuthStore(s => s.authToken);
   const setToken = useUserAuthStore(s => s.setToken);
+  const isAuthenticated = useUserAuthStore(s => s.isAuthenticated);
 
+  // Login mutation
   const loginMutation = useMutation({
       mutationFn: (data: { authToken: string; }) => loginUserWithToken(token),
       onSuccess: async (data) => {
@@ -72,6 +76,7 @@ export default function RootLayout() {
           }
           else {
             console.log("Error logging in with stored token.");
+            navigation.navigate("(auth)");
             return;
           }
           navigation.navigate('(tabs)');
@@ -80,28 +85,23 @@ export default function RootLayout() {
 
   async function runStartup() {
     await loadToken();
+    let retryCount = 3;
     if (token !== '') {
-      await loginMutation.mutateAsync({authToken: token})
+      for (let i = 0; i < retryCount; i++, retryCount++) {
+        await loginMutation.mutateAsync({authToken: token})
+        if (isAuthenticated) break;
+      }
+      if (isAuthenticated)
+        navigation.navigate("(tabs)");
+    } else {
+      navigation.navigate("(auth)");
+      console.log("No stored auth token found, navigating to (auth)");
     }
   }
 
   useEffect(() => {
-    const TIMEOUT_MS = 4000;
-
-    let didTimeout = false;
-    const timeoutId = setTimeout(() => {
-      didTimeout = true;
-    }, TIMEOUT_MS);
-
-    runStartup()
-      .catch((e) => {
-        if (!didTimeout) console.warn('Startup error:', e);
-      })
-      .finally(() => {
-        clearTimeout(timeoutId);
-        setAppIsReady(true);
-      });
-  }, []);
+    runStartup();
+  })
 
   // ── Android system background ──────────────────────────────────────────────────
   useEffect(() => {
@@ -111,7 +111,6 @@ export default function RootLayout() {
   }, [theme.colors.background]);
 
 
-
   // ── Hide splash screen once ready ────────────────────────────────────────
   useEffect(() => {
     if (appIsReady) SplashScreen.hideAsync().catch(() => {});
@@ -119,7 +118,7 @@ export default function RootLayout() {
 
   if (!appIsReady) 
     return (
-      <ActivityIndicator />
+      <Text style={styles.text}>An error has occurred. Please restart the app.</Text>
     );
   
   // ── Main navigator ────────────────────────────────────────────────────────

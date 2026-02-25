@@ -25,7 +25,7 @@ export const useUserAuthStore = create<UserAuthStore>((set, get) => ({
     loadToken: async () => {
         const token = await AsyncStorage.getItem("auth_token");
         if (token) {
-            set({authToken: token, isAuthenticated: true})
+            set({authToken: token, isAuthenticated: false})
         }
     }
 }))
