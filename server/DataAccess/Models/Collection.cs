@@ -9,7 +9,7 @@ namespace DataAccess.Models;
 public class Collection
 {
     public int CollectionId { get; set; }
-    public int UserId { get; set; }
+    public int UserId { get; set; } = 0;
     public string Title { get; set; } = string.Empty;
     public CollectionVisibility Visibility { get; set; } = CollectionVisibility.Private;
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;

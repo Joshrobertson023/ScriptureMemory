@@ -34,6 +34,8 @@ public sealed class CollectionService : ICollectionService
     {
         if (string.IsNullOrEmpty(newCollection.Title))
             throw new ArgumentException("Cannot create collection: Title is required.");
+        if (newCollection.UserId <= 0)
+            throw new ArgumentException("Cannot create collection: UserId is required."); 
 
         // Get the next order position to insert the new collection at the bottom of the list
         newCollection.OrderPosition = await collectionContext.GetNextOrderPosition(newCollection.UserId);
@@ -71,16 +73,49 @@ public sealed class CollectionService : ICollectionService
         return newCollectionId;
     }
 
-    //public async Task<int> SaveCollection(Collection collection)
-    //{
-    //    if (await collectionContext.SavedFromPublishedExists(collection))
-    //        throw new InvalidOperationException("Cannot create collection: User already saved collection.");
+    /// <summary>
+    /// Creates a new collection for a user from a published collection
+    /// </summary>
+    /// <param name="collection"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="ArgumentException"></exception>
+    public async Task<int> SaveCollection(Collection collection)
+    {
+        if (await collectionContext.SavedFromPublishedExists(collection))
+            throw new InvalidOperationException("Cannot create collection: User already saved collection.");
+        if (collection.PublishedId is null)
+            throw new ArgumentException("Cannot save collection: PublishedId is required.");
 
-    //    // Get the author's id
-    //    //if (newCollection.AuthorId is null)
-    //    //    newCollection.AuthorId = await collectionContext.GetAuthorIdForPublishedCollection(newCollection.PublishedId);
+        // Get the author's id
+        //if (newCollection.AuthorId is null)
+        //    newCollection.AuthorId = await collectionContext.GetAuthorIdForPublishedCollection(newCollection.PublishedId);
 
-    //    // Saved collection should not be favorites
-    //    collection.IsFavorites = false;
-    //}
+        // Get the next order position to insert the new collection at the bottom of the list
+        collection.OrderPosition = await collectionContext.GetNextOrderPosition(collection.UserId);
+
+        // Saved collection should not be favorites
+        collection.IsFavorites = false;
+
+        // Default saved collections to private
+        collection.Visibility = CollectionVisibility.Private;
+
+        int newCollectionId = await collectionContext.InsertCollection(collection);
+
+        await logger.Log(
+            new ActivityLog(
+                collection.UserId,
+                ActionType.Create,
+                EntityType.Collection,
+                newCollectionId,
+                "User saved collection",
+                new
+                {
+                    PublishedId = collection.PublishedId,
+                }
+            )
+        );
+
+        return newCollectionId;
+    }
 }
