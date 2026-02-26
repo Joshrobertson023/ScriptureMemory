@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace DataAccess.Models;
 public class CollectionNote
 {
-    public string Id { get; set; }
+    public int Id { get; set; }
     public int CollectionId { get; set; }
-    public string Text { get; set; }
+    public string Text { get; set; } = string.Empty;
     public int OrderPosition { get; set; }
 }
 

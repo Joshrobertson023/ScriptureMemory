@@ -1,32 +1,44 @@
-//using DataAccess.DBAccess;
-//using DataAccess.Models;
-//using Microsoft.Extensions.Configuration;
-//using System;
-//using System.Collections.Generic;
-//using System.Data;
-//using Microsoft.Data.SqlClient;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using System.Text.Json;
-//using Dapper;
-//using ScriptureMemoryLibrary;
-//using Oracle.ManagedDataAccess.Client;
-//using DataAccess.DataInterfaces;
+using DataAccess.Models;
+using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Text.Json;
+using Dapper;
+using ScriptureMemoryLibrary;
+using Oracle.ManagedDataAccess.Client;
+using DataAccess.DataInterfaces;
 
-//namespace DataAccess.Data;
-//public class UserPassageData : IUserPassageData
-//{
-//    private readonly IConfiguration _config;
-//    private readonly IPracticeSessionData _practiceSessionData;
-//    private readonly string connectionString;
+namespace DataAccess.Data;
 
-//    public UserPassageData(IConfiguration config, IPracticeSessionData practiceSessionData)
-//    {
-//        _config = config;
-//        _practiceSessionData = practiceSessionData;
-//        connectionString = _config.GetConnectionString("Default");
-//    }
+public class UserPassageData : IUserPassageData
+{
+    private readonly IConfiguration _config;
+    private readonly IPracticeSessionData _practiceSessionData;
+    private readonly string connectionString;
+
+    public UserPassageData(IConfiguration config, IPracticeSessionData practiceSessionData)
+    {
+        _config = config;
+        _practiceSessionData = practiceSessionData;
+        connectionString = _config.GetConnectionString("Default")!;
+    }
+
+    public async Task<string> GetPassageTextFromListOfReferences(List<string> references)
+    {
+        var sql = @"SELECT TEXT FROM VERSES WHERE VERSE_REFERENCE IN (:References)";
+        // If you get an error for this, remove the paranthesis
+
+        using var conn = new OracleConnection(connectionString);
+        var result = await conn.QueryAsync<string>(sql, new { References = references });
+        
+        return string.Join(" ", result);
+    }
+}
 
 //    public async Task<List<UserPassage>> GetMemorized(string username)
 //    {
@@ -43,7 +55,7 @@
 //        using IDbConnection conn = new OracleConnection(connectionString);
 //        var results = await conn.QueryAsync<UserPassage>(sql, new { Username = username }, commandType: CommandType.Text);
 //        var memorizedList = results.ToList();
-        
+
 //        return memorizedList;
 //    }
 
@@ -66,7 +78,7 @@
 //            new { Username = username },
 //            commandType: CommandType.Text);
 //        var inProgressList = results.ToList();
-        
+
 //        return inProgressList;
 //    }
 
@@ -89,7 +101,7 @@
 //            new { Username = username },
 //            commandType: CommandType.Text);
 //        var notStartedList = results.ToList();
-        
+
 //        return notStartedList;
 //    }
 
@@ -152,7 +164,7 @@
 //                AND UPPER(TRIM(READABLE_REFERENCE)) = UPPER(TRIM(:ReadableReference))",
 //            new { CollectionId = collectionId, ReadableReference = readableReference },
 //            commandType: CommandType.Text);
-        
+
 //        return count > 0 ? true : false;
 //    }
 
@@ -175,12 +187,12 @@
 
 //        var distinctReferences = new List<string>();
 //        var seenReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        
+
 //        foreach (var uv in userVerses)
 //        {
 //            if (string.IsNullOrWhiteSpace(uv.ReadableReference))
 //                continue;
-                
+
 //            var trimmedRef = uv.ReadableReference.Trim();
 //            if (!seenReferences.Contains(trimmedRef))
 //            {
@@ -303,7 +315,7 @@
 //        var userVerses = await conn.QueryAsync<UserPassage>(sql,
 //            new { Id = id }, commandType: CommandType.Text);
 //        var userVerse = userVerses.FirstOrDefault();
-        
+
 //        return userVerse;
 //    }
 
@@ -320,7 +332,7 @@
 //                           DATE_SAVED AS DateAdded, PROGRESS_PERCENT AS ProgressPercent, 
 //                           TIMES_MEMORIZED AS TimesMemorized, IN_PUBLISHED AS InPublished, DUE_DATE AS DUEDATE
 //                    FROM USER_VERSES WHERE USER_VERSE_ID IN ({inClause})";
-        
+
 //        var parameters = new DynamicParameters();
 //        for (int i = 0; i < ids.Count; i++)
 //        {
@@ -330,7 +342,7 @@
 //        using IDbConnection conn = new OracleConnection(connectionString);
 //        var userVerses = await conn.QueryAsync<UserPassage>(sql, parameters, commandType: CommandType.Text);
 //        var userVersesList = userVerses.ToList();
-        
+
 //        return userVersesList;
 //    }
 
@@ -341,14 +353,14 @@
 //        {
 //            throw new ArgumentException($"UserVerse with Id {uv.Id} not found.");
 //        }
-        
+
 //        var readableReference = !string.IsNullOrWhiteSpace(uv.ReadableReference) ? uv.ReadableReference : existing.ReadableReference;
-        
+
 //        if (string.IsNullOrWhiteSpace(readableReference))
 //        {
 //            throw new ArgumentException("ReadableReference cannot be null or empty.");
 //        }
-        
+
 //        var sql = @"UPDATE USER_VERSES
 //                     SET 
 //                     READABLE_REFERENCE = :ReadableReference,
@@ -431,10 +443,10 @@
 //        { 
 //            Username = username
 //        }, commandType: CommandType.Text);
-        
+
 //        var allPracticedVerses = results.ToList();
 //        var today = DateTime.Today;
-        
+
 //        var overdueList = new List<UserPassage>();
 //        foreach (var uv in allPracticedVerses)
 //        {
@@ -443,9 +455,9 @@
 //                overdueList.Add(uv);
 //            }
 //        }
-        
+
 //        overdueList = overdueList.OrderBy(uv => uv.DueDate).ToList();
-        
+
 //        return overdueList;
 //    }
 

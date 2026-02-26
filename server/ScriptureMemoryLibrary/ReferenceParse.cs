@@ -14,11 +14,12 @@ public static class ReferenceParse
     /// <returns>Reference { Book = "Psalms", Chapter = 119, List<string> Verses = "2-4" }</returns>
     public static Reference ConvertStringToReference(string referenceString)
     {
-        Reference reference = new();
+        Reference reference = new(referenceString);
 
         reference.Book = GetBook(referenceString);
         reference.Chapter = GetChapter(referenceString);
         reference.Verses = GetIndividualVerses(referenceString);
+        reference.ReadableReference = ConvertToReadableReference(reference.Book, reference.Chapter, reference.Verses);
 
         return reference;
     }

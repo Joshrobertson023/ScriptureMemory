@@ -189,6 +189,14 @@ public class UserData : IUserData
         return count > 0;
     }
 
+    public async Task<string> GetUsernameFromId(int userId)
+    {
+        var sql = @"SELECT USERNAME FROM USERS WHERE ID = :UserId";
+        await using var conn = new OracleConnection(connectionString);
+        var results = await conn.QueryAsync<string>(sql, new { UserId = userId });
+        return results.FirstOrDefault() ?? "";
+    }
+
 
     // -------------------------------------------------------
     //  Increment

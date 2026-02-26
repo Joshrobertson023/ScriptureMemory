@@ -15,6 +15,7 @@ public interface IUserData
     Task<bool> CheckUsernameExists(string username);
     Task<int> GetUserIdFromUsername(string username);
     Task<User> GetUserFromUserId(int userId);
+    Task<string> GetUsernameFromId(int userId);
     Task IncrementVersesMemorized(int userId);
     Task AddPoints(int userId, int points);
     Task UpdateDescription(int userId, string description);

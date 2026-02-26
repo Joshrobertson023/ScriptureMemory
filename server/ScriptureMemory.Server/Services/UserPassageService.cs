@@ -13,24 +13,27 @@ public interface IUserPassageService
 public sealed class UserPassageService : IUserPassageService
 {
     private readonly IUserPassageData passageContext;
-    private readonly DataAccess.DataInterfaces.IVerseData verseContext;
+    private readonly IVerseData verseContext;
 
-    public UserPassageService(IUserPassageData passageContext, DataAccess.DataInterfaces.IVerseData verseContext)
+    public UserPassageService(
+        IUserPassageData passageContext, 
+        IVerseData verseContext)
     {
         this.passageContext = passageContext;
         this.verseContext = verseContext;
     }
 
+    // PassageParts is used for a practice session
     public async Task<IResult> GetUserPassageParts(UserPassage passage)
     {
         if (string.IsNullOrEmpty(passage.Reference.ReadableReference))
             return Results.BadRequest("ReadableReference is required");
 
-        var book = ReferenceParse.GetBook(passage.Reference.ReadableReference);
-        var chapter = ReferenceParse.GetChapter(passage.Reference.ReadableReference);
-        var references = ReferenceParse.GetReferencesFromVersesInReference(passage.Reference.ReadableReference);
-        var verseParts = ReferenceParse.GetVerseTypingParts(passage.Reference.ReadableReference);
-        var text = ""; //await verseContext.GetPassageTextFromListOfReferences(references);
+        string book = ReferenceParse.GetBook(passage.Reference.ReadableReference);
+        int chapter = ReferenceParse.GetChapter(passage.Reference.ReadableReference);
+        List<string> verseParts = ReferenceParse.GetVerseTypingParts(passage.Reference.ReadableReference);
+        List<string> references = ReferenceParse.GetReferencesFromVersesInReference(passage.Reference.ReadableReference);
+        string text = await passageContext.GetPassageTextFromListOfReferences(references);
 
         var userVerseParts = new PassageParts
         {

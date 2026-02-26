@@ -11,12 +11,12 @@ public class UserPassage
     public int UserId { get; set; }
     public int CollectionId { get; set; }
     public Reference Reference { get; set; }
-    public DateTime LastPracticed { get; set; } = DateTime.UtcNow;
     public int OrderPosition { get; set; }
     public DateTime DateAdded { get; set; }
     public float ProgressPercent { get; set; } = 0.0f;
     public int TimesMemorized { get; set; } = 0;
     public List<Verse> Verses { get; set; } = new();
+    public DateTime? LastPracticed { get; set; }
     public DateTime? DueDate { get; set; }
 
     public UserPassage(int userId, int collectionId, Reference reference)

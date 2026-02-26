@@ -1,6 +1,7 @@
 using Dapper;
 using DataAccess.Data;
 using DataAccess.DataInterfaces;
+using ScriptureMemory.Server.Services;
 using System;
 using VerseAppNew.Server.Apis;
 using VerseAppNew.Server.Bogus;
@@ -20,6 +21,8 @@ builder.Services.AddScoped<PopulateDatabase>();
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IVerseService, VerseService>();
+builder.Services.AddScoped<IUserPassageService, UserPassageService>();
+builder.Services.AddScoped<ICollectionService, CollectionService>();
 
 // Data Access
 builder.Services.AddScoped<IUserData, UserData>();
@@ -28,25 +31,8 @@ builder.Services.AddScoped<IActivityLoggingData, ActivityLoggingData>();
 builder.Services.AddScoped<ISearchData, DataAccess.Data.SearchData>();
 builder.Services.AddScoped<INotificationData, NotificationData>();
 builder.Services.AddScoped<IVerseData, VerseData>();
-//builder.Services.AddScoped<IPaidData, PaidData>();
-//builder.Services.AddScoped<ICategoryData, CategoryData>();
-//builder.Services.AddScoped<IUserPassageData, UserPassageData>();
-//builder.Services.AddScoped<ICollectionData, CollectionData>();
-//builder.Services.AddScoped<IPracticeLogData, PracticeLogData>();
-//builder.Services.AddScoped<IPracticeSessionData, PracticeSessionData>();
-//builder.Services.AddScoped<IVerseOfDayData, VerseOfDayData>();
-//builder.Services.AddScoped<IVerseOfDaySuggestionData, VerseOfDaySuggestionData>();
-//builder.Services.AddScoped<IRelationshipData, RelationshipData>();
-//builder.Services.AddScoped<IReportData, ReportData>();
-//builder.Services.AddScoped<IPublishedCollectionData, PublishedCollectionData>();
-//builder.Services.AddScoped<IActivityData, ActivityData>();
-//builder.Services.AddScoped<IBannerData, BannerData>();
-//builder.Services.AddScoped<IAdminData, AdminData>();
-//builder.Services.AddScoped<IPushTokenData, PushTokenData>();
-//builder.Services.AddScoped<IHighlightData, HighlightData>();
-//builder.Services.AddScoped<IVerseNoteData, VerseNoteData>();
-//builder.Services.AddScoped<INoteLikeData, NoteLikeData>();
-//builder.Services.AddScoped<IBanData, BanData>();
+builder.Services.AddScoped<IUserPassageData, UserPassageData>();
+builder.Services.AddScoped<ICollectionData, CollectionData>();
 
 
 builder.Services.AddHttpClient("ExpoPush", client =>

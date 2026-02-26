@@ -1,35 +1,34 @@
-//using Dapper;
-//using DataAccess.DataInterfaces;
-//using DataAccess.DBAccess;
-//using DataAccess.Models;
-//using Microsoft.Data.SqlClient;
-//using Microsoft.Extensions.Configuration;
-//using Oracle.ManagedDataAccess.Client;
-//using System;
-//using System.Collections.Generic;
-//using System.Data;
-//using System.Diagnostics;
-//using System.Linq;
-//using System.Text;
-//using System.Text.Json;
-//using System.Threading.Tasks;
-//using ScriptureMemoryLibrary;
+using Dapper;
+using DataAccess.DataInterfaces;
+using DataAccess.Models;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using Oracle.ManagedDataAccess.Client;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using ScriptureMemoryLibrary;
 
-//namespace DataAccess.Data;
-//public class CollectionData : ICollectionData
-//{
-//    private readonly IDBAccess _db;
-//    private readonly IConfiguration _config;
-//    private readonly IPracticeSessionData _practiceSessionData;
-//    private readonly string connectionString;
+namespace DataAccess.Data;
 
-//    public CollectionData(IDBAccess db, IConfiguration config, IPracticeSessionData practiceSessionData)
-//    {
-//        _db = db;
-//        _config = config;
-//        _practiceSessionData = practiceSessionData;
-//        connectionString = _config.GetConnectionString("Default");
-//    }
+public class CollectionData : ICollectionData
+{
+    private readonly IConfiguration _config;
+    private readonly IPracticeSessionData _practiceSessionData;
+    private readonly string connectionString;
+
+    public CollectionData(IConfiguration config, IPracticeSessionData practiceSessionData)
+    {
+        _config = config;
+        _practiceSessionData = practiceSessionData;
+        connectionString = _config.GetConnectionString("Default")!;
+    }
+}
 
 //    public async Task InsertCollection(Collection collection)
 //    {
@@ -94,27 +93,27 @@
 //        {
 //            throw new ArgumentNullException(nameof(collectionBeingPublished), "Collection cannot be null.");
 //        }
-        
+
 //        if (string.IsNullOrWhiteSpace(collectionBeingPublished.Title))
 //        {
 //            throw new ArgumentException("Collection title cannot be null or empty.", nameof(collectionBeingPublished));
 //        }
-        
+
 //        if (string.IsNullOrWhiteSpace(collectionBeingPublished.AuthorUsername))
 //        {
 //            throw new ArgumentException("Collection author username cannot be null or empty.", nameof(collectionBeingPublished));
 //        }
-        
-        
-        
+
+
+
 //        using IDbConnection conn = new OracleConnection(connectionString);
-        
-        
+
+
 //        // Handle CollectionId - use NULL if it's 0 or not set
 //        int? collectionIdValue = collectionBeingPublished.CollectionId > 0 
 //            ? collectionBeingPublished.CollectionId 
 //            : (int?)null;
-        
+
 //        await conn.ExecuteAsync(@"INSERT INTO PUBLISHED_COLLECTIONS
 //                    (DESCRIPTION, TITLE, VERSE_ORDER, AUTHOR, DATE_PUBLISHED, STATUS, COLLECTION_ID)
 //                    VALUES
@@ -127,9 +126,9 @@
 //            CollectionId = collectionIdValue
 //        },
 //        commandType: CommandType.Text);
-        
-        
-        
+
+
+
 //        var getPublishedIdSql = @"SELECT PUBLISHED_ID FROM PUBLISHED_COLLECTIONS 
 //                                  WHERE AUTHOR = :Author 
 //                                    AND TITLE = :Title
@@ -137,7 +136,7 @@
 //                                    AND STATUS = 'PENDING'
 //                                  ORDER BY DATE_PUBLISHED DESC 
 //                                  FETCH FIRST 1 ROWS ONLY";
-        
+
 //        var publishedId = await conn.QueryFirstOrDefaultAsync<int>(
 //            getPublishedIdSql, 
 //            new 
@@ -147,7 +146,7 @@
 //                VerseOrder = collectionBeingPublished.VerseOrder ?? string.Empty
 //            }, 
 //            commandType: CommandType.Text);
-        
+
 //        // Save notes for published collection
 //        if (publishedId > 0 && collectionBeingPublished.Notes != null && collectionBeingPublished.Notes.Count > 0)
 //        {
@@ -163,7 +162,7 @@
 //                }, commandType: CommandType.Text);
 //            }
 //        }
-        
+
 //        return publishedId;
 //    }
 
@@ -351,12 +350,12 @@
 
 //        using IDbConnection conn = new OracleConnection(connectionString);
 //        var result = await conn.QueryFirstOrDefaultAsync<Collection>(sql, new { CollectionId = collectionId }, commandType: CommandType.Text);
-        
+
 //        if (result != null)
 //        {
 //            await PopulateCollectionNotes(result);
 //        }
-        
+
 //        return result;
 //    }
 
@@ -442,7 +441,7 @@
 
 //        var result = await GetUserVersesForCollection(collectionDictionary);
 //        await PopulateCollectionNotes(result);
-        
+
 //        return result;
 //    }
 
@@ -504,7 +503,7 @@
 //                            }
 //                        }
 //                    }
-                    
+
 //                    var ordered = new List<UserPassage>();
 //                    var unordered = new List<UserPassage>();
 
@@ -570,7 +569,7 @@
 //        }
 
 //        using IDbConnection conn = new OracleConnection(connectionString);
-        
+
 //        var inClause = string.Join(",", collectionIds.Select((_, i) => $":id{i}"));
 //        var sql = $@"SELECT ID AS Id, COLLECTION_ID AS CollectionId, TEXT AS Text
 //                    FROM COLLECTION_NOTES
@@ -755,10 +754,10 @@
 
 //        var results = await GetUserVersesForPublishedCollection(collectionDictionary);
 //        var resultsList = results.ToList();
-        
+
 //        // Load notes for all published collections
 //        await PopulatePublishedCollectionNotes(resultsList);
-        
+
 //        return resultsList;
 //    }
 
@@ -1076,16 +1075,16 @@
 
 //        var results = await QueryPublishedCollectionsAsync(sql, new { PublishedId = publishedId });
 //        var publishedCollection = results.FirstOrDefault();
-        
+
 //        // Load notes for published collection
 //        if (publishedCollection != null)
 //        {
 //            await PopulatePublishedCollectionNotes(publishedCollection);
 //        }
-        
+
 //        return publishedCollection;
 //    }
-    
+
 //    private async Task PopulatePublishedCollectionNotes(PublishedCollection publishedCollection)
 //    {
 //        if (publishedCollection == null || publishedCollection.PublishedId <= 0)
@@ -1101,7 +1100,7 @@
 //        var notes = await conn.QueryAsync<CollectionNote>(sql, new { PublishedId = publishedCollection.PublishedId }, commandType: CommandType.Text);
 //        publishedCollection.Notes = notes?.ToList() ?? new List<CollectionNote>();
 //    }
-    
+
 //    private async Task PopulatePublishedCollectionNotes(IEnumerable<PublishedCollection> publishedCollections)
 //    {
 //        if (publishedCollections == null || !publishedCollections.Any())

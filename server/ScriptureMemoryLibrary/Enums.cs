@@ -8,6 +8,13 @@ namespace ScriptureMemoryLibrary
 {
     public static class Enums
     {
+        public enum CollectionVisibility
+        {
+            Private = 0,
+            Friends = 1,
+            Public = 2
+        }
+
         public enum Status
         {
             Active = 0,
