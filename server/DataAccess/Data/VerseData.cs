@@ -29,7 +29,7 @@ public class VerseData : IVerseData
     public VerseData(IConfiguration config, ICategoryData? categoryData = null)
     {
         _config = config;
-        connectionString = _config.GetConnectionString("Default") ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
+        connectionString = _config.GetConnectionString("Default")!;
         _categoryData = categoryData;
     }
 

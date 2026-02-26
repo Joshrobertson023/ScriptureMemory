@@ -28,6 +28,86 @@ public class CollectionData : ICollectionData
         _practiceSessionData = practiceSessionData;
         connectionString = _config.GetConnectionString("Default")!;
     }
+
+    /// <summary>
+    /// Insert a collection
+    /// </summary>
+    /// <param name="collection"></param>
+    /// <returns>int</returns>
+    public async Task<int> InsertCollection(Collection collection)
+    {
+        var sql = @"INSERT INTO COLLECTIONS
+                (USER_ID, ORDER_POSITION, VISIBILITY, IS_FAVORITES, DESCRIPTION, PROGRESS_PERCENT, TITLE, DATE_CREATED, PUBLISHED_ID, AUTHOR_ID)
+                VALUES
+                (:UserId, :OrderPosition, :Visibility, :IsFavorites, :Description, :ProgressPercent, :Title, :DateCreated, :PublishedId, :AuthorId)
+                RETURNING COLLECTION_ID INTO :NewId";
+
+        await using var conn = new OracleConnection(connectionString);
+        await conn.OpenAsync();
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("UserId", collection.UserId);
+        parameters.Add("OrderPosition", collection.OrderPosition);
+        parameters.Add("Visibility", collection.Visibility);
+        parameters.Add("IsFavorites", collection.IsFavorites);
+        parameters.Add("Description", collection.Description);
+        parameters.Add("ProgressPercent", collection.ProgressPercent);
+        parameters.Add("Title", collection.Title);
+        parameters.Add("DateCreated", DateTime.UtcNow);
+
+        parameters.Add("NewId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+
+        await conn.ExecuteAsync(sql, parameters);
+
+        return parameters.Get<int>("NewId");
+    }
+
+    /// <summary>
+    /// Get the next order position for creating a new collection
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns>int</returns>
+    public async Task<int> GetNextOrderPosition(int userId)
+    {
+        var sql = @"SELECT NVL(MAX(ORDER_POSITION), 0) + 1 FROM COLLECTIONS WHERE USER_ID = :UserId";
+        
+        await using var conn = new OracleConnection(connectionString);
+        var nextPosition = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
+        
+        return nextPosition;
+    }
+
+    /// <summary>
+    /// Check whether a favorites collection already exists for a user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns>bool</returns>
+    public async Task<bool> FavoritesExists(int userId)
+    {
+        var sql = @"SELECT COUNT(*) FROM COLLECTIONS WHERE USER_ID = :UserId AND IS_FAVORITES = 1";
+        
+        await using var conn = new OracleConnection(connectionString);
+        var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
+        
+        return count > 0;
+    }
+
+    /// <summary>
+    /// Check whether a user has already saved this collection
+    /// </summary>
+    /// <param name="collection"></param>
+    /// <returns>bool</returns>
+    public async Task<bool> SavedFromPublishedExists(Collection collection)
+    {
+        var sql = @"SELECT COUNT(*) FROM COLLECTIONS 
+                    WHERE USER_ID = :UserId 
+                    AND PUBLISHED_ID = :PublishedId";
+        await using var conn = new OracleConnection(connectionString);
+        var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = collection.UserId, PublishedId = collection.PublishedId });
+
+        return count > 0;
+    }
 }
 
 //    public async Task InsertCollection(Collection collection)
