@@ -13,6 +13,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ScriptureMemoryLibrary;
+using DataAccess.Requests;
+using static ScriptureMemoryLibrary.Enums;
 
 namespace DataAccess.Data;
 
@@ -63,6 +65,25 @@ public class CollectionData : ICollectionData
         return parameters.Get<int>("NewId");
     }
 
+    public async Task SaveCollection(SaveCollectionRequest request)
+    {
+        var sql = @"INSERT INTO SAVED_COLLECTIONS
+                    (USER_ID, PUBLISHED_ID, DATE_SAVED, ORDER_POSITION, VISIBILITY)
+                    VALUES
+                    (:UserId, :PublishedId, :DateSaved, :OrderPosition, :Visibility)";
+
+        await using var conn = new OracleConnection(connectionString);
+        await conn.OpenAsync();
+        await conn.ExecuteAsync(sql, new
+        {
+            UserId = request.UserId,
+            PublishedId = request.PublishedId,
+            DateSaved = request.DateSaved,
+            OrderPosition = request.OrderPosition,
+            Visibility = CollectionVisibility.Private,
+        });
+    }
+
     /// <summary>
     /// Get the next order position for creating a new collection
     /// </summary>
@@ -98,13 +119,13 @@ public class CollectionData : ICollectionData
     /// </summary>
     /// <param name="collection"></param>
     /// <returns>bool</returns>
-    public async Task<bool> SavedFromPublishedExists(Collection collection)
+    public async Task<bool> SavedFromPublishedExists(int publishedId, int userId)
     {
         var sql = @"SELECT COUNT(*) FROM COLLECTIONS 
                     WHERE USER_ID = :UserId 
                     AND PUBLISHED_ID = :PublishedId";
         await using var conn = new OracleConnection(connectionString);
-        var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = collection.UserId, PublishedId = collection.PublishedId });
+        var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId, PublishedId = publishedId });
 
         return count > 0;
     }

@@ -1,5 +1,6 @@
 ﻿using DataAccess.DataInterfaces;
 using DataAccess.Models;
+using DataAccess.Requests;
 using VerseAppNew.Server.Services;
 using static ScriptureMemoryLibrary.Enums;
 
@@ -76,50 +77,36 @@ public sealed class CollectionService : ICollectionService
     }
 
     /// <summary>
-    /// Saves the passed collection for the user
+    /// Saves a collection for a user
     /// </summary>
     /// <param name="collection"></param>
-    /// <returns>int</returns>
+    /// <returns></returns>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="ArgumentException"></exception>
-    public async Task<int> SaveCollection(Collection collection)
+    public async Task SaveCollection(SaveCollectionRequest request)
     {
-        if (await collectionContext.SavedFromPublishedExists(collection))
+        if (await collectionContext.SavedFromPublishedExists(request.PublishedId, request.UserId))
             throw new InvalidOperationException("Cannot create collection: User already saved collection.");
-        if (collection.PublishedId is null)
-            throw new ArgumentException("Cannot save collection: PublishedId is required.");
-
-        // Get the author's id
-        if (collection.AuthorId is null)
-            collection.AuthorId = await collectionContext.GetAuthorId(collection.PublishedId
-                ?? throw new ArgumentException("Cannot save collection: PublishedId is required."));
 
         // Get the next order position to insert the new collection at the bottom of the list
-        collection.OrderPosition = await collectionContext.GetNextOrderPosition(collection.UserId);
+        request.OrderPosition = await collectionContext.GetNextOrderPosition(request.UserId);
 
-        // Saved collection should not be favorites
-        collection.IsFavorites = false;
-
-        // Default saved collections to private
-        collection.Visibility = CollectionVisibility.Private;
-
-        int newCollectionId = await collectionContext.InsertCollection(collection);
+        await collectionContext.SaveCollection(request);
 
         await logger.Log(
             new ActivityLog(
-                collection.UserId,
-                ActionType.Create,
+                request.UserId,
+                ActionType.Save,
                 EntityType.Collection,
-                newCollectionId,
+                null,
                 "User saved collection",
                 new
                 {
-                    PublishedId = collection.PublishedId,
+                    PrimaryKey = "UserId + PublishedId",
+                    PublishedId = request.PublishedId,
                 }
             )
         );
-
-        return newCollectionId;
     }
 
     /// <summary>

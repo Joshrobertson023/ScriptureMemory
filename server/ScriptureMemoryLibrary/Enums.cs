@@ -84,7 +84,7 @@ namespace ScriptureMemoryLibrary
             Critical = 3
         }
 
-        public enum ActionType
+        public enum ActionType // Don't update these after using real user data
         {
             Register,
             Login,
@@ -96,6 +96,7 @@ namespace ScriptureMemoryLibrary
             Delete,
             Publish,
             Update,
+            Save,
 
             View,
             Like,
