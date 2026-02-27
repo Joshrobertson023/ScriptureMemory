@@ -8,4 +8,7 @@ public interface ICollectionData
     Task<int> GetNextOrderPosition(int userId);
     Task<bool> FavoritesExists(int userId);
     Task<bool> SavedFromPublishedExists(Collection collection);
+    Task<int> GetAuthorId(int publishedId);
+    Task<List<Collection>> GetUserCollections(int userId);
+    Task<string> GetAuthorName(int publishedId);
 }

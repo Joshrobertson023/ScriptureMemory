@@ -21,13 +21,7 @@ public class Collection
     public string? Author { get; set; }       // If a saved published collection
     public int? ProgressPercent { get; set; } // Percentage out of 100
     //public float? AverageProgressPercent { get; set; }
-    public int NumVerses
-    {
-        get
-        {
-            return Passages.Count;
-        }
-    }
+    public int NumPassages { get; set; }
     public List<UserPassage> Passages { get; set; } = new();
     public List<CollectionNote> Notes { get; set; } = new();
 }

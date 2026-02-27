@@ -71,10 +71,10 @@ public class CollectionData : ICollectionData
     public async Task<int> GetNextOrderPosition(int userId)
     {
         var sql = @"SELECT NVL(MAX(ORDER_POSITION), 0) + 1 FROM COLLECTIONS WHERE USER_ID = :UserId";
-        
+
         await using var conn = new OracleConnection(connectionString);
         var nextPosition = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
-        
+
         return nextPosition;
     }
 
@@ -86,10 +86,10 @@ public class CollectionData : ICollectionData
     public async Task<bool> FavoritesExists(int userId)
     {
         var sql = @"SELECT COUNT(*) FROM COLLECTIONS WHERE USER_ID = :UserId AND IS_FAVORITES = 1";
-        
+
         await using var conn = new OracleConnection(connectionString);
         var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
-        
+
         return count > 0;
     }
 
@@ -108,64 +108,131 @@ public class CollectionData : ICollectionData
 
         return count > 0;
     }
+
+    /// <summary>
+    /// Gets a list of empty user collections
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<List<Collection>> GetUserCreatedCollections(int userId)
+    {
+        var sql = @"SELECT 
+                        c.COLLECTION_ID AS CollectionId,
+                        c.USER_ID AS UserId,
+                        c.TITLE,
+                        c.VISIBILITY,
+                        c.DATE_CREATED AS DateCreated,
+                        c.ORDER_POSITION AS OrderPosition,
+                        c.IS_FAVORITES AS IsFavorites,
+                        c.DESCRIPTION,
+                        c.PUBLISHED_ID AS PublishedId,
+                        c.AUTHOR_ID AS AuthorId,
+                        c.PROGRESS_PERCENT AS ProgressPercent,
+                        COUNT(up.COLLECTION_ID) AS NumPassages
+                    FROM COLLECTIONS c
+                    LEFT JOIN USER_PASSAGES up 
+                        ON up.COLLECTION_ID = c.COLLECTION_ID
+                    WHERE c.USER_ID = :UserId 
+                      AND c.PUBLISHED_ID IS NULL
+                    GROUP BY 
+                        c.COLLECTION_ID,
+                        c.USER_ID,
+                        c.TITLE,
+                        c.VISIBILITY,
+                        c.DATE_CREATED,
+                        c.ORDER_POSITION,
+                        c.IS_FAVORITES,
+                        c.DESCRIPTION,
+                        c.PUBLISHED_ID,
+                        c.AUTHOR_ID,
+                        c.PROGRESS_PERCENT
+                    ORDER BY c.ORDER_POSITION";
+        
+        await using var conn = new OracleConnection(connectionString);
+        var collections = await conn.QueryAsync<Collection>(sql, new { UserId = userId });
+        
+        return collections.ToList();
+    }
+
+    //public async Task<List<Collection>> GetUserSavedCollections(int userId)
+    //{
+    //    var sql = @"SELECT 
+    //                    c.PUBLISHED_ID AS CollectionId,
+    //                    c.USER_ID AS UserId,
+    //                    c.TITLE,
+    //                    c.VISIBILITY,
+    //                    c.DATE_CREATED AS DateCreated,
+    //                    c.ORDER_POSITION AS OrderPosition,
+    //                    c.IS_FAVORITES AS IsFavorites,
+    //                    c.DESCRIPTION,
+    //                    c.PUBLISHED_ID AS PublishedId,
+    //                    c.AUTHOR_ID AS AuthorId,
+    //                    c.PROGRESS_PERCENT AS ProgressPercent,
+    //                    COUNT(up.COLLECTION_ID) AS NumPassages
+    //                FROM COLLECTIONS c
+    //                LEFT JOIN USER_PASSAGES up 
+    //                    ON up.COLLECTION_ID = c.COLLECTION_ID
+    //                WHERE c.USER_ID = :UserId 
+    //                  AND c.PUBLISHED_ID IS NULL
+    //                GROUP BY 
+    //                    c.COLLECTION_ID,
+    //                    c.USER_ID,
+    //                    c.TITLE,
+    //                    c.VISIBILITY,
+    //                    c.DATE_CREATED,
+    //                    c.ORDER_POSITION,
+    //                    c.IS_FAVORITES,
+    //                    c.DESCRIPTION,
+    //                    c.PUBLISHED_ID,
+    //                    c.AUTHOR_ID,
+    //                    c.PROGRESS_PERCENT
+    //                ORDER BY c.ORDER_POSITION";
+
+    //    await using var conn = new OracleConnection(connectionString);
+    //    var collections = await conn.QueryAsync<Collection>(sql, new { UserId = userId });
+
+    //    return collections.ToList();
+    //}
+
+    public async Task<Collection> GetUserCollection
+
+
+
+    // -- Published Collections -----------------------------------------------------
+
+
+    /// <summary>
+    /// Gets the author id for a published collection
+    /// </summary>
+    /// <param name="publishedId"></param>
+    /// <returns>int</returns>
+    public async Task<int> GetAuthorId(int publishedId)
+    {
+        var sql = @"SELECT AUTHOR_ID FROM PUBLISHED_COLLECTIONS WHERE PUBLISHED_ID = :PublishedId";
+
+        await using var conn = new OracleConnection(connectionString);
+        var authorId = await conn.ExecuteScalarAsync<int>(sql, new { PublishedId = publishedId });
+
+        return authorId;
+    }
+
+    /// <summary>
+    /// Gets the author's username of a published collection
+    /// </summary>
+    /// <param name="publishedId"></param>
+    /// <returns></returns>
+    public async Task<string> GetAuthorName(int publishedId)
+    {
+        var sql = @"SELECT u.USERNAME FROM PUBLISHED_COLLECTIONS c
+                    INNER JOIN USERS u ON c.AUTHOR_ID = u.USER_ID
+                    WHERE c.PUBLISHED_ID = :PublishedId";
+
+        await using var conn = new OracleConnection(connectionString);
+        var authorName = await conn.ExecuteScalarAsync<string>(sql, new { PublishedId = publishedId });
+
+        return authorName ?? "";
+    }
 }
-
-//    public async Task InsertCollection(Collection collection)
-//    {
-//        if (collection == null)
-//        {
-//            throw new ArgumentNullException(nameof(collection));
-//        }
-
-//        if (string.IsNullOrWhiteSpace(collection.Username))
-//        {
-//            throw new ArgumentException("Collection username (owner) is required.", nameof(collection));
-//        }
-
-//        using IDbConnection conn = new OracleConnection(connectionString);
-
-//        // Only check limit for collections where user is the author (AUTHOR_USERNAME = USERNAME)
-//        // Saved collections from other authors don't count toward the limit
-//        var isAuthor = !string.IsNullOrWhiteSpace(collection.AuthorUsername) &&
-//                       string.Equals(collection.AuthorUsername, collection.Username, StringComparison.OrdinalIgnoreCase);
-
-//        if (isAuthor)
-//        {
-//            // Check if user is paid to determine limit
-//            var userIsPaid = await conn.ExecuteScalarAsync<int?>(
-//                "SELECT ISPAID FROM USERS WHERE USERNAME = :Username",
-//                new { Username = collection.Username },
-//                commandType: CommandType.Text);
-
-//            var maxCollectionsPerUser = (userIsPaid == 1) ? 40 : 5;
-
-//            var existingCount = await conn.ExecuteScalarAsync<int>(
-//                @"SELECT COUNT(*) FROM COLLECTIONS 
-//                  WHERE USERNAME = :Username 
-//                  AND AUTHOR_USERNAME = :Username",
-//                new { Username = collection.Username },
-//                commandType: CommandType.Text);
-
-//            if (existingCount >= maxCollectionsPerUser)
-//            {
-//                throw new InvalidOperationException("Collection limit reached for this user.");
-//            }
-//        }
-
-//        var sql = @"INSERT INTO COLLECTIONS
-//                     (author_username, username, Title, Visibility, Verse_Order, date_created)
-//                     VALUES
-//                     (:AuthorUsername, :Username, :Title, :Visibility, :VerseOrder, SYSDATE)";
-
-//        await conn.ExecuteAsync(sql, new
-//        {
-//            collection.AuthorUsername,
-//            collection.Username,
-//            collection.Title,
-//            collection.Visibility,
-//            collection.VerseOrder
-//        }, commandType: CommandType.Text);
-//    }
 
 //    public async Task<int> PublishCollection(Collection collectionBeingPublished, string description)
 //    {

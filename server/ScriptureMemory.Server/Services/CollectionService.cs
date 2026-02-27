@@ -8,6 +8,8 @@ namespace ScriptureMemory.Server.Services;
 public interface ICollectionService
 {
     Task<int> CreateCollection(Collection newCollection);
+    Task<int> SaveCollection(Collection collection);
+    Task<List<Collection>> GetUserCollections(int userId);
 }
 
 public sealed class CollectionService : ICollectionService
@@ -74,10 +76,10 @@ public sealed class CollectionService : ICollectionService
     }
 
     /// <summary>
-    /// Creates a new collection for a user from a published collection
+    /// Saves the passed collection for the user
     /// </summary>
     /// <param name="collection"></param>
-    /// <returns></returns>
+    /// <returns>int</returns>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="ArgumentException"></exception>
     public async Task<int> SaveCollection(Collection collection)
@@ -88,8 +90,9 @@ public sealed class CollectionService : ICollectionService
             throw new ArgumentException("Cannot save collection: PublishedId is required.");
 
         // Get the author's id
-        //if (newCollection.AuthorId is null)
-        //    newCollection.AuthorId = await collectionContext.GetAuthorIdForPublishedCollection(newCollection.PublishedId);
+        if (collection.AuthorId is null)
+            collection.AuthorId = await collectionContext.GetAuthorId(collection.PublishedId
+                ?? throw new ArgumentException("Cannot save collection: PublishedId is required."));
 
         // Get the next order position to insert the new collection at the bottom of the list
         collection.OrderPosition = await collectionContext.GetNextOrderPosition(collection.UserId);
@@ -117,5 +120,30 @@ public sealed class CollectionService : ICollectionService
         );
 
         return newCollectionId;
+    }
+
+    /// <summary>
+    /// Gets a list of empty user collections
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns><List<Collection>></returns>
+    public async Task<List<Collection>> GetUserCollections(int userId)
+    {
+        List<Collection> collections = await collectionContext.GetUserCreatedCollections(userId);
+
+        // Later on after doing published collections, call GetUserSavedCollections
+
+        return collections;
+    }
+
+    /// <summary>
+    /// Gets a user's collection filled in with passages and notes
+    /// </summary>
+    /// <param name="collectionId"></param>
+    /// <param name="userId"></param>
+    /// <returns>Collection</returns>
+    public async Task<Collection> GetCollection(int collectionId)
+    {
+        Collection collection = await collectionContext.GetCollection(collectionId);
     }
 }
