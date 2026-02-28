@@ -28,6 +28,45 @@ public class UserPassageData : IUserPassageData
         connectionString = _config.GetConnectionString("Default")!;
     }
 
+    public async Task<int> InsertUserPassage(UserPassage newPassage)
+    {
+        var sql = @"INSERT INTO USER_PASSAGES
+                    (REFERENCE, DUE_DATE, LAST_PRACTICED, TIMES_MEMORIZED, DATE_SAVED, 
+                     COLLECTION_ID, ORDER_POSITION, NOTIFY_MEMORIZED, USER_ID, PROGRESS_PERCENT)
+                    VALUES
+                    (:Reference, :DueDate, :LastPracticed, :TimesMemorized, :DateSaved, 
+                     :CollectionId, :OrderPosition, :NotifyMemorized, :UserId, :ProgressPercent)
+                    RETURNING ID INTO :NewId";
+
+        await using var conn = new OracleConnection(connectionString);
+        await conn.OpenAsync();
+
+        var parameters = new DynamicParameters();
+
+        parameters.Add("Reference", newPassage.Reference.ReadableReference);
+        parameters.Add("DueDate", newPassage.DueDate);
+        parameters.Add("LastPracticed", newPassage.LastPracticed);
+        parameters.Add("TimesMemorized", newPassage.TimesMemorized);
+        parameters.Add("DateSaved", newPassage.DateAdded);
+        parameters.Add("CollectionId", newPassage.CollectionId);
+        parameters.Add("OrderPosition", newPassage.OrderPosition);
+        parameters.Add("NotifyMemorized", newPassage.NotifyMemorized ? 1 : 0);
+        parameters.Add("UserId", newPassage.UserId);
+        parameters.Add("ProgressPercent", newPassage.ProgressPercent);
+
+        parameters.Add(
+            "NewId",
+            dbType: DbType.Int32,
+            direction: ParameterDirection.Output
+        );
+
+        await conn.ExecuteAsync(sql, parameters);
+
+        var newId = parameters.Get<int>("NewId");
+
+        return newId;
+    }
+
     public async Task<string> GetPassageTextFromListOfReferences(List<string> references)
     {
         var sql = @"SELECT TEXT FROM VERSES WHERE VERSE_REFERENCE IN (:References)";
@@ -52,6 +91,7 @@ public class UserPassageData : IUserPassageData
         public int TimesMemorized { get; set; }
         public DateTime? LastPracticed { get; set; }
         public DateTime? DueDate { get; set; }
+        public bool NotifyMemorized { get; set; }
         public List<VerseRow> Verses { get; set; } = new();
     }
 
@@ -82,6 +122,7 @@ public class UserPassageData : IUserPassageData
                 up.times_memorized as TimesMemorized,
                 up.last_practiced as LastPracticed,
                 up.due_date as DueDate,
+                up.notify_memorized as NotifyMemorized,
 
                 v.verse_id as VerseId,
                 v.verse_reference as ReadableReference,

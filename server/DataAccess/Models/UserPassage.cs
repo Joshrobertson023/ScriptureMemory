@@ -18,6 +18,7 @@ public class UserPassage
     public List<Verse> Verses { get; set; } = new();
     public DateTime? LastPracticed { get; set; }
     public DateTime? DueDate { get; set; }
+    public bool NotifyMemorized { get; set; } = true;
 
     public UserPassage() { }
 

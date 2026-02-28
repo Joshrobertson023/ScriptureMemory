@@ -305,4 +305,15 @@ public static class ReferenceParse
             throw new Exception($"Failed to parse chapter number from reference: {reference} | parts[1]: {parts[1]}");
         }
     }
+
+    /// <summary>
+    /// Normalizes a reference's syntax
+    /// </summary>
+    /// <param name="readableReference"></param>
+    /// <returns></returns>
+    public static string NormalizeReadableReference(string readableReference)
+    {
+        var reference = ConvertStringToReference(readableReference);
+        return reference.ReadableReference;
+    }
 }

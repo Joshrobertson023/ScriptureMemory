@@ -76,6 +76,22 @@ public sealed class CollectionService : ICollectionService
             )
         );
 
+        // Insert passages and notes
+        if (newCollection.Passages.Count > 0)
+        {
+            foreach (var passage in newCollection.Passages)
+            {
+                await passageContext.InsertUserPassage(passage);
+            }
+        }
+        if (newCollection.Notes.Count > 0)
+        {
+            foreach (var note in newCollection.Notes)
+            {
+                await collectionContext.InsertCollectionNote(note);
+            }
+        }
+
         return newCollectionId;
     }
 
