@@ -17,13 +17,16 @@ public sealed class CollectionService : ICollectionService
 {
     private readonly ICollectionData collectionContext;
     private readonly IActivityLogger logger;
+    private readonly IUserPassageData passageContext;
 
     public CollectionService(
         ICollectionData collectionContext, 
-        IActivityLogger logger)
+        IActivityLogger logger,
+        IUserPassageData passageContext)
     {
         this.collectionContext = collectionContext;
         this.logger = logger;
+        this.passageContext = passageContext;
     }
 
     /// <summary>
@@ -102,7 +105,6 @@ public sealed class CollectionService : ICollectionService
                 "User saved collection",
                 new
                 {
-                    PrimaryKey = "UserId + PublishedId",
                     PublishedId = request.PublishedId,
                 }
             )
@@ -129,8 +131,8 @@ public sealed class CollectionService : ICollectionService
     /// <param name="collectionId"></param>
     /// <param name="userId"></param>
     /// <returns>Collection</returns>
-    public async Task<Collection> GetCollection(int collectionId)
+    public async Task<List<UserPassage>> GetUserPassagesForCollection(int collectionId)
     {
-        Collection collection = await collectionContext.GetCollection(collectionId);
+        return await passageContext.GetUserPassagesPopulatedForCollection(collectionId);
     }
 }

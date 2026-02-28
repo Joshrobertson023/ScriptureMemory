@@ -13,4 +13,5 @@ public interface ICollectionData
     Task<int> GetAuthorId(int publishedId);
     Task<List<Collection>> GetUserCollections(int userId);
     Task<string> GetAuthorName(int publishedId);
+    Task<List<Collection>> GetUserCreatedCollections(int userId);
 }

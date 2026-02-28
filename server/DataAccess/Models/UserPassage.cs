@@ -19,11 +19,21 @@ public class UserPassage
     public DateTime? LastPracticed { get; set; }
     public DateTime? DueDate { get; set; }
 
+    public UserPassage() { }
+
     public UserPassage(int userId, int collectionId, Reference reference)
     {
         UserId = userId;
         CollectionId = collectionId;
         Reference = reference;
+        DateAdded = DateTime.UtcNow;
+    }
+
+    public UserPassage(int userId, int collectionId, string readableReference)
+    {
+        UserId = userId;
+        CollectionId = collectionId;
+        Reference = new Reference(readableReference);
         DateAdded = DateTime.UtcNow;
     }
 }

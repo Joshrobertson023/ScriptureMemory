@@ -13,7 +13,7 @@ public class Verse
     public string Text { get; set; }
     public int UsersSavedCount { get; set; } = 0;
     public int UsersMemorizedCount { get; set; } = 0;
-    public string VerseNumbers { get; set; } // What is this?
+    public string VerseNumbers { get; set; } // Typable part of reference that has verses
 
     public Verse() { }
 

@@ -38,6 +38,109 @@ public class UserPassageData : IUserPassageData
         
         return string.Join(" ", result);
     }
+
+    // DTO used for fetching a row of user passages
+    private class UserPassageRow
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public int CollectionId { get; set; }
+        public string ReadableReference { get; set; } = string.Empty;
+        public int OrderPosition { get; set; }
+        public DateTime DateAdded { get; set; }
+        public float ProgressPercent { get; set; }
+        public int TimesMemorized { get; set; }
+        public DateTime? LastPracticed { get; set; }
+        public DateTime? DueDate { get; set; }
+        public List<VerseRow> Verses { get; set; } = new();
+    }
+
+    private class VerseRow
+    {
+        public int VerseId { get; set; }
+        public string ReadableReference { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+        public int UsersSavedCount { get; set; }
+        public int UsersMemorizedCount { get; set; }
+    }
+
+    /// <summary>
+    /// Gets a list of user passages populated with its verses for a collection
+    /// </summary>
+    /// <param name="collectionId"></param>
+    /// <returns>List<UserPassage>></returns>
+    public async Task<List<UserPassage>> GetUserPassagesPopulatedForCollection(int collectionId)
+    {
+        var sql = @"SELECT 
+                up.ID,
+                up.USER_ID AS UserId,
+                up.COLLECTION_ID AS CollectionId,
+                up.REFERENCE AS ReadableReference,
+                up.ORDER_POSITION AS OrderPosition,
+                up.DATE_SAVED AS DateAdded,
+                up.progress_percent as ProgressPercent,
+                up.times_memorized as TimesMemorized,
+                up.last_practiced as LastPracticed,
+                up.due_date as DueDate,
+
+                v.verse_id as VerseId,
+                v.verse_reference as ReadableReference,
+                v.text as Text,
+                v.users_saved_verse as UsersSavedCount, 
+                v.users_memorized as UsersMemorizedCount
+
+                FROM USER_PASSAGES up 
+                JOIN verses v on up.reference = v.verse_reference
+                WHERE up.COLLECTION_ID = :CollectionId
+                ORDER BY up.ORDER_POSITION, v.verse_id";
+
+        using var conn = new OracleConnection(connectionString);
+        await conn.OpenAsync();
+
+        var lookup = new Dictionary<int, UserPassage>();
+
+        await conn.QueryAsync<UserPassageRow, VerseRow, UserPassage>(
+            sql,
+            (row, verseRow) =>
+            {
+                if (!lookup.TryGetValue(row.Id, out var passage))
+                {
+                    passage = new UserPassage(
+                        row.UserId,
+                        row.CollectionId,
+                        row.ReadableReference)
+                    {
+                        Id = row.Id,
+                        OrderPosition = row.OrderPosition,
+                        DateAdded = row.DateAdded,
+                        ProgressPercent = row.ProgressPercent,
+                        TimesMemorized = row.TimesMemorized,
+                        LastPracticed = row.LastPracticed,
+                        DueDate = row.DueDate
+                    };
+
+                    lookup.Add(row.Id, passage);
+                }
+
+                var verse = new Verse(
+                    new DataAccess.Models.Reference(verseRow.ReadableReference),
+                    verseRow.Text)
+                {
+                    Id = verseRow.VerseId,
+                    UsersSavedCount = verseRow.UsersSavedCount,
+                    UsersMemorizedCount = verseRow.UsersMemorizedCount
+                };
+
+                passage.Verses.Add(verse);
+
+                return passage;
+            },
+            new { CollectionId = collectionId },
+            splitOn: "VerseId"
+        );
+
+        return lookup.Values.ToList();
+    }
 }
 
 //    public async Task<List<UserPassage>> GetMemorized(string username)
