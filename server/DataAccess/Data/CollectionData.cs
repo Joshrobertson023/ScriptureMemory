@@ -215,75 +215,6 @@ public class CollectionData : ICollectionData
     //    return collections.ToList();
     //}
 
-    public async Task<Collection?> GetUserCollection(Collection collection)
-    {
-        collection.Passages = new List<UserPassage>();
-
-        List<UserPassage> passages = collection.Passages;
-        List<string> verseReferences = new();
-
-
-
-
-
-
-        foreach (var passage in passages)
-        {
-            if (string.IsNullOrEmpty(passage.)) continue;
-
-            List<string> individualVerseReferences = ReferenceParse.GetReferencesFromVersesInReference(userVerse.ReadableReference);
-            verseReferences.AddRange(individualVerseReferences);
-        }
-
-            List<string> uniqueReferences = verseReferences.Distinct().ToList();
-
-            if (uniqueReferences.Count == 0)
-                return collection;
-
-            var quotedReferences = uniqueReferences.Select(r => $"'{r.Replace("'", "''")}'");
-var referencesList = string.Join(",", quotedReferences);
-
-Debug.WriteLine($"\n\n\n\nSQL IN CLAUSE: {referencesList}\n\n\n\n");
-
-            var sql = $@"SELECT * FROM verses WHERE verse_reference in ({referencesList})";
-
-            using IDbConnection conn = new OracleConnection(connectionString);
-var result = await conn.QueryAsync<Verse>(
-    sql,
-    commandType: CommandType.Text);
-
-var resultVerses = result.ToList();
-
-            foreach (var uv in collection.UserVerses)
-            {
-                uv.Verses.Clear();
-                List<string> individualVerseReferences = ReferenceParse.GetReferencesFromVersesInReference(uv.ReadableReference);
-
-                foreach (var verseReference in individualVerseReferences)
-                {
-                    var newVerse = resultVerses.FirstOrDefault(v => v.verse_reference == verseReference);
-                    if (newVerse != null)
-                    {
-                        newVerse.Verse_Number = ReferenceParse.GetVerseNumber(newVerse.verse_reference);
-                        uv.Verses.Add(newVerse);
-                    }
-                }
-            }
-
-            foreach (var uv in collection.UserVerses)
-{
-    Debug.WriteLine("\n\ncollection.UserVerse: " + uv.ReadableReference);
-    foreach (var v in uv.Verses)
-    {
-        Debug.WriteLine("userVerse.Verse: " + v.verse_reference);
-    }
-}
-
-await PopulateCollectionNotes(collection);
-
-return collection;
-        }
-
 
 
     // -- Published Collections -----------------------------------------------------
@@ -319,6 +250,28 @@ return collection;
         var authorName = await conn.ExecuteScalarAsync<string>(sql, new { PublishedId = publishedId });
 
         return authorName ?? "";
+    }
+
+
+
+
+
+
+
+    // -- Collection Notes -----------------------------------------------------
+
+
+
+    public async Task<List<CollectionNote>> GetCollectionNotes(int collectionId)
+    {
+        var sql = @"SELECT ID AS Id, COLLECTION_ID AS CollectionId, TEXT AS Text, ORDER_POSITION AS OrderPosition
+                    FROM COLLECTION_NOTES
+                    WHERE COLLECTION_ID = :CollectionId";
+
+        await using var conn = new OracleConnection(connectionString);
+        var notes = await conn.QueryAsync<CollectionNote>(sql, new { CollectionId = collectionId });
+        
+        return notes?.ToList() ?? new List<CollectionNote>();
     }
 }
 

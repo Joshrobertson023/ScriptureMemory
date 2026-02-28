@@ -131,8 +131,14 @@ public sealed class CollectionService : ICollectionService
     /// <param name="collectionId"></param>
     /// <param name="userId"></param>
     /// <returns>Collection</returns>
-    public async Task<List<UserPassage>> GetUserPassagesForCollection(int collectionId)
+    public async Task<Collection> GetCollection(Collection collection)
     {
-        return await passageContext.GetUserPassagesPopulatedForCollection(collectionId);
+        if (collection.CollectionId <= 0)
+            throw new InvalidOperationException("Cannot get collection: CollectionId is required.");
+
+        collection.Passages = await passageContext.GetUserPassagesPopulatedForCollection(collection.CollectionId);
+        collection.Notes = await collectionContext.GetCollectionNotes(collection.CollectionId);
+
+        return collection;
     }
 }
