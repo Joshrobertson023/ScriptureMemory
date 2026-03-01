@@ -18,13 +18,11 @@ namespace DataAccess.Data;
 public class UserPassageData : IUserPassageData
 {
     private readonly IConfiguration _config;
-    private readonly IPracticeSessionData _practiceSessionData;
     private readonly string connectionString;
 
-    public UserPassageData(IConfiguration config, IPracticeSessionData practiceSessionData)
+    public UserPassageData(IConfiguration config)
     {
         _config = config;
-        _practiceSessionData = practiceSessionData;
         connectionString = _config.GetConnectionString("Default")!;
     }
 

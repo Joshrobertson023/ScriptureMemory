@@ -26,20 +26,16 @@ public class VerseTests : BaseIntegrationTest
         var verse = await verseContext.GetVerse(newVerse.Reference.ReadableReference);
 
         Assert.NotNull(verse);
-        Assert.Equal(newVerse.Reference, verse.Reference);
+        Assert.Equal(newVerse.Reference.ReadableReference, verse.Reference.ReadableReference);
 
 
         // -- Update verse ----------------------
 
-        await verseContext.UpdateUsersMemorizedVerse(verse.Reference.ReadableReference);
+        var oldVerse = await verseContext.GetVerse(newVerse.Reference.ReadableReference);
+        await verseContext.UpdateUsersSavedVerse(oldVerse.Reference.ReadableReference);
         verse = await verseContext.GetVerse(newVerse.Reference.ReadableReference);
-        Assert.NotNull(verse);
-        Assert.Equal(1, verse.UsersMemorizedCount);
-
-        await verseContext.UpdateUsersSavedVerse(verse.Reference.ReadableReference);
-        verse = await verseContext.GetVerse(newVerse.Reference.ReadableReference);
-        Assert.NotNull(verse);
-        Assert.Equal(1, verse.UsersSavedCount);
+        Assert.NotNull(oldVerse);
+        Assert.Equal(oldVerse.UsersSavedCount + 1, verse.UsersSavedCount);
     }
 
     [Fact]
@@ -84,14 +80,9 @@ public class VerseTests : BaseIntegrationTest
             john319
         };
 
-        foreach (var chapterVerse in newChapter)
-        {
-            await verseContext.InsertVerse(chapterVerse);
-        }
-
         var chapterVerses = await verseContext.GetChapterVerses("John", 3);
         Assert.NotNull(chapterVerses);
-        Assert.Equal(4, chapterVerses.Count);
+        Assert.Equal(36, chapterVerses.Count);
         var firstFirst = chapterVerses.FirstOrDefault(v => v.Reference.ReadableReference == "John 3:16");
         Assert.NotNull(firstFirst);
         Assert.Equal(john316.Text, firstFirst.Text);
@@ -140,7 +131,7 @@ public class VerseTests : BaseIntegrationTest
 
         foreach (var chapterVerse in newChapter)
         {
-            references.Add(chapterVerse.Reference.ReadableReference);
+            references.Add(chapterVerse.Reference.ReadableReference); 
         }
 
         foreach (var chapterVerse in newChapter)

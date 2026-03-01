@@ -1,8 +1,10 @@
 using Dapper;
 using DataAccess.Data;
 using DataAccess.DataInterfaces;
+using Oracle.ManagedDataAccess.Client;
 using ScriptureMemory.Server.Services;
 using System;
+using System.Data;
 using VerseAppNew.Server.Apis;
 using VerseAppNew.Server.Bogus;
 using VerseAppNew.Server.Services;
@@ -28,11 +30,19 @@ builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<IUserData, UserData>();
 builder.Services.AddScoped<IUserSettingsData, UserSettingsData>();
 builder.Services.AddScoped<IActivityLoggingData, ActivityLoggingData>();
-builder.Services.AddScoped<ISearchData, DataAccess.Data.SearchData>();
+builder.Services.AddScoped<ISearchData, SearchData>();
 builder.Services.AddScoped<INotificationData, NotificationData>();
 builder.Services.AddScoped<IVerseData, VerseData>();
 builder.Services.AddScoped<IUserPassageData, UserPassageData>();
 builder.Services.AddScoped<ICollectionData, CollectionData>();
+
+builder.Services.AddScoped<IDbConnection>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    return new OracleConnection(
+        config.GetConnectionString("DefaultConnection")
+    );
+});
 
 
 builder.Services.AddHttpClient("ExpoPush", client =>
@@ -99,7 +109,7 @@ app.ConfigureUserEndpoints();
 using var scope = app.Services.CreateScope();
 {
     var populateService = scope.ServiceProvider.GetRequiredService<PopulateDatabase>();
-    await populateService.Populate();
+    //await populateService.Populate();
 }
 
 

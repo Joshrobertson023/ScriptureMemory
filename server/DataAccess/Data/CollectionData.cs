@@ -21,13 +21,11 @@ namespace DataAccess.Data;
 public class CollectionData : ICollectionData
 {
     private readonly IConfiguration _config;
-    private readonly IPracticeSessionData _practiceSessionData;
     private readonly string connectionString;
 
-    public CollectionData(IConfiguration config, IPracticeSessionData practiceSessionData)
+    public CollectionData(IConfiguration config)
     {
         _config = config;
-        _practiceSessionData = practiceSessionData;
         connectionString = _config.GetConnectionString("Default")!;
     }
 

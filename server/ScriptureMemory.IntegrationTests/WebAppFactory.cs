@@ -1,27 +1,52 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System.Data;
-using Oracle.ManagedDataAccess.Client;
-using Testcontainers.Oracle;
+﻿using J2N.Collections.Generic.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using J2N.Collections.Generic.Extensions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Oracle.ManagedDataAccess.Client;
+using System.Data;
+using Testcontainers.Oracle;
 
 namespace ScriptureMemory.IntegrationTests;
 
-public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
+public class IntegrationTestWebAppFactory
+    : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private OracleContainer? _dbContainer;
+    private string? _connectionString;
 
-    public async Task InitializeAsync()
+    protected override IHost CreateHost(IHostBuilder builder)
     {
         _dbContainer = new OracleBuilder()
             .WithImage("gvenzl/oracle-xe")
             .WithPassword("Oracle123!")
             .Build();
-        
-        await _dbContainer.StartAsync();
+
+        _dbContainer.StartAsync().GetAwaiter().GetResult();
+
+        var host = _dbContainer.Hostname;
+        var port = _dbContainer.GetMappedPublicPort(1521);
+
+        _connectionString =
+            $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
+
+        builder.ConfigureAppConfiguration(config =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:DefaultConnection"] = _connectionString
+            });
+        });
+
+        return base.CreateHost(builder);
+    }
+
+    public async Task InitializeAsync()
+    {
+        _ = CreateClient();
 
         await InitializeDatabaseTablesAsync();
     }
@@ -48,13 +73,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     {
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll<IDbConnection>();
-
-            var host = _dbContainer.Hostname;
-            var port = _dbContainer.GetMappedPublicPort(1521);
-            var connString = $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
-
-            services.AddScoped<IDbConnection>(_ => new OracleConnection(connString));
+            var connString = _connectionString!;
         });
         builder.UseEnvironment("Development");
         builder.CaptureStartupErrors(true);
@@ -63,9 +82,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
     public async Task CleanDatabaseAsync()
     {
-        var host = _dbContainer!.Hostname;
-        var port = _dbContainer.GetMappedPublicPort(1521);
-        var connString = $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
+        var connString = _connectionString!;
 
         using var connection = new OracleConnection(connString);
         await connection.OpenAsync();
@@ -90,9 +107,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     private async Task InitializeDatabaseTablesAsync()
     {
 
-        var host = _dbContainer.Hostname;
-        var port = _dbContainer.GetMappedPublicPort(1521);
-        var connString = $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
+        var connString = _connectionString!;
 
         using var connection = new OracleConnection(connString);
         await connection.OpenAsync();
@@ -175,7 +190,14 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
         foreach (var cmdText in commands)
         {
             using var command = new OracleCommand(cmdText, connection);
-            await command.ExecuteNonQueryAsync();
+            try
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+            catch (OracleException ex) when (ex.Number == 955)
+            {
+
+            }
         }
         
         await connection.CloseAsync();

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ScriptureMemoryLibrary;
+using static DataAccess.Data.VerseData;
 
 namespace DataAccess.Models;
 public class Verse
@@ -28,6 +29,16 @@ public class Verse
     {
         Reference = reference;
         Text = text;
+        VerseNumbers = ReferenceParse.GetVersesHalfOfReference(this.Reference.ReadableReference);
+    }
+
+    public Verse(VerseRow row)
+    {
+        Id = row.Id;
+        Reference = new Reference(row.Reference);
+        Text = row.Text;
+        UsersSavedCount = row.UsersSavedCount;
+        UsersMemorizedCount = row.UsersMemorizedCount;
         VerseNumbers = ReferenceParse.GetVersesHalfOfReference(this.Reference.ReadableReference);
     }
 }

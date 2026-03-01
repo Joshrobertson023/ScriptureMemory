@@ -18,25 +18,20 @@ namespace DataAccess.Data;
 
 public class VerseData : IVerseData
 {
-    private readonly IConfiguration _config;
-    private readonly string connectionString;
-    private readonly ICategoryData? _categoryData;
+    private readonly IDbConnection conn;
 
     private string selectSql = @"VERSE_ID AS Id, VERSE_REFERENCE as Reference, 
                                 USERS_SAVED_VERSE AS UsersSavedCount, USERS_MEMORIZED AS UsersMemorizedCount,
                                 TEXT AS Text";
 
-    public VerseData(IConfiguration config, ICategoryData? categoryData = null)
+    public VerseData(IDbConnection connection)
     {
-        _config = config;
-        connectionString = _config.GetConnectionString("Default")!;
-        _categoryData = categoryData;
+        conn = connection;
     }
 
     public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)
     {
         var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";
-        await using var conn = new OracleConnection(connectionString);
         var results = await conn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });
 
         return results.ToList();
@@ -48,15 +43,23 @@ public class VerseData : IVerseData
                     (verse_reference, Text, users_saved_verse, users_memorized)
                      VALUES
                      (:Reference, :Text, :UsersSavedCount, :UsersMemorizedCount)";
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql,
             new 
             { 
-                verse.Reference, 
+                Reference = verse.Reference.ReadableReference, 
                 verse.Text,
                 verse.UsersSavedCount,
                 verse.UsersMemorizedCount
             });
+    }
+
+    public class VerseRow
+    {
+        public int Id { get; set; }
+        public string Reference { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+        public int UsersSavedCount { get; set; }
+        public int UsersMemorizedCount { get; set; }
     }
 
     public async Task<Verse?> GetVerse(string reference)
@@ -64,9 +67,10 @@ public class VerseData : IVerseData
         string sql = $@"SELECT 
                         {selectSql}
                         FROM VERSES WHERE verse_reference = :Reference";
-        using IDbConnection conn = new OracleConnection(connectionString);
-        var results = await conn.QueryAsync<Verse?>(sql, new { Reference = reference });
-        return results.FirstOrDefault();
+        await using var conn = new OracleConnection(connectionString);
+        var results = await conn.QueryAsync<VerseRow?>(sql, new { Reference = reference });
+        return new Verse(results.First()
+            ?? throw new NullReferenceException());
     }
 
     public async Task<List<Verse>> GetChapterVerses(string book, int chapter)
@@ -90,17 +94,18 @@ public class VerseData : IVerseData
         sql.Append(")");
 
         await using var conn = new OracleConnection(connectionString);
-        var verses = await conn.QueryAsync<Verse>(sql.ToString(), commandType: CommandType.Text);
-        return verses.ToList();
+        var rows = await conn.QueryAsync<VerseRow?>(sql.ToString(), commandType: CommandType.Text);
+        return rows.Select(r => new Verse(r)).ToList();
     }
 
     public async Task<Verse?> GetVerseFromId(int id)
     {
         var sql = $@"SELECT {selectSql} WHERE verse_id = :id";
         using IDbConnection conn = new OracleConnection(connectionString);
-        var userVerses = await conn.QueryAsync<Verse?>(sql, new { id = id },
+        var verses = await conn.QueryAsync<VerseRow?>(sql, new { id = id },
             commandType: CommandType.Text);
-        return userVerses.FirstOrDefault();
+        return new Verse(verses.FirstOrDefault()
+            ?? throw new ArgumentNullException());
     }
 
     public async Task UpdateVerseText(string text, int id)
@@ -139,8 +144,8 @@ public class VerseData : IVerseData
                     )
                     WHERE USERS_SAVED_VERSE > 0";
         using IDbConnection conn = new OracleConnection(connectionString);
-        var verses = await conn.QueryAsync<Verse>(sql, commandType: CommandType.Text);
-        return verses.ToList();
+        var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
+        return rows.Select(r => new Verse(r)).ToList();
     }
 
     public async Task<List<Verse>> GetTopMemorizedVerses(int top)
@@ -153,8 +158,8 @@ public class VerseData : IVerseData
                     )
                     WHERE USERS_MEMORIZED > 0";
         using IDbConnection conn = new OracleConnection(connectionString);
-        var verses = await conn.QueryAsync<Verse>(sql, commandType: CommandType.Text);
-        return verses.ToList();
+        var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
+        return rows.Select(r => new Verse(r)).ToList();
     }
 
     public async Task<List<Verse>> GetAllVersesFromReferenceList(List<string> references)
@@ -172,9 +177,9 @@ public class VerseData : IVerseData
 
         Debug.WriteLine(sql);
 
-        var resultVerses = await conn.QueryAsync<Verse>(sql.ToString(), commandType: CommandType.Text);
+        var rows = await conn.QueryAsync<VerseRow>(sql.ToString(), commandType: CommandType.Text);
 
-        return resultVerses.ToList();
+        return rows.Select(r => new Verse(r)).ToList();
     }
 }
 

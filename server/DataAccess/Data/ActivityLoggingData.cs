@@ -78,7 +78,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     {
         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
                      WHERE USER_ID = :UserId
-                     ORDER BY CREATED_AT DESC
+                     ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
         await using var conn = new OracleConnection(connectionString);
@@ -101,7 +101,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     {
         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
                      WHERE ENTITY_TYPE = :EntityType AND ENTITY_ID = :EntityId
-                     ORDER BY CREATED_AT DESC
+                     ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
         await using var conn = new OracleConnection(connectionString);
@@ -125,7 +125,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     {
         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
                      WHERE ACTION_TYPE = :ActionType
-                     ORDER BY CREATED_AT DESC
+                     ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
         await using var conn = new OracleConnection(connectionString);
@@ -147,8 +147,8 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     public async Task<PagedLogs<ActivityLog>> GetByDateRange(DateTime from, DateTime to, int page = 1, int pageSize = 50)
     {
         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
-                     WHERE CREATED_AT >= :From AND CREATED_AT <= :To
-                     ORDER BY CREATED_AT DESC
+                     WHERE CREATED_AT >= :p_from AND CREATED_AT <= :p_to    
+                     ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
         await using var conn = new OracleConnection(connectionString);
@@ -158,8 +158,8 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                 sql,
                 new
                 {
-                    From = from,
-                    To = to,
+                    p_from = from,
+                    p_to = to,
                     Offset = (page - 1) * pageSize,
                     PageSize = pageSize
                 })).AsList(),
@@ -172,7 +172,7 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     {
         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
                      WHERE IS_ADMIN_ACTION = 1
-                     ORDER BY CREATED_AT DESC
+                     ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
         await using var conn = new OracleConnection(connectionString);
