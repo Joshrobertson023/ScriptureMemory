@@ -153,11 +153,13 @@ public sealed class CollectionService : ICollectionService
     /// <returns><List<Collection>></returns>
     public async Task<List<Collection>> GetUserCollections(int userId)
     {
-        List<Collection> collections = await collectionContext.GetUserCreatedCollections(userId);
+        List<Collection> userCreatedCollections = await collectionContext.GetUserCreatedCollections(userId);
+        List<Collection> savedCollections = await collectionContext.GetUserSavedCollections(userId);
 
-        // Later on after doing published collections, call GetUserSavedCollections
-
-        return collections;
+        return userCreatedCollections
+                .Concat(savedCollections)
+                .OrderBy(c => c.OrderPosition)
+                .ToList();
     }
 
     /// <summary>
