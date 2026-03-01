@@ -220,7 +220,9 @@ internal static class TableDefinitions
         "DROP TABLE ACTIVITY_LOGS  CASCADE CONSTRAINTS",
         "DROP TABLE USER_PREFERENCES CASCADE CONSTRAINTS",
         "DROP TABLE VERSES          CASCADE CONSTRAINTS",
-        "DROP TABLE USERS           CASCADE CONSTRAINTS"
+        "DROP TABLE USERS           CASCADE CONSTRAINTS",
+        "DROP TABLE USER_PASSAGES   CASCADE CONSTRAINTS",
+        "DROP TABLE COLLECTIONS     CASCADE CONSTRAINTS"
     ];
 
     internal static readonly string[] CreateStatements =
@@ -300,6 +302,34 @@ internal static class TableDefinitions
             USERS_MEMORIZED  NUMBER DEFAULT 0,
             VERSE_TEXT       VARCHAR2(2000)
         )
+        """,
+
+        """
+         CREATE TABLE COLLECTIONS (
+            COLLECTION_ID    NUMBER  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            USER_ID          NUMBER  REFERENCES USERS(ID) ON DELETE CASCADE,
+            TITLE            VARCHAR2(4000),
+            VISIBILITY       NUMBER,
+            DATE_CREATED     DATE,
+            ORDER_POSITION   NUMBER,
+            IS_FAVORITES     NUMBER(1,0) DEFAULT 0,
+            DESCRIPTION      VARCHAR2(1000),
+            PUBLISHED_ID     NUMBER,
+            AUTHOR_ID        NUMBER,
+            AUTHOR           VARCHAR2(4000),
+            PROGRESS_PERCENT NUMBER,
+            NUM_PASSAGES     NUMBER
+         )
+         """,
+
+         """
+         CREATE TABLE USER_PASSAGES (
+             USER_PASSAGE_ID  NUMBER  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+             COLLECTION_ID    NUMBER  REFERENCES COLLECTIONS(COLLECTION_ID) ON DELETE CASCADE,
+             VERSE_ID         NUMBER  REFERENCES VERSES(VERSE_ID) ON DELETE CASCADE,
+             ORDER_POSITION   NUMBER,
+             IS_MEMORIZED     NUMBER(1,0) DEFAULT 0
+         )
         """
     ];
 }
