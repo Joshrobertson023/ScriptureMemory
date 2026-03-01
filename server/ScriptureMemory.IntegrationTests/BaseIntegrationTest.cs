@@ -1,47 +1,52 @@
-using Microsoft.Extensions.DependencyInjection;
-using System.Data;
-using Oracle.ManagedDataAccess.Client;
-using Testcontainers.Oracle;
 using DataAccess.DataInterfaces;
-using VerseAppNew.Server.Services;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using ScriptureMemory.Server.Services;
 
 namespace ScriptureMemory.IntegrationTests;
 
-public abstract class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
+/// <summary>
+/// Base class for all integration tests. Provides an <see cref="Api"/> HTTP client
+/// and resets the database schema before each test so every test starts from a clean slate.
+/// The Oracle container is shared across the entire test collection via
+/// <see cref="IntegrationTestWebAppFactory"/>.
+/// </summary>
+public abstract class BaseIntegrationTest
+    : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
-    private readonly IServiceScope scope;
-    private readonly IntegrationTestWebAppFactory factory;
+    private readonly IntegrationTestWebAppFactory _factory;
 
-    protected readonly HttpClient api;
+    /// <summary>HTTP client pointed at the test server. Use this for all interactions.</summary>
+    protected HttpClient Api { get; private set; } = null!;
 
-    protected readonly IUserData userContext;
-    protected readonly IUserService userService;
-    protected readonly IActivityLogger activityLogger;
-    protected readonly IActivityLoggingData activityLogContext;
-    protected readonly INotificationData notificationContext;
     protected readonly IVerseData verseContext;
+    protected readonly INotificationData notificationContext;
+    protected readonly ICollectionService collectionService;
 
-    public BaseIntegrationTest(IntegrationTestWebAppFactory factory)
+    protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
-        this.factory = factory;
-        scope = factory.Services.CreateScope();
-        api = factory.CreateClient();
-
-        userContext = scope.ServiceProvider.GetRequiredService<IUserData>();
-        userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        activityLogger = scope.ServiceProvider.GetRequiredService<IActivityLogger>();
-        activityLogContext = scope.ServiceProvider.GetRequiredService<IActivityLoggingData>();
-        notificationContext = scope.ServiceProvider.GetRequiredService<INotificationData>();
-        verseContext = scope.ServiceProvider.GetRequiredService<IVerseData>();
+        _factory = factory;
+        verseContext = _factory.Services.GetRequiredService<IVerseData>();
+        notificationContext = _factory.Services.GetRequiredService<INotificationData>();
+        collectionService = _factory.Services.GetRequiredService<ICollectionService>();
     }
 
+    /// <summary>
+    /// Runs before every test. Drops and recreates the schema so each test
+    /// starts with empty tables, then creates a fresh HTTP client.
+    /// </summary>
     public async Task InitializeAsync()
     {
-        await factory.CleanDatabaseAsync();
+        await _factory.DropSchemaAsync();
+        await _factory.CreateSchemaAsync();
+
+        Api = _factory.CreateClient();
     }
 
+    /// <summary>Runs after every test. Disposes the HTTP client.</summary>
     public Task DisposeAsync()
     {
+        Api.Dispose();
         return Task.CompletedTask;
     }
 }

@@ -11,12 +11,8 @@ namespace ScriptureMemory.IntegrationTests;
 
 public class UserPreferencesTests : BaseIntegrationTest
 {
-    private IUserSettingsData settingsData;
 
-    public UserPreferencesTests(IntegrationTestWebAppFactory factory) : base(factory)
-    {
-        settingsData = factory.Services.CreateScope().ServiceProvider.GetRequiredService<IUserSettingsData>();
-    }
+    public UserPreferencesTests(IntegrationTestWebAppFactory factory) : base(factory) { }
 
     // Test all preference updates
     [Fact]
@@ -32,10 +28,10 @@ public class UserPreferencesTests : BaseIntegrationTest
             BibleVersion = BibleVersion.Kjv
         };
 
-        var createResponse = await api.PostAsJsonAsync("/users", createRequest);
+        var createResponse = await Api.PostAsJsonAsync("/users", createRequest);
         createResponse.EnsureSuccessStatusCode();
 
-        var loginResponse = await api.PostAsJsonAsync("/users/login/username",
+        var loginResponse = await Api.PostAsJsonAsync("/users/login/username",
             new { Username = createRequest.Username, Password = createRequest.Password });
         loginResponse.EnsureSuccessStatusCode();
 
@@ -59,131 +55,82 @@ public class UserPreferencesTests : BaseIntegrationTest
 
 
         // Update Collections Sort Preference
-        await settingsData.UpdateCollectionsSort(CollectionsSort.LastPracticed, userId);
-
-        var loginAfterCollectionsSort = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterCollectionsSort = await loginAfterCollectionsSort.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterCollectionsSort?.Settings);
-        Assert.Equal(CollectionsSort.LastPracticed, userAfterCollectionsSort.Settings.CollectionsSort);
-
+        await Api.PutAsJsonAsync("/userpreferences/collectionssort", new {
+            UserId = userId,
+            SortBy = CollectionsSort.LastPracticed
+        });
 
         // Toggle Subscribed Verse of Day
-        await settingsData.UpdateSubscribedVerseOfDay(false, userId);
-
-        var loginAfterVOD = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterVOD = await loginAfterVOD.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterVOD?.Settings);
-        Assert.False(userAfterVOD.Settings.SubscribedVerseOfDay);
-
+        await Api.PutAsJsonAsync("/userpreferences/subscribedverseofday", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Push Notifications
-        await settingsData.UpdatePushNotificationsEnabled(false, userId);
-
-        var loginAfterPushDisable = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterPushDisable = await loginAfterPushDisable.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterPushDisable?.Settings);
-        Assert.False(userAfterPushDisable.Settings.PushNotificationsEnabled);
-
+        await Api.PutAsJsonAsync("/userpreferences/pushnotifications", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Notify Memorized Verse
-        await settingsData.UpdateNotifyMemorizedVerse(false, userId);
-
-        var loginAfterNoMemorizedNotify = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoMemorizedNotify = await loginAfterNoMemorizedNotify.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoMemorizedNotify?.Settings);
-        Assert.False(userAfterNoMemorizedNotify.Settings.NotifyMemorizedVerse);
-
+        await Api.PutAsJsonAsync("/userpreferences/notifymemorizedverse", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Notify Published Collection
-        await settingsData.UpdateNotifyPublishedCollection(false, userId);
-
-        var loginAfterNoPublishedNotify = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoPublishedNotify = await loginAfterNoPublishedNotify.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoPublishedNotify?.Settings);
-        Assert.False(userAfterNoPublishedNotify.Settings.NotifyPublishedCollection);
-
+        await Api.PutAsJsonAsync("/userpreferences/notifypublishedcollection", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Notify Collection Saved
-        await settingsData.UpdateNotifyCollectionSaved(false, userId);
-
-        var loginAfterNoCollectionSavedNotify = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoCollectionSavedNotify = await loginAfterNoCollectionSavedNotify.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoCollectionSavedNotify?.Settings);
-        Assert.False(userAfterNoCollectionSavedNotify.Settings.NotifyCollectionSaved);
-
+        await Api.PutAsJsonAsync("/userpreferences/notifycollectionsaved", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Notify Note Liked
-        await settingsData.UpdateNotifyNoteLiked(false, userId);
-
-        var loginAfterNoNoteLikedNotify = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoNoteLikedNotify = await loginAfterNoNoteLikedNotify.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoNoteLikedNotify?.Settings);
-        Assert.False(userAfterNoNoteLikedNotify.Settings.NotifyNoteLiked);
-
+        await Api.PutAsJsonAsync("/userpreferences/notifynoteliked", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Friends Activity Notifications
-        await settingsData.UpdateFriendsActivityNotifications(false, userId);
-
-        var loginAfterNoFriendsActivityNotify = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoFriendsActivityNotify = await loginAfterNoFriendsActivityNotify.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoFriendsActivityNotify?.Settings);
-        Assert.False(userAfterNoFriendsActivityNotify.Settings.FriendsActivityNotificationsEnabled);
-
+        await Api.PutAsJsonAsync("/userpreferences/friendsactivitynotifications", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Streak Reminders
-        await settingsData.UpdateStreakReminders(false, userId);
-
-        var loginAfterNoStreakReminders = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoStreakReminders = await loginAfterNoStreakReminders.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoStreakReminders?.Settings);
-        Assert.False(userAfterNoStreakReminders.Settings.StreakRemindersEnabled);
-
+        await Api.PutAsJsonAsync("/userpreferences/streakreminders", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable App Badges
-        await settingsData.UpdateAppBadgesEnabled(false, userId);
-
-        var loginAfterNoAppBadges = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoAppBadges = await loginAfterNoAppBadges.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoAppBadges?.Settings);
-        Assert.False(userAfterNoAppBadges.Settings.AppBadgesEnabled);
-
+        await Api.PutAsJsonAsync("/userpreferences/appbadgesenabled", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Disable Practice Tab Badges
-        await settingsData.UpdatePracticeTabBadgesEnabled(false, userId);
-
-        var loginAfterNoPracticeTabBadges = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterNoPracticeTabBadges = await loginAfterNoPracticeTabBadges.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterNoPracticeTabBadges?.Settings);
-        Assert.False(userAfterNoPracticeTabBadges.Settings.PracticeTabBadgesEnabled);
-
+        await Api.PutAsJsonAsync("/userpreferences/practicetabbadgesenabled", new {
+            UserId = userId,
+            Enabled = false
+        });
 
         // Enable Type Out Reference
-        await settingsData.UpdateTypeOutReference(true, userId);
-
-        var loginAfterTypeOutRef = await api.PostAsJsonAsync("/users/login/username",
-            new { Username = createRequest.Username, Password = createRequest.Password });
-        var userAfterTypeOutRef = await loginAfterTypeOutRef.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(userAfterTypeOutRef?.Settings);
-        Assert.True(userAfterTypeOutRef.Settings.TypeOutReference);
-
+        await Api.PutAsJsonAsync("/userpreferences/typeoutreference", new {
+            UserId = userId,
+            Enabled = true
+        });
 
         // Get user and verify all updates persist
-        var finalLoginResponse = await api.PostAsJsonAsync("/users/login/username",
+        var finalLoginResponse = await Api.PostAsJsonAsync("/users/login/username",
             new { Username = createRequest.Username, Password = createRequest.Password });
         var finalUser = await finalLoginResponse.Content.ReadFromJsonAsync<User>();
         Assert.NotNull(finalUser?.Settings);
-        
         Assert.Equal(CollectionsSort.LastPracticed, finalUser.Settings.CollectionsSort);
         Assert.False(finalUser.Settings.SubscribedVerseOfDay);
         Assert.False(finalUser.Settings.PushNotificationsEnabled);

@@ -30,7 +30,7 @@ public class UserData : IUserData
     public async Task CreateUser(User user)
     {
         var sql = @"INSERT INTO USERS
-                    (USERNAME, FIRST_NAME, LAST_NAME, EMAIL, AUTH_TOKEN, STATUS, HASHED_PASSWORD, DATE_REGISTERED, 
+                    (USERNAME, FIRST_NAME, LAST_NAME, EMAIL, AUTH_TOKEN, USER_STATUS, HASHED_PASSWORD, DATE_REGISTERED, 
                      LAST_SEEN, PROFILE_DESCRIPTION, POINTS, VERSES_MEMORIZED, PROFILE_PICTURE_URL)
                     VALUES
                     (:Username, :FirstName, :LastName, :Email, :AuthToken, :Status, :HashedPassword, :DateRegistered,
@@ -63,7 +63,7 @@ public class UserData : IUserData
 
     public async Task<User?> GetUserFromUsername(string username)
     {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
                     HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
@@ -75,7 +75,7 @@ public class UserData : IUserData
 
     public async Task<User?> GetUserFromToken(string token)
     {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
                     HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
@@ -96,7 +96,7 @@ public class UserData : IUserData
 
     public async Task<List<User>> GetUsersFromEmail(string email)
     {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
                     HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
@@ -132,7 +132,7 @@ public class UserData : IUserData
 
     public async Task<List<User>> GetUsers(int count = 100)
     {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
                     HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
@@ -153,7 +153,7 @@ public class UserData : IUserData
 
     public async Task<User> GetUserFromUserId(int userId)
     {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, ""STATUS"",
+        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
                     HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
                     POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
@@ -293,7 +293,7 @@ public class UserData : IUserData
     {
         var offset = (page - 1) * pageSize;
         var sql = @"SELECT USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken,
-                           ""STATUS"" AS Status, HASHED_PASSWORD as HashedPassword,
+                           USER_STATUS as Status, HASHED_PASSWORD as HashedPassword,
                            DATE_REGISTERED as DateRegistered, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION as ProfileDescription,
                            VERSES_MEMORIZED AS VersesMemorizedCount, POINTS, 
                            PROFILE_PICTURE_URL AS ProfilePictureUrl,
@@ -328,7 +328,7 @@ public class UserData : IUserData
         var fullName = query.Trim().Split(' ', 2);
 
         var sql = @"SELECT USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken,
-                           ""STATUS"" AS Status, HASHED_PASSWORD as HashedPassword,
+                           USER_STATUS as Status, HASHED_PASSWORD as HashedPassword,
                            DATE_REGISTERED as DateRegistered, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION as ProfileDescription,
                            VERSES_MEMORIZED AS VersesMemorizedCount, POINTS, 
                            PROFILE_PICTURE_URL AS ProfilePictureUrl

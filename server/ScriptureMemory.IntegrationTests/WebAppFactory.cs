@@ -1,13 +1,9 @@
-﻿using J2N.Collections.Generic.Extensions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Dapper;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
@@ -15,215 +11,297 @@ using Testcontainers.Oracle;
 
 namespace ScriptureMemory.IntegrationTests;
 
-public class IntegrationTestWebAppFactory
+/// <summary>
+/// Shared test fixture that spins up an Oracle XE container, creates the schema,
+/// and tears everything down after all tests in the collection have run.
+/// </summary>
+public sealed class IntegrationTestWebAppFactory
     : WebApplicationFactory<Program>, IAsyncLifetime
 {
-    private OracleContainer? _dbContainer;
-    private string? _connectionString;
+    // -------------------------------------------------------------------------
+    // Constants
+    // -------------------------------------------------------------------------
 
-    protected override IHost CreateHost(IHostBuilder builder)
-    {
-        _dbContainer = new OracleBuilder()
-            .WithImage("gvenzl/oracle-xe")
-            .WithPassword("Oracle123!")
-            .Build();
+    private const string OracleImage = "gvenzl/oracle-xe";
+    private const string AdminPassword = "Oracle123!";
+    private const string AppUser = "APPUSER";
+    private const string AppPassword = "App123!";
+    private const string ServiceName = "XE";
+    private const int OraclePort = 1521;
 
-        _dbContainer.StartAsync().GetAwaiter().GetResult();
+    // -------------------------------------------------------------------------
+    // State
+    // -------------------------------------------------------------------------
 
-        var host = _dbContainer.Hostname;
-        var port = _dbContainer.GetMappedPublicPort(1521);
+    private OracleContainer? _container;
 
-        _connectionString =
-            $"User Id=system;Password=Oracle123!;Data Source={host}:{port}/XE";
+    /// <summary>Connection string for <see cref="AppUser"/>. Available after <see cref="InitializeAsync"/>.</summary>
+    public string ConnectionString { get; private set; } = string.Empty;
 
-        builder.ConfigureAppConfiguration(config =>
-        {
-            config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] = _connectionString
-            });
-        });
+    // -------------------------------------------------------------------------
+    // IAsyncLifetime – start / stop container
+    // -------------------------------------------------------------------------
 
-        return base.CreateHost(builder);
-    }
-
+    /// <summary>Starts the Oracle container, provisions the schema, then wires up the HTTP client.</summary>
     public async Task InitializeAsync()
     {
+        _container = new OracleBuilder()
+            .WithImage(OracleImage)
+            .WithPassword(AdminPassword)
+            .Build();
+
+        await _container.StartAsync();
+
+        ConnectionString = BuildConnectionString(AppUser, AppPassword);
+
+        // CreateClient() triggers CreateHost(), which needs ConnectionString to already be set.
         _ = CreateClient();
 
-        await InitializeDatabaseTablesAsync();
+        await ProvisionSchemaAsync();
     }
 
+    /// <summary>Drops all tables and stops the container.</summary>
     public new async Task DisposeAsync()
     {
-        if (_dbContainer is null)
+        if (_container is null)
             return;
 
         try
         {
-            await CleanDatabaseAsync();
+            await DropSchemaAsync();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error cleaning test database: {ex}");
+            Console.WriteLine($"[IntegrationTestWebAppFactory] Error dropping schema: {ex.Message}");
         }
-
-        await _dbContainer.StopAsync();
-        await _dbContainer.DisposeAsync();
+        finally
+        {
+            await _container.StopAsync();
+            await _container.DisposeAsync();
+        }
     }
+
+    // -------------------------------------------------------------------------
+    // WebApplicationFactory overrides
+    // -------------------------------------------------------------------------
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureTestServices(services =>
-        {
-            var connString = _connectionString!;
-        });
-        builder.UseEnvironment("Development");
-        builder.Configure(app =>
-        {
-            app.UseDeveloperExceptionPage();
-        });
-        builder.CaptureStartupErrors(true);
-        builder.UseSetting("detailedErrors", "true");
+        builder
+            .UseEnvironment("Development")
+            .UseSetting("detailedErrors", "true")
+            .CaptureStartupErrors(true)
+            .ConfigureTestServices(services =>
+            {
+                // Replace the production connection string so all injected
+                // IDbConnection / IDbConnectionFactory instances hit the test DB.
+                services.Configure<Microsoft.Extensions.Options.ConfigureNamedOptions<object>>(
+                    _ => { });
+            })
+            .ConfigureAppConfiguration(config =>
+            {
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["ConnectionStrings:DefaultConnection"] = ConnectionString
+                });
+            });
     }
 
-    public async Task CleanDatabaseAsync()
+    // -------------------------------------------------------------------------
+    // Schema management
+    // -------------------------------------------------------------------------
+
+    /// <summary>Creates the APPUSER and all application tables.</summary>
+    private async Task ProvisionSchemaAsync()
     {
-        var connString = _connectionString!;
+        await CreateAppUserAsync();
+        await CreateTablesAsync();
+    }
 
-        using var connection = new OracleConnection(connString);
-        await connection.OpenAsync();
+    private async Task CreateAppUserAsync()
+    {
+        var adminConnString = BuildConnectionString("system", AdminPassword);
 
-        var commands = new[]
+        await using var conn = new OracleConnection(adminConnString);
+        await conn.OpenAsync();
+
+        // Create user – ignore ORA-01920 (user already exists)
+        try
         {
-            "DROP TABLE NOTIFICATIONS",
-            "DROP TABLE ACTIVITY_LOGS",
-            "DROP TABLE USER_PREFERENCES",
-            "DROP TABLE USERS",
-            "DROP TABLE VERSES"
-        };
-
-        foreach (var cmdText in commands)
+            await conn.ExecuteAsync($"CREATE USER {AppUser} IDENTIFIED BY {AppPassword}");
+        }
+        catch (OracleException ex) when (ex.Number == 1920)
         {
-            using var command = new OracleCommand(cmdText, connection);
-            await command.ExecuteNonQueryAsync();
+            Console.WriteLine($"[IntegrationTestWebAppFactory] User {AppUser} already exists, continuing.");
         }
 
-        await connection.CloseAsync();
+        var grants = new[]
+        {
+            $"GRANT CREATE SESSION   TO {AppUser}",
+            $"GRANT CREATE TABLE     TO {AppUser}",
+            $"GRANT CREATE SEQUENCE  TO {AppUser}",
+            $"GRANT UNLIMITED TABLESPACE TO {AppUser}"
+        };
+
+        foreach (var grant in grants)
+        {
+            await conn.ExecuteAsync(grant);
+        }
     }
 
-    private async Task InitializeDatabaseTablesAsync()
+    private async Task CreateTablesAsync()
     {
+        await using var conn = new OracleConnection(ConnectionString);
+        await conn.OpenAsync();
 
-        var connString = _connectionString!;
-
-        using var connection = new OracleConnection(connString);
-        await connection.OpenAsync();
-        
-        var commands = new[]
+        foreach (var ddl in TableDefinitions.CreateStatements)
         {
-            """
-            CREATE TABLE USERS (
-                ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                "USERNAME" VARCHAR2(4000),
-                "FIRST_NAME" VARCHAR2(4000),
-                "LAST_NAME" VARCHAR2(4000),
-                "EMAIL" VARCHAR2(4000),
-                "AUTH_TOKEN" VARCHAR2(4000),
-                "STATUS" NUMBER,
-                "HASHED_PASSWORD" VARCHAR2(4000),
-                "DATERE_GISTERED" DATE,
-                "LAST_SEEN" DATE,
-                "profile_DESCRIPTION" VARCHAR2(4000),
-                "VERSES_MEMORIZED" NUMBER DEFAULT 0,
-                "POINTS" NUMBER DEFAULT 0,
-                "PROFILE_PICTURE_URL" VARCHAR2(500)
-            )
-            """,
-            """
-                        
-              CREATE TABLE "USER_PREFERENCES" 
-                (
-                "USER_ID" NUMBER PRIMARY KEY,
-                "USERNAME" VARCHAR2(100),
-
-                "THEME" NUMBER,
-                "VERSION" NUMBER,
-                "COLLECTIONS_SORT" NUMBER,
-                "SUBSCRIBED_VOD" NUMBER,
-                "PUSH_NOTIFICATIONS_ENABLED" NUMBER,
-                "NOTIFY_MEMORIZED_VERSE" NUMBER,
-                "NOTIFY_PUBLISHED_COLLECTION" NUMBER,
-                "NOTIFY_COLLECTION_SAVED" NUMBER,
-                "NOTIFY_NOTE_LIKED" NUMBER,
-                "FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED" NUMBER,
-                "STREAK_REMINDERS_ENABLED" NUMBER,
-                "APP_BADGES_ENABLED" NUMBER,
-                "PRACTICE_TAB_BADGES_ENABLED" NUMBER,
-                "TYPE_OUT_REFERENCE" NUMBER,
-
-                CONSTRAINT "FK_USER_PREFERENCES_USERS"
-                    FOREIGN KEY ("USER_ID")
-                    REFERENCES "USERS"("ID")
-                    ON DELETE CASCADE
-                );
-            """,
-            """
-                        
-              CREATE TABLE "ACTIVITY_LOGS" 
-               (	
-               "ID" NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
-                USER_ID NUMBER REFERENCES USERS(ID),
-            	"ACTION_TYPE" NUMBER, 
-            	"ENTITY_TYPE" NUMBER, 
-            	"ENTITY_ID" NUMBER, 
-            	"CONTEXT_DESCRIPTION" VARCHAR2(1000), 
-            	"METADATA_JSON" VARCHAR2(2000), 
-            	"SEVERITY_LEVEL" NUMBER DEFAULT 0 NOT NULL, 
-            	"IS_ADMIN_ACTION" NUMBER DEFAULT 0 NOT NULL, 
-            	"CREATED_AT" DATE DEFAULT SYSDATE NOT NULL,
-            )
-            """,
-            """
-                        
-              CREATE TABLE "NOTIFICATIONS" 
-               (	
-               "ID" NUMBER GENERATED ALWAYS AS IDENTITY, 
-            	"MESSAGE" VARCHAR2(1000) NOT NULL, 
-            	"CREATEDDATE" DATE NOT NULL, 
-            	"ISREAD" NUMBER(1,0) DEFAULT 0, 
-            	"EXPIRATION_DATE" DATE, 
-            	"NOTIFICATIONTYPE" NUMBER, 
-            	"SENDER_ID" NUMBER REFERENCES USERS(ID),
-            	"RECEIVER_ID" NUMBER REFERENCES USERS(ID), 
-            	 PRIMARY KEY ("ID")
-            )
-            """,
-            """
-            CREATE TABLE VERSES
-            (
-            VERSE_ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            VERSE_REFERENCE VARCHAR2(100),
-            USERS_SAVED_VERSE NUMBER DEFAULT 0,
-            USERS_MEMORIZED_VERSE NUMBER DEFAULT 0,
-            TEXT VARCHAR2(2000)
-            )
-            """
-        };
-        
-        foreach (var cmdText in commands)
-        {
-            using var command = new OracleCommand(cmdText, connection);
+            await using var cmd = new OracleCommand(ddl, conn);
             try
             {
-                await command.ExecuteNonQueryAsync();
+                await cmd.ExecuteNonQueryAsync();
             }
-            catch (OracleException ex) when (ex.Number == 955)
+            catch (OracleException ex) when (ex.Number == 955) // ORA-00955: name already used
             {
-
+                Console.WriteLine($"[IntegrationTestWebAppFactory] Table already exists, skipping.");
+            }
+            catch (OracleException ex)
+            {
+                Console.WriteLine($"[IntegrationTestWebAppFactory] DDL failed (ORA-{ex.Number}): {ex.Message}");
+                Console.WriteLine($"Statement: {ddl.Trim()[..Math.Min(120, ddl.Trim().Length)]}...");
+                throw;
             }
         }
-        
-        await connection.CloseAsync();
     }
+
+    /// <summary>Drops all application tables in reverse FK order.</summary>
+    public async Task DropSchemaAsync()
+    {
+        await using var conn = new OracleConnection(ConnectionString);
+        await conn.OpenAsync();
+
+        foreach (var ddl in TableDefinitions.DropStatements)
+        {
+            try
+            {
+                await conn.ExecuteAsync(ddl);
+            }
+            catch (OracleException ex) when (ex.Number == 942) // ORA-00942: table or view does not exist
+            {
+                // Nothing to drop – that's fine.
+            }
+        }
+    }
+
+    public async Task CreateSchemaAsync()
+    {
+        await CreateTablesAsync();
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private string BuildConnectionString(string userId, string password)
+    {
+        var host = _container!.Hostname;
+        var port = _container.GetMappedPublicPort(OraclePort);
+        return $"User Id={userId};Password={password};Data Source={host}:{port}/{ServiceName}";
+    }
+}
+
+// =============================================================================
+// DDL definitions – kept separate so they are easy to update independently.
+// =============================================================================
+
+internal static class TableDefinitions
+{
+    internal static readonly string[] DropStatements =
+    [
+        "DROP TABLE NOTIFICATIONS  CASCADE CONSTRAINTS",
+        "DROP TABLE ACTIVITY_LOGS  CASCADE CONSTRAINTS",
+        "DROP TABLE USER_PREFERENCES CASCADE CONSTRAINTS",
+        "DROP TABLE VERSES          CASCADE CONSTRAINTS",
+        "DROP TABLE USERS           CASCADE CONSTRAINTS"
+    ];
+
+    internal static readonly string[] CreateStatements =
+    [
+        """
+        CREATE TABLE USERS (
+            ID                  NUMBER          GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            USERNAME            VARCHAR2(4000),
+            FIRST_NAME          VARCHAR2(4000),
+            LAST_NAME           VARCHAR2(4000),
+            EMAIL               VARCHAR2(4000),
+            AUTH_TOKEN          VARCHAR2(4000),
+            USER_STATUS         NUMBER,
+            HASHED_PASSWORD     VARCHAR2(4000),
+            DATE_REGISTERED     DATE,
+            LAST_SEEN           DATE,
+            PROFILE_DESCRIPTION VARCHAR2(4000),
+            VERSES_MEMORIZED    NUMBER DEFAULT 0,
+            POINTS              NUMBER DEFAULT 0,
+            PROFILE_PICTURE_URL VARCHAR2(500)
+        )
+        """,
+
+        """
+        CREATE TABLE USER_PREFERENCES (
+            USER_ID                                 NUMBER  PRIMARY KEY REFERENCES USERS(ID) ON DELETE CASCADE,
+            THEME                                   NUMBER,
+            BIBLE_VERSION                           NUMBER,
+            COLLECTIONS_SORT                        NUMBER,
+            SUBSCRIBED_VOD                          NUMBER,
+            PUSH_NOTIFICATIONS_ENABLED              NUMBER,
+            NOTIFY_MEMORIZED_VERSE                  NUMBER,
+            NOTIFY_PUBLISHED_COLLECTION             NUMBER,
+            NOTIFY_COLLECTION_SAVED                 NUMBER,
+            NOTIFY_NOTE_LIKED                       NUMBER,
+            FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED  NUMBER,
+            STREAK_REMINDERS_ENABLED                NUMBER,
+            APP_BADGES_ENABLED                      NUMBER,
+            PRACTICE_TAB_BADGES_ENABLED             NUMBER,
+            TYPE_OUT_REFERENCE                      NUMBER
+        )
+        """,
+
+        """
+        CREATE TABLE ACTIVITY_LOGS (
+            ID                  NUMBER  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            USER_ID             NUMBER  REFERENCES USERS(ID) ON DELETE CASCADE,
+            ACTION_TYPE         NUMBER,
+            ENTITY_TYPE         NUMBER,
+            ENTITY_ID           NUMBER,
+            CONTEXT_DESCRIPTION VARCHAR2(1000),
+            METADATA_JSON       VARCHAR2(2000),
+            SEVERITY_LEVEL      NUMBER  DEFAULT 0 NOT NULL,
+            IS_ADMIN_ACTION     NUMBER  DEFAULT 0 NOT NULL,
+            CREATED_AT          DATE    DEFAULT SYSDATE NOT NULL
+        )
+        """,
+
+        """
+        CREATE TABLE NOTIFICATIONS (
+            ID               NUMBER           GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            MESSAGE          VARCHAR2(1000)   NOT NULL,
+            CREATEDDATE      DATE             NOT NULL,
+            ISREAD           NUMBER(1,0)      DEFAULT 0,
+            EXPIRATION_DATE  DATE,
+            NOTIFICATIONTYPE NUMBER,
+            SENDER_ID        NUMBER           REFERENCES USERS(ID) ON DELETE CASCADE,
+            RECEIVER_ID      NUMBER           REFERENCES USERS(ID) ON DELETE CASCADE
+        )
+        """,
+
+        """
+        CREATE TABLE VERSES (
+            VERSE_ID         NUMBER  GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            VERSE_REFERENCE  VARCHAR2(100),
+            USERS_SAVED_VERSE NUMBER DEFAULT 0,
+            USERS_MEMORIZED  NUMBER DEFAULT 0,
+            VERSE_TEXT       VARCHAR2(2000)
+        )
+        """
+    ];
 }

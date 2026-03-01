@@ -24,4 +24,18 @@ public class Collection
     public int NumPassages { get; set; }
     public List<UserPassage> Passages { get; set; } = new();
     public List<CollectionNote> Notes { get; set; } = new();
+
+    public Collection() { }
+
+    public Collection(
+        int userId,
+        string title,
+        bool isFavorites = false
+    )
+    {
+        UserId = userId;
+        Title = title;
+        DateCreated = DateTime.UtcNow;
+        IsFavorites = isFavorites;
+    }
 }

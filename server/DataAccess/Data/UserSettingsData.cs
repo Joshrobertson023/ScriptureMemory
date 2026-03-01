@@ -15,6 +15,18 @@ namespace DataAccess.Data;
 
 public sealed class UserSettingsData : IUserSettingsData
 {
+    public async Task UpdateThemePreference(Enums.ThemePreference preference, int userId)
+    {
+        var sql = @"UPDATE USER_PREFERENCES SET THEME = :preference WHERE USER_ID = :userId";
+        await conn.ExecuteAsync(sql, new { preference = preference, userId = userId });
+    }
+
+    public async Task UpdateBibleVersion(Enums.BibleVersion version, int userId)
+    {
+        var sql = @"UPDATE USER_PREFERENCES SET BIBLE_VERSION = :version WHERE USER_ID = :userId";
+        await conn.ExecuteAsync(sql, new { version = version, userId = userId });
+    }
+
     private readonly IDbConnection conn;
 
     public UserSettingsData(IDbConnection connection)
@@ -25,7 +37,7 @@ public sealed class UserSettingsData : IUserSettingsData
     public async Task CreateUserSettings(UserSettings settings, int userId)
     {
         var sql = @"INSERT INTO USER_PREFERENCES
-                    (USER_ID, THEME, VERSION, COLLECTIONS_SORT, SUBSCRIBED_VOD,
+                    (USER_ID, THEME, BIBLE_VERSION, COLLECTIONS_SORT, SUBSCRIBED_VOD,
                      PUSH_NOTIFICATIONS_ENABLED, NOTIFY_MEMORIZED_VERSE, NOTIFY_PUBLISHED_COLLECTION,
                      NOTIFY_COLLECTION_SAVED, NOTIFY_NOTE_LIKED, FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED,
                      STREAK_REMINDERS_ENABLED, APP_BADGES_ENABLED, PRACTICE_TAB_BADGES_ENABLED, TYPE_OUT_REFERENCE)
@@ -60,7 +72,7 @@ public sealed class UserSettingsData : IUserSettingsData
     public async Task<UserSettings> GetUserSettingsFromUserId(int userId)
     {
         var sql = @"SELECT THEME as ThemePreference, 
-                           VERSION as BibleVersion, 
+                           BIBLE_VERSION as BibleVersion, 
                            COLLECTIONS_SORT as CollectionsSort, 
                            SUBSCRIBED_VOD as SubscribedVerseOfDay, 
                            PUSH_NOTIFICATIONS_ENABLED as PushNotificationsEnabled,

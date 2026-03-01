@@ -10,6 +10,8 @@ namespace DataAccess.DataInterfaces;
 
 public interface IUserSettingsData
 {
+    Task UpdateThemePreference(Enums.ThemePreference preference, int userId);
+    Task UpdateBibleVersion(Enums.BibleVersion version, int userId);
     Task CreateUserSettings(UserSettings settings, int userId);
     Task<UserSettings> GetUserSettingsFromUserId(int userId);
     Task UpdateCollectionsSort(Enums.CollectionsSort sortBy, int userId);

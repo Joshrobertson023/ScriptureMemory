@@ -10,6 +10,8 @@ public interface ICollectionService
 {
     Task<int> CreateCollection(Collection newCollection);
     Task<List<Collection>> GetUserCollections(int userId);
+    Task SaveCollection(SaveCollectionRequest request);
+    Task<Collection> GetCollection(Collection collection);
 }
 
 public sealed class CollectionService : ICollectionService

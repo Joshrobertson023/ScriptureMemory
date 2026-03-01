@@ -22,7 +22,7 @@ public class VerseData : IVerseData
 
     private string selectSql = @"VERSE_ID AS Id, VERSE_REFERENCE as Reference, 
                                 USERS_SAVED_VERSE AS UsersSavedCount, USERS_MEMORIZED AS UsersMemorizedCount,
-                                TEXT AS Text";
+                                VERSE_TEXT AS Text";
 
     public VerseData(IDbConnection connection)
     {
@@ -40,7 +40,7 @@ public class VerseData : IVerseData
     public async Task InsertVerse(Verse verse)
     {
         var sql = $@"INSERT INTO VERSES 
-                    (verse_reference, Text, users_saved_verse, users_memorized)
+                    (verse_reference, verse_text, users_saved_verse, users_memorized)
                      VALUES
                      (:Reference, :Text, :UsersSavedCount, :UsersMemorizedCount)";
         await conn.ExecuteAsync(sql,
