@@ -21,6 +21,7 @@ public abstract class BaseIntegrationTest
     protected IVerseData verseContext { get; private set; } = null!;
     protected INotificationData notificationContext { get; private set; } = null!;
     protected ICollectionService collectionService { get; private set; } = null!;
+    protected IPublishedCollectionData publishedContext { get; private set; } = null!;
 
     protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
@@ -39,6 +40,7 @@ public abstract class BaseIntegrationTest
         verseContext = _scope.ServiceProvider.GetRequiredService<IVerseData>();
         notificationContext = _scope.ServiceProvider.GetRequiredService<INotificationData>();
         collectionService = _scope.ServiceProvider.GetRequiredService<ICollectionService>();
+        publishedContext = _scope.ServiceProvider.GetRequiredService<IPublishedCollectionData>();
     }
 
     public Task DisposeAsync()

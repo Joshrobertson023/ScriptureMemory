@@ -14,7 +14,7 @@ public class PublishedCollection
     public int AuthorId { get; set; }
     public int? CollectionId { get; set; }
     public List<int> categoryIds { get; set; } = new();
-    public DateTime DatePublished { get; set; }
+    public DateTime DatePublished { get; set; } = DateTime.UtcNow;
     public ApprovedStatus Status { get; set; }
     public List<UserPassage> UserVerses { get; set; } = new();
     public List<CollectionNote> Notes { get; set; } = new();

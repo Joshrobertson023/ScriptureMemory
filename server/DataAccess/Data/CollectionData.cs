@@ -35,9 +35,9 @@ public class CollectionData : ICollectionData
     public async Task<int> InsertCollection(Collection collection)
     {
         var sql = @"INSERT INTO COLLECTIONS
-                (USER_ID, ORDER_POSITION, VISIBILITY, IS_FAVORITES, DESCRIPTION, PROGRESS_PERCENT, TITLE, DATE_CREATED, PUBLISHED_ID, AUTHOR_ID)
+                (USER_ID, ORDER_POSITION, VISIBILITY, IS_FAVORITES, DESCRIPTION, PROGRESS_PERCENT, TITLE, DATE_CREATED)
                 VALUES
-                (:UserId, :OrderPosition, :Visibility, :IsFavorites, :Description, :ProgressPercent, :Title, :DateCreated, :PublishedId, :AuthorId)
+                (:UserId, :OrderPosition, :Visibility, :IsFavorites, :Description, :ProgressPercent, :Title, :DateCreated)
                 RETURNING COLLECTION_ID INTO :NewId";
 
         var parameters = new DynamicParameters();
@@ -45,7 +45,7 @@ public class CollectionData : ICollectionData
         parameters.Add("UserId", collection.UserId);
         parameters.Add("OrderPosition", collection.OrderPosition);
         parameters.Add("Visibility", collection.Visibility);
-        parameters.Add("IsFavorites", collection.IsFavorites);
+        parameters.Add("IsFavorites", collection.IsFavorites == true ? 1 : 0);
         parameters.Add("Description", collection.Description);
         parameters.Add("ProgressPercent", collection.ProgressPercent);
         parameters.Add("Title", collection.Title);
@@ -110,7 +110,7 @@ public class CollectionData : ICollectionData
     /// <returns>bool</returns>
     public async Task<bool> SavedFromPublishedExists(int publishedId, int userId)
     {
-        var sql = @"SELECT COUNT(*) FROM COLLECTIONS 
+        var sql = @"SELECT COUNT(*) FROM SAVED_COLLECTIONS 
                     WHERE USER_ID = :UserId 
                     AND PUBLISHED_ID = :PublishedId";
         var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId, PublishedId = publishedId });
@@ -134,8 +134,6 @@ public class CollectionData : ICollectionData
                         c.ORDER_POSITION AS OrderPosition,
                         c.IS_FAVORITES AS IsFavorites,
                         c.DESCRIPTION,
-                        c.PUBLISHED_ID AS PublishedId,
-                        c.AUTHOR_ID AS AuthorId,
                         c.PROGRESS_PERCENT AS ProgressPercent,
                         COUNT(up.COLLECTION_ID) AS NumPassages
                     FROM COLLECTIONS c
@@ -152,8 +150,6 @@ public class CollectionData : ICollectionData
                         c.ORDER_POSITION,
                         c.IS_FAVORITES,
                         c.DESCRIPTION,
-                        c.PUBLISHED_ID,
-                        c.AUTHOR_ID,
                         c.PROGRESS_PERCENT
                     ORDER BY c.ORDER_POSITION";
         
@@ -162,45 +158,55 @@ public class CollectionData : ICollectionData
         return collections.ToList();
     }
 
-    //public async Task<List<Collection>> GetUserSavedCollections(int userId)
-    //{
-    //    var sql = @"SELECT 
-    //                    c.PUBLISHED_ID AS CollectionId,
-    //                    c.USER_ID AS UserId,
-    //                    c.TITLE,
-    //                    c.VISIBILITY,
-    //                    c.DATE_CREATED AS DateCreated,
-    //                    c.ORDER_POSITION AS OrderPosition,
-    //                    c.IS_FAVORITES AS IsFavorites,
-    //                    c.DESCRIPTION,
-    //                    c.PUBLISHED_ID AS PublishedId,
-    //                    c.AUTHOR_ID AS AuthorId,
-    //                    c.PROGRESS_PERCENT AS ProgressPercent,
-    //                    COUNT(up.COLLECTION_ID) AS NumPassages
-    //                FROM COLLECTIONS c
-    //                LEFT JOIN USER_PASSAGES up 
-    //                    ON up.COLLECTION_ID = c.COLLECTION_ID
-    //                WHERE c.USER_ID = :UserId 
-    //                  AND c.PUBLISHED_ID IS NULL
-    //                GROUP BY 
-    //                    c.COLLECTION_ID,
-    //                    c.USER_ID,
-    //                    c.TITLE,
-    //                    c.VISIBILITY,
-    //                    c.DATE_CREATED,
-    //                    c.ORDER_POSITION,
-    //                    c.IS_FAVORITES,
-    //                    c.DESCRIPTION,
-    //                    c.PUBLISHED_ID,
-    //                    c.AUTHOR_ID,
-    //                    c.PROGRESS_PERCENT
-    //                ORDER BY c.ORDER_POSITION";
+    public async Task<List<Collection>> GetUserSavedCollections(int userId)
+    {
+        var sql = @"SELECT 
+                        c.COLLECTION_ID      AS CollectionId,
+                        c.USER_ID            AS UserId,
+                        c.TITLE,
+                        c.DATE_CREATED       AS DateCreated,
+                        c.IS_FAVORITES       AS IsFavorites,
+                        c.DESCRIPTION,
+                        c.PUBLISHED_ID       AS PublishedId,
+                        c.AUTHOR_ID          AS AuthorId,
+                        c.PROGRESS_PERCENT   AS ProgressPercent,
+                        sc.VISIBILITY,
+                        sc.ORDER_POSITION    AS OrderPosition,
+                        sc.DATE_SAVED        AS DateSaved,
+                        u.USERNAME           AS Author,
+                        COUNT(up.COLLECTION_ID) AS NumPassages
+                    FROM COLLECTIONS c
+                    INNER JOIN SAVED_COLLECTIONS sc
+                        ON  sc.PUBLISHED_ID = c.PUBLISHED_ID
+                        AND sc.USER_ID      = c.USER_ID
+                    INNER JOIN PUBLISHED_COLLECTIONS pc
+                        ON  pc.PUBLISHED_ID = c.PUBLISHED_ID
+                    LEFT JOIN USERS u
+                        ON  u.ID = pc.AUTHOR_ID
+                    LEFT JOIN USER_PASSAGES up
+                        ON  up.COLLECTION_ID = c.COLLECTION_ID
+                    WHERE c.USER_ID = :UserId
+                      AND c.PUBLISHED_ID IS NOT NULL
+                    GROUP BY
+                        c.COLLECTION_ID,
+                        c.USER_ID,
+                        c.TITLE,
+                        c.DATE_CREATED,
+                        c.IS_FAVORITES,
+                        c.DESCRIPTION,
+                        c.PUBLISHED_ID,
+                        c.AUTHOR_ID,
+                        c.PROGRESS_PERCENT,
+                        sc.VISIBILITY,
+                        sc.ORDER_POSITION,
+                        sc.DATE_SAVED,
+                        u.USERNAME
+                    ORDER BY sc.ORDER_POSITION";
 
-    //    await using var conn = new OracleConnection(connectionString);
-    //    var collections = await conn.QueryAsync<Collection>(sql, new { UserId = userId });
+        var collections = await conn.QueryAsync<Collection>(sql, new { UserId = userId });
 
-    //    return collections.ToList();
-    //}
+        return collections.ToList();
+    }
 
 
 

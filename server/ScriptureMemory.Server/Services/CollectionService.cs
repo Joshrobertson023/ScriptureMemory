@@ -126,6 +126,7 @@ public sealed class CollectionService : ICollectionService
             new Notification(
                 publishedCollection.AuthorId,
                 request.UserId,
+                "Someone saved your collection, " + publishedCollection.Title,
                 NotificationType.CollectionSaved
             )
         );
@@ -171,7 +172,7 @@ public sealed class CollectionService : ICollectionService
             throw new InvalidOperationException("Cannot get collection: CollectionId is required.");
 
         collection.Passages = await passageContext.GetUserPassagesPopulatedForCollection(collection.CollectionId);
-        collection.Notes = await collectionContext.GetCollectionNotes(collection.CollectionId);
+        //collection.Notes = await collectionContext.GetCollectionNotes(collection.CollectionId);
 
         return collection;
     }

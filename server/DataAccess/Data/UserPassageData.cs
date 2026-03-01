@@ -118,7 +118,7 @@ public class UserPassageData : IUserPassageData
 
                 v.verse_id as VerseId,
                 v.verse_reference as ReadableReference,
-                v.text as Text,
+                v.verse_text as Text,
                 v.users_saved_verse as UsersSavedCount, 
                 v.users_memorized as UsersMemorizedCount
 
