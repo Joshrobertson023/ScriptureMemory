@@ -204,45 +204,6 @@ public class CollectionData : ICollectionData
 
 
 
-    // -- Published Collections -----------------------------------------------------
-
-
-    /// <summary>
-    /// Gets the author id for a published collection
-    /// </summary>
-    /// <param name="publishedId"></param>
-    /// <returns>int</returns>
-    public async Task<int> GetAuthorId(int publishedId)
-    {
-        var sql = @"SELECT AUTHOR_ID FROM PUBLISHED_COLLECTIONS WHERE PUBLISHED_ID = :PublishedId";
-
-        var authorId = await conn.ExecuteScalarAsync<int>(sql, new { PublishedId = publishedId });
-
-        return authorId;
-    }
-
-    /// <summary>
-    /// Gets the author's username of a published collection
-    /// </summary>
-    /// <param name="publishedId"></param>
-    /// <returns></returns>
-    public async Task<string> GetAuthorName(int publishedId)
-    {
-        var sql = @"SELECT u.USERNAME FROM PUBLISHED_COLLECTIONS c
-                    INNER JOIN USERS u ON c.AUTHOR_ID = u.USER_ID
-                    WHERE c.PUBLISHED_ID = :PublishedId";
-
-        var authorName = await conn.ExecuteScalarAsync<string>(sql, new { PublishedId = publishedId });
-
-        return authorName ?? "";
-    }
-
-
-
-
-
-
-
     // -- Collection Notes -----------------------------------------------------
 
 

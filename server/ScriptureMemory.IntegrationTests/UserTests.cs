@@ -103,13 +103,13 @@ public class UserTests : BaseIntegrationTest
             BibleVersion = BibleVersion.Kjv
         };
         var result = await Api.PostAsJsonAsync("/users", request);
-        var createdUser = await result.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(createdUser);
-        List<Notification> notifications = await notificationContext.GetUserNotifications(createdUser.Id);
+        var createdUserId = await result.Content.ReadFromJsonAsync<int>();
+        Assert.NotNull(createdUserId);
+        List<Notification> notifications = await notificationContext.GetUserNotifications(createdUserId);
         Assert.NotNull(notifications);
         Assert.Single(notifications);
         Notification latestNotification = notifications.First();
-        Assert.Equal(createdUser.Id, latestNotification.ReceiverId);
+        Assert.Equal(createdUserId, latestNotification.ReceiverId);
         Assert.Equal(Data.welcomeNotificationBody, latestNotification.Message);
         Assert.Equal(Data.NOTIFICATION_SYSTEM_ID, latestNotification.SenderId);
         Assert.Equal(NotificationType.Welcome, latestNotification.NotificationType);
@@ -127,22 +127,24 @@ public class UserTests : BaseIntegrationTest
             Password = "password1234455",
             BibleVersion = BibleVersion.Kjv
         };
-        var createResult = await Api.PostAsJsonAsync("/users", request);
-        var createdUser = await createResult.Content.ReadFromJsonAsync<User>();
+        var result = await Api.PostAsJsonAsync("/users", request);
+        int createdUser = await result.Content.ReadFromJsonAsync<int>();
         Assert.NotNull(createdUser);
         var newUsername = $"testuser{Guid.NewGuid().ToString().Substring(0, 8)}";
         var existsResponse = await Api.GetAsync($"/users/exists/{newUsername}");
         var exists = await existsResponse.Content.ReadFromJsonAsync<bool>();
         Assert.False(exists); // Username should be available
+        var loginResponse = await Api.PostAsJsonAsync("/users/login/username", new { Username = request.Username, Password = request.Password });
+        var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
         var updateUsernameRequest = new UpdateUsernameRequest
         {
-            UserId = createdUser.Id,
-            OldUsername = createdUser.Username,
+            UserId = loggedInUser.Id,
+            OldUsername = loggedInUser.Username,
             NewUsername = newUsername
         };
         var updateResponse = await Api.PutAsJsonAsync("/users/username", updateUsernameRequest);
         updateResponse.EnsureSuccessStatusCode();
-        var loginResponse = await Api.PostAsJsonAsync("/users/login/username", new { Username = newUsername, request.Password });
+        loginResponse = await Api.PostAsJsonAsync("/users/login/username", new { Username = newUsername, request.Password });
         loginResponse.EnsureSuccessStatusCode();
         var updatedUser = await loginResponse.Content.ReadFromJsonAsync<User>();
         Assert.NotNull(updatedUser);

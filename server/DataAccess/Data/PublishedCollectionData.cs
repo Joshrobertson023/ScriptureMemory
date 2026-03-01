@@ -1,25 +1,99 @@
-//using Dapper;
-//using DataAccess.DataInterfaces;
-//using DataAccess.DBAccess;
-//using DataAccess.Models;
-//using Microsoft.Extensions.Configuration;
-//using Oracle.ManagedDataAccess.Client;
-//using System.Data;
+using Dapper;
+using DataAccess.DataInterfaces;
+using DataAccess.Models;
+using Microsoft.Extensions.Configuration;
+using Oracle.ManagedDataAccess.Client;
+using System.Data;
 
-//namespace DataAccess.Data;
+namespace DataAccess.Data;
 
-//public class PublishedCollectionData : IPublishedCollectionData
-//{
-//    private readonly IDBAccess _db;
-//    private readonly IConfiguration _config;
-//    private readonly string connectionString;
+public class PublishedCollectionData : IPublishedCollectionData
+{
+    private readonly IDbConnection conn;
 
-//    public PublishedCollectionData(IDBAccess db, IConfiguration config)
-//    {
-//        _db = db;
-//        _config = config;
-//        connectionString = _config.GetConnectionString("Default");
-//    }
+    public PublishedCollectionData(IDbConnection connection)
+    {
+        conn = connection;
+    }
+
+    /// <summary>
+    /// Inserts a published collection into the database
+    /// </summary>
+    /// <param name="collection"></param>
+    /// <returns>int, the new row id</returns>
+    public async Task<int> Insert(PublishedCollection collection)
+    {
+        var sql = @"INSERT INTO PUBLISHED_COLLECTIONS (COLLECTION_DESCRIPTION, NUM_SAVES, AUTHOR_ID, TITLE, APPROVED_STATUS, ORDER_POSITION)
+                    VALUES (:Description, :NumSaves, :AuthorId, :Title, :ApprovedStatus, :OrderPosition)
+                    RETURNING PUBLISHED_ID INTO :PublishedId";
+        var parameters = new DynamicParameters();
+        parameters.Add("Description", collection.Description);
+        parameters.Add("NumSaves", collection.NumSaves);
+        parameters.Add("AuthorId", collection.AuthorId);
+        parameters.Add("Title", collection.Title);
+        parameters.Add("ApprovedStatus", collection.Status);
+        parameters.Add("OrderPosition", collection.OrderPosition);
+        parameters.Add("PublishedId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+        await conn.ExecuteAsync(sql, parameters);
+        int publishedId = parameters.Get<int>("PublishedId");
+        return publishedId;
+    }
+
+    /// <summary>
+    /// Gets a published collection by id
+    /// </summary>
+    /// <param name="publishedId"></param>
+    /// <returns>PublishedCollection</returns>
+    public async Task<PublishedCollection> Get(int publishedId)
+    {
+        var sql = @"SELECT PUBLISHED_ID AS PublishedId, COLLECTION_DESCRIPTION AS Description, NUM_SAVES AS NumSaves, AUTHOR_ID AS AuthorId, TITLE, APPROVED_STATUS AS Status, ORDER_POSITION AS OrderPosition
+                    FROM PUBLISHED_COLLECTIONS
+                    WHERE PUBLISHED_ID = :PublishedId";
+        var collection = await conn.QueryFirstOrDefaultAsync<PublishedCollection>(sql, new { PublishedId = publishedId });
+        return collection ?? throw new NullReferenceException();
+    }
+
+    /// <summary>
+    /// Gets the author id for a published collection
+    /// </summary>
+    /// <param name="publishedId"></param>
+    /// <returns>int</returns>
+    public async Task<int> GetAuthorId(int publishedId)
+    {
+        var sql = @"SELECT AUTHOR_ID FROM PUBLISHED_COLLECTIONS WHERE PUBLISHED_ID = :PublishedId";
+
+        var authorId = await conn.ExecuteScalarAsync<int>(sql, new { PublishedId = publishedId });
+
+        return authorId;
+    }
+
+    /// <summary>
+    /// Gets the author's username of a published collection
+    /// </summary>
+    /// <param name="publishedId"></param>
+    /// <returns></returns>
+    public async Task<string> GetAuthorName(int publishedId)
+    {
+        var sql = @"SELECT u.USERNAME FROM PUBLISHED_COLLECTIONS c
+                    INNER JOIN USERS u ON c.AUTHOR_ID = u.USER_ID
+                    WHERE c.PUBLISHED_ID = :PublishedId";
+
+        var authorName = await conn.ExecuteScalarAsync<string>(sql, new { PublishedId = publishedId });
+
+        return authorName ?? "";
+    }
+
+    /// <summary>
+    /// Increments the saved count by 1 for a published collection
+    /// </summary>
+    /// <param name="publishedId"></param>
+    /// <returns></returns>
+    public async Task IncrementUsersSaved(int publishedId)
+    {
+        var sql = @"UPDATE PUBLISHED_COLLECTIONS SET NUM_SAVES = NVL(NUM_SAVES, 0) + 1 WHERE PUBLISHED_ID = :PublishedId";
+        await conn.ExecuteAsync(sql, new { PublishedId = publishedId });
+    }
+}
 
 //    public async Task Publish(int collectionId, string? description)
 //    {

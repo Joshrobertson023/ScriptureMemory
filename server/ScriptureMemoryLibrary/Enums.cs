@@ -34,7 +34,16 @@ namespace ScriptureMemoryLibrary
         public enum NotificationType
         {
             System = 0,
-            Welcome = 1
+            Welcome = 1,
+            CollectionSaved = 2,
+        }
+
+        public enum ApprovedStatus
+        {
+            UnderReview = 0,
+            Approved = 1,
+            Rejected = 2,
+            Other = 3
         }
 
         public enum PracticeStyle

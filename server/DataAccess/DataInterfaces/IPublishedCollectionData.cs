@@ -4,9 +4,11 @@ namespace DataAccess.DataInterfaces;
 
 public interface IPublishedCollectionData
 {
-    Task Publish(int collectionId, string? description);
-    Task Unpublish(int collectionId);
-    Task<PublishedCollection?> Get(int collectionId);
+    Task<int> GetAuthorId(int publishedId);
+    Task<string> GetAuthorName(int publishedId);
+    Task IncrementUsersSaved(int publishedId);
+    Task<int> Insert(PublishedCollection collection);
+    Task<PublishedCollection> Get(int publishedId);
 }
 
 

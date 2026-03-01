@@ -330,6 +330,19 @@ internal static class TableDefinitions
              ORDER_POSITION   NUMBER,
              IS_MEMORIZED     NUMBER(1,0) DEFAULT 0
          )
+        """,
+
+        """
+        CREATE TABLE PUBLISHED_COLLECTIONS (
+            PUBLISHED_ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            COLLECTION_DESCRIPTION VARCHAR2(2000),
+            NUM_SAVES NUMBER,
+            TITLE VARCHAR2(100),
+            DATE_PUBLISHED DATE,
+            AUTHOR_ID NUMBER REFERENCES USERS(ID) ON DELETE SET NULL,
+            APPROVED_STATUS NUMBER,
+            ORDER_POSITION NUMBER
+        )
         """
     ];
 }

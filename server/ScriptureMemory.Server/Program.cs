@@ -35,6 +35,7 @@ builder.Services.AddScoped<INotificationData, NotificationData>();
 builder.Services.AddScoped<IVerseData, VerseData>();
 builder.Services.AddScoped<IUserPassageData, UserPassageData>();
 builder.Services.AddScoped<ICollectionData, CollectionData>();
+builder.Services.AddScoped<IPublishedCollectionData, PublishedCollectionData>();
 
 builder.Services.AddScoped<IDbConnection>(sp =>
 {

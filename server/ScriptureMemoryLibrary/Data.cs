@@ -17,6 +17,7 @@ public class Data
     public static int NOTIFICATION_SYSTEM_ID = 1;
     public static string notificationSystemName = "Scripture Memory Staff";
     public static string welcomeNotificationBody = "To interact with people you know, visit the search page to send them a friend request.";
+    public static string savedNotificationBody = "Someone saved your collection, ";
 
     public static int NOTIFICATION_SYSTEM_SENDER_ID = 1;
 

@@ -19,15 +19,21 @@ public sealed class CollectionService : ICollectionService
     private readonly ICollectionData collectionContext;
     private readonly IActivityLogger logger;
     private readonly IUserPassageData passageContext;
+    private readonly INotificationService notifications;
+    private readonly IPublishedCollectionData publishedContext;
 
     public CollectionService(
         ICollectionData collectionContext, 
         IActivityLogger logger,
-        IUserPassageData passageContext)
+        IUserPassageData passageContext,
+        INotificationService notifications,
+        IPublishedCollectionData publishedContext)
     {
         this.collectionContext = collectionContext;
         this.logger = logger;
         this.passageContext = passageContext;
+        this.notifications = notifications;
+        this.publishedContext = publishedContext;
     }
 
     /// <summary>
@@ -112,9 +118,17 @@ public sealed class CollectionService : ICollectionService
         request.OrderPosition = await collectionContext.GetNextOrderPosition(request.UserId);
 
         await collectionContext.SaveCollection(request);
-        // await publishedContext.IncrementUsersSaved(request.PublishedId);
+        await publishedContext.IncrementUsersSaved(request.PublishedId);
 
-        // Todo: Notify author
+        var publishedCollection = await publishedContext.Get(request.PublishedId);
+
+        await notifications.SendNotification(
+            new Notification(
+                publishedCollection.AuthorId,
+                request.UserId,
+                NotificationType.CollectionSaved
+            )
+        );
 
         await logger.Log(
             new ActivityLog(

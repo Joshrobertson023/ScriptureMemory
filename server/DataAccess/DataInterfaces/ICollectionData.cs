@@ -10,8 +10,6 @@ public interface ICollectionData
     Task<bool> FavoritesExists(int userId);
     Task<bool> SavedFromPublishedExists(int publishedId, int userId);
     Task SaveCollection(SaveCollectionRequest request);
-    Task<int> GetAuthorId(int publishedId);
-    Task<string> GetAuthorName(int publishedId);
     Task<List<Collection>> GetUserCreatedCollections(int userId);
     Task<List<CollectionNote>> GetCollectionNotes(int collectionId);
     Task<int> InsertCollectionNote(CollectionNote note);
