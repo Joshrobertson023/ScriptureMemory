@@ -20,13 +20,11 @@ namespace DataAccess.Data;
 
 public class CollectionData : ICollectionData
 {
-    private readonly IConfiguration _config;
-    private readonly string connectionString;
+    private readonly IDbConnection conn;
 
-    public CollectionData(IConfiguration config)
+    public CollectionData(IDbConnection connection)
     {
-        _config = config;
-        connectionString = _config.GetConnectionString("Default")!;
+        conn = connection;
     }
 
     /// <summary>
@@ -41,9 +39,6 @@ public class CollectionData : ICollectionData
                 VALUES
                 (:UserId, :OrderPosition, :Visibility, :IsFavorites, :Description, :ProgressPercent, :Title, :DateCreated, :PublishedId, :AuthorId)
                 RETURNING COLLECTION_ID INTO :NewId";
-
-        await using var conn = new OracleConnection(connectionString);
-        await conn.OpenAsync();
 
         var parameters = new DynamicParameters();
 
@@ -70,8 +65,6 @@ public class CollectionData : ICollectionData
                     VALUES
                     (:UserId, :PublishedId, :DateSaved, :OrderPosition, :Visibility)";
 
-        await using var conn = new OracleConnection(connectionString);
-        await conn.OpenAsync();
         await conn.ExecuteAsync(sql, new
         {
             UserId = request.UserId,
@@ -91,7 +84,6 @@ public class CollectionData : ICollectionData
     {
         var sql = @"SELECT NVL(MAX(ORDER_POSITION), 0) + 1 FROM COLLECTIONS WHERE USER_ID = :UserId";
 
-        await using var conn = new OracleConnection(connectionString);
         var nextPosition = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
 
         return nextPosition;
@@ -106,7 +98,6 @@ public class CollectionData : ICollectionData
     {
         var sql = @"SELECT COUNT(*) FROM COLLECTIONS WHERE USER_ID = :UserId AND IS_FAVORITES = 1";
 
-        await using var conn = new OracleConnection(connectionString);
         var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
 
         return count > 0;
@@ -122,7 +113,6 @@ public class CollectionData : ICollectionData
         var sql = @"SELECT COUNT(*) FROM COLLECTIONS 
                     WHERE USER_ID = :UserId 
                     AND PUBLISHED_ID = :PublishedId";
-        await using var conn = new OracleConnection(connectionString);
         var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId, PublishedId = publishedId });
 
         return count > 0;
@@ -167,7 +157,6 @@ public class CollectionData : ICollectionData
                         c.PROGRESS_PERCENT
                     ORDER BY c.ORDER_POSITION";
         
-        await using var conn = new OracleConnection(connectionString);
         var collections = await conn.QueryAsync<Collection>(sql, new { UserId = userId });
         
         return collections.ToList();
@@ -227,7 +216,6 @@ public class CollectionData : ICollectionData
     {
         var sql = @"SELECT AUTHOR_ID FROM PUBLISHED_COLLECTIONS WHERE PUBLISHED_ID = :PublishedId";
 
-        await using var conn = new OracleConnection(connectionString);
         var authorId = await conn.ExecuteScalarAsync<int>(sql, new { PublishedId = publishedId });
 
         return authorId;
@@ -244,7 +232,6 @@ public class CollectionData : ICollectionData
                     INNER JOIN USERS u ON c.AUTHOR_ID = u.USER_ID
                     WHERE c.PUBLISHED_ID = :PublishedId";
 
-        await using var conn = new OracleConnection(connectionString);
         var authorName = await conn.ExecuteScalarAsync<string>(sql, new { PublishedId = publishedId });
 
         return authorName ?? "";
@@ -268,9 +255,6 @@ public class CollectionData : ICollectionData
                     (:CollectionId, :Text, :OrderPosition)
                     RETURNING ID INTO :NewId";
 
-        await using var conn = new OracleConnection(connectionString);
-        await conn.OpenAsync();
-
         var parameters = new DynamicParameters();
 
         parameters.Add("CollectionId", note.CollectionId);
@@ -290,7 +274,6 @@ public class CollectionData : ICollectionData
                     FROM COLLECTION_NOTES
                     WHERE COLLECTION_ID = :CollectionId";
 
-        await using var conn = new OracleConnection(connectionString);
         var notes = await conn.QueryAsync<CollectionNote>(sql, new { CollectionId = collectionId });
         
         return notes?.ToList() ?? new List<CollectionNote>();

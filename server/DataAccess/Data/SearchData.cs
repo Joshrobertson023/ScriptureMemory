@@ -10,13 +10,11 @@ namespace DataAccess.Data;
 
 public class SearchData : ISearchData
 {
-    private readonly IConfiguration _config;
-    private readonly string connectionString;
+    private readonly IDbConnection conn;
 
-    public SearchData(IConfiguration config)
+    public SearchData(IDbConnection connection)
     {
-        _config = config;
-        connectionString = _config.GetConnectionString("Default")!;
+        conn = connection;
     }
 
     public async Task TrackSearch(string searchTerm, SearchType searchType)
@@ -33,7 +31,6 @@ public class SearchData : ISearchData
                 VALUES (new_search.TERM, 1, :CurrentDate, :SearchType)
         ";
 
-        await using var conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -50,7 +47,6 @@ public class SearchData : ISearchData
             INSERT INTO SEARCHES (SEARCH_TERM, SEARCH_COUNT, SEARCH_DATE, SEARCH_TYPE)
             VALUES (:SearchTerm, :SearchCount, :SearchDate, :SearchType)
         ";
-        await using var conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new 
         { 
             SearchTerm = search.SearchTerm.Trim(),
@@ -68,7 +64,6 @@ public class SearchData : ISearchData
             FROM SEARCHES
             WHERE ID = :Id
         ";
-        await using var conn = new OracleConnection(connectionString);
         var result = await conn.QueryFirstOrDefaultAsync<Search>(sql, new { Id = id }, commandType: CommandType.Text);
         return result;
     }
@@ -87,7 +82,6 @@ public class SearchData : ISearchData
                     order by search_date desc
                     fetch first 10 rows only";
 
-        await using var conn = new OracleConnection(connectionString);
         var results = await conn.QueryAsync<int>(sql);
         return results.ToList();
     }
@@ -99,7 +93,6 @@ public class SearchData : ISearchData
                     VALUES
                     (:SearchId)";
 
-        await using var conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new { Searchid = searchId });
     }
 
@@ -116,7 +109,6 @@ public class SearchData : ISearchData
             join trending_searches ts on ts.search_id = s.id
             where s.id = 1";
 
-        using IDbConnection conn = new OracleConnection(connectionString);
         var results = await conn.QueryAsync<Search>(sql);
         return results.ToList();
     }

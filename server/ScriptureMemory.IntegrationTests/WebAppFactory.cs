@@ -1,5 +1,8 @@
 ﻿using J2N.Collections.Generic.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -76,6 +79,10 @@ public class IntegrationTestWebAppFactory
             var connString = _connectionString!;
         });
         builder.UseEnvironment("Development");
+        builder.Configure(app =>
+        {
+            app.UseDeveloperExceptionPage();
+        });
         builder.CaptureStartupErrors(true);
         builder.UseSetting("detailedErrors", "true");
     }
@@ -89,10 +96,11 @@ public class IntegrationTestWebAppFactory
 
         var commands = new[]
         {
-            "DELETE FROM NOTIFICATIONS",
-            "DELETE FROM ACTIVITY_LOGS",
-            "DELETE FROM USER_PREFERENCES",
-            "DELETE FROM USERS"
+            "DROP TABLE NOTIFICATIONS",
+            "DROP TABLE ACTIVITY_LOGS",
+            "DROP TABLE USER_PREFERENCES",
+            "DROP TABLE USERS",
+            "DROP TABLE VERSES"
         };
 
         foreach (var cmdText in commands)
@@ -115,17 +123,18 @@ public class IntegrationTestWebAppFactory
         var commands = new[]
         {
             """
-            CREATE TABLE "USERS" (
-                "USERNAME" VARCHAR2(4000) PRIMARY KEY,
-                "FIRSTNAME" VARCHAR2(4000),
-                "LASTNAME" VARCHAR2(4000),
+            CREATE TABLE USERS (
+                ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                "USERNAME" VARCHAR2(4000),
+                "FIRST_NAME" VARCHAR2(4000),
+                "LAST_NAME" VARCHAR2(4000),
                 "EMAIL" VARCHAR2(4000),
-                "AUTHTOKEN" VARCHAR2(4000),
+                "AUTH_TOKEN" VARCHAR2(4000),
                 "STATUS" NUMBER,
-                "HASHEDPASSWORD" VARCHAR2(4000),
-                "DATEREGISTERED" DATE,
-                "LASTSEEN" DATE,
-                "DESCRIPTION" VARCHAR2(4000),
+                "HASHED_PASSWORD" VARCHAR2(4000),
+                "DATERE_GISTERED" DATE,
+                "LAST_SEEN" DATE,
+                "profile_DESCRIPTION" VARCHAR2(4000),
                 "VERSES_MEMORIZED" NUMBER DEFAULT 0,
                 "POINTS" NUMBER DEFAULT 0,
                 "PROFILE_PICTURE_URL" VARCHAR2(500)
@@ -134,40 +143,45 @@ public class IntegrationTestWebAppFactory
             """
                         
               CREATE TABLE "USER_PREFERENCES" 
-               (	
-                "USERNAME" VARCHAR2(100), 
-            	"THEME" NUMBER, 
-            	"VERSION" NUMBER, 
-            	"COLLECTIONS_SORT" NUMBER, 
-            	"SUBSCRIBED_VOD" NUMBER, 
-            	"PUSH_NOTIFICATIONS_ENABLED" NUMBER, 
-            	"NOTIFY_MEMORIZED_VERSE" NUMBER, 
-            	"NOTIFY_PUBLISHED_COLLECTION" NUMBER, 
-            	"NOTIFY_COLLECTION_SAVED" NUMBER, 
-            	"NOTIFY_NOTE_LIKED" NUMBER, 
-            	"FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED" NUMBER, 
-            	"STREAK_REMINDERS_ENABLED" NUMBER, 
-            	"APP_BADGES_ENABLED" NUMBER, 
-            	"PRACTICE_TAB_BADGES_ENABLED" NUMBER, 
-            	"TYPE_OUT_REFERENCE" NUMBER, 
-            	 PRIMARY KEY ("USERNAME")
-            )
+                (
+                "USER_ID" NUMBER PRIMARY KEY,
+                "USERNAME" VARCHAR2(100),
+
+                "THEME" NUMBER,
+                "VERSION" NUMBER,
+                "COLLECTIONS_SORT" NUMBER,
+                "SUBSCRIBED_VOD" NUMBER,
+                "PUSH_NOTIFICATIONS_ENABLED" NUMBER,
+                "NOTIFY_MEMORIZED_VERSE" NUMBER,
+                "NOTIFY_PUBLISHED_COLLECTION" NUMBER,
+                "NOTIFY_COLLECTION_SAVED" NUMBER,
+                "NOTIFY_NOTE_LIKED" NUMBER,
+                "FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED" NUMBER,
+                "STREAK_REMINDERS_ENABLED" NUMBER,
+                "APP_BADGES_ENABLED" NUMBER,
+                "PRACTICE_TAB_BADGES_ENABLED" NUMBER,
+                "TYPE_OUT_REFERENCE" NUMBER,
+
+                CONSTRAINT "FK_USER_PREFERENCES_USERS"
+                    FOREIGN KEY ("USER_ID")
+                    REFERENCES "USERS"("ID")
+                    ON DELETE CASCADE
+                );
             """,
             """
                         
               CREATE TABLE "ACTIVITY_LOGS" 
                (	
-               "ID" NUMBER GENERATED ALWAYS AS IDENTITY, 
-            	"USERNAME" VARCHAR2(100), 
-            	"ACTION_TYPE" VARCHAR2(100), 
-            	"ENTITY_TYPE" VARCHAR2(100), 
+               "ID" NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, 
+                USER_ID NUMBER REFERENCES USERS(ID),
+            	"ACTION_TYPE" NUMBER, 
+            	"ENTITY_TYPE" NUMBER, 
             	"ENTITY_ID" NUMBER, 
             	"CONTEXT_DESCRIPTION" VARCHAR2(1000), 
             	"METADATA_JSON" VARCHAR2(2000), 
             	"SEVERITY_LEVEL" NUMBER DEFAULT 0 NOT NULL, 
             	"IS_ADMIN_ACTION" NUMBER DEFAULT 0 NOT NULL, 
-            	"CREATED_AT" DATE DEFAULT SYSDATE NOT NULL, 
-            	 PRIMARY KEY ("ID")
+            	"CREATED_AT" DATE DEFAULT SYSDATE NOT NULL,
             )
             """,
             """
@@ -180,9 +194,19 @@ public class IntegrationTestWebAppFactory
             	"ISREAD" NUMBER(1,0) DEFAULT 0, 
             	"EXPIRATION_DATE" DATE, 
             	"NOTIFICATIONTYPE" NUMBER, 
-            	"SENDER" VARCHAR2(100), 
-            	"RECEIVER" VARCHAR2(100), 
+            	"SENDER_ID" NUMBER REFERENCES USERS(ID),
+            	"RECEIVER_ID" NUMBER REFERENCES USERS(ID), 
             	 PRIMARY KEY ("ID")
+            )
+            """,
+            """
+            CREATE TABLE VERSES
+            (
+            VERSE_ID NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+            VERSE_REFERENCE VARCHAR2(100),
+            USERS_SAVED_VERSE NUMBER DEFAULT 0,
+            USERS_MEMORIZED_VERSE NUMBER DEFAULT 0,
+            TEXT VARCHAR2(2000)
             )
             """
         };

@@ -14,13 +14,11 @@ namespace DataAccess.Data;
 
 public class NotificationData : INotificationData
 {
-    private readonly IConfiguration _config;
-    private readonly string connectionString;
+    private readonly IDbConnection conn;
 
-    public NotificationData(IConfiguration config)
+    public NotificationData(IDbConnection connection)
     {
-        _config = config;
-        connectionString = _config.GetConnectionString("Default")!;
+        conn = connection;
     }
 
     public async Task CreateNotification(Notification notification)
@@ -30,7 +28,6 @@ public class NotificationData : INotificationData
                     VALUES 
                     (:Receiver, :Sender, :Message, :CreatedDate, 0, :NotificationType, :ExpirationDate)";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new
         {
             Receiver = notification.ReceiverId,
@@ -56,7 +53,6 @@ public class NotificationData : INotificationData
                     WHERE RECEIVER_ID = :UserId 
                     ORDER BY CREATEDDATE DESC";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         var notifications = await conn.QueryAsync<Notification>(
             sql, 
             new { UserId = userId });
@@ -82,7 +78,6 @@ public class NotificationData : INotificationData
             WHERE ROWNUM <= :Limit
         ";
 
-        using IDbConnection conn = new OracleConnection(connectionString);
         var notifications = await conn.QueryAsync<Notification>(
             sql, 
             new 
@@ -113,7 +108,6 @@ public class NotificationData : INotificationData
             WHERE ROWNUM <= :Limit
         ";
 
-        using IDbConnection conn = new OracleConnection(connectionString);
         var notifications = await conn.QueryAsync<Notification>(sql, new
         {
             UserId = userId,
@@ -131,7 +125,6 @@ public class NotificationData : INotificationData
             WHERE ID = :NotificationId
         ";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new { NotificationId = notificationId }, commandType: CommandType.Text);
     }
 
@@ -143,7 +136,6 @@ public class NotificationData : INotificationData
             WHERE RECEIVER_ID = :UserId AND ISREAD = 0
         ";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new { UserId = userId }, commandType: CommandType.Text);
     }
 
@@ -155,7 +147,6 @@ public class NotificationData : INotificationData
             WHERE ID = :NotificationId
         ";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -172,7 +163,6 @@ public class NotificationData : INotificationData
             WHERE RECEIVER_ID = :UserId AND ISREAD = 0
         ";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         var count = await conn.QueryFirstOrDefaultAsync<int>(sql, new { UserId = userId }, commandType: CommandType.Text);
         return count;
     }
@@ -186,7 +176,6 @@ public class NotificationData : INotificationData
             FROM USERS u
         ";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -208,7 +197,6 @@ public class NotificationData : INotificationData
             WHERE u.ISADMIN = 1
         ";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -228,7 +216,6 @@ public class NotificationData : INotificationData
             WHERE RECEIVER_ID = :UserId OR SENDER_ID = :UserId
         ";
         
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new { UserId = userId }, commandType: CommandType.Text);
     }
 }

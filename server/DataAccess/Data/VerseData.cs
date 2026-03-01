@@ -67,7 +67,6 @@ public class VerseData : IVerseData
         string sql = $@"SELECT 
                         {selectSql}
                         FROM VERSES WHERE verse_reference = :Reference";
-        await using var conn = new OracleConnection(connectionString);
         var results = await conn.QueryAsync<VerseRow?>(sql, new { Reference = reference });
         return new Verse(results.First()
             ?? throw new NullReferenceException());
@@ -93,7 +92,6 @@ public class VerseData : IVerseData
         }
         sql.Append(")");
 
-        await using var conn = new OracleConnection(connectionString);
         var rows = await conn.QueryAsync<VerseRow?>(sql.ToString(), commandType: CommandType.Text);
         return rows.Select(r => new Verse(r)).ToList();
     }
@@ -101,7 +99,6 @@ public class VerseData : IVerseData
     public async Task<Verse?> GetVerseFromId(int id)
     {
         var sql = $@"SELECT {selectSql} WHERE verse_id = :id";
-        using IDbConnection conn = new OracleConnection(connectionString);
         var verses = await conn.QueryAsync<VerseRow?>(sql, new { id = id },
             commandType: CommandType.Text);
         return new Verse(verses.FirstOrDefault()
@@ -111,7 +108,6 @@ public class VerseData : IVerseData
     public async Task UpdateVerseText(string text, int id)
     {
         var sql = "update verses set text = :newText where verse_id = :id";
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new { newText = text, id = id },
             commandType: CommandType.Text);
         return;
@@ -121,7 +117,6 @@ public class VerseData : IVerseData
     {
         var sql = @"UPDATE VERSES SET Users_Saved_Verse = Users_Saved_Verse + 1
                      WHERE verse_reference = :Reference";
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new { Reference = reference },
             commandType: CommandType.Text);
     }
@@ -130,7 +125,6 @@ public class VerseData : IVerseData
     {
         var sql = @"UPDATE VERSES SET Users_Memorized = Users_Memorized + 1
                      WHERE verse_reference = :Reference";
-        using IDbConnection conn = new OracleConnection(connectionString);
         await conn.ExecuteAsync(sql, new { Reference = reference },
             commandType: CommandType.Text);
     }
@@ -143,7 +137,6 @@ public class VerseData : IVerseData
                         FETCH FIRST 20 ROWS ONLY
                     )
                     WHERE USERS_SAVED_VERSE > 0";
-        using IDbConnection conn = new OracleConnection(connectionString);
         var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
         return rows.Select(r => new Verse(r)).ToList();
     }
@@ -157,7 +150,6 @@ public class VerseData : IVerseData
                         FETCH FIRST 20 ROWS ONLY
                     )
                     WHERE USERS_MEMORIZED > 0";
-        using IDbConnection conn = new OracleConnection(connectionString);
         var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
         return rows.Select(r => new Verse(r)).ToList();
     }
@@ -166,7 +158,6 @@ public class VerseData : IVerseData
     {
         bool first = true;
         StringBuilder sql = new($"SELECT {selectSql} FROM VERSES WHERE verse_reference IN (");
-        using IDbConnection conn = new OracleConnection(connectionString);
         foreach (var reference in references)
         {
             if (first) sql.Append($"\'{reference}\'");

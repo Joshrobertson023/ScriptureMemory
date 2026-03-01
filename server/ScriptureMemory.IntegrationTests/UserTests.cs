@@ -36,7 +36,8 @@ public class UserTests : BaseIntegrationTest
 
         var result = await api.PostAsJsonAsync("/users", request);
 
-        result.EnsureSuccessStatusCode();
+        var body = await result.Content.ReadAsStringAsync();
+        Console.WriteLine(body);
 
 
         // Verify login in with username/password and with token

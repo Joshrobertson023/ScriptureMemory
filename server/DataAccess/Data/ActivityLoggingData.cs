@@ -3,12 +3,13 @@ using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
 using Oracle.ManagedDataAccess.Client;
+using ScriptureMemoryLibrary;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ScriptureMemoryLibrary;
 
 namespace DataAccess.Data;
 
@@ -21,18 +22,16 @@ public class PagedLogs<T>
 
 public sealed class ActivityLoggingData : IActivityLoggingData
 {
-    private readonly IConfiguration _config;
-    private readonly string connectionString;
+    private readonly IDbConnection conn;
 
     private const string selectClause = @"ID, USER_ID as UserId, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
                                         ENTITY_ID as EntityId, CONTEXT_DESCRIPTION as ContextDescription,
                                         METADATA_JSON as JsonMetadata, SEVERITY_LEVEL as SeverityLevel,
                                         IS_ADMIN_ACTION as IsAdminAction, CREATED_AT as CreatedAt";
 
-    public ActivityLoggingData(IConfiguration config)
+    public ActivityLoggingData(IDbConnection connection)
     {
-        _config = config;
-        connectionString = _config.GetConnectionString("Default")!;
+        conn = connection;
     }
 
     public async Task Create(ActivityLog log)
@@ -43,9 +42,6 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                     VALUES
                     (:UserId, :ActionType, :EntityType, :EntityId, :ContextDescription,
                      :MetadataJson, :SeverityLevel, :IsAdminAction, :CreatedAt)";
-
-        await using var conn = new OracleConnection(connectionString);
-        await conn.OpenAsync();
 
         await conn.ExecuteAsync(sql,
             new
@@ -68,7 +64,6 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                     {selectClause}
                     FROM ACTIVITY_LOGS WHERE ID = :Id";
 
-        await using var conn = new OracleConnection(connectionString);
         return await conn.QuerySingleOrDefaultAsync<ActivityLog>(
             sql,
             new { Id = id });
@@ -81,7 +76,6 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
-        await using var conn = new OracleConnection(connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -104,7 +98,6 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
-        await using var conn = new OracleConnection(connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -128,7 +121,6 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
-        await using var conn = new OracleConnection(connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -151,7 +143,6 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
-        await using var conn = new OracleConnection(connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -175,7 +166,6 @@ public sealed class ActivityLoggingData : IActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
-        await using var conn = new OracleConnection(connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -193,16 +183,12 @@ public sealed class ActivityLoggingData : IActivityLoggingData
     public async Task<int> DeleteOlderThan(DateTime cutoff)
     {
         var sql = "DELETE FROM ACTIVITY_LOGS WHERE CREATED_AT < :Cutoff";
-
-        await using var conn = new OracleConnection(connectionString);
         return await conn.ExecuteAsync(sql, new { Cutoff = cutoff });
     }
 
     public async Task<int> DeleteLogsForUser(string username)
     {
         var sql = "DELETE FROM ACTIVITY_LOGS WHERE USERNAME = :Username";
-
-        await using var conn = new OracleConnection(connectionString);
         return await conn.ExecuteAsync(sql, new { Username = username });
     }
 }

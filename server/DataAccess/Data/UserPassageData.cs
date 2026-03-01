@@ -17,13 +17,11 @@ namespace DataAccess.Data;
 
 public class UserPassageData : IUserPassageData
 {
-    private readonly IConfiguration _config;
-    private readonly string connectionString;
+    private readonly IDbConnection conn;
 
-    public UserPassageData(IConfiguration config)
+    public UserPassageData(IDbConnection connection)
     {
-        _config = config;
-        connectionString = _config.GetConnectionString("Default")!;
+        conn = connection;
     }
 
     public async Task<int> InsertUserPassage(UserPassage newPassage)
@@ -35,9 +33,6 @@ public class UserPassageData : IUserPassageData
                     (:Reference, :DueDate, :LastPracticed, :TimesMemorized, :DateSaved, 
                      :CollectionId, :OrderPosition, :NotifyMemorized, :UserId, :ProgressPercent)
                     RETURNING ID INTO :NewId";
-
-        await using var conn = new OracleConnection(connectionString);
-        await conn.OpenAsync();
 
         var parameters = new DynamicParameters();
 
@@ -70,7 +65,6 @@ public class UserPassageData : IUserPassageData
         var sql = @"SELECT TEXT FROM VERSES WHERE VERSE_REFERENCE IN (:References)";
         // If you get an error for this, remove the paranthesis
 
-        using var conn = new OracleConnection(connectionString);
         var result = await conn.QueryAsync<string>(sql, new { References = references });
         
         return string.Join(" ", result);
@@ -132,9 +126,6 @@ public class UserPassageData : IUserPassageData
                 JOIN verses v on up.reference = v.verse_reference
                 WHERE up.COLLECTION_ID = :CollectionId
                 ORDER BY up.ORDER_POSITION, v.verse_id";
-
-        using var conn = new OracleConnection(connectionString);
-        await conn.OpenAsync();
 
         var lookup = new Dictionary<int, UserPassage>();
 
