@@ -15,37 +15,35 @@ public abstract class BaseIntegrationTest
     : IClassFixture<IntegrationTestWebAppFactory>, IAsyncLifetime
 {
     private readonly IntegrationTestWebAppFactory _factory;
+    private IServiceScope _scope = null!;
 
-    /// <summary>HTTP client pointed at the test server. Use this for all interactions.</summary>
     protected HttpClient Api { get; private set; } = null!;
-
-    protected readonly IVerseData verseContext;
-    protected readonly INotificationData notificationContext;
-    protected readonly ICollectionService collectionService;
+    protected IVerseData verseContext { get; private set; } = null!;
+    protected INotificationData notificationContext { get; private set; } = null!;
+    protected ICollectionService collectionService { get; private set; } = null!;
 
     protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
         _factory = factory;
-        verseContext = _factory.Services.GetRequiredService<IVerseData>();
-        notificationContext = _factory.Services.GetRequiredService<INotificationData>();
-        collectionService = _factory.Services.GetRequiredService<ICollectionService>();
     }
 
-    /// <summary>
-    /// Runs before every test. Drops and recreates the schema so each test
-    /// starts with empty tables, then creates a fresh HTTP client.
-    /// </summary>
     public async Task InitializeAsync()
     {
         await _factory.DropSchemaAsync();
         await _factory.CreateSchemaAsync();
 
         Api = _factory.CreateClient();
+
+        // Create a fresh scope per test so scoped services resolve correctly
+        _scope = _factory.Services.CreateScope();
+        verseContext = _scope.ServiceProvider.GetRequiredService<IVerseData>();
+        notificationContext = _scope.ServiceProvider.GetRequiredService<INotificationData>();
+        collectionService = _scope.ServiceProvider.GetRequiredService<ICollectionService>();
     }
 
-    /// <summary>Runs after every test. Disposes the HTTP client.</summary>
     public Task DisposeAsync()
     {
+        _scope?.Dispose();
         Api.Dispose();
         return Task.CompletedTask;
     }

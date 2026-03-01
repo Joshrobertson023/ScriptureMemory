@@ -26,7 +26,7 @@ public sealed class IntegrationTestWebAppFactory
     private const string AdminPassword = "Oracle123!";
     private const string AppUser = "APPUSER";
     private const string AppPassword = "App123!";
-    private const string ServiceName = "XE";
+    private const string ServiceName = "XEPDB1";
     private const int OraclePort = 1521;
 
     // -------------------------------------------------------------------------
@@ -125,10 +125,10 @@ public sealed class IntegrationTestWebAppFactory
         await using var conn = new OracleConnection(adminConnString);
         await conn.OpenAsync();
 
-        // Create user – ignore ORA-01920 (user already exists)
         try
         {
-            await conn.ExecuteAsync($"CREATE USER {AppUser} IDENTIFIED BY {AppPassword}");
+            // Password must be double-quoted in DDL if it contains special characters (e.g. !)
+            await conn.ExecuteAsync($"CREATE USER {AppUser} IDENTIFIED BY \"{AppPassword}\"");
         }
         catch (OracleException ex) when (ex.Number == 1920)
         {
@@ -137,16 +137,14 @@ public sealed class IntegrationTestWebAppFactory
 
         var grants = new[]
         {
-            $"GRANT CREATE SESSION   TO {AppUser}",
-            $"GRANT CREATE TABLE     TO {AppUser}",
-            $"GRANT CREATE SEQUENCE  TO {AppUser}",
-            $"GRANT UNLIMITED TABLESPACE TO {AppUser}"
-        };
+        $"GRANT CREATE SESSION TO {AppUser}",
+        $"GRANT CREATE TABLE TO {AppUser}",
+        $"GRANT CREATE SEQUENCE TO {AppUser}",
+        $"GRANT UNLIMITED TABLESPACE TO {AppUser}"
+    };
 
         foreach (var grant in grants)
-        {
             await conn.ExecuteAsync(grant);
-        }
     }
 
     private async Task CreateTablesAsync()
