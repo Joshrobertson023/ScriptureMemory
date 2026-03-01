@@ -11,7 +11,6 @@ public interface ICollectionData
     Task<bool> SavedFromPublishedExists(int publishedId, int userId);
     Task SaveCollection(SaveCollectionRequest request);
     Task<int> GetAuthorId(int publishedId);
-    Task<List<Collection>> GetUserCollections(int userId);
     Task<string> GetAuthorName(int publishedId);
     Task<List<Collection>> GetUserCreatedCollections(int userId);
     Task<List<CollectionNote>> GetCollectionNotes(int collectionId);

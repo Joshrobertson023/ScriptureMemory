@@ -9,7 +9,6 @@ namespace ScriptureMemory.Server.Services;
 public interface ICollectionService
 {
     Task<int> CreateCollection(Collection newCollection);
-    Task<int> SaveCollection(Collection collection);
     Task<List<Collection>> GetUserCollections(int userId);
 }
 
@@ -111,6 +110,9 @@ public sealed class CollectionService : ICollectionService
         request.OrderPosition = await collectionContext.GetNextOrderPosition(request.UserId);
 
         await collectionContext.SaveCollection(request);
+        // await publishedContext.IncrementUsersSaved(request.PublishedId);
+
+        // Todo: Notify author
 
         await logger.Log(
             new ActivityLog(

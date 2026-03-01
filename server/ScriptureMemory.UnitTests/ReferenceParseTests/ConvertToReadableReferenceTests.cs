@@ -17,12 +17,6 @@ public class ConvertToReadableReferenceTests
         Assert.Equal("1 John 4:18-20", result);
     }
     [Fact]
-    public void ConvertToReadableReference_NumberedBookRangeWithSeparateVerse_ReturnsCorrectString()
-    {
-        var result = ReferenceParse.ConvertToReadableReference("1 John", 4, new List<int> { 18, 19, 20 });
-        Assert.Equal("1 John 4:18-19, 20", result);
-    }
-    [Fact]
     public void ConvertToReadableReference_SingleVerse_ReturnsCorrectString()
     {
         var result = ReferenceParse.ConvertToReadableReference("John", 3, new List<int> { 16 });

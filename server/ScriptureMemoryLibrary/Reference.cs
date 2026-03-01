@@ -11,26 +11,21 @@ public sealed class Reference
     public string Book { get; set; }
     public int Chapter { get; set; }
     public List<int> Verses { get; set; }
-    private string _readableReference;
-    public string ReadableReference
-    {
-        get => _readableReference;
-        set => _readableReference = ReferenceParse.NormalizeReadableReference(value);
-    }
+    public string ReadableReference { get; set; }
 
     public Reference(string book, int chapter, List<int> verses)
     {
         Book = book;
         Chapter = chapter;
         Verses = verses;
-        _readableReference = ReferenceParse.ConvertToReadableReference(Book, Chapter, Verses);
+        ReadableReference = ReferenceParse.ConvertToReadableReference(Book, Chapter, Verses);
     }
 
     public Reference(string readableReference)
     {
-        ReadableReference = readableReference;
         Book = ReferenceParse.GetBook(readableReference);
         Chapter = ReferenceParse.GetChapter(readableReference);
         Verses = ReferenceParse.GetIndividualVerses(readableReference);
+        ReadableReference = ReferenceParse.ConvertToReadableReference(Book, Chapter, Verses);
     }
 }

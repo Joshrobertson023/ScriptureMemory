@@ -31,26 +31,33 @@ public static class ReferenceParse
     /// <returns>List<string> { "Psalms", "119", "2", "4", "7" }</returns>
     public static List<string> GetVerseTypingParts(string reference)
     {
-        List<string> typingParts = new();
-        string verseNumber = string.Empty;
+        var parts = new List<string>();
 
-        var referenceParts = reference.Split(':');
-        var secondPart = referenceParts[1];
-        for (int i = 0; i < secondPart.Length; i++)
+        string book = GetBook(reference);
+        int chapter = GetChapter(reference);
+
+        parts.Add(book);
+        parts.Add(chapter.ToString());
+
+        string versesPart = GetVersesHalfOfReference(reference);
+
+        foreach (var segment in versesPart.Split(','))
         {
-            while (i < secondPart.Length && char.IsNumber(secondPart[i]))
+            string trimmed = segment.Trim();
+
+            if (trimmed.Contains('-'))
             {
-                verseNumber += secondPart[i];
-                i++;
+                var range = trimmed.Split('-');
+                parts.Add(range[0].Trim());
+                parts.Add(range[1].Trim());
             }
-            if (verseNumber.Length > 0)
+            else
             {
-                typingParts.Add(verseNumber);
-                verseNumber = string.Empty;
+                parts.Add(trimmed);
             }
         }
 
-        return typingParts;
+        return parts;
     }
 
     /// <summary>
@@ -152,10 +159,23 @@ public static class ReferenceParse
         List<int> returnList = new List<int>();
         string verses = GetVersesHalfOfReference(reference);
 
-        if (verses.Length > 1)
-            for (int i = 0; i < verses.Length - 1; i += 2)
-                returnList.Add(Convert.ToInt32(verses[i]));
-        returnList.Add(Convert.ToInt32(verses[verses.Length - 1]));
+        foreach (string part in verses.Split(','))
+        {
+            string trimmed = part.Trim();
+
+            if (trimmed.Contains('-'))
+            {
+                string[] range = trimmed.Split('-');
+                int start = int.Parse(range[0].Trim());
+                int end = int.Parse(range[1].Trim());
+                for (int i = start; i <= end; i++)
+                    returnList.Add(i);
+            }
+            else
+            {
+                returnList.Add(int.Parse(trimmed));
+            }
+        }
 
         return returnList;
     }
