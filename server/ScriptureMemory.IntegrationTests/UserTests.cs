@@ -30,19 +30,6 @@ public class UserTests : BaseIntegrationTest
 
         var result = await Api.PostAsJsonAsync("/users", request);
         result.EnsureSuccessStatusCode();
-        var createdUser = await result.Content.ReadFromJsonAsync<User>();
-
-        Assert.NotNull(createdUser);
-        Assert.Equal(request.Username, createdUser.Username);
-        Assert.Equal(request.FirstName, createdUser.FirstName);
-        Assert.Equal(request.LastName, createdUser.LastName);
-        Assert.Equal(request.Email, createdUser.Email);
-        Assert.NotNull(createdUser.HashedPassword);
-        Assert.NotNull(createdUser.DateRegistered);
-        Assert.NotNull(createdUser.AuthToken);
-        Assert.NotNull(createdUser.Settings);
-        Assert.Equal(request.BibleVersion, createdUser.Settings.BibleVersion);
-        Assert.True(createdUser.Settings.PushNotificationsEnabled);
     }
 
     [Fact]

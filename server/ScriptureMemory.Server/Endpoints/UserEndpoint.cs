@@ -51,8 +51,16 @@ public static class UserEndpoint
             [FromBody] CreateUserRequest request,
             [FromServices] IUserService userService) =>
         {
-            await userService.CreateUserFromRequest(request);
-            return Results.Created();
+            try
+            {
+                await userService.CreateUserFromRequest(request);
+                return Results.Created();
+            }
+            catch (Exception ex)
+            {
+                // Return the error message and stack trace for debugging
+                return Results.BadRequest(new { error = ex.Message, details = ex.StackTrace });
+            }
         });
 
         // Check if username exists

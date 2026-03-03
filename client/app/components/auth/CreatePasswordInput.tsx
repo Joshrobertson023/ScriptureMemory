@@ -2,7 +2,7 @@ import { HelperText, TextInput } from "react-native-paper";
 import useStyles from "../../styles";
 import { useFormStore } from "../../stores/form.store";
 import { useState } from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 
 export const CreatePasswordInput = () => {
     const styles = useStyles();
@@ -23,9 +23,12 @@ export const CreatePasswordInput = () => {
                 autoCorrect={false}
                 autoComplete="password"
                 textContentType="password"
+                mode="outlined"
+                outlineStyle={{borderRadius: 40}}
                 secureTextEntry={!showPassword}
                 error={passwordEmpty}
-                label="Password" mode="outlined" style={styles.input} value={password}
+                label={<Text style={{ left: -10, marginLeft: 20, fontSize: 14 }}>Create Password</Text>}
+                style={{...styles.input, marginBottom: -10}} value={password}
                 right={<TextInput.Icon icon={showPassword ? 'eye-off' : 'eye'} onPress={() => setShowPassword((prev) => !prev)} />}
                 onChangeText={(text) => {
                     const trimmed = text.trim();
@@ -50,7 +53,9 @@ export const CreatePasswordInput = () => {
                 textContentType="password"
                 secureTextEntry={!showConfirmPassword}
                 error={confirmEmpty}
-                label="Confirm Password" mode="outlined" style={styles.input} value={confirmPassword} 
+                outlineStyle={{borderRadius: 40}}
+                label={<Text style={{ left: -10, marginLeft: 20, fontSize: 14 }}>Confirm Password</Text>}
+                mode="outlined" style={{...styles.input}} value={confirmPassword} 
                 right={<TextInput.Icon icon={showConfirmPassword ? 'eye-off' : 'eye'} onPress={() => setShowConfirmPassword((prev) => !prev)} />}
                 onChangeText={(text) => updateForm({confirmPassword: text}) }
                 maxLength={30}/>

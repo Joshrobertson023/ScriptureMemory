@@ -11,7 +11,7 @@ export interface RegisterForm {
   confirmPassword: string;
   bibleVersion: BibleVersion;
   errorMessage: string;
-  errors: Record<string, string>;
+  empty: Record<string, boolean>;
 }
 
 export interface LoginForm {
@@ -43,7 +43,15 @@ const initialRegister: RegisterForm = {
   confirmPassword: '',
   bibleVersion: 0,
   errorMessage: '',
-  errors: {}
+  empty: {
+    firstName: false,
+    lastName: false,
+    username: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+    bibleVersion: false,
+  }
 };
 
 const initialLogin: LoginForm = {

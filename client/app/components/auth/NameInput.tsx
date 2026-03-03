@@ -5,7 +5,6 @@ import { useAppStore } from '../../store';
 import { useState } from 'react';
 import { useFormStore } from '../../stores/form.store';
 
-
 export const NameInput = () => {
     
     const styles = useStyles();
@@ -13,19 +12,38 @@ export const NameInput = () => {
     const lastName = useFormStore(s => s.registerForm.lastName);
     const updateForm = useFormStore(s => s.updateRegister);
     const errorMessage = useFormStore(s => s.registerForm.errorMessage);
+    const form = useFormStore(s => s.registerForm);
 
-    const [firstNameEmpty, setFirstNameEmpty] = useState(false);
-    const [lastNameEmpty, setLastNameEmpty] = useState(false);
+    const firstNameEmpty = useFormStore(s => s.registerForm.empty.firstName);
+    const lastNameEmpty = useFormStore(s => s.registerForm.empty.lastName);
 
     return (
         <View>
-            <TextInput style={styles.input} value={firstName}
+            <TextInput style={styles.input} 
+                value={firstName}
+                mode='outlined'
+                outlineStyle={{borderRadius: 40}}
+                label={<Text style={{ left: -10, marginLeft: 20, fontSize: 14 }}>First Name</Text>}
                 error={firstNameEmpty}
                 onChangeText={(text) => {
                     updateForm({firstName: text});
                     if (errorMessage) updateForm({errorMessage: ''})
-                    if (text) setFirstNameEmpty(false);
-                    else setFirstNameEmpty(true);
+                    // if (text) {
+                    //     updateForm({
+                    //         empty: {
+                    //             ...form.empty,
+                    //             firstName: false
+                    //         }
+                    //     })
+                    // }
+                    // else {
+                    //     updateForm({
+                    //         empty: {
+                    //             ...form.empty,
+                    //             firstName: true
+                    //         }
+                    //     })
+                    // }
                 }} 
                 maxLength={30}/>
 
@@ -33,13 +51,29 @@ export const NameInput = () => {
                 Enter your first name
             </HelperText>
 
-            <TextInput label="Last Name" mode="outlined" style={styles.input} value={lastName}
+            <TextInput mode="outlined" style={{...styles.input, marginTop: -10}} value={lastName}
+                outlineStyle={{borderRadius: 40}}
+                label={<Text style={{ left: -10, marginLeft: 20, fontSize: 14 }}> Last Name</Text>}
                 error={lastNameEmpty}
                 onChangeText={(text) => {
                     updateForm({lastName: text})
                     if (errorMessage) updateForm({errorMessage: ''})
-                    if (text) setLastNameEmpty(false);
-                    else setLastNameEmpty(true);
+                    // if (text) {
+                    //     updateForm({
+                    //         empty: {
+                    //             ...form.empty,
+                    //             lastName: false
+                    //         }
+                    //     })
+                    // }
+                    // else {
+                    //     updateForm({
+                    //         empty: {
+                    //             ...form.empty,
+                    //             lastName: true
+                    //         }
+                    //     })
+                    // }
                 }} 
                 maxLength={30}/>
 

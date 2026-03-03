@@ -34,8 +34,23 @@ export async function createUser(
         }
     );
     if (!response.ok) {
-        const responseText = await response.text();
-        throw new Error(responseText || 'Failed to create user');
+        let errorMessage = 'Failed to create user';
+        let errorDetails = null;
+        try {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const errorJson = await response.json();
+                errorMessage = errorJson.error || JSON.stringify(errorJson);
+                errorDetails = errorJson.details || null;
+                console.log('Full error response:', errorJson);
+            } else {
+                errorMessage = await response.text();
+                console.log('Full error response (text):', errorMessage);
+            }
+        } catch (err) {
+            console.log('Error parsing error response:', err);
+        }
+        throw new Error(errorMessage);
     }
 }
 
