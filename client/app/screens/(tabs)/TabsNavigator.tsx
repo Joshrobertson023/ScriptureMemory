@@ -24,29 +24,12 @@ import { useUserAuthStore } from '../../stores/userAuth.store';
 import { Text } from 'react-native-paper';
 import { Button } from 'react-native';
 import useStyles from '../../styles';
-import { RootStackParamList } from '../../_layout';
 
 
 const Stack = createNativeStackNavigator();
 
 export default function TabsNavigator() {
   const theme = useAppTheme();
-  const styles = useStyles();    
-  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-  const navigation = useNavigation<NavigationProp>();
-
-  // Ensure user is authenticated before continuing  
-  const isAuthenticated = useUserAuthStore(s => s.isAuthenticated);
-  if (!isAuthenticated) {
-    return (
-      <>
-        <Text style={styles.text}>You are not authorized to view this screen.</Text>
-        <Button title="Back to login" onPress={() => {
-          navigation.navigate("(auth)");
-        }} />
-      </>
-    )
-  }
 
   SystemUI.setBackgroundColorAsync(theme.colors.background);
 

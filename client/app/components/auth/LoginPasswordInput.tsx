@@ -2,6 +2,7 @@ import { HelperText, TextInput } from "react-native-paper";
 import useStyles from "../../styles";
 import { useFormStore } from "../../stores/form.store";
 import { useState } from "react";
+import { View, Text } from "react-native";
 
 export default function LoginPasswordInput() {
     const styles = useStyles();
@@ -13,7 +14,7 @@ export default function LoginPasswordInput() {
     const [passwordEmpty, setPasswordEmpty] = useState(false);
 
     return (
-        <>
+        <View>
             <TextInput keyboardType="default"
                         autoCapitalize="none"
                         autoCorrect={false}
@@ -21,20 +22,22 @@ export default function LoginPasswordInput() {
                         textContentType="password"
                         secureTextEntry={!showPassword}
                         error={passwordEmpty}
-                        label="Password" mode="outlined" style={styles.input} value={password}
+                        label={<Text style={{ left: -10, marginLeft: 20, fontSize: 14 }}>Password</Text>}
+                        mode="outlined" style={styles.input} value={password}
                         right={<TextInput.Icon icon={showPassword ? 'eye-off' : 'eye'} onPress={() => setShowPassword((prev) => !prev)} />}
                         onChangeText={(text) => {
                             const trimmed = text.trim();
                             updateForm({password: trimmed})
                             if (text) setPasswordEmpty(false);
                         }} 
-                        maxLength={30}/>
+                        maxLength={30}
+                        outlineStyle={{borderRadius: 40}}/>
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={passwordEmpty}>
                 Enter your password
             </HelperText>
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={passwordIncorrect}>
                 Incorrect password
             </HelperText>
-        </>
+        </View>
     )
 }

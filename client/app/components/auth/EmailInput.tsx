@@ -2,6 +2,7 @@ import { HelperText, TextInput } from "react-native-paper"
 import { useFormStore } from "../../stores/form.store"
 import { useState } from "react";
 import useStyles from "../../styles";
+import { View } from "react-native";
 
 export const EmailInput = () => {
     const email = useFormStore(s => s.registerForm.email);
@@ -12,7 +13,7 @@ export const EmailInput = () => {
     const styles = useStyles();
 
     return (
-        <>
+        <View>
             <TextInput style={{...styles.input}} value={email} error={emailEmpty}
                 onChangeText={(text) => {
                     updateForm({email: email});
@@ -25,6 +26,6 @@ export const EmailInput = () => {
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={emailEmpty}>
                 Enter your email
             </HelperText>
-        </>
+        </View>
     )
 }

@@ -1,14 +1,242 @@
-/* eslint-disable */
-import * as Router from 'expo-router';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable import/export */
+/* eslint-disable @typescript-eslint/ban-types */
+declare module "expo-router" {
+  import type { LinkProps as OriginalLinkProps } from 'expo-router/build/link/Link';
+  import type { Router as OriginalRouter } from 'expo-router/build/types';
+  export * from 'expo-router/build';
 
-export * from 'expo-router';
+  // prettier-ignore
+  type StaticRoutes = `/` | `/api/baseUrl` | `/api/user.api` | `/App` | `/AppShell` | `/components/auth/CreatePasswordInput` | `/components/auth/EmailInput` | `/components/auth/LoginButton` | `/components/auth/LoginPasswordInput` | `/components/auth/LoginUsernameInput` | `/components/auth/NameInput` | `/components/auth/TermsPrivacyButton` | `/components/auth/UsernameInput` | `/components/collection/collectionDonut` | `/components/collection/collectionItem` | `/components/collection/collectionNote` | `/components/collection/exploreCollectionCard` | `/components/collection/friendCollectionItem` | `/components/temp/bibleHelpPopup` | `/components/temp/boxedSection` | `/components/temp/Button` | `/components/temp/ErrorBoundary` | `/components/temp/FadeInView` | `/components/temp/logo` | `/components/temp/practiceModeModal` | `/components/temp/ProfileContent` | `/components/temp/publishDialog` | `/components/temp/skeleton` | `/components/temp/streak` | `/components/verse/addPassage` | `/components/verse/SafeBottomSheet` | `/components/verse/saveVerseToCollectionSheet` | `/components/verse/searchResultVerseCard` | `/components/verse/shareCollectionSheet` | `/components/verse/shareVerseSheet` | `/components/verse/sheet` | `/components/verse/userVerse` | `/components/verse/userVerseDonut` | `/components/verse/verseCard` | `/components/verse/verseSheet` | `/db` | `/google-services.json` | `/screens/(auth)/AuthNavigator` | `/screens/AuthNavigator` | `/screens/(auth)/banned` | `/screens/banned` | `/screens/(auth)/createAccount.screen` | `/screens/createAccount.screen` | `/screens/(auth)/forgotPassword` | `/screens/forgotPassword` | `/screens/(auth)/forgotUsername` | `/screens/forgotUsername` | `/screens/(auth)/login.screen` | `/screens/login.screen` | `/screens/(auth)/resetPassword` | `/screens/resetPassword` | `/screens/(tabs)/bible` | `/screens/bible` | `/screens/(tabs)/explore` | `/screens/explore` | `/screens/(tabs)/` | `/screens/` | `/screens/(tabs)` | `/screens/(tabs)/practice` | `/screens/practice` | `/screens/(tabs)/search` | `/screens/search` | `/screens/(tabs)/TabsNavigator` | `/screens/TabsNavigator` | `/screens/admin/categories` | `/screens/admin` | `/screens/collections/addnew` | `/screens/collections/editCollection` | `/screens/collections/myPublished` | `/screens/collections/publishCollection` | `/screens/collections/reorderCollections` | `/screens/collections/reorderExistingVerses` | `/screens/collections/reorderVerses` | `/screens/collections/searchPassages` | `/screens/collections/verseCatalog` | `/screens/explore/categories` | `/screens/explore/my` | `/screens/explore/popular` | `/screens/explore/recent` | `/screens/not-found` | `/screens/profile/about` | `/screens/profile/activity` | `/screens/profile/manageSubscription` | `/screens/profile/privacy` | `/screens/profile/pro` | `/screens/profile/settings` | `/screens/profile/terms` | `/screens/user/friends` | `/screens/user/leaderboard` | `/screens/user/notifications` | `/screens/user/overdue` | `/screens/user/practiceSession` | `/screens/user/profile` | `/screens/user/streak` | `/store` | `/stores/form.store` | `/stores/userAuth.store` | `/styles` | `/theme` | `/utils/dateUtils` | `/utils/loginUtils` | `/utils/reviewIntervalUtils`;
+  // prettier-ignore
+  type DynamicRoutes<T extends string> = `/screens/admin/categories/${SingleRoutePart<T>}` | `/screens/book/${SingleRoutePart<T>}` | `/screens/chapters/${SingleRoutePart<T>}` | `/screens/collections/verseCatalog/${SingleRoutePart<T>}` | `/screens/collections/${SingleRoutePart<T>}` | `/screens/explore/category/${SingleRoutePart<T>}` | `/screens/explore/collection/${SingleRoutePart<T>}` | `/screens/user/${SingleRoutePart<T>}/collection/${SingleRoutePart<T>}` | `/screens/user/${SingleRoutePart<T>}/streak` | `/screens/user/${SingleRoutePart<T>}` | `/screens/${SingleRoutePart<T>}/${SingleRoutePart<T>}`;
+  // prettier-ignore
+  type DynamicRouteTemplate = `/screens/admin/categories/[categoryId]` | `/screens/book/[bookName]` | `/screens/chapters/[bookName]` | `/screens/collections/verseCatalog/[categoryId]` | `/screens/collections/[id]` | `/screens/explore/category/[categoryId]` | `/screens/explore/collection/[id]` | `/screens/user/[username]/collection/[id]` | `/screens/user/[username]/streak` | `/screens/user/[username]` | `/screens/[bookName]/[chapter]`;
 
-declare module 'expo-router' {
-  export namespace ExpoRouter {
-    export interface __routes<T extends string | object = string> {
-      hrefInputParams: { pathname: Router.RelativePathString, params?: Router.UnknownInputParams } | { pathname: Router.ExternalPathString, params?: Router.UnknownInputParams } | { pathname: `/db`; params?: Router.UnknownInputParams; } | { pathname: `/store`; params?: Router.UnknownInputParams; } | { pathname: `/styles`; params?: Router.UnknownInputParams; } | { pathname: `/theme`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/EmailInput`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/PasswordInput`; params?: Router.UnknownInputParams; } | { pathname: `/utils/loginUtils`; params?: Router.UnknownInputParams; } | { pathname: `/_sitemap`; params?: Router.UnknownInputParams; } | { pathname: `/api/baseUrl`; params?: Router.UnknownInputParams; } | { pathname: `/api/user.api`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/LoginButton`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/NameInput`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/UsernameInput`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/collectionDonut`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/collectionItem`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/collectionNote`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/exploreCollectionCard`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/friendCollectionItem`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/bibleHelpPopup`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/boxedSection`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/Button`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/ErrorBoundary`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/FadeInView`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/logo`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/practiceModeModal`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/ProfileContent`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/publishDialog`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/skeleton`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/streak`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/addPassage`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/SafeBottomSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/saveVerseToCollectionSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/searchResultVerseCard`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/shareCollectionSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/shareVerseSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/sheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/userVerse`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/userVerseDonut`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/verseCard`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/verseSheet`; params?: Router.UnknownInputParams; } | { pathname: `/screens/admin`; params?: Router.UnknownInputParams; } | { pathname: `/screens/not-found`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/banned` | `/screens/banned`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/createAccount.screen` | `/screens/createAccount.screen`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/createPassword` | `/screens/createPassword`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/createUsername` | `/screens/createUsername`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/enterEmail` | `/screens/enterEmail`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/forgotPassword` | `/screens/forgotPassword`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/forgotUsername` | `/screens/forgotUsername`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/login` | `/screens/login`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/resetPassword` | `/screens/resetPassword`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/bible` | `/screens/bible`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/explore` | `/screens/explore`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}` | `/screens`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/practice` | `/screens/practice`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/search` | `/screens/search`; params?: Router.UnknownInputParams; } | { pathname: `/screens/admin/categories`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/addnew`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/editCollection`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/myPublished`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/publishCollection`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/reorderCollections`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/reorderExistingVerses`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/reorderVerses`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/searchPassages`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/verseCatalog`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/categories`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/my`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/popular`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/recent`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/about`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/activity`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/manageSubscription`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/privacy`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/pro`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/settings`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/terms`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/friends`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/leaderboard`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/notifications`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/overdue`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/practiceSession`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/profile`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/streak`; params?: Router.UnknownInputParams; } | { pathname: `/stores/form.store`; params?: Router.UnknownInputParams; } | { pathname: `/utils/dateUtils`; params?: Router.UnknownInputParams; } | { pathname: `/utils/reviewIntervalUtils`; params?: Router.UnknownInputParams; } | { pathname: `/screens/admin/categories/[categoryId]`, params: Router.UnknownInputParams & { categoryId: string | number; } } | { pathname: `/screens/book/[bookName]`, params: Router.UnknownInputParams & { bookName: string | number; } } | { pathname: `/screens/chapters/[bookName]`, params: Router.UnknownInputParams & { bookName: string | number; } } | { pathname: `/screens/collections/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/screens/collections/verseCatalog/[categoryId]`, params: Router.UnknownInputParams & { categoryId: string | number; } } | { pathname: `/screens/explore/category/[categoryId]`, params: Router.UnknownInputParams & { categoryId: string | number; } } | { pathname: `/screens/explore/collection/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/screens/user/[username]`, params: Router.UnknownInputParams & { username: string | number; } } | { pathname: `/screens/user/[username]/streak`, params: Router.UnknownInputParams & { username: string | number; } } | { pathname: `/screens/user/[username]/collection/[id]`, params: Router.UnknownInputParams & { username: string | number;id: string | number; } } | { pathname: `/screens/[bookName]/[chapter]`, params: Router.UnknownInputParams & { bookName: string | number;chapter: string | number; } };
-      hrefOutputParams: { pathname: Router.RelativePathString, params?: Router.UnknownOutputParams } | { pathname: Router.ExternalPathString, params?: Router.UnknownOutputParams } | { pathname: `/db`; params?: Router.UnknownOutputParams; } | { pathname: `/store`; params?: Router.UnknownOutputParams; } | { pathname: `/styles`; params?: Router.UnknownOutputParams; } | { pathname: `/theme`; params?: Router.UnknownOutputParams; } | { pathname: `/components/auth/EmailInput`; params?: Router.UnknownOutputParams; } | { pathname: `/components/auth/PasswordInput`; params?: Router.UnknownOutputParams; } | { pathname: `/utils/loginUtils`; params?: Router.UnknownOutputParams; } | { pathname: `/_sitemap`; params?: Router.UnknownOutputParams; } | { pathname: `/api/baseUrl`; params?: Router.UnknownOutputParams; } | { pathname: `/api/user.api`; params?: Router.UnknownOutputParams; } | { pathname: `/components/auth/LoginButton`; params?: Router.UnknownOutputParams; } | { pathname: `/components/auth/NameInput`; params?: Router.UnknownOutputParams; } | { pathname: `/components/auth/UsernameInput`; params?: Router.UnknownOutputParams; } | { pathname: `/components/collection/collectionDonut`; params?: Router.UnknownOutputParams; } | { pathname: `/components/collection/collectionItem`; params?: Router.UnknownOutputParams; } | { pathname: `/components/collection/collectionNote`; params?: Router.UnknownOutputParams; } | { pathname: `/components/collection/exploreCollectionCard`; params?: Router.UnknownOutputParams; } | { pathname: `/components/collection/friendCollectionItem`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/bibleHelpPopup`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/boxedSection`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/Button`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/ErrorBoundary`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/FadeInView`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/logo`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/practiceModeModal`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/ProfileContent`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/publishDialog`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/skeleton`; params?: Router.UnknownOutputParams; } | { pathname: `/components/temp/streak`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/addPassage`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/SafeBottomSheet`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/saveVerseToCollectionSheet`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/searchResultVerseCard`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/shareCollectionSheet`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/shareVerseSheet`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/sheet`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/userVerse`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/userVerseDonut`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/verseCard`; params?: Router.UnknownOutputParams; } | { pathname: `/components/verse/verseSheet`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/admin`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/not-found`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/banned` | `/screens/banned`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/createAccount.screen` | `/screens/createAccount.screen`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/createPassword` | `/screens/createPassword`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/createUsername` | `/screens/createUsername`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/enterEmail` | `/screens/enterEmail`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/forgotPassword` | `/screens/forgotPassword`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/forgotUsername` | `/screens/forgotUsername`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/login` | `/screens/login`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(auth)'}/resetPassword` | `/screens/resetPassword`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(tabs)'}/bible` | `/screens/bible`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(tabs)'}/explore` | `/screens/explore`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(tabs)'}` | `/screens`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(tabs)'}/practice` | `/screens/practice`; params?: Router.UnknownOutputParams; } | { pathname: `/screens${'/(tabs)'}/search` | `/screens/search`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/admin/categories`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/addnew`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/editCollection`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/myPublished`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/publishCollection`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/reorderCollections`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/reorderExistingVerses`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/reorderVerses`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/searchPassages`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/collections/verseCatalog`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/explore/categories`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/explore/my`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/explore/popular`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/explore/recent`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/profile/about`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/profile/activity`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/profile/manageSubscription`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/profile/privacy`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/profile/pro`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/profile/settings`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/profile/terms`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/user/friends`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/user/leaderboard`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/user/notifications`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/user/overdue`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/user/practiceSession`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/user/profile`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/user/streak`; params?: Router.UnknownOutputParams; } | { pathname: `/stores/form.store`; params?: Router.UnknownOutputParams; } | { pathname: `/utils/dateUtils`; params?: Router.UnknownOutputParams; } | { pathname: `/utils/reviewIntervalUtils`; params?: Router.UnknownOutputParams; } | { pathname: `/screens/admin/categories/[categoryId]`, params: Router.UnknownOutputParams & { categoryId: string; } } | { pathname: `/screens/book/[bookName]`, params: Router.UnknownOutputParams & { bookName: string; } } | { pathname: `/screens/chapters/[bookName]`, params: Router.UnknownOutputParams & { bookName: string; } } | { pathname: `/screens/collections/[id]`, params: Router.UnknownOutputParams & { id: string; } } | { pathname: `/screens/collections/verseCatalog/[categoryId]`, params: Router.UnknownOutputParams & { categoryId: string; } } | { pathname: `/screens/explore/category/[categoryId]`, params: Router.UnknownOutputParams & { categoryId: string; } } | { pathname: `/screens/explore/collection/[id]`, params: Router.UnknownOutputParams & { id: string; } } | { pathname: `/screens/user/[username]`, params: Router.UnknownOutputParams & { username: string; } } | { pathname: `/screens/user/[username]/streak`, params: Router.UnknownOutputParams & { username: string; } } | { pathname: `/screens/user/[username]/collection/[id]`, params: Router.UnknownOutputParams & { username: string;id: string; } } | { pathname: `/screens/[bookName]/[chapter]`, params: Router.UnknownOutputParams & { bookName: string;chapter: string; } };
-      href: Router.RelativePathString | Router.ExternalPathString | `/db${`?${string}` | `#${string}` | ''}` | `/store${`?${string}` | `#${string}` | ''}` | `/styles${`?${string}` | `#${string}` | ''}` | `/theme${`?${string}` | `#${string}` | ''}` | `/components/auth/EmailInput${`?${string}` | `#${string}` | ''}` | `/components/auth/PasswordInput${`?${string}` | `#${string}` | ''}` | `/utils/loginUtils${`?${string}` | `#${string}` | ''}` | `/_sitemap${`?${string}` | `#${string}` | ''}` | `/api/baseUrl${`?${string}` | `#${string}` | ''}` | `/api/user.api${`?${string}` | `#${string}` | ''}` | `/components/auth/LoginButton${`?${string}` | `#${string}` | ''}` | `/components/auth/NameInput${`?${string}` | `#${string}` | ''}` | `/components/auth/UsernameInput${`?${string}` | `#${string}` | ''}` | `/components/collection/collectionDonut${`?${string}` | `#${string}` | ''}` | `/components/collection/collectionItem${`?${string}` | `#${string}` | ''}` | `/components/collection/collectionNote${`?${string}` | `#${string}` | ''}` | `/components/collection/exploreCollectionCard${`?${string}` | `#${string}` | ''}` | `/components/collection/friendCollectionItem${`?${string}` | `#${string}` | ''}` | `/components/temp/bibleHelpPopup${`?${string}` | `#${string}` | ''}` | `/components/temp/boxedSection${`?${string}` | `#${string}` | ''}` | `/components/temp/Button${`?${string}` | `#${string}` | ''}` | `/components/temp/ErrorBoundary${`?${string}` | `#${string}` | ''}` | `/components/temp/FadeInView${`?${string}` | `#${string}` | ''}` | `/components/temp/logo${`?${string}` | `#${string}` | ''}` | `/components/temp/practiceModeModal${`?${string}` | `#${string}` | ''}` | `/components/temp/ProfileContent${`?${string}` | `#${string}` | ''}` | `/components/temp/publishDialog${`?${string}` | `#${string}` | ''}` | `/components/temp/skeleton${`?${string}` | `#${string}` | ''}` | `/components/temp/streak${`?${string}` | `#${string}` | ''}` | `/components/verse/addPassage${`?${string}` | `#${string}` | ''}` | `/components/verse/SafeBottomSheet${`?${string}` | `#${string}` | ''}` | `/components/verse/saveVerseToCollectionSheet${`?${string}` | `#${string}` | ''}` | `/components/verse/searchResultVerseCard${`?${string}` | `#${string}` | ''}` | `/components/verse/shareCollectionSheet${`?${string}` | `#${string}` | ''}` | `/components/verse/shareVerseSheet${`?${string}` | `#${string}` | ''}` | `/components/verse/sheet${`?${string}` | `#${string}` | ''}` | `/components/verse/userVerse${`?${string}` | `#${string}` | ''}` | `/components/verse/userVerseDonut${`?${string}` | `#${string}` | ''}` | `/components/verse/verseCard${`?${string}` | `#${string}` | ''}` | `/components/verse/verseSheet${`?${string}` | `#${string}` | ''}` | `/screens/admin${`?${string}` | `#${string}` | ''}` | `/screens/not-found${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/banned${`?${string}` | `#${string}` | ''}` | `/screens/banned${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/createAccount.screen${`?${string}` | `#${string}` | ''}` | `/screens/createAccount.screen${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/createPassword${`?${string}` | `#${string}` | ''}` | `/screens/createPassword${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/createUsername${`?${string}` | `#${string}` | ''}` | `/screens/createUsername${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/enterEmail${`?${string}` | `#${string}` | ''}` | `/screens/enterEmail${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/forgotPassword${`?${string}` | `#${string}` | ''}` | `/screens/forgotPassword${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/forgotUsername${`?${string}` | `#${string}` | ''}` | `/screens/forgotUsername${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/login${`?${string}` | `#${string}` | ''}` | `/screens/login${`?${string}` | `#${string}` | ''}` | `/screens${'/(auth)'}/resetPassword${`?${string}` | `#${string}` | ''}` | `/screens/resetPassword${`?${string}` | `#${string}` | ''}` | `/screens${'/(tabs)'}/bible${`?${string}` | `#${string}` | ''}` | `/screens/bible${`?${string}` | `#${string}` | ''}` | `/screens${'/(tabs)'}/explore${`?${string}` | `#${string}` | ''}` | `/screens/explore${`?${string}` | `#${string}` | ''}` | `/screens${'/(tabs)'}${`?${string}` | `#${string}` | ''}` | `/screens${`?${string}` | `#${string}` | ''}` | `/screens${'/(tabs)'}/practice${`?${string}` | `#${string}` | ''}` | `/screens/practice${`?${string}` | `#${string}` | ''}` | `/screens${'/(tabs)'}/search${`?${string}` | `#${string}` | ''}` | `/screens/search${`?${string}` | `#${string}` | ''}` | `/screens/admin/categories${`?${string}` | `#${string}` | ''}` | `/screens/collections/addnew${`?${string}` | `#${string}` | ''}` | `/screens/collections/editCollection${`?${string}` | `#${string}` | ''}` | `/screens/collections/myPublished${`?${string}` | `#${string}` | ''}` | `/screens/collections/publishCollection${`?${string}` | `#${string}` | ''}` | `/screens/collections/reorderCollections${`?${string}` | `#${string}` | ''}` | `/screens/collections/reorderExistingVerses${`?${string}` | `#${string}` | ''}` | `/screens/collections/reorderVerses${`?${string}` | `#${string}` | ''}` | `/screens/collections/searchPassages${`?${string}` | `#${string}` | ''}` | `/screens/collections/verseCatalog${`?${string}` | `#${string}` | ''}` | `/screens/explore/categories${`?${string}` | `#${string}` | ''}` | `/screens/explore/my${`?${string}` | `#${string}` | ''}` | `/screens/explore/popular${`?${string}` | `#${string}` | ''}` | `/screens/explore/recent${`?${string}` | `#${string}` | ''}` | `/screens/profile/about${`?${string}` | `#${string}` | ''}` | `/screens/profile/activity${`?${string}` | `#${string}` | ''}` | `/screens/profile/manageSubscription${`?${string}` | `#${string}` | ''}` | `/screens/profile/privacy${`?${string}` | `#${string}` | ''}` | `/screens/profile/pro${`?${string}` | `#${string}` | ''}` | `/screens/profile/settings${`?${string}` | `#${string}` | ''}` | `/screens/profile/terms${`?${string}` | `#${string}` | ''}` | `/screens/user/friends${`?${string}` | `#${string}` | ''}` | `/screens/user/leaderboard${`?${string}` | `#${string}` | ''}` | `/screens/user/notifications${`?${string}` | `#${string}` | ''}` | `/screens/user/overdue${`?${string}` | `#${string}` | ''}` | `/screens/user/practiceSession${`?${string}` | `#${string}` | ''}` | `/screens/user/profile${`?${string}` | `#${string}` | ''}` | `/screens/user/streak${`?${string}` | `#${string}` | ''}` | `/stores/form.store${`?${string}` | `#${string}` | ''}` | `/utils/dateUtils${`?${string}` | `#${string}` | ''}` | `/utils/reviewIntervalUtils${`?${string}` | `#${string}` | ''}` | { pathname: Router.RelativePathString, params?: Router.UnknownInputParams } | { pathname: Router.ExternalPathString, params?: Router.UnknownInputParams } | { pathname: `/db`; params?: Router.UnknownInputParams; } | { pathname: `/store`; params?: Router.UnknownInputParams; } | { pathname: `/styles`; params?: Router.UnknownInputParams; } | { pathname: `/theme`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/EmailInput`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/PasswordInput`; params?: Router.UnknownInputParams; } | { pathname: `/utils/loginUtils`; params?: Router.UnknownInputParams; } | { pathname: `/_sitemap`; params?: Router.UnknownInputParams; } | { pathname: `/api/baseUrl`; params?: Router.UnknownInputParams; } | { pathname: `/api/user.api`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/LoginButton`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/NameInput`; params?: Router.UnknownInputParams; } | { pathname: `/components/auth/UsernameInput`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/collectionDonut`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/collectionItem`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/collectionNote`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/exploreCollectionCard`; params?: Router.UnknownInputParams; } | { pathname: `/components/collection/friendCollectionItem`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/bibleHelpPopup`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/boxedSection`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/Button`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/ErrorBoundary`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/FadeInView`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/logo`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/practiceModeModal`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/ProfileContent`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/publishDialog`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/skeleton`; params?: Router.UnknownInputParams; } | { pathname: `/components/temp/streak`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/addPassage`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/SafeBottomSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/saveVerseToCollectionSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/searchResultVerseCard`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/shareCollectionSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/shareVerseSheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/sheet`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/userVerse`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/userVerseDonut`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/verseCard`; params?: Router.UnknownInputParams; } | { pathname: `/components/verse/verseSheet`; params?: Router.UnknownInputParams; } | { pathname: `/screens/admin`; params?: Router.UnknownInputParams; } | { pathname: `/screens/not-found`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/banned` | `/screens/banned`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/createAccount.screen` | `/screens/createAccount.screen`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/createPassword` | `/screens/createPassword`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/createUsername` | `/screens/createUsername`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/enterEmail` | `/screens/enterEmail`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/forgotPassword` | `/screens/forgotPassword`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/forgotUsername` | `/screens/forgotUsername`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/login` | `/screens/login`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(auth)'}/resetPassword` | `/screens/resetPassword`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/bible` | `/screens/bible`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/explore` | `/screens/explore`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}` | `/screens`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/practice` | `/screens/practice`; params?: Router.UnknownInputParams; } | { pathname: `/screens${'/(tabs)'}/search` | `/screens/search`; params?: Router.UnknownInputParams; } | { pathname: `/screens/admin/categories`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/addnew`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/editCollection`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/myPublished`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/publishCollection`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/reorderCollections`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/reorderExistingVerses`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/reorderVerses`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/searchPassages`; params?: Router.UnknownInputParams; } | { pathname: `/screens/collections/verseCatalog`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/categories`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/my`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/popular`; params?: Router.UnknownInputParams; } | { pathname: `/screens/explore/recent`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/about`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/activity`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/manageSubscription`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/privacy`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/pro`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/settings`; params?: Router.UnknownInputParams; } | { pathname: `/screens/profile/terms`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/friends`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/leaderboard`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/notifications`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/overdue`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/practiceSession`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/profile`; params?: Router.UnknownInputParams; } | { pathname: `/screens/user/streak`; params?: Router.UnknownInputParams; } | { pathname: `/stores/form.store`; params?: Router.UnknownInputParams; } | { pathname: `/utils/dateUtils`; params?: Router.UnknownInputParams; } | { pathname: `/utils/reviewIntervalUtils`; params?: Router.UnknownInputParams; } | `/screens/admin/categories/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/book/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/chapters/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/collections/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/collections/verseCatalog/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/explore/category/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/explore/collection/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/user/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/user/${Router.SingleRoutePart<T>}/streak${`?${string}` | `#${string}` | ''}` | `/screens/user/${Router.SingleRoutePart<T>}/collection/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | `/screens/${Router.SingleRoutePart<T>}/${Router.SingleRoutePart<T>}${`?${string}` | `#${string}` | ''}` | { pathname: `/screens/admin/categories/[categoryId]`, params: Router.UnknownInputParams & { categoryId: string | number; } } | { pathname: `/screens/book/[bookName]`, params: Router.UnknownInputParams & { bookName: string | number; } } | { pathname: `/screens/chapters/[bookName]`, params: Router.UnknownInputParams & { bookName: string | number; } } | { pathname: `/screens/collections/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/screens/collections/verseCatalog/[categoryId]`, params: Router.UnknownInputParams & { categoryId: string | number; } } | { pathname: `/screens/explore/category/[categoryId]`, params: Router.UnknownInputParams & { categoryId: string | number; } } | { pathname: `/screens/explore/collection/[id]`, params: Router.UnknownInputParams & { id: string | number; } } | { pathname: `/screens/user/[username]`, params: Router.UnknownInputParams & { username: string | number; } } | { pathname: `/screens/user/[username]/streak`, params: Router.UnknownInputParams & { username: string | number; } } | { pathname: `/screens/user/[username]/collection/[id]`, params: Router.UnknownInputParams & { username: string | number;id: string | number; } } | { pathname: `/screens/[bookName]/[chapter]`, params: Router.UnknownInputParams & { bookName: string | number;chapter: string | number; } };
-    }
+  type RelativePathString = `./${string}` | `../${string}` | '..';
+  type AbsoluteRoute = DynamicRouteTemplate | StaticRoutes;
+  type ExternalPathString = `${string}:${string}`;
+
+  type ExpoRouterRoutes = DynamicRouteTemplate | StaticRoutes | RelativePathString;
+  export type AllRoutes = ExpoRouterRoutes | ExternalPathString;
+
+  /****************
+   * Route Utils  *
+   ****************/
+
+  type SearchOrHash = `?${string}` | `#${string}`;
+  type UnknownInputParams = Record<string, string | number | (string | number)[]>;
+  type UnknownOutputParams = Record<string, string | string[]>;
+
+  /**
+   * Return only the RoutePart of a string. If the string has multiple parts return never
+   *
+   * string   | type
+   * ---------|------
+   * 123      | 123
+   * /123/abc | never
+   * 123?abc  | never
+   * ./123    | never
+   * /123     | never
+   * 123/../  | never
+   */
+  type SingleRoutePart<S extends string> = S extends `${string}/${string}`
+    ? never
+    : S extends `${string}${SearchOrHash}`
+      ? never
+      : S extends ''
+        ? never
+        : S extends `(${string})`
+          ? never
+          : S extends `[${string}]`
+            ? never
+            : S;
+
+  /**
+   * Return only the CatchAll router part. If the string has search parameters or a hash return never
+   */
+  type CatchAllRoutePart<S extends string> = S extends `${string}${SearchOrHash}`
+    ? never
+    : S extends ''
+      ? never
+      : S extends `${string}(${string})${string}`
+        ? never
+        : S extends `${string}[${string}]${string}`
+          ? never
+          : S;
+
+  // type OptionalCatchAllRoutePart<S extends string> = S extends `${string}${SearchOrHash}` ? never : S
+
+  /**
+   * Return the name of a route parameter
+   * '[test]'    -> 'test'
+   * 'test'      -> never
+   * '[...test]' -> '...test'
+   */
+  type IsParameter<Part> = Part extends `[${infer ParamName}]` ? ParamName : never;
+
+  /**
+   * Return a union of all parameter names. If there are no names return never
+   *
+   * /[test]         -> 'test'
+   * /[abc]/[...def] -> 'abc'|'...def'
+   */
+  type ParameterNames<Path> = Path extends `${infer PartA}/${infer PartB}`
+    ? IsParameter<PartA> | ParameterNames<PartB>
+    : IsParameter<Path>;
+
+  /**
+   * Returns all segements of a route.
+   *
+   * /(group)/123/abc/[id]/[...rest] -> ['(group)', '123', 'abc', '[id]', '[...rest]'
+   */
+  type RouteSegments<Path> = Path extends `${infer PartA}/${infer PartB}`
+    ? PartA extends '' | '.'
+      ? [...RouteSegments<PartB>]
+      : [PartA, ...RouteSegments<PartB>]
+    : Path extends ''
+      ? []
+      : [Path];
+
+  /**
+   * Returns a Record of the routes parameters as strings and CatchAll parameters
+   *
+   * There are two versions, input and output, as you can input 'string | number' but
+   *  the output will always be 'string'
+   *
+   * /[id]/[...rest] -> { id: string, rest: string[] }
+   * /no-params      -> {}
+   */
+  type InputRouteParams<Path> = {
+    [Key in ParameterNames<Path> as Key extends `...${infer Name}`
+      ? Name
+      : Key]: Key extends `...${string}` ? (string | number)[] : string | number;
+  } & UnknownInputParams;
+
+  type OutputRouteParams<Path> = {
+    [Key in ParameterNames<Path> as Key extends `...${infer Name}`
+      ? Name
+      : Key]: Key extends `...${string}` ? string[] : string;
+  } & UnknownOutputParams;
+
+  /**
+   * Returns the search parameters for a route.
+   */
+  export type SearchParams<T extends AllRoutes> = T extends DynamicRouteTemplate
+    ? OutputRouteParams<T>
+    : T extends StaticRoutes
+      ? never
+      : UnknownOutputParams;
+
+  /**
+   * Route is mostly used as part of Href to ensure that a valid route is provided
+   *
+   * Given a dynamic route, this will return never. This is helpful for conditional logic
+   *
+   * /test         -> /test, /test2, etc
+   * /test/[abc]   -> never
+   * /test/resolve -> /test, /test2, etc
+   *
+   * Note that if we provide a value for [abc] then the route is allowed
+   *
+   * This is named Route to prevent confusion, as users they will often see it in tooltips
+   */
+  export type Route<T> = T extends string
+    ? T extends DynamicRouteTemplate
+      ? never
+      :
+          | StaticRoutes
+          | RelativePathString
+          | ExternalPathString
+          | (T extends `${infer P}${SearchOrHash}`
+              ? P extends DynamicRoutes<infer _>
+                ? T
+                : never
+              : T extends DynamicRoutes<infer _>
+                ? T
+                : never)
+    : never;
+
+  /*********
+   * Href  *
+   *********/
+
+  export type Href<T> = T extends Record<'pathname', string> ? HrefObject<T> : Route<T>;
+
+  export type HrefObject<
+    R extends Record<'pathname', string>,
+    P = R['pathname'],
+  > = P extends DynamicRouteTemplate
+    ? { pathname: P; params: InputRouteParams<P> }
+    : P extends Route<P>
+      ? { pathname: Route<P> | DynamicRouteTemplate; params?: never | InputRouteParams<never> }
+      : never;
+
+  /***********************
+   * Expo Router Exports *
+   ***********************/
+
+  export type Router = Omit<OriginalRouter, 'push' | 'replace' | 'setParams'> & {
+    /** Navigate to the provided href. */
+    push: <T>(href: Href<T>) => void;
+    /** Navigate to route without appending to the history. */
+    replace: <T>(href: Href<T>) => void;
+    /** Update the current route query params. */
+    setParams: <T = ''>(params?: T extends '' ? Record<string, string> : InputRouteParams<T>) => void;
+  };
+
+  /** The imperative router. */
+  export const router: Router;
+
+  /************
+   * <Link /> *
+   ************/
+  export interface LinkProps<T> extends OriginalLinkProps {
+    href: Href<T>;
   }
+
+  export interface LinkComponent {
+    <T>(props: React.PropsWithChildren<LinkProps<T>>): JSX.Element;
+    /** Helper method to resolve an Href object into a string. */
+    resolveHref: <T>(href: Href<T>) => string;
+  }
+
+  /**
+   * Component to render link to another route using a path.
+   * Uses an anchor tag on the web.
+   *
+   * @param props.href Absolute path to route (e.g. `/feeds/hot`).
+   * @param props.replace Should replace the current route without adding to the history.
+   * @param props.asChild Forward props to child component. Useful for custom buttons.
+   * @param props.children Child elements to render the content.
+   * @param props.className On web, this sets the HTML `class` directly. On native, this can be used with CSS interop tools like Nativewind.
+   */
+  export const Link: LinkComponent;
+
+  /** Redirects to the href as soon as the component is mounted. */
+  export const Redirect: <T>(
+    props: React.PropsWithChildren<{ href: Href<T> }>
+  ) => JSX.Element;
+
+  /************
+   * Hooks *
+   ************/
+  export function useRouter(): Router;
+
+  export function useLocalSearchParams<
+    T extends AllRoutes | UnknownOutputParams = UnknownOutputParams,
+  >(): T extends AllRoutes ? SearchParams<T> : T;
+
+  /** @deprecated renamed to `useGlobalSearchParams` */
+  export function useSearchParams<
+    T extends AllRoutes | UnknownOutputParams = UnknownOutputParams,
+  >(): T extends AllRoutes ? SearchParams<T> : T;
+
+  export function useGlobalSearchParams<
+    T extends AllRoutes | UnknownOutputParams = UnknownOutputParams,
+  >(): T extends AllRoutes ? SearchParams<T> : T;
+
+  export function useSegments<
+    T extends AbsoluteRoute | RouteSegments<AbsoluteRoute> | RelativePathString,
+  >(): T extends AbsoluteRoute ? RouteSegments<T> : T extends string ? string[] : T;
 }

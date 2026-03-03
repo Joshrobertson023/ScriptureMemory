@@ -14,7 +14,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ActivityIndicator, PaperProvider, Portal, Text } from 'react-native-paper';
 
 import useAppTheme from './theme';
-import AuthNavigator from './screens/(auth)/_layout';
+import AuthNavigator from './screens/(auth)/AuthNavigator';
 
 import {
   useQuery,
@@ -23,27 +23,26 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
-import TabsNavigator from './screens/(tabs)/_layout';
+import TabsNavigator from './screens/(tabs)/TabsNavigator';
 import { useUserAuthStore } from './stores/userAuth.store';
 import { loginUserWithToken } from './api/user.api';
 import useStyles from './styles';
+import { useFonts } from 'expo-font';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-// Tells Typescript what routes are available
-export type RootStackParamList = {
-  '(tabs)': undefined;
-  '(auth)': undefined;
-};
-const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const queryClient = new QueryClient();
-
+const Stack = createNativeStackNavigator();
 
 // ─── Root component ───────────────────────────────────────────────────────────
-export default function RootLayout() {
+export default function AppShell() {
   const theme = useAppTheme();
   const styles = useStyles();
+
+  const [fontsLoaded] = useFonts({
+    'Lora': require('../assets/fonts/Lora-VariableFont_wght.ttf'),
+    'Lora-SemiBold': require('../assets/fonts/Lora-SemiBold.ttf'),
+    'Lora-Bold': require('../assets/fonts/Lora-Bold.ttf')
+  })
 
   const [appIsReady, setAppIsReady] = useState(false);
 
@@ -57,9 +56,6 @@ export default function RootLayout() {
     ...sharedHeaderStyle,
     headerShadowVisible: false,
   } as const;
-
-  type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-  const navigation = useNavigation<NavigationProp>();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   const loadToken = useUserAuthStore(s => s.loadToken);
@@ -68,81 +64,73 @@ export default function RootLayout() {
   const isAuthenticated = useUserAuthStore(s => s.isAuthenticated);
 
   // Login mutation
-  const loginMutation = useMutation({
-      mutationFn: (data: { authToken: string; }) => loginUserWithToken(token),
-      onSuccess: async (data) => {
-          if (data.authToken) {
-            await setToken(data.authToken);
-          }
-          else {
-            console.log("Error logging in with stored token.");
-            navigation.navigate("(auth)");
-            return;
-          }
-          navigation.navigate('(tabs)');
-      }   
-  })
+    const loginMutation = useMutation({
+        mutationFn: (data: { authToken: string; }) => loginUserWithToken(token),
+        onSuccess: async (data) => {
+            if (data.authToken) {
+              await setToken(data.authToken);
+            }
+            else {
+              console.log("Error logging in with stored token.");
+              return;
+            }
+        }   
+    })
 
   // On startup try to login user with auth token, retry if could not, then navigate
   async function runStartup() {
     await loadToken();
-    let retryCount = 3;
-    if (token !== '' || token) {
-      for (let i = 0; i < retryCount; i++, retryCount++) {
-        await loginMutation.mutateAsync({authToken: token})
-        if (isAuthenticated) break;
-      }
-      if (isAuthenticated) {
-        setAppIsReady(true);
-        navigation.navigate("(tabs)");
-      }
-      // Default to going to auth
-      setAppIsReady(true);
-      navigation.navigate("(auth)");
-    } else {
-      setAppIsReady(true);
-      navigation.navigate("(auth)");
-      console.log("No stored auth token found, navigating to (auth)");
+
+    if (token) {
+      try {
+        await loginMutation.mutateAsync({ authToken: token });
+      } catch {}
     }
+
+    setAppIsReady(true);
   }
-
-  useEffect(() => {
-    runStartup();
-  })
-
-  // ── Android system background ──────────────────────────────────────────────────
-  useEffect(() => {
-    SystemUI.setBackgroundColorAsync(theme.colors.background).catch((e) =>
-      console.warn('Failed to set system UI background:', e),
-    );
-  }, [theme.colors.background]);
-
-
-  // ── Hide splash screen once ready ────────────────────────────────────────
-  useEffect(() => {
-    if (appIsReady) SplashScreen.hideAsync().catch(() => {});
-  }, [appIsReady]);
-
-  if (!appIsReady) 
-    return (
-      <Text style={styles.text}>An error has occurred.</Text>
-    );
   
+  useEffect(() => {
+      runStartup();
+    }, []); // ← IMPORTANT
+    
+    // ── Android system background ──────────────────────────────────────────────────
+    useEffect(() => {
+      SystemUI.setBackgroundColorAsync(theme.colors.background).catch((e) =>
+        console.warn('Failed to set system UI background:', e),
+      );
+    }, [theme.colors.background]);
+  
+  
+    // ── Hide splash screen once ready ────────────────────────────────────────
+    useEffect(() => {
+      if (appIsReady) 
+        if (fontsLoaded) 
+            SplashScreen.hideAsync().catch(() => {});
+    }, [appIsReady, fontsLoaded]);
 
-  return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <PaperProvider theme={theme}>
-        <Portal.Host>
-          <NavigationContainer>
-            <QueryClientProvider client={queryClient}>
+  if (!appIsReady || !fontsLoaded) {
+    return <ActivityIndicator />;
+  } 
+
+
+    return (
+        
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+        <PaperProvider theme={theme}>
+          <Portal.Host>
+            <NavigationContainer>
               <Stack.Navigator
                 screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
               >
                 {/* Tab / auth roots */}
-                <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'none' }} />
-                <Stack.Screen name="(auth)"  component={AuthNavigator}  options={{ headerShown: false }} />
-
-                {/* Settings & info screens */}
+                {isAuthenticated ? (
+                    <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'none' }} />
+                ) : (
+                    <Stack.Screen name="(auth)"  component={AuthNavigator}  options={{ headerShown: false }} />
+                )}
+                
+                                {/* Settings & info screens */}
                 {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />
                 <Stack.Screen name="terms"         component={TermsScreen}         options={{ title: 'Terms of Service',            ...sharedHeaderStyle }} />
                 <Stack.Screen name="activity"      component={ActivityScreen}      options={{ title: 'Activity Tracking & Sharing', ...sharedHeaderStyle }} />
@@ -192,10 +180,9 @@ export default function RootLayout() {
                   options={{ title: '', ...sharedHeaderStyle }}
                 /> */}
               </Stack.Navigator>
-            </QueryClientProvider>
-          </NavigationContainer>
-        </Portal.Host>
-      </PaperProvider>
-    </GestureHandlerRootView>
-  );
+            </NavigationContainer>
+          </Portal.Host>
+        </PaperProvider>
+      </GestureHandlerRootView>
+    )
 }

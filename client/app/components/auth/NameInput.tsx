@@ -18,7 +18,7 @@ export const NameInput = () => {
     const [lastNameEmpty, setLastNameEmpty] = useState(false);
 
     return (
-        <>
+        <View>
             <TextInput style={styles.input} value={firstName}
                 error={firstNameEmpty}
                 onChangeText={(text) => {
@@ -46,6 +46,6 @@ export const NameInput = () => {
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={lastNameEmpty}>
                 Enter your last name
             </HelperText>
-        </>
+        </View>
     )
 }

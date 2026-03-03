@@ -18,10 +18,8 @@ export default function useStyles() {
     screen: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      alignItems: 'flex-start',
-      justifyContent: 'flex-start',
-      paddingHorizontal: 20,
-      paddingTop: 20,
+      padding: 20,
+      minWidth: '100%'
     },
     scrollContainer: {
       flex: 1,
@@ -94,10 +92,11 @@ export default function useStyles() {
       width: '100%',
       backgroundColor: theme.colors.surface,
       color: theme.colors.onBackground,
-      borderRadius: 8,
+      borderRadius: '18px',
       marginBottom: 12,
       height: 50,
       borderWidth: 0.2,
+      paddingLeft: 10,
     },
     errorInput: {
       borderColor: 'red',

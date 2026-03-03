@@ -23,7 +23,7 @@ import {
 import { useUserAuthStore } from '../../stores/userAuth.store';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../_layout';
+import { RootStackParamList } from '../../../types/router';
 
 export default function CreateAccountScreen() {
     const styles = useStyles();
@@ -88,29 +88,30 @@ export default function CreateAccountScreen() {
     return (
         <SafeAreaView style={styles.screen}>
             <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                <Logo />
-                <Text style={{
-                    color: theme.colors.onBackground,
-                    fontSize: 24,
-                    marginBottom: 16,
-                    fontFamily: 'Inter',
-                    fontWeight: 900,
-                }}>
-                    Create Account
-                </Text>
-                <NameInput />
-                <UsernameInput />
-                <LoginButton />
-                <EmailInput />
-                <CreatePasswordInput />
-                <Button style={styles.buttonFilled} onPress={() => createAccount()}>
-                    {loading ? (
-                        <ActivityIndicator animating={true} color={theme.colors.background}/>
-                    ) : (
-                        <Text style={styles.tinyText}>Create Account</Text>
-                    )}
-                </Button>
-                {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+                <View>
+                    <Text style={{
+                        color: theme.colors.onBackground,
+                        fontSize: 24,
+                        marginBottom: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: 900,
+                    }}>
+                        Create Account
+                    </Text>
+                    <NameInput />
+                    <UsernameInput />
+                    <LoginButton />
+                    <EmailInput />
+                    <CreatePasswordInput />
+                    <Button style={styles.buttonFilled} onPress={() => createAccount()}>
+                        {loading ? (
+                            <ActivityIndicator animating={true} color={theme.colors.background}/>
+                        ) : (
+                            <Text style={styles.tinyText}>Create Account</Text>
+                        )}
+                    </Button>
+                    {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+                </View>
             </TouchableWithoutFeedback>
         </SafeAreaView>
     )

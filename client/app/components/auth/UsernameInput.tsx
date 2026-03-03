@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAppStore } from "../../store";
 import { useFormStore } from "../../stores/form.store";
 import { usernameExists } from "../../api/user.api";
-
+import { View } from "react-native";
 
 export const UsernameInput = () => {
     const styles = useStyles();
@@ -15,7 +15,7 @@ export const UsernameInput = () => {
     const [doesUsernameExist, setDoesUsernameExist] = useState(false);
 
     return (
-        <>
+        <View>
             <TextInput style={{...styles.input}} error={usernameEmpty || doesUsernameExist} value={username} 
                 onChangeText={ async (text) => {
                     if (text) 
@@ -37,6 +37,6 @@ export const UsernameInput = () => {
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={doesUsernameExist}>
                 Username already exists
             </HelperText>
-        </>
+        </View>
     )
 }

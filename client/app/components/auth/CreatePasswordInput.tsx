@@ -2,6 +2,7 @@ import { HelperText, TextInput } from "react-native-paper";
 import useStyles from "../../styles";
 import { useFormStore } from "../../stores/form.store";
 import { useState } from "react";
+import { View } from "react-native";
 
 export const CreatePasswordInput = () => {
     const styles = useStyles();
@@ -16,7 +17,7 @@ export const CreatePasswordInput = () => {
     const [passwordTooShort, setPasswordTooShort] = useState(false);
 
     return (
-        <>
+        <View>
             <TextInput keyboardType="default"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -56,6 +57,6 @@ export const CreatePasswordInput = () => {
             <HelperText style={{textAlign: 'left', width: '100%', marginTop: -15, marginBottom: -5, height: 25}} type="error" visible={confirmEmpty}>
                 Confirm your password
             </HelperText>
-        </>
+        </View>
     )
 }
