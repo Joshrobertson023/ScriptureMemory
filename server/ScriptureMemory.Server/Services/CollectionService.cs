@@ -1,6 +1,7 @@
 ﻿using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using DataAccess.Requests;
+using DataAccess.Requests.UpdateRequests;
 using VerseAppNew.Server.Services;
 using static ScriptureMemoryLibrary.Enums;
 
@@ -177,5 +178,26 @@ public sealed class CollectionService : ICollectionService
         //collection.Notes = await collectionContext.GetCollectionNotes(collection.CollectionId);
 
         return collection;
+    }
+
+    /// <summary>
+    /// Updates a collection's attributes
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public async Task UpdateCollection(UpdateCollectionRequest request)
+    {
+
+    }
+
+    /// <summary>
+    /// Updates a user's collection order
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public async Task UpdateCollectionsOrder(int userId, UpdateCollectionOrderRequest request)
+    {
+        Dictionary<int, int> collectionOrders = request.CollectionIdToNewOrderPosition;
     }
 }
