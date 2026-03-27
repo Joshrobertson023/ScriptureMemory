@@ -5,8 +5,8 @@
       "resizeMode": "contain",
       "backgroundColor": "#b93838ff"
     },
-    "name": "Verse Memorization",
-    "slug": "VerseMemorization",
+    "name": "KJV Bible",
+    "slug": "KJVBible",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/Logo.png",
@@ -30,7 +30,7 @@
         "resizeMode": "contain",
         "backgroundColor": "#b93838ff"
       },
-      "edgeToEdgeEnabled": true,
+      // "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.VerseApp",
       "googleServicesFile": "./google-services.json"
@@ -66,10 +66,10 @@
         }
       ]
     ],
-    "notification": {
-      "icon": "./assets/images/NotificationIcon.png",
-      "color": "#E6F4FE"
-    },
+    // "notification": {
+    //   "icon": "./assets/images/NotificationIcon.png",
+    //   "color": "#E6F4FE"
+    // },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

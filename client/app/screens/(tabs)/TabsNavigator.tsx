@@ -21,7 +21,6 @@ import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeScreen } from '.';
 import { useUserAuthStore } from '../../stores/userAuth.store';
-import { Text } from 'react-native-paper';
 import { Button } from 'react-native';
 import useStyles from '../../styles';
 

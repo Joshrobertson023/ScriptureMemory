@@ -11,10 +11,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import { TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ActivityIndicator, PaperProvider, Portal, Text } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native';
 
 import useAppTheme from './theme';
-import AuthNavigator from './screens/(auth)/AuthNavigator';
 
 import {
   useQuery,
@@ -79,13 +78,13 @@ export default function AppShell() {
 
   // On startup try to login user with auth token, retry if could not, then navigate
   async function runStartup() {
-    await loadToken();
+    // await loadToken();
 
-    if (token) {
-      try {
-        await loginMutation.mutateAsync({ authToken: token });
-      } catch {}
-    }
+    // if (token) {
+    //   try {
+    //     await loginMutation.mutateAsync({ authToken: token });
+    //   } catch {}
+    // }
 
     setAppIsReady(true);
   }
@@ -117,18 +116,12 @@ export default function AppShell() {
     return (
         
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <PaperProvider theme={theme}>
-          <Portal.Host>
             <NavigationContainer>
               <Stack.Navigator
                 screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
               >
-                {/* Tab / auth roots */}
-                {isAuthenticated ? (
-                    <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'none' }} />
-                ) : (
-                    <Stack.Screen name="(auth)"  component={AuthNavigator}  options={{ headerShown: false }} />
-                )}
+                
+                <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'none' }} />
                 
                                 {/* Settings & info screens */}
                 {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />
@@ -181,8 +174,6 @@ export default function AppShell() {
                 /> */}
               </Stack.Navigator>
             </NavigationContainer>
-          </Portal.Host>
-        </PaperProvider>
       </GestureHandlerRootView>
     )
 }

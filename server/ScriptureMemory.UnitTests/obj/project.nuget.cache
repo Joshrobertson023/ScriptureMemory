@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "XgJcW1c0N68=",
+  "dgSpecHash": "SJeUYewLD+c=",
   "success": true,
   "projectFilePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
   "expectedPackageFiles": [
@@ -20,7 +20,7 @@
     "C:\\Users\\there\\.nuget\\packages\\lucene.net.sandbox\\4.8.0-beta00017\\lucene.net.sandbox.4.8.0-beta00017.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.applicationinsights\\2.23.0\\microsoft.applicationinsights.2.23.0.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.aspnetcore.openapi\\8.0.19\\microsoft.aspnetcore.openapi.8.0.19.nupkg.sha512",
-    "C:\\Users\\there\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\8.0.24\\microsoft.aspnetcore.spaproxy.8.0.24.nupkg.sha512",
+    "C:\\Users\\there\\.nuget\\packages\\microsoft.aspnetcore.spaproxy\\8.0.25\\microsoft.aspnetcore.spaproxy.8.0.25.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\8.0.0\\microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.bcl.cryptography\\9.0.5\\microsoft.bcl.cryptography.9.0.5.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.codecoverage\\17.14.1\\microsoft.codecoverage.17.14.1.nupkg.sha512",

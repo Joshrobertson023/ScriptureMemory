@@ -1,5 +1,4 @@
 import { useColorScheme } from 'react-native';
-import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import { useAppStore } from './store';
 
 export default function useAppTheme() {

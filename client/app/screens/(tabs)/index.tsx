@@ -18,13 +18,14 @@
 
 // const { height } = Dimensions.get('window');
 
-import { View } from "react-native"
+import { View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export const HomeScreen = () => {
     return (
-        <View>
-
-        </View>
+        <SafeAreaProvider>
+            
+        </SafeAreaProvider>
     )
 }
 
