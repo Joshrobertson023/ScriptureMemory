@@ -14,6 +14,7 @@ import {ExploreScreen} from './explore.screen';
 import {HomeScreen} from './home.screen';
 import {CollectionsScreen} from './collections.screen';
 import useGlobalStyles from '../../styles/gobalStyles';
+import { CollectionTopTabs } from './CollectionTopTabs';
 
 const Tab = createBottomTabNavigator();
 
@@ -33,223 +34,205 @@ export default function TabLayout() {
   SystemUI.setBackgroundColorAsync(theme.colors.background);
 
   return (
-    <Drawer
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
-      open={isProfileDrawerOpen}
-      onOpen={() => setIsProfileDrawerOpen(true)}
-      onClose={() => setIsProfileDrawerOpen(false)}
-      drawerPosition="right"
-      drawerType="front"
-      overlayStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
-      drawerStyle={{ width: '80%', backgroundColor: theme.colors.background }}
-      renderDrawerContent={() => <View />}
-    >
-      <Tab.Navigator
-        tabBar={(props: BottomTabBarProps) => <BottomTabBar {...props} />}
-        screenOptions={{
-          animation: 'fade',
-          tabBarActiveTintColor: theme.colors.onBackground,
-          tabBarInactiveTintColor: theme.colors.inactiveTab,
-          tabBarLabelPosition: 'below-icon',
-          tabBarItemStyle: {
-            alignItems: 'center',
-            justifyContent: 'center',
-            paddingHorizontal: 0,
-            paddingVertical: 6,
-            width: '100%',
-          },
-          tabBarIconStyle: {
-            width: '100%',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 0,
-            marginLeft: 2,
-          },
-          tabBarLabelStyle: {
-            width: '100%',
-            textAlign: 'center',
-            marginTop: 0,
-          },
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: theme.colors.background2,
-            borderBottomWidth: 0,
-            borderBottomColor: 'transparent',
-          },
-          headerTitleStyle: {
-            color: theme.colors.onBackground,
-          },
-          headerTintColor: theme.colors.onBackground,
-          tabBarStyle: {
-            backgroundColor: theme.colors.background,
-            height: 70 + insets.bottom + 10,
-            paddingBottom: Math.max(insets.bottom, 10) + 10,
-            paddingTop: 10,
-            paddingLeft: 5,
-            paddingRight: 5,
-            borderTopColor: theme.colors.elevation2,
-            borderTopWidth: 0.2,
-          },
-        }}
+      <Drawer
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        open={isProfileDrawerOpen}
+        onOpen={() => setIsProfileDrawerOpen(true)}
+        onClose={() => setIsProfileDrawerOpen(false)}
+        drawerPosition="right"
+        drawerType="front"
+        overlayStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
+        drawerStyle={{ width: '80%', backgroundColor: theme.colors.background }}
+        renderDrawerContent={() => <View />}
       >
-        {/* ── Home ── */}
-        <Tab.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{
-            headerTitle: () => (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Text style={{ fontFamily: 'Noto Serif bold', fontSize: 22, color: theme.colors.onBackground }}>
-                  Home
-                </Text>
-                {user.isPaid && (
-                  <View style={{
-                    backgroundColor: theme.colors.onBackground,
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 6,
-                  }}>
-                    <Text style={styles.p1}>
-                      Pro
-                    </Text>
-                  </View>
-                )}
-              </View>
-            ),
-            headerRight: () => (
-              <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
-                <TouchableOpacity onPress={() => { /* navigate to notifications */ }}>
-                  <Ionicons style={{ marginTop: 4 }} name="refresh" size={32} color={theme.colors.onBackground} />
-                </TouchableOpacity>
-                <Pressable onPress={() => setIsProfileDrawerOpen(true)}>
-                  <Ionicons style={{ marginTop: 4 }} name="person-circle" size={32} color={theme.colors.onBackground} />
-                </Pressable>
-              </View>
-            ),
-            tabBarIcon: ({ focused }) => (
-              <Ionicons
-                name={focused ? 'home' : 'home-outline'}
-                color={focused ? theme.colors.onBackground : inactiveColor}
-                size={28}
-              />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
-                Home
-              </Text>
-            ),
-          }}
-        />
-
-        {/* ── Practice ── */}
-        <Tab.Screen
-          name="Collections"
-          component={CollectionsScreen}
-          options={{
+        <Tab.Navigator
+          tabBar={(props: BottomTabBarProps) => <BottomTabBar {...props} />}
+          screenOptions={{
+            animation: 'fade',
+            tabBarActiveTintColor: theme.colors.onBackground,
+            tabBarInactiveTintColor: theme.colors.inactiveTab,
+            tabBarLabelPosition: 'below-icon',
+            tabBarItemStyle: {
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingHorizontal: 0,
+              paddingVertical: 6,
+              width: '100%',
+            },
+            tabBarIconStyle: {
+              width: '100%',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 0,
+              marginLeft: 2,
+            },
+            tabBarLabelStyle: {
+              width: '100%',
+              textAlign: 'center',
+              marginTop: 0,
+            },
             headerShown: true,
-            tabBarIcon: ({ focused }) => (
-              <View style={{ position: 'relative' }}>
+            headerStyle: {
+              backgroundColor: theme.colors.background2,
+              borderBottomWidth: 0,
+              borderBottomColor: 'transparent',
+            },
+            headerTitleStyle: {
+              color: theme.colors.onBackground,
+            },
+            headerTintColor: theme.colors.onBackground,
+            tabBarStyle: {
+              backgroundColor: theme.colors.background,
+              height: 70 + insets.bottom + 10,
+              paddingBottom: Math.max(insets.bottom, 10) + 10,
+              paddingTop: 10,
+              paddingLeft: 5,
+              paddingRight: 5,
+              borderTopColor: theme.colors.elevation2,
+              borderTopWidth: 0.2,
+            },
+          }}
+        >
+          {/* ── Home ── */}
+          <Tab.Screen
+            name="HomeTabs"
+            component={HomeScreen}
+            options={{
+              headerShown: true,
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
+                  <TouchableOpacity onPress={() => { /* navigate to notifications */ }}>
+                    <Ionicons style={{ marginTop: 4 }} name="refresh" size={32} color={theme.colors.onBackground} />
+                  </TouchableOpacity>
+                  <Pressable onPress={() => setIsProfileDrawerOpen(true)}>
+                    <Ionicons style={{ marginTop: 4 }} name="person-circle" size={32} color={theme.colors.onBackground} />
+                  </Pressable>
+                </View>
+              ),
+              tabBarIcon: ({ focused }) => (
                 <Ionicons
-                  name={focused ? 'albums' : 'albums-outline'}
+                  name={focused ? 'home' : 'home-outline'}
                   color={focused ? theme.colors.onBackground : inactiveColor}
                   size={28}
                 />
-              </View>
-            ),
-            tabBarLabel: ({ focused }) => (
-              <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
-                Collections
-              </Text>
-            ),
-            headerRight: () => (
-              <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
-                <TouchableOpacity onPress={() => { /* navigate to notifications */ }}>
-                  <Ionicons style={{ marginTop: 4 }} name="refresh" size={32} color={theme.colors.onBackground} />
-                </TouchableOpacity>
-                <Pressable onPress={() => setIsProfileDrawerOpen(true)}>
-                  <Ionicons style={{ marginTop: 4 }} name="person-circle" size={32} color={theme.colors.onBackground} />
-                </Pressable>
-              </View>
-            ),
-          }}
-        />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
+                  Home
+                </Text>
+              ),
+            }}
+          />
 
-        {/* ── Search (center FAB-style) ── */}
-        <Tab.Screen
-          name="Search"
-          component={HomeScreen}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <View style={{
-                zIndex: 1000000,
-                height: 67,
-                width: 67,
-                padding: 10,
-                borderRadius: 100,
-                marginBottom: -10,
-                backgroundColor: focused ? theme.colors.elevation : theme.colors.background,
-              }}>
-                <Ionicons name="search-outline" color={focused ? theme.colors.onBackground : inactiveColor} size={45} />
-              </View>
-            ),
-            tabBarLabel: ({ focused }) => (
-              <Text style={{
-                fontSize: 14,
-                fontWeight: focused ? '800' : '400',
-                color: 'transparent',
-                textAlign: 'center',
-                position: 'absolute',
-                zIndex: 0,
-              }}>
-                Search
-              </Text>
-            ),
-          }}
-        />
+          {/* ── Practice ── */}
+          <Tab.Screen
+            name="Collections"
+            component={CollectionTopTabs}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => (
+                <View style={{ position: 'relative' }}>
+                  <Ionicons
+                    name={focused ? 'albums' : 'albums-outline'}
+                    color={focused ? theme.colors.onBackground : inactiveColor}
+                    size={28}
+                  />
+                </View>
+              ),
+              tabBarLabel: ({ focused }) => (
+                <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
+                  Collections
+                </Text>
+              ),
+              headerRight: () => (
+                <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
+                  <TouchableOpacity onPress={() => { /* navigate to notifications */ }}>
+                    <Ionicons style={{ marginTop: 4 }} name="refresh" size={32} color={theme.colors.onBackground} />
+                  </TouchableOpacity>
+                  <Pressable onPress={() => setIsProfileDrawerOpen(true)}>
+                    <Ionicons style={{ marginTop: 4 }} name="person-circle" size={32} color={theme.colors.onBackground} />
+                  </Pressable>
+                </View>
+              ),
+            }}
+          />
 
-        {/* ── Bible ── */}
-        <Tab.Screen
-          name="Bible"
-          component={BibleScreen}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <Ionicons
-                name={focused ? 'book-sharp' : 'book-outline'}
-                color={focused ? theme.colors.onBackground : inactiveColor}
-                size={28}
-              />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
-                Bible
-              </Text>
-            ),
-          }}
-        />
+          {/* ── Search (center FAB-style) ── */}
+          <Tab.Screen
+            name="Search"
+            component={HomeScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => (
+                <View style={{
+                  zIndex: 1000000,
+                  height: 67,
+                  width: 67,
+                  padding: 10,
+                  borderRadius: 100,
+                  marginBottom: -10,
+                  backgroundColor: focused ? theme.colors.elevation : theme.colors.background,
+                }}>
+                  <Ionicons name="search-outline" color={focused ? theme.colors.onBackground : inactiveColor} size={45} />
+                </View>
+              ),
+              tabBarLabel: ({ focused }) => (
+                <Text style={{
+                  fontSize: 14,
+                  fontWeight: focused ? '800' : '400',
+                  color: 'transparent',
+                  textAlign: 'center',
+                  position: 'absolute',
+                  zIndex: 0,
+                }}>
+                  Search
+                </Text>
+              ),
+            }}
+          />
 
-        {/* ── Explore ── */}
-        <Tab.Screen
-          name="Explore"
-          component={ExploreScreen}
-          options={{
-            headerShown: false,
-            tabBarIcon: ({ focused }) => (
-              <Ionicons
-                name={focused ? 'planet' : 'planet-outline'}
-                color={focused ? theme.colors.onBackground : inactiveColor}
-                size={28}
-              />
-            ),
-            tabBarLabel: ({ focused }) => (
-              <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
-                Explore
-              </Text>
-            ),
-          }}
-        />
-      </Tab.Navigator>
-    </Drawer>
+          {/* ── Bible ── */}
+          <Tab.Screen
+            name="Bible"
+            component={BibleScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => (
+                <Ionicons
+                  name={focused ? 'book-sharp' : 'book-outline'}
+                  color={focused ? theme.colors.onBackground : inactiveColor}
+                  size={28}
+                />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
+                  Bible
+                </Text>
+              ),
+            }}
+          />
+
+          {/* ── Explore ── */}
+          <Tab.Screen
+            name="Explore"
+            component={ExploreScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => (
+                <Ionicons
+                  name={focused ? 'planet' : 'planet-outline'}
+                  color={focused ? theme.colors.onBackground : inactiveColor}
+                  size={28}
+                />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
+                  Explore
+                </Text>
+              ),
+            }}
+          />
+        </Tab.Navigator>
+      </Drawer>
   );
 }

@@ -22,6 +22,7 @@ import { Button, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useStyles from '../../styles/gobalStyles';
 import * as SystemUI from 'expo-system-ui';
+import { VerseOfDayHomeCard } from "../../components/home/vod";
 
 SystemUI.setBackgroundColorAsync('#181818')
 
@@ -29,9 +30,9 @@ export const HomeScreen = () => {
     const styles = useStyles();
     
     return (
-        <SafeAreaView style={styles.screen}>
-            <Text style={styles.p1}>Home</Text>
-        </SafeAreaView>
+        <View style={styles.screen}>
+            <VerseOfDayHomeCard/>
+        </View>
     )
 }
 

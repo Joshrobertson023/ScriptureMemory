@@ -8,7 +8,6 @@ export default function useGlobalStyles() {
       flex: 1,
       backgroundColor: theme.colors.background,
       padding: 20,
-      justifyContent: 'center',
       alignItems: 'center'
     },
 
@@ -16,6 +15,12 @@ export default function useGlobalStyles() {
       color: theme.colors.onBackground,
       fontSize: 20,
       fontFamily: 'Inter',
+    },
+
+    icon: {
+      width: 30,
+      height: 30,
+      backgroundColor: theme.colors.onBackground
     },
 
 
