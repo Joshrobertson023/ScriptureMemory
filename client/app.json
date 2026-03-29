@@ -55,7 +55,6 @@
       ],
       "expo-secure-store",
       "expo-sqlite",
-      "expo-font",
       "expo-notifications",
       [
         "expo-notifications",
@@ -64,6 +63,30 @@
           "color": "#E6F4FE",
           "sounds": []
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Inter/extras/ttf/Inter-Regular.ttf"
+          ],
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Inter",
+                "fontDefinitions": [
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Regular.ttf", "weight": 400 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Medium.ttf", "weight": 500 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-SemiBold.ttf", "weight": 600 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Bold.ttf", "weight": 700 }
+                ]
+              }
+            ]
+          },
+          "ios": {
+            "fonts": ["./assets/fonts/Inter/extras/ttf/Inter-Regular.ttf"]
+          }
+        }
       ]
     ],
     // "notification": {
@@ -71,7 +94,7 @@
     //   "color": "#E6F4FE"
     // },
     "experiments": {
-      "typedRoutes": true,
+      "typedRoutes": false,
       "reactCompiler": true
     },
     "extra": {

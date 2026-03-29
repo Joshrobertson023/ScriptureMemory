@@ -25,8 +25,10 @@ import {
 import TabsNavigator from './screens/(tabs)/TabsNavigator';
 import { useUserAuthStore } from './stores/userAuth.store';
 import { loginUserWithToken } from './api/user.api';
-import useStyles from './styles';
-import { useFonts } from 'expo-font';
+import useStyles from './styles/gobalStyles';
+import { HomeScreen } from './screens/(tabs)/home.screen';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCustomFonts } from './styles/fonts';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -36,25 +38,9 @@ const Stack = createNativeStackNavigator();
 export default function AppShell() {
   const theme = useAppTheme();
   const styles = useStyles();
-
-  const [fontsLoaded] = useFonts({
-    'Lora': require('../assets/fonts/Lora-VariableFont_wght.ttf'),
-    'Lora-SemiBold': require('../assets/fonts/Lora-SemiBold.ttf'),
-    'Lora-Bold': require('../assets/fonts/Lora-Bold.ttf')
-  })
+  const fontsLoaded = useCustomFonts();
 
   const [appIsReady, setAppIsReady] = useState(false);
-
-  const sharedHeaderStyle = {
-    headerStyle: { backgroundColor: theme.colors.background },
-    headerTitleStyle: { color: theme.colors.onBackground },
-    headerTintColor: theme.colors.onBackground,
-  } as const;
-
-  const sharedHeaderStyleNoShadow = {
-    ...sharedHeaderStyle,
-    headerShadowVisible: false,
-  } as const;
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   const loadToken = useUserAuthStore(s => s.loadToken);
@@ -116,12 +102,15 @@ export default function AppShell() {
     return (
         
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-            <NavigationContainer>
+            <NavigationContainer theme={theme}>
               <Stack.Navigator
                 screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
               >
                 
-                <Stack.Screen name="(tabs)"  component={TabsNavigator}  options={{ headerShown: false, animation: 'none' }} />
+                <Stack.Screen 
+                  name="(tabs)" 
+                  component={TabsNavigator} 
+                  options={{ headerShown: false, animation: 'none' }} />
                 
                                 {/* Settings & info screens */}
                 {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />

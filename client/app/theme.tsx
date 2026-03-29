@@ -1,4 +1,5 @@
-import { useColorScheme } from 'react-native';
+import { useColorScheme, Appearance } from 'react-native';
+import { DefaultTheme } from '@react-navigation/native';
 import { useAppStore } from './store';
 
 export default function useAppTheme() {
@@ -7,41 +8,34 @@ export default function useAppTheme() {
     const scheme = themePreference === 'system' ? (systemScheme || 'light') : themePreference;
 
     return scheme === 'dark' ? {
-        ...MD3DarkTheme,
-        colors: {
-          ...MD3DarkTheme.colors,
-          primary: '#f8f8f8ff',
-          secondary: '#c14848ff',
-          background: '#151515ff',
-          surface: '#292929ff',
-          surface2: '#3d3d3dff',
-          onBackground: '#fff',
-          backdrop: '#2a2a2aff',
-          onPrimary: '#73675aff',
-          gray: '#737373ff',
-          onSurfaceVariant: '#fff',
-          onSurface: '#fff',
-          verseText: '#d3d3d3ff',
-          verseHint: '#959595ff'
-        }
+      ...DefaultTheme,
+      colors: {
+        ...DefaultTheme.colors,
+        primary: '#834343',
+        background: '#181818',
+        background2: '#222222',
+        onBackground: '#F4F4F4',
+        elevation: '#2E2E2E',
+        elevation2: '#494949',
+        elevation3: '#696969',
+        white: '#F4F4F4',
+        verseHint: '#959595ff',
+        inactiveTab: 'rgb(207, 207, 207)'
+      }
     } : {
-        ...MD3LightTheme,
-        colors: {
-          ...MD3LightTheme.colors,
-          primary: '#b93838ff',
-          secondary: '#c14848ff',
-          background: '#fff',
-          surface: '#f5f5f5',
-          surface2: '#cececeff',
-          onBackground: '#000',
-          backdrop: '#f5f5f5',
-          onPrimary: '#603f1bff',
-          gray: '#919191ff',
-          onSurfaceVariant: '#000',
-          onSurface: '#000',
-          verseText: '#363636ff',
-          verseHint: '#4d4a4aff'
-          // add more overrides as needed
-        }
+      ...DefaultTheme,
+      colors: {
+        ...DefaultTheme.colors,
+        primary: '#834343',
+        background: '#181818',
+        background2: '#222222',
+        onBackground: '#F4F4F4',
+        elevation: '#2E2E2E',
+        elevation2: '#494949',
+        elevation3: '#696969',
+        white: '#F4F4F4',
+        verseHint: '#959595ff',
+        inactiveTab: '#959595ff'
+      }
     };
 }

@@ -1,5 +1,5 @@
 import { Alert, Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import useStyles from "../../styles";
+import useStyles from "../../styles/gobalStyles";
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../types/router';

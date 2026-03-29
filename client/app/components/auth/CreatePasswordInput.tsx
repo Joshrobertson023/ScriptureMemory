@@ -1,5 +1,5 @@
 import { HelperText, TextInput } from "react-native-paper";
-import useStyles from "../../styles";
+import useStyles from "../../styles/gobalStyles";
 import { useFormStore } from "../../stores/form.store";
 import { useState } from "react";
 import { View, Text } from "react-native";
