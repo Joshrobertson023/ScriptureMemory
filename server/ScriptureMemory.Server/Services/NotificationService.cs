@@ -1,19 +1,14 @@
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using DataAccess.Models;
-using ScriptureMemoryLibrary;
+using ScriptureMemory.Server.Tools;
 
 namespace VerseAppNew.Server.Services;
 
-public interface INotificationService
+public sealed class NotificationService
 {
-    Task SendNotification(Notification notification);
-}
+    private readonly NotificationData notificationContext; 
 
-public sealed class NotificationService : INotificationService
-{
-    private readonly INotificationData notificationContext; 
-
-    public NotificationService(INotificationData notificationContext)
+    public NotificationService(NotificationData notificationContext)
     {
         this.notificationContext = notificationContext;
     }

@@ -1,19 +1,14 @@
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using DataAccess.Models;
 
 namespace VerseAppNew.Server.Services;
 
-public interface IActivityLogger
+public sealed class ActivityLogger
 {
-    Task Log(ActivityLog log);
-}
-
-public sealed class ActivityLogger : IActivityLogger
-{
-    private readonly IActivityLoggingData loggingData;
+    private readonly ActivityLoggingData loggingData;
     private readonly ILogger<ActivityLogger> _logger;
 
-    public ActivityLogger(IActivityLoggingData loggingData, ILogger<ActivityLogger> logger)
+    public ActivityLogger(ActivityLoggingData loggingData, ILogger<ActivityLogger> logger)
     {
         this.loggingData = loggingData;
         _logger = logger;

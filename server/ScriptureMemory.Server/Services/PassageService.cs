@@ -1,17 +1,12 @@
-﻿using DataAccess.DataInterfaces;
+﻿using DataAccess.Data;
 
 namespace ScriptureMemory.Server.Services;
 
-public interface IPassageService
+public class PassageService
 {
+    private readonly UserPassageData passageContext;
 
-}
-
-public class PassageService : IPassageService
-{
-    private readonly IUserPassageData passageContext;
-
-    public PassageService(IUserPassageData passageContext)
+    public PassageService(UserPassageData passageContext)
     {
         this.passageContext = passageContext;
     }

@@ -1,34 +1,26 @@
-﻿using DataAccess.DataInterfaces;
+﻿using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
 using DataAccess.Requests.UpdateRequests;
 using VerseAppNew.Server.Services;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 
 namespace ScriptureMemory.Server.Services;
 
-public interface ICollectionService
+public sealed class CollectionService
 {
-    Task<int> CreateCollection(Collection newCollection);
-    Task<List<Collection>> GetUserCollections(int userId);
-    Task SaveCollection(SaveCollectionRequest request);
-    Task<Collection> GetCollection(Collection collection);
-}
-
-public sealed class CollectionService : ICollectionService
-{
-    private readonly ICollectionData collectionContext;
-    private readonly IActivityLogger logger;
-    private readonly IUserPassageData passageContext;
-    private readonly INotificationService notifications;
-    private readonly IPublishedCollectionData publishedContext;
+    private readonly CollectionData collectionContext;
+    private readonly ActivityLogger logger;
+    private readonly UserPassageData passageContext;
+    private readonly NotificationService notifications;
+    private readonly PublishedCollectionData publishedContext;
 
     public CollectionService(
-        ICollectionData collectionContext, 
-        IActivityLogger logger,
-        IUserPassageData passageContext,
-        INotificationService notifications,
-        IPublishedCollectionData publishedContext)
+        CollectionData collectionContext, 
+        ActivityLogger logger,
+        UserPassageData passageContext,
+        NotificationService notifications,
+        PublishedCollectionData publishedContext)
     {
         this.collectionContext = collectionContext;
         this.logger = logger;

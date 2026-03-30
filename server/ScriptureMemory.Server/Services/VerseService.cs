@@ -1,16 +1,12 @@
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 
 namespace VerseAppNew.Server.Services;
 
-public interface IVerseService
+public sealed class VerseService
 {
-}
+    private readonly VerseData verseContext;
 
-public sealed class VerseService : IVerseService
-{
-    private readonly IVerseData verseContext;
-
-    public VerseService(IVerseData verseContext)
+    public VerseService(VerseData verseContext)
     {
         this.verseContext = verseContext;
     }

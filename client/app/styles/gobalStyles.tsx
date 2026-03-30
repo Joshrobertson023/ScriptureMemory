@@ -11,10 +11,30 @@ export default function useGlobalStyles() {
       alignItems: 'center'
     },
 
+    h1: {
+      color: theme.colors.onBackground,
+      fontSize: 32,
+      fontFamily: 'Noto Serif',
+      fontWeight: 600
+    },
+
     p1: {
       color: theme.colors.onBackground,
       fontSize: 20,
       fontFamily: 'Inter',
+    },
+    p2: {
+      color: theme.colors.onBackground,
+      fontSize: 18,
+      fontFamily: 'Inter',
+    },
+    p3: {
+
+    },
+    p4: {
+      color: theme.colors.onBackground,
+      fontSize: 11,
+      fontFamily: 'Inter'
     },
 
     icon: {

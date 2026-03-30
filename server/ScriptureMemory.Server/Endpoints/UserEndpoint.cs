@@ -1,5 +1,5 @@
 using Azure.Core;
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
 using DataAccess.Requests.UpdateRequests;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using VerseAppNew.Server.Services;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 
 namespace VerseAppNew.Server.Apis;
 
@@ -21,7 +21,7 @@ public static class UserEndpoint
         // Get user by username directly from data context
         app.MapGet("/users/{username}", async (
             string username,
-            [FromServices] IUserData data,
+            [FromServices] UserData data,
             ClaimsPrincipal user) =>
         {
             return Results.Forbid(); // Currently unsecure
@@ -40,7 +40,7 @@ public static class UserEndpoint
         // Search for a user
         app.MapGet("/users/search/{query}", async (
             string query,
-            [FromServices] IUserData data) =>
+            [FromServices] UserData data) =>
         {
             var results = await data.SearchUsers(query);
             return Results.Ok(results);
@@ -49,7 +49,7 @@ public static class UserEndpoint
         // Create a new user account
         app.MapPost("/users", async (
             [FromBody] CreateUserRequest request,
-            [FromServices] IUserService userService) =>
+            [FromServices] UserService userService) =>
         {
             try
             {
@@ -66,7 +66,7 @@ public static class UserEndpoint
         // Check if username exists
         app.MapGet("/users/exists/{username}", async (
             string username,
-            [FromServices] IUserData data) =>
+            [FromServices] UserData data) =>
         {
             return Results.Ok(await data.CheckUsernameExists(username));
         });
@@ -74,7 +74,7 @@ public static class UserEndpoint
         // Set a user as active
         app.MapPut("/users/setAsActive", async (
             [FromBody] int userId,
-            [FromServices] IUserData data) =>
+            [FromServices] UserData data) =>
         {
             await data.UpdateLastSeen(userId);
             return Results.Ok();
@@ -83,7 +83,7 @@ public static class UserEndpoint
         // Get users with a specific email address
         app.MapGet("/users/email", async (
             [FromBody] string email,
-            [FromServices] IUserData data) =>
+            [FromServices] UserData data) =>
         {
             var results = await data.GetUsersFromEmail(email);
             if (results == null)
@@ -94,7 +94,7 @@ public static class UserEndpoint
         // Get a user's password hash
         app.MapGet("/users/password/{username}", async (
             [FromBody] string username,
-            [FromServices] IUserData data) =>
+            [FromServices] UserData data) =>
         {
             var result = await data.GetPasswordHash(username);
             if (result is null)
@@ -105,7 +105,7 @@ public static class UserEndpoint
         // Login a user with username and password
         app.MapPost("/users/login/username", async (
             [FromBody] LoginRequest request,
-            [FromServices] IUserService userService) =>
+            [FromServices] UserService userService) =>
         {
             return await userService.Login(request.Username, request.Password);
         });
@@ -113,7 +113,7 @@ public static class UserEndpoint
         // Login a user from a login token
         app.MapPost("/users/login/token", async (
             [FromBody] string token,
-            [FromServices] IUserService userService) =>
+            [FromServices] UserService userService) =>
         {
             return await userService.Login(token);
         });
@@ -121,7 +121,7 @@ public static class UserEndpoint
         // Increment the number of verses a user has memorized
         app.MapPut("/users/incrementVersesMemorized", async (
             [FromBody] int userId,
-            [FromServices] IUserData data) =>
+            [FromServices] UserData data) =>
         {
             await data.IncrementVersesMemorized(userId);
             return Results.Ok();
@@ -129,71 +129,71 @@ public static class UserEndpoint
 
         app.MapPost("/users/forgot-username", async (
             [FromBody] ForgotUsernameRequest request,
-            [FromServices] IEmailSenderService emailSender) =>
+            [FromServices] EmailSenderService emailSender) =>
         {
             return await emailSender.SendForgotUsernameEmail(request);
         });
 
         app.MapPost("/users/forgot-password/request", async (
             [FromBody] ForgotPasswordRequest request,
-            [FromServices] IEmailSenderService emailSender) =>
+            [FromServices] EmailSenderService emailSender) =>
         {
             return await emailSender.SendPasswordResetOtp(request);
         });
 
         app.MapPost("/users/forgot-password/verify", async (
             [FromBody] VerifyOtpRequest request,
-            [FromServices] IPasswordResetService service) =>
+            [FromServices] PasswordResetService service) =>
         {
             return await service.VerifyOtp(request);
         });
 
         app.MapPost("/users/forgot-password/reset", async (
             [FromBody] ResetPasswordRequest request,
-            [FromServices] IPasswordResetService service) =>
+            [FromServices] PasswordResetService service) =>
         {
             return await service.Reset(request);
         });
 
         app.MapPut("/users/username", async (
             [FromBody] UpdateUsernameRequest request,
-            [FromServices] IUserService service) =>
+            [FromServices] UserService service) =>
         {
             return await service.UpdateUsername(request);
         });
 
         app.MapPut("/users/email", async (
             [FromBody] UpdateEmailRequest request,
-            [FromServices] IUserService service) =>
+            [FromServices] UserService service) =>
         {
             return await service.UpdateEmail(request);
         });
 
         app.MapPut("/users/name", async (
             [FromBody] UpdateNameRequest request,
-            [FromServices] IUserService service) =>
+            [FromServices] UserService service) =>
         {
             return await service.UpdateName(request);
         });
 
         app.MapPut("/users/description", async (
             [FromBody] UpdateDescriptionRequest request,
-            [FromServices] IUserService service) =>
+            [FromServices] UserService service) =>
         {
             return await service.UpdateDescription(request);
         });
 
         app.MapGet("/leaderboard", async (
             [FromBody] GetLeaderboardRequest request,
-            [FromServices] IUserData data) =>
+            [FromServices] UserData data) =>
         {
             return Results.Ok(await data.GetLeaderboard(request.Page, request.PageSize));
         });
 
         app.MapGet("/leaderboard/rank", async (
             [FromBody] int userId,
-            [FromServices] IUserData data,
-            [FromServices] IActivityLogger logger) =>
+            [FromServices] UserData data,
+            [FromServices] ActivityLogger logger) =>
         {
             await logger.Log(new ActivityLog(
                 userId,

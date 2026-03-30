@@ -14,17 +14,17 @@ export const VerseOfDayHomeCard = () => {
     return (
         <View style={{width: '100%', backgroundColor: theme.colors.primary, borderRadius: 15, 
             flexDirection: 'row', justifyContent: 'space-between', padding: 20}}>
-            <View style={{width: '75%', justifyContent: 'space-between'}}>
+            <View style={{width: '85%', justifyContent: 'space-between'}}>
                 <View>
-                    <Text style={style.p1}>Verse of the Day</Text>
-                    <Text style={style.p1}>{vodReference}</Text>
+                    <Text style={style.p4}>Verse of the Day</Text>
+                    <Text style={style.h1}>{vodReference}</Text>
                 </View>
                 <View style={{marginTop: 50}}>
-                    <Text style={style.p1}>{vodText}</Text>
+                    <Text style={{...style.p2, fontFamily: 'Noto Serif'}}>{vodText}</Text>
                 </View>
             </View>
             <View>
-                <Ionicons name="heart" color={theme.colors.onBackground} size={24}/>
+                <Ionicons name="bookmark" color={theme.colors.onBackground} size={24}/>
             </View>
         </View>
     )

@@ -1,8 +1,7 @@
 using DataAccess.Models;
 using DataAccess.Requests;
-using ScriptureMemoryLibrary;
 using System.Net.Http.Json;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 
 namespace ScriptureMemory.IntegrationTests;
 
@@ -26,17 +25,17 @@ public class VerseTests : BaseIntegrationTest
         await verseContext.InsertVerse(newVerse);
 
         // Get verse via endpoint
-        var getResponse = await Api.PostAsJsonAsync("/verses", newVerse.Reference.ReadableReference);
+        var getResponse = await Api.PostAsJsonAsync("/verses", newVerse.Reference.ToString());
         getResponse.EnsureSuccessStatusCode();
         var verse = await getResponse.Content.ReadFromJsonAsync<Verse>();
         Assert.NotNull(verse);
-        Assert.Equal(newVerse.Reference.ReadableReference, verse.Reference.ReadableReference);
+        Assert.Equal(newVerse.Reference.ToString(), verse.Reference.ToString());
 
         // -- Update verse ----------------------
-        var updateResponse = await Api.PutAsync($"/verses/saved/{newVerse.Reference.ReadableReference}", null);
+        var updateResponse = await Api.PutAsync($"/verses/saved/{newVerse.Reference.ToString()}", null);
         updateResponse.EnsureSuccessStatusCode();
 
-        var getAfterUpdate = await Api.PostAsJsonAsync("/verses", newVerse.Reference.ReadableReference);
+        var getAfterUpdate = await Api.PostAsJsonAsync("/verses", newVerse.Reference.ToString());
         getAfterUpdate.EnsureSuccessStatusCode();
         var updatedVerse = await getAfterUpdate.Content.ReadFromJsonAsync<Verse>();
         Assert.NotNull(updatedVerse);
@@ -87,7 +86,7 @@ public class VerseTests : BaseIntegrationTest
         var chapterVerses = await response.Content.ReadFromJsonAsync<List<Verse>>();
         Assert.NotNull(chapterVerses);
         Assert.True(chapterVerses.Count >= 4); // At least the ones we inserted
-        var firstFirst = chapterVerses.FirstOrDefault(v => v.Reference.ReadableReference == "John 3:16");
+        var firstFirst = chapterVerses.FirstOrDefault(v => v.Reference.ToString() == "John 3:16");
         Assert.NotNull(firstFirst);
         Assert.Equal(john316.Text, firstFirst.Text);
     }

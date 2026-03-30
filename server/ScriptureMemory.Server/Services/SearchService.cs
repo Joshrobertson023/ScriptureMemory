@@ -1,21 +1,16 @@
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using DataAccess.Models;
 using System.DirectoryServices.Protocols;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 
 namespace VerseAppNew.Server.Services;
 
-public interface ISearchService
+public sealed class SearchService
 {
-    Task<IResult> SearchVerses(DataAccess.Requests.SearchRequest request);
-}
+    private readonly ActivityLogger logger;
+    private readonly UserData userContext;
 
-public sealed class SearchService : ISearchService
-{
-    private readonly IActivityLogger logger;
-    private readonly IUserData userContext;
-
-    public SearchService(IActivityLogger logger, IUserData userContext)
+    public SearchService(ActivityLogger logger, UserData userContext)
     {
         this.logger = logger;
         this.userContext = userContext;

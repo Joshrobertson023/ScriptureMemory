@@ -3,11 +3,12 @@ using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
 using Microsoft.AspNetCore.Identity.Data;
-using ScriptureMemoryLibrary;
+using ScriptureMemory.Server.Tools;
 using System.Net.Http.Json;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 using System;
 using DataAccess.Requests.UpdateRequests;
+using ScriptureMemory.Server.Tools;
 
 namespace ScriptureMemory.IntegrationTests;
 

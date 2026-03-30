@@ -8,8 +8,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Xml;
 using VerseAppNew.Server.Services;
-using ScriptureMemoryLibrary;
-using DataAccess.DataInterfaces;
+using ScriptureMemory.Server.Tools;
 using ScriptureMemory.Server.Services;
 using DataAccess.Requests.UpdateRequests;
 
@@ -21,7 +20,7 @@ public static class CollectionEndpoint
     {
         app.MapPost("/collections", async (
             [FromBody] Collection newCollection,
-            [FromServices] ICollectionService collectionService) =>
+            [FromServices] CollectionService collectionService) =>
         {
             int newCollectionId = await collectionService.CreateCollection(newCollection);
             return Results.Ok(newCollectionId);
@@ -29,7 +28,7 @@ public static class CollectionEndpoint
 
         app.MapPut("/collections", async (
             [FromBody] UpdateCollectionRequest request,
-            [FromServices] ICollectionService collectionService) =>
+            [FromServices] CollectionService collectionService) =>
         {
             await collectionService.UpdateCollection(request);
             return Results.NoContent();

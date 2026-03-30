@@ -1,25 +1,25 @@
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
-using ScriptureMemoryLibrary;
+using ScriptureMemory.Server.Tools;
 using VerseAppNew.Server.Services;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 
 namespace VerseAppNew.Server.Bogus;
 
 public sealed class PopulateDatabase
 {
-    private readonly IUserService userService;
-    private readonly IUserData userContext;
-    private readonly INotificationService notificationService;
-    private readonly ISearchService searchService;
+    private readonly UserService userService;
+    private readonly UserData userContext;
+    private readonly NotificationService notificationService;
+    private readonly SearchService searchService;
     private readonly ILogger<PopulateDatabase> logger;
 
     public PopulateDatabase(
-        IUserService userService,
-        IUserData userContext,
-        INotificationService notificationService,
-        ISearchService searchService,
+        UserService userService,
+        UserData userContext,
+        NotificationService notificationService,
+        SearchService searchService,
         ILogger<PopulateDatabase> logger)
     {
         this.userService = userService;

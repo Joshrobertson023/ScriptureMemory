@@ -1,4 +1,5 @@
-using ScriptureMemoryLibrary;
+using ScriptureMemory.Server.Tools;
+using ScriptureMemory.Server.Tools;
 using Xunit;
 namespace VerseApp.UnitTests.ReferenceParseTests;
 
@@ -7,7 +8,7 @@ public class GetReferencesFromVersesInReferenceTests
     [Fact]
     public void GetReferencesFromVersesInReference_DoubleDigitRangeWithSeparateVerse_ReturnsAllReferences()
     {
-        var result = ReferenceParse.GetReferencesFromVersesInReference("Psalms 119:2-21, 24");
+        var result = ReferenceParser.GetReferencesFromVersesInReference("Psalms 119:2-21, 24");
         Assert.Equal(new List<string>
         {
             "Psalms 119:2", "Psalms 119:3", "Psalms 119:4", "Psalms 119:5",
@@ -21,13 +22,13 @@ public class GetReferencesFromVersesInReferenceTests
     [Fact]
     public void GetReferencesFromVersesInReference_NumberedBookDoubleDigitRangeWithSeparateVerse_ReturnsAllReferences()
     {
-        var result = ReferenceParse.GetReferencesFromVersesInReference("1 John 4:18-19, 20");
+        var result = ReferenceParser.GetReferencesFromVersesInReference("1 John 4:18-19, 20");
         Assert.Equal(new List<string> { "1 John 4:18", "1 John 4:19", "1 John 4:20" }, result);
     }
     [Fact]
     public void GetReferencesFromVersesInReference_SingleVerse_ReturnsSingleReference()
     {
-        var result = ReferenceParse.GetReferencesFromVersesInReference("John 3:16");
+        var result = ReferenceParser.GetReferencesFromVersesInReference("John 3:16");
         Assert.Equal(new List<string> { "John 3:16" }, result);
     }
 }

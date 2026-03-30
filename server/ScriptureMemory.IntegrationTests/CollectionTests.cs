@@ -2,12 +2,12 @@ using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
 using ScriptureMemory.Server.Services;
-using ScriptureMemoryLibrary;
 using System.Net.Http.Json;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
+using ScriptureMemory.Server.Tools;
 
 namespace ScriptureMemory.IntegrationTests
 {
@@ -24,7 +24,7 @@ namespace ScriptureMemory.IntegrationTests
                 LastName = lastName,
                 Email = $"{firstName.ToLower()}@gmail.com",
                 Password = "password123456",
-                BibleVersion = BibleVersion.Kjv
+                BibleVersion = Enums.BibleVersion.Kjv
             };
 
             await Api.PostAsJsonAsync("/users", request);

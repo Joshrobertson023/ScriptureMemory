@@ -1,7 +1,7 @@
 //using DataAccess.Models;
 //using DataAccess.Requests;
-//using ScriptureMemoryLibrary;
-//using static ScriptureMemoryLibrary.Enums;
+//using ScriptureMemory.Server.Tools;
+//using static ScriptureMemory.Server.Tools.Enums;
 
 //namespace ScriptureMemory.IntegrationTests;
 

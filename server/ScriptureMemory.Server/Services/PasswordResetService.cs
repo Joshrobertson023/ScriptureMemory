@@ -1,28 +1,22 @@
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
-using ScriptureMemoryLibrary;
-using static ScriptureMemoryLibrary.Enums;
+using ScriptureMemory.Server.Tools;
+using static ScriptureMemory.Server.Tools.Enums;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VerseAppNew.Server.Services;
 
-public interface IPasswordResetService
+public sealed class PasswordResetService
 {
-    Task<IResult> VerifyOtp(VerifyOtpRequest request);
-    Task<IResult> Reset(ResetPasswordRequest request);
-}
-
-public sealed class PasswordResetService : IPasswordResetService
-{
-    private readonly IUserData userContext;
-    private readonly IEmailSenderService emailSender;
-    private readonly IActivityLogger activityLogger;
+    private readonly UserData userContext;
+    private readonly EmailSenderService emailSender;
+    private readonly ActivityLogger activityLogger;
 
     public PasswordResetService(
-        IUserData userContext,
-        IEmailSenderService emailSender,
-        IActivityLogger activityLogger)
+        UserData userContext,
+        EmailSenderService emailSender,
+        ActivityLogger activityLogger)
     {
         this.userContext = userContext;
         this.emailSender = emailSender;

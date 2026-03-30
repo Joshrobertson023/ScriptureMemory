@@ -80,6 +80,16 @@
                   { "path": "./assets/fonts/Inter/extras/ttf/Inter-SemiBold.ttf", "weight": 600 },
                   { "path": "./assets/fonts/Inter/extras/ttf/Inter-Bold.ttf", "weight": 700 }
                 ]
+              },
+              {
+                "fontFamily": "Noto Serif",
+                "fontDefinitions": [
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Light.ttf", "weight": 300},
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Medium.ttf", "weight": 400},
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Regular.ttf", "weight": 500},
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-SemiBold.ttf", "weight": 600},
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Bold.ttf", "weight": 700}
+                ]
               }
             ]
           },

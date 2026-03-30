@@ -1,44 +1,32 @@
 using Azure.Core;
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
 using DataAccess.Requests.UpdateRequests;
 using Microsoft.AspNetCore.Identity;
-using ScriptureMemoryLibrary;
+using ScriptureMemory.Server.Tools;
 using System.Text.Json;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VerseAppNew.Server.Services;
 
-public interface IUserService
+public sealed class UserService
 {
-    Task CreateUserFromRequest(CreateUserRequest request);
-    Task<IResult> Login(string username, string password);
-    Task<IResult> Login(string token);
-    Task<IResult> UpdateUsername(UpdateUsernameRequest request);
-    Task<IResult> UpdateEmail(UpdateEmailRequest request);
-    Task<IResult> UpdateName(UpdateNameRequest request);
-    Task<IResult> UpdateDescription(UpdateDescriptionRequest request);
-    Task<bool> IsUsernameAvailable(string username);
-}
-
-public sealed class UserService : IUserService
-{
-    private readonly IUserData userContext;
-    private readonly IUserSettingsData settingsContext;
-    //private readonly IPaidData paidContext;
-    private readonly INotificationService notificationService;
-    private readonly IActivityLogger logger;
-    private readonly IEmailSenderService emailSender;
+    private readonly UserData userContext;
+    private readonly UserSettingsData settingsContext;
+    //private readonly PaidData paidContext;
+    private readonly NotificationService notificationService;
+    private readonly ActivityLogger logger;
+    private readonly EmailSenderService emailSender;
 
     public UserService(
-        IUserData userContext, 
-        IUserSettingsData settingsContext, 
-        //IPaidData paidContext,
-        INotificationService notificationService,
-        IActivityLogger logger,
-        IEmailSenderService emailSender)
+        UserData userContext, 
+        UserSettingsData settingsContext, 
+        //PaidData paidContext,
+        NotificationService notificationService,
+        ActivityLogger logger,
+        EmailSenderService emailSender)
     {
         this.userContext = userContext;
         this.settingsContext = settingsContext;

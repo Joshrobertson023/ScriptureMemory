@@ -1,19 +1,12 @@
-using DataAccess.DataInterfaces;
 using DataAccess.Requests;
 using RestSharp;
 using RestSharp.Authenticators;
 using System.Security.Cryptography;
-using ScriptureMemoryLibrary;
+using ScriptureMemory.Server.Tools;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using DataAccess.Data;
 
 namespace VerseAppNew.Server.Services;
-
-public interface IEmailSenderService
-{
-    Task<RestResponse> SendEmail(Email email);
-    Task<IResult> SendForgotUsernameEmail(ForgotUsernameRequest request);
-    Task<IResult> SendPasswordResetOtp(ForgotPasswordRequest request);
-}
 
 public class Email
 {
@@ -55,13 +48,16 @@ public class Email
     }
 }
 
-public sealed class EmailSenderService : IEmailSenderService
+public sealed class EmailSenderService
 {
-    private readonly IUserData userContext;
+    private readonly UserData userContext;
     private readonly IConfiguration config;
     private readonly IServiceProvider serviceProvider;
 
-    public EmailSenderService(IUserData userContext, IConfiguration config, IServiceProvider serviceProvider)
+    public EmailSenderService(
+        UserData userContext, 
+        IConfiguration config, 
+        IServiceProvider serviceProvider)
     {
         this.userContext = userContext;
         this.config = config;
@@ -128,7 +124,7 @@ public sealed class EmailSenderService : IEmailSenderService
     public async Task<IResult> SendPasswordResetOtp(ForgotPasswordRequest request)
     {
         var scope = serviceProvider.CreateScope();
-        var userContext = scope.ServiceProvider.GetRequiredService<IUserData>();
+        var userContext = scope.ServiceProvider.GetRequiredService<UserData>();
 
         var recoveryInfo = await userContext.GetPasswordRecoveryInfo(
             request.Username.Trim(),

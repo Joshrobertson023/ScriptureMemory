@@ -1,4 +1,4 @@
-using DataAccess.DataInterfaces;
+using DataAccess.Data;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using ScriptureMemory.Server.Services;
@@ -18,10 +18,10 @@ public abstract class BaseIntegrationTest
     private IServiceScope _scope = null!;
 
     protected HttpClient Api { get; private set; } = null!;
-    protected IVerseData verseContext { get; private set; } = null!;
-    protected INotificationData notificationContext { get; private set; } = null!;
-    protected ICollectionService collectionService { get; private set; } = null!;
-    protected IPublishedCollectionData publishedContext { get; private set; } = null!;
+    protected VerseData verseContext { get; private set; } = null!;
+    protected NotificationData notificationContext { get; private set; } = null!;
+    protected CollectionService collectionService { get; private set; } = null!;
+    protected PublishedCollectionData publishedContext { get; private set; } = null!;
 
     protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
@@ -37,10 +37,10 @@ public abstract class BaseIntegrationTest
 
         // Create a fresh scope per test so scoped services resolve correctly
         _scope = _factory.Services.CreateScope();
-        verseContext = _scope.ServiceProvider.GetRequiredService<IVerseData>();
-        notificationContext = _scope.ServiceProvider.GetRequiredService<INotificationData>();
-        collectionService = _scope.ServiceProvider.GetRequiredService<ICollectionService>();
-        publishedContext = _scope.ServiceProvider.GetRequiredService<IPublishedCollectionData>();
+        verseContext = _scope.ServiceProvider.GetRequiredService<VerseData>();
+        notificationContext = _scope.ServiceProvider.GetRequiredService<NotificationData>();
+        collectionService = _scope.ServiceProvider.GetRequiredService<CollectionService>();
+        publishedContext = _scope.ServiceProvider.GetRequiredService<PublishedCollectionData>();
     }
 
     public Task DisposeAsync()

@@ -1,11 +1,9 @@
 using DataAccess.Data;
-using DataAccess.DataInterfaces;
 using DataAccess.Models;
 using DataAccess.Requests;
 using Microsoft.Extensions.DependencyInjection;
-using ScriptureMemoryLibrary;
 using System.Net.Http.Json;
-using static ScriptureMemoryLibrary.Enums;
+using static ScriptureMemory.Server.Tools.Enums;
 
 namespace ScriptureMemory.IntegrationTests;
 
