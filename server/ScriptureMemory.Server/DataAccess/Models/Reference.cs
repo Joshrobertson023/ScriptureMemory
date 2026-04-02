@@ -9,9 +9,9 @@ namespace DataAccess.Models;
 
 public sealed class Reference
 {
-    public string Book { get; set; }
+    public string Book { get; set; } = string.Empty;
     public int Chapter { get; set; }
-    public List<int> Verses { get; set; }
+    public List<int> Verses { get; set; } = new();
     public string ReadableReference { get; set; } = string.Empty;
 
     public Reference(string book, int chapter, List<int> verses)
@@ -32,4 +32,6 @@ public sealed class Reference
     {
         return ReferenceParser.ConvertToReadableReference(Book, Chapter, Verses);
     }
+
+    public Reference() { }
 }

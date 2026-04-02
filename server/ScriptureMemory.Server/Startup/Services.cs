@@ -111,6 +111,7 @@ public static class Services
         //services.AddScoped<UserPassageService>();
         services.AddScoped<CollectionService>();
         services.AddScoped<TokenProvider>();
+        services.AddScoped<VerseOfDayService>();
 
         services.AddScoped<VerseManagement>();
 
@@ -129,6 +130,7 @@ public static class Services
         services.AddScoped<UserPassageData>();
         services.AddScoped<CollectionData>();
         services.AddScoped<PublishedCollectionData>();
+        services.AddScoped<VerseOfDayData>();
         return services;
     }
 }

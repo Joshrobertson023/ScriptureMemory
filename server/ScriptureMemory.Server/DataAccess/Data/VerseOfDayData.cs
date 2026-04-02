@@ -1,138 +1,122 @@
-//using DataAccess.Models;
-//using Dapper;
-//using Microsoft.Extensions.Configuration;
-//using Oracle.ManagedDataAccess.Client;
-//using System;
-//using System.Collections.Generic;
-//using System.Data;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using DataAccess.DataInterfaces;
+using DataAccess.Models;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using Oracle.ManagedDataAccess.Client;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
-//namespace DataAccess.Data;
+namespace DataAccess.Data;
 
-//public class VerseOfDayData : IVerseOfDayData
-//{
-//    private readonly IConfiguration _config;
-//    private readonly string connectionString;
+public class VerseOfDayData
+{
+    private readonly IConfiguration _config;
+    private readonly string connectionString;
 
-//    public VerseOfDayData(IConfiguration config)
-//    {
-//        _config = config;
-//        connectionString = _config.GetConnectionString("Default") ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
-//    }
+    public VerseOfDayData(IConfiguration config)
+    {
+        _config = config;
+        connectionString = _config.GetConnectionString("PostgresConnection") 
+            ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
+    }
 
-//    public async Task<VerseOfDayInfo> GetLastUsedVerseOfDayData()
-//    {
-//        var sql = @"SELECT LAST_USED_VOD_ID AS LastUsedVodId, LAST_ROTATED_VOD_UTC AS LastUsedVodUtc FROM VERSE_OF_DAY_INFO";
+    public async Task<int> InsertPassage(string reference, int adminId)
+    {
+        var sql =
+            """
+            insert into vod_passages
+            (reference, admin_id, order_position)
+            values
+            (@Reference, @AdminId, (select coalesce(max(order_position), 0) + 1 from vod_passages))
+            returning id
+            """;
 
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var data = await conn.QueryAsync<VerseOfDayInfo>(sql, commandType: CommandType.Text);
-//        return data.FirstOrDefault();
-//    }
+        await using var conn = new Npgsql.NpgsqlConnection(connectionString);
+        await conn.OpenAsync();
+        var result = await conn.ExecuteScalarAsync<int>(sql, new { Reference = reference, AdminId = adminId });
+        return result;
+    }
 
-//    public async Task<VerseOfDay> GetNextPassageInSequence(int lastUsedId)
-//    {
-//        var getLastUsedSequenceSql = @"SELECT SEQUENCE FROM VERSE_OF_DAY WHERE ID = :LastUsedId;";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var lastUsedSequenceResults = await conn.QueryAsync(
-//            getLastUsedSequenceSql,
-//            new { LastUsedId = lastUsedId },
-//            commandType: CommandType.Text);
+    public async Task InsertVerses(List<int> verseIds, int vodPassageId)
+    {
+        var sql = 
+            """
+            insert into vod_passage_verses 
+            (verse_id, vod_passage_id) 
+            values 
+            (@VerseId, @VodPassageId) 
+            """;
 
-//        int lastUsedSequence = lastUsedSequenceResults.FirstOrDefault();
+        await using var conn = new Npgsql.NpgsqlConnection(connectionString);
+        await conn.OpenAsync();
 
-//        var getNextVerseInSequenceSql = @"
-//                SELECT ID, READABLEREFERENCE FROM VERSE_OF_DAY
-//                WHERE SEQUENCE > :LastSquence
-//                ORDER BY SEQUENCE ASC FETCH FIRST 1 ROWS ONLY";
-//        using IDbConnection conn2 = new OracleConnection(connectionString);
-//        var nextVerseInSequence = await conn2.QueryAsync<VerseOfDay>(
-//            getNextVerseInSequenceSql,
-//            new { LastSequence = lastUsedSequence },
-//            commandType: CommandType.Text);
+        var parameters = verseIds.Select(id => new { VerseId = id, VodPassageId = vodPassageId });
 
-//        return nextVerseInSequence.FirstOrDefault();
-//    }
+        await conn.ExecuteAsync(sql, parameters);
+    }
 
-//    public async Task SetTodayVod(VerseOfDayInfo info)
-//    {
-//        var sql = @"UPDATE VERSE_OF_DAY_INFO 
-//                    SET LAST_USED_VOD_ID = :newId, LAST_ROTATED_VOD_UTC = :newDate";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        await conn.ExecuteAsync(sql,
-//            new { newId = info.LastUsedVodId, newDate = info.LastUsedVodUtc },
-//            commandType: CommandType.Text);
-//    }
+    public record GetActiveVod(
+        string Reference,
+        int AdminId,
+        int OrderPosition,
+        int VerseId,
+        string Book,
+        int Chapter,
+        int VerseNum,
+        string Text,
+        int Memorized,
+        int Saved
+    );
 
-//    public async Task<VerseOfDay?> GetCurrentVerseOfDay()
-//    {
-//        var info = await GetLastUsedVerseOfDayData();
-//        if (info == null || info.LastUsedVodId == 0)
-//        {
-//            return null;
-//        }
+    public async Task<VerseOfDay?> GetActive()
+    {
+        var sql =
+            """
+            select 
+            p.reference,
+            p.admin_id as AdminId,
+            p.order_position as OrderPosition,
+            v.id as VerseId,
+            v.book as Book,
+            v.chapter as Chapter,
+            v.verse_num as VerseNum,
+            v.text as Text,
+            v.memorized_count as Memorized,
+            v.saved_count as Saved
+            from vod_passages p
+            left join vod_passages_verses pv on p.id = pv.vod_passage_id
+            left join vod_active a on p.id = a.id
+            left join verses v on pv.verse_id = v.id
+            """;
 
-//        var sql = @"SELECT ID, READABLEREFERENCE FROM VERSE_OF_DAY WHERE ID = :Id";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var result = await conn.QueryFirstOrDefaultAsync<VerseOfDay>(sql, 
-//            new { Id = info.LastUsedVodId }, 
-//            commandType: CommandType.Text);
-//        return result;
-//    }
+        await using var conn = new Npgsql.NpgsqlConnection(connectionString);
+        await conn.OpenAsync();
 
-//    public async Task CreateVerseOfDay(VerseOfDay verseOfDay)
-//    {
-//        using IDbConnection conn = new OracleConnection(connectionString);
-        
-//        var getMaxSequenceSql = @"SELECT NVL(MAX(SEQUENCE), 0) FROM VERSE_OF_DAY";
-//        var maxSequenceResult = await conn.QueryFirstOrDefaultAsync<int>(getMaxSequenceSql, commandType: CommandType.Text);
-//        int nextSequence = maxSequenceResult + 1;
+        var results = await conn.QueryAsync<GetActiveVod>(sql);
+        var grouped = results.GroupBy(r => new { r.Reference, r.AdminId, r.OrderPosition })
+            .Select(g => new VerseOfDay
+            {
+                Reference = g.Key.Reference,
+                AdminId = g.Key.AdminId,
+                OrderPosition = g.Key.OrderPosition,
+                Verses = g.Select(v => new Verse
+                {
+                    Id = v.VerseId,
+                    Reference = new Reference
+                    {
+                        Book = v.Book,
+                        Chapter = v.Chapter,
+                        Verses = new List<int> { v.VerseNum },
+                        ReadableReference = $"{v.Book} {v.Chapter}:{v.VerseNum}"
+                    },
+                    Text = v.Text,
+                }).ToList(),
+                MostMemorized = g.Max(v => v.Memorized),
+                MostSaved = g.Max(v => v.Saved)
+            }).FirstOrDefault();
 
-//        var insertSql = @"INSERT INTO VERSE_OF_DAY (READABLEREFERENCE, SEQUENCE) 
-//                          VALUES (:ReadableReference, :Sequence)";
-//        await conn.ExecuteAsync(insertSql,
-//            new { ReadableReference = verseOfDay.ReadableReference, Sequence = nextSequence },
-//            commandType: CommandType.Text);
-//    }
-
-//    public async Task DeleteVerseOfDay(int id)
-//    {
-//        var sql = @"DELETE FROM VERSE_OF_DAY WHERE ID = :Id";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        await conn.ExecuteAsync(sql, new { Id = id }, commandType: CommandType.Text);
-//    }
-
-//    public async Task<List<VerseOfDay>> GetUpcomingVerseOfDay()
-//    {
-//        var sql = @"SELECT ID, READABLEREFERENCE, SEQUENCE FROM VERSE_OF_DAY ORDER BY SEQUENCE ASC";
-//        using IDbConnection conn = new OracleConnection(connectionString);
-//        var results = await conn.QueryAsync<VerseOfDay>(sql, commandType: CommandType.Text);
-//        return results.ToList();
-//    }
-
-//    public async Task ResetQueueToBeginning()
-//    {
-//        using IDbConnection conn = new OracleConnection(connectionString);
-        
-//        var getFirstVerseSql = @"
-//            SELECT ID, READABLEREFERENCE, SEQUENCE 
-//            FROM VERSE_OF_DAY 
-//            ORDER BY SEQUENCE ASC 
-//            FETCH FIRST 1 ROWS ONLY";
-        
-//        var firstVerse = await conn.QueryFirstOrDefaultAsync<VerseOfDay>(getFirstVerseSql, commandType: CommandType.Text);
-        
-//        if (firstVerse == null)
-//        {
-//            throw new InvalidOperationException("No verses found in the queue to reset to.");
-//        }
-
-//        var updateSql = @"UPDATE VERSE_OF_DAY_INFO 
-//                         SET LAST_USED_VOD_ID = :newId, LAST_ROTATED_VOD_UTC = :newDate";
-        
-//        await conn.ExecuteAsync(updateSql,
-//            new { newId = firstVerse.Id, newDate = DateTime.UtcNow },
-//            commandType: CommandType.Text);
-//    }
-//}
+        return grouped;
+    }
+}

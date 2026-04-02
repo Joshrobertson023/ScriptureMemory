@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScriptureMemory.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+03f41a18b2f485c67a942d5c385bd6e1497748d0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+63c3a88f1ec204e062d5679f0e3a7ecbd37d2dc0")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScriptureMemory.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScriptureMemory.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
