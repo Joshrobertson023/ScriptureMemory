@@ -1,4 +1,5 @@
 ﻿using VerseAppNew.Server.Apis;
+using VerseAppNew.Server.Endpoints;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -9,6 +10,8 @@ public static class Middleware
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
         else
         {
@@ -34,7 +37,7 @@ public static class Middleware
         //app.ConfigurePracticeLogEndpoints();
         //app.ConfigurePracticeSessionEndpoints();
         //app.ConfigureNotificationEndpoints();
-        //app.ConfigureAdminEndpoints();
+        app.ConfigureAdminEndpoints();
         //app.ConfigureRelationshipEndpoints();
         //app.ConfigurePopularSearchEndpoints();
         //app.ConfigureReportEndpoints();

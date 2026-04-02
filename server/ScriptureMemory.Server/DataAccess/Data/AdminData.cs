@@ -1,66 +1,86 @@
-//using System.Linq;
-//using DataAccess.DataInterfaces;
-//using DataAccess.Models;
+using System.Data;
+using System.Linq;
+using Dapper;
+using DataAccess.Models;
 
-//namespace DataAccess.Data;
+namespace DataAccess.Data;
 
-//public class AdminData : IAdminData
-//{
+public class AdminData
+{
+    private readonly IDbConnection _conn;
 
-//    public async Task<IEnumerable<string>> GetAdminUsernames()
-//    {
-//        const string sql = @"
-//SELECT
-//    USERNAME AS Username
-//FROM ADMINS
-//ORDER BY USERNAME";
+    public AdminData([FromKeyedServices("Postgres")] IDbConnection conn)
+    {
+        _conn = conn;
+    }
 
-//        var results = await _db.GetData<AdminUser, dynamic>(sql, new { }, "Default");
-//        return results.Select(r => r.Username);
-//    }
+    public async Task<int> InsertAdmin(Admin admin)
+    {
+        var sql =
+            """
+            insert into admins (role, admin_email)
+            values (@Role, @AdminEmail)
+            returning id
+            """;
 
-//    public async Task<IEnumerable<AdminSummary>> GetAdminsWithDetails()
-//    {
-//        const string sql = @"
-//SELECT
-//    U.USERNAME AS Username,
-//    U.EMAIL AS Email
-//FROM USERS U
-//INNER JOIN ADMINS A ON A.USERNAME = U.USERNAME
-//ORDER BY U.USERNAME";
+        return await _conn.QuerySingleAsync<int>(sql, admin);
+    }
 
-//        var results = await _db.GetData<AdminSummary, dynamic>(sql, new { }, "Default");
-//        return results;
-//    }
+    public async Task UpdatePassword(int adminId, string password)
+    {
+        var sql =
+            """
+            update admins set hashed_password = @Password
+            where id = @Id
+            """;
 
-//    public async Task<bool> IsAdmin(string username)
-//    {
-//        const string sql = @"
-//SELECT
-//    USERNAME AS Username
-//FROM ADMINS
-//WHERE USERNAME = :Username";
+        await _conn.ExecuteAsync(sql, new { Id = adminId, Password = password });
+    }
 
-//        var results = await _db.GetData<AdminUser, dynamic>(sql, new { Username = username }, "Default");
-//        return results.Any();
-//    }
+    public async Task UpdatePersonalEmail(int adminId, string personalEmail)
+    {
+        var sql =
+            """
+            update admins set personal_email = @PersonalEmail
+            where id = @Id
+            """;
+        await _conn.ExecuteAsync(sql, new { Id = adminId, PersonalEmail = personalEmail });
+    }
 
-//    public async Task AddAdmin(string username)
-//    {
-//        const string sql = @"
-//INSERT INTO ADMINS (USERNAME)
-//VALUES (:Username)";
 
-//        await _db.SaveData<dynamic, dynamic>(sql, new { Username = username }, "Default");
-//    }
+    public async Task<Admin?> GetAdminByUsername(string username)
+    {
+        var sql =
+            """
+            select id, hashed_password as HashedPassword, role,
+            admin_email as AdminEmail, personal_email as PersonalEmai
+            from admins
+            where admin_email = @Username
+            """;
+        return await _conn.QuerySingleOrDefaultAsync<Admin>(sql, new { Username = username });
+    }
 
-//    public async Task RemoveAdmin(string username)
-//    {
-//        const string sql = @"
-//DELETE FROM ADMINS
-//WHERE USERNAME = :Username";
+    public async Task<Admin?> GetAdminById(int id)
+    {
+        var sql =
+            """
+            select id, hashed_password as HashedPassword, role,
+            admin_email as AdminEmail, personal_email as PersonalEmail
+            from admins
+            where id = @Id
+            """;
+        return await _conn.QuerySingleOrDefaultAsync<Admin>(sql, new { Id = id });
+    }
 
-//        await _db.SaveData<dynamic, dynamic>(sql, new { Username = username }, "Default");
-//    }
-//}
+    public async Task<List<Admin>> GetAllAdmins()
+    {
+        var sql =
+            """
+            select id, hashed_password as HashedPassword, role,
+            admin_email as AdminEmail, personal_email as PersonalEmail
+            from admins
+            """;
+        return (await _conn.QueryAsync<Admin>(sql)).ToList();
+    }
+}
 

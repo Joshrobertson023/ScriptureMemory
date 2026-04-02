@@ -82,7 +82,10 @@ public sealed class VerseManagement
             {
                 allVerses.Add(new Files.CsvRecordModels.Verse
                 {
-
+                    Book = record.Book,
+                    Chapter = record.Chapter,
+                    VerseNum = record.VerseNum,
+                    Text = record.Text
                 });
             }
         }

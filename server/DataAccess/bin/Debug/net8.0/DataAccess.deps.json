@@ -17,7 +17,6 @@
           "Microsoft.Extensions.Configuration.Binder": "10.0.0-rc.2.25502.107",
           "Microsoft.Extensions.Configuration.UserSecrets": "10.0.0-rc.2.25502.107",
           "Oracle.ManagedDataAccess.Core": "23.26.0",
-          "ScriptureMemoryLibrary": "1.0.0",
           "System.Data.SqlClient": "4.9.0"
         },
         "runtime": {
@@ -750,14 +749,6 @@
             "fileVersion": "10.0.25.50307"
           }
         }
-      },
-      "ScriptureMemoryLibrary/1.0.0": {
-        "runtime": {
-          "ScriptureMemoryLibrary.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
       }
     }
   },
@@ -1151,11 +1142,6 @@
       "sha512": "sha512-4Lxl3HOywwYqQAmcHRG5+YOALomAI85GfoKLdr1n0tLGNeViXDoit535C3aAdIvSFA1gjlk7xD2fPK//L+usGQ==",
       "path": "system.text.json/10.0.0-rc.2.25502.107",
       "hashPath": "system.text.json.10.0.0-rc.2.25502.107.nupkg.sha512"
-    },
-    "ScriptureMemoryLibrary/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     }
   }
 }
