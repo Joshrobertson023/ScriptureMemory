@@ -42,7 +42,7 @@ public sealed class VerseManagement
                 allVerses.Add(new Verse
                 {
                     Id = record.VERSE_ID,
-                    Reference = ReferenceParser.ConvertStringToReference(record.VERSE_REFERENCE),
+                    Reference = ReferenceParser.Parse(record.VERSE_REFERENCE),
                     Text = record.VERSE_TEXT,
                     UsersSavedCount = record.USERS_SAVED_VERSE,
                     UsersMemorizedCount = record.USERS_MEMORIZED

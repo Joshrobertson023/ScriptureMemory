@@ -9,7 +9,7 @@ public class ConvertStringToReference
     [Fact]
     public void ConvertStringToReference_ValidInput_ReturnsCorrectReference()
     {
-        Reference reference = ReferenceParser.ConvertStringToReference("Psalms 119:12-14, 17");
+        Reference reference = ReferenceParser.Parse("Psalms 119:12-14, 17");
 
         Assert.Equal("Psalms", reference.Book);
         Assert.Equal(119, reference.Chapter);
@@ -19,7 +19,7 @@ public class ConvertStringToReference
     [Fact]
     public void ConvertStringToReference_SingleVerse_ReturnsCorrectReference()
     {
-        var reference = ReferenceParser.ConvertStringToReference("John 3:16");
+        var reference = ReferenceParser.Parse("John 3:16");
 
         Assert.Equal("John", reference.Book);
         Assert.Equal(3, reference.Chapter);
@@ -29,7 +29,7 @@ public class ConvertStringToReference
     [Fact]
     public void ConvertStringToReference_NumberedBook_ReturnsCorrectReference()
     {
-        var reference = ReferenceParser.ConvertStringToReference("1 John 4:8");
+        var reference = ReferenceParser.Parse("1 John 4:8");
 
         Assert.Equal("1 John", reference.Book);
         Assert.Equal(4, reference.Chapter);
@@ -40,6 +40,6 @@ public class ConvertStringToReference
     public void ConvertStringToReference_InvalidBook_ThrowsException()
     {
         Assert.Throws<Exception>(() =>
-            ReferenceParser.ConvertStringToReference("FakeBook 1:1"));
+            ReferenceParser.Parse("FakeBook 1:1"));
     }
 }

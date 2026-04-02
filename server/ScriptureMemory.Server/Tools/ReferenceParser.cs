@@ -13,7 +13,7 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>Reference { Book = "Psalms", Chapter = 119, List<string> Verses = "2-4" }</returns>
-    public static Reference ConvertStringToReference(string referenceString)
+    public static Reference Parse(string referenceString)
     {
         Reference reference = new(referenceString);
 
@@ -192,7 +192,7 @@ public static class ReferenceParser
     {
         List<string> references = new();
 
-        Reference reference = ConvertStringToReference(referenceString);
+        Reference reference = Parse(referenceString);
 
         foreach (var verseNumber in reference.Verses)
         {
@@ -201,69 +201,6 @@ public static class ReferenceParser
 
         return references;
     }
-
-    //public static List<string> GetIndividualVersesFromReference(string reference)
-    //{
-    //    List<string> references = new();
-
-    //    if (string.IsNullOrWhiteSpace(reference))
-    //        return references;
-
-    //    reference = reference.Trim();
-    //    reference = reference.Replace(" :", ":").Replace(": ", ":").Replace("  ", " ");
-
-    //    int colonIndex = reference.IndexOf(':');
-    //    if (colonIndex > 0)
-    //    {
-    //        if (colonIndex > 0 && !char.IsWhiteSpace(reference[colonIndex - 1]))
-    //        {
-    //            int lastSpace = reference.LastIndexOf(' ', colonIndex);
-    //            if (lastSpace == -1)
-    //            {
-    //                for (int i = colonIndex - 1; i >= 0; i--)
-    //                {
-    //                    if (char.IsDigit(reference[i]))
-    //                    {
-    //                        reference = reference.Insert(i, " ");
-    //                        break;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    var match = System.Text.RegularExpressions.Regex.Match(reference, @"^(?<book>[\dA-Za-z\s]+)\s+(?<chapter>\d+):(?<verses>[\d\-\,\s]+)$");
-    //    if (!match.Success)
-    //        return references;
-
-    //    string book = match.Groups["book"].Value.Trim();
-    //    string chapter = match.Groups["chapter"].Value.Trim();
-    //    string versePart = match.Groups["verses"].Value.Trim();
-
-    //    var segments = versePart.Split(',', StringSplitOptions.RemoveEmptyEntries);
-    //    foreach (var seg in segments)
-    //    {
-    //        string part = seg.Trim();
-    //        if (part.Contains('-'))
-    //        {
-    //            var bounds = part.Split('-', StringSplitOptions.RemoveEmptyEntries);
-    //            if (bounds.Length == 2 &&
-    //                int.TryParse(bounds[0], out int start) &&
-    //                int.TryParse(bounds[1], out int end) &&
-    //                end >= start)
-    //            {
-    //                for (int verse = start; verse <= end; verse++)
-    //                    references.Add($"{book} {chapter}:{verse}");
-    //            }
-    //        }
-    //        else if (int.TryParse(part, out int verse))
-    //        {
-    //            references.Add($"{book} {chapter}:{verse}");
-    //        }
-    //    }
-
-    //    return references;
-    //}
 
     /// <summary>
     /// Convert a full reference to the verse number(s) after the semicolon
@@ -361,7 +298,7 @@ public static class ReferenceParser
     /// <returns></returns>
     public static string NormalizeReadableReference(string readableReference)
     {
-        var reference = ConvertStringToReference(readableReference);
+        var reference = Parse(readableReference);
         return reference.ReadableReference;
     }
 }
