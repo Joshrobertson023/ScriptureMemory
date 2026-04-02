@@ -1,20 +1,23 @@
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class NoteLikeData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public NoteLikeData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public NoteLikeData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task LikeNote(int noteId, string username)
@@ -25,9 +28,10 @@ public class NoteLikeData
 
         try
         {
+            using var conn = new NpgsqlConnection(_connectionString);
             await conn.ExecuteAsync(sql, new { NoteId = noteId, Username = username }, commandType: CommandType.Text);
         }
-        catch (Oracle.ManagedDataAccess.Client.OracleException ex) when (ex.Number == 1) // Unique constraint violation
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
         {
             // User already liked this note, ignore
         }
@@ -37,6 +41,7 @@ public class NoteLikeData
     {
         const string sql = @"DELETE FROM NOTE_LIKES WHERE ""NOTE_ID"" = :NoteId AND ""USERNAME"" = :Username";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { NoteId = noteId, Username = username }, commandType: CommandType.Text);
     }
 
@@ -47,6 +52,7 @@ public class NoteLikeData
             FROM NOTE_LIKES 
             WHERE ""NOTE_ID"" = :NoteId AND ""USERNAME"" = :Username";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var count = await conn.QueryFirstOrDefaultAsync<int>(sql, new { NoteId = noteId, Username = username }, commandType: CommandType.Text);
         return count > 0;
     }
@@ -58,6 +64,7 @@ public class NoteLikeData
             FROM NOTE_LIKES 
             WHERE ""NOTE_ID"" = :NoteId";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         return await conn.QueryFirstOrDefaultAsync<int>(sql, new { NoteId = noteId }, commandType: CommandType.Text);
     }
 
@@ -84,6 +91,7 @@ public class NoteLikeData
         
         sql += ")";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         var likedNoteIds = await conn.QueryAsync<int>(sql, parameters, commandType: CommandType.Text);
         var likedSet = new HashSet<int>(likedNoteIds);
         
@@ -112,6 +120,7 @@ public class NoteLikeData
         sql += @")
             GROUP BY ""NOTE_ID""";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<(int NoteId, int LikeCount)>(sql, parameters, commandType: CommandType.Text);
         
         var counts = results.ToDictionary(r => r.NoteId, r => r.LikeCount);

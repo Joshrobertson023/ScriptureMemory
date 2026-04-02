@@ -199,7 +199,7 @@
             },
             "Npgsql": {
               "target": "Package",
-              "version": "[10.0.2, )"
+              "version": "[9.0.5, )"
             },
             "Oracle.ManagedDataAccess.Core": {
               "target": "Package",

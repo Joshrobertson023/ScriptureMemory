@@ -2,16 +2,20 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using DataAccess.Models;
+using ScriptureMemory.Server.Tools;
 
 namespace DataAccess.Data;
 
 public class AdminData
 {
-    private readonly IDbConnection _conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public AdminData([FromKeyedServices("Postgres")] IDbConnection conn)
+    public AdminData(IConfiguration config)
     {
-        _conn = conn;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task<int> InsertAdmin(Admin admin)
@@ -23,18 +27,22 @@ public class AdminData
             returning id
             """;
 
-        return await _conn.QuerySingleAsync<int>(sql, admin);
+        await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        var result = await conn.QuerySingleAsync<int>(sql, admin);
+        return result;
     }
 
     public async Task UpdatePassword(int adminId, string password)
     {
-        var sql =
-            """
-            update admins set hashed_password = @Password
-            where id = @Id
-            """;
+        var sql = "update admins set hashed_password = @Password where id = @Id";
 
-        await _conn.ExecuteAsync(sql, new { Id = adminId, Password = password });
+        using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        await conn.ExecuteAsync(sql, new { Id = adminId, Password = password });
+
+        await conn.CloseAsync();
     }
 
     public async Task UpdatePersonalEmail(int adminId, string personalEmail)
@@ -44,7 +52,10 @@ public class AdminData
             update admins set personal_email = @PersonalEmail
             where id = @Id
             """;
-        await _conn.ExecuteAsync(sql, new { Id = adminId, PersonalEmail = personalEmail });
+
+        await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        await conn.ExecuteAsync(sql, new { Id = adminId, PersonalEmail = personalEmail });
     }
 
 
@@ -57,7 +68,11 @@ public class AdminData
             from admins
             where admin_email = @Username
             """;
-        return await _conn.QuerySingleOrDefaultAsync<Admin>(sql, new { Username = username });
+
+        await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        var result = await conn.QuerySingleOrDefaultAsync<Admin>(sql, new { Username = username });
+        return result;
     }
 
     public async Task<Admin?> GetAdminById(int id)
@@ -69,7 +84,10 @@ public class AdminData
             from admins
             where id = @Id
             """;
-        return await _conn.QuerySingleOrDefaultAsync<Admin>(sql, new { Id = id });
+
+        await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        return await conn.QuerySingleOrDefaultAsync<Admin>(sql, new { Id = id });
     }
 
     public async Task<List<Admin>> GetAllAdmins()
@@ -80,7 +98,10 @@ public class AdminData
             admin_email as AdminEmail, personal_email as PersonalEmail
             from admins
             """;
-        return (await _conn.QueryAsync<Admin>(sql)).ToList();
+
+        await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        return (await conn.QueryAsync<Admin>(sql)).ToList();
     }
 }
 

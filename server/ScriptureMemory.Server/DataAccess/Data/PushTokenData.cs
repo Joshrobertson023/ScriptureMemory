@@ -1,22 +1,24 @@
 using System;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using Dapper;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class PushTokenData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public PushTokenData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public PushTokenData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task UpsertTokenAsync(string username, string expoPushToken, string platform)
@@ -33,6 +35,7 @@ USING (SELECT :Username AS USERNAME, :Token AS TOKEN FROM DUAL) source
    INSERT (USERNAME, TOKEN, PLATFORM, UPDATED_AT)
    VALUES (:Username, :Token, :Platform, SYSDATE)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new
         {
             Username = username,
@@ -45,6 +48,7 @@ USING (SELECT :Username AS USERNAME, :Token AS TOKEN FROM DUAL) source
     {
         const string sql = @"DELETE FROM USER_PUSH_TOKENS WHERE USERNAME = :Username AND TOKEN = :Token";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new
         {
             Username = username,
@@ -72,6 +76,7 @@ USING (SELECT :Username AS USERNAME, :Token AS TOKEN FROM DUAL) source
             parameters.Add($"t{i}", tokens[i]);
         }
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, parameters, commandType: CommandType.Text);
     }
 
@@ -82,6 +87,7 @@ SELECT USERNAME, TOKEN AS ExpoPushToken, PLATFORM, UPDATED_AT AS UpdatedAt
 FROM USER_PUSH_TOKENS
 WHERE USERNAME = :Username";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<PushToken>(sql, new { Username = username }, commandType: CommandType.Text);
         return results.ToList();
     }
@@ -114,6 +120,7 @@ WHERE USERNAME IN ({string.Join(", ", parameterNames)})";
             parameters.Add($"u{i}", usernameList[i]);
         }
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<PushToken>(sql, parameters, commandType: CommandType.Text);
         return results.ToList();
     }
@@ -124,6 +131,7 @@ WHERE USERNAME IN ({string.Join(", ", parameterNames)})";
 SELECT USERNAME, TOKEN AS ExpoPushToken, PLATFORM, UPDATED_AT AS UpdatedAt
 FROM USER_PUSH_TOKENS";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<PushToken>(sql, commandType: CommandType.Text);
         return results.ToList();
     }

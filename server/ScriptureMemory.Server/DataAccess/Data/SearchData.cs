@@ -1,19 +1,22 @@
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using Dapper;
 using static ScriptureMemory.Server.Tools.Enums;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class SearchData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public SearchData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public SearchData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task TrackSearch(string searchTerm, SearchType searchType)
@@ -30,6 +33,7 @@ public class SearchData
                 VALUES (new_search.TERM, 1, :CurrentDate, :SearchType)
         ";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -46,6 +50,7 @@ public class SearchData
             INSERT INTO SEARCHES (SEARCH_TERM, SEARCH_COUNT, SEARCH_DATE, SEARCH_TYPE)
             VALUES (:SearchTerm, :SearchCount, :SearchDate, :SearchType)
         ";
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new 
         { 
             SearchTerm = search.SearchTerm.Trim(),
@@ -63,6 +68,7 @@ public class SearchData
             FROM SEARCHES
             WHERE ID = :Id
         ";
+        using var conn = new NpgsqlConnection(_connectionString);
         var result = await conn.QueryFirstOrDefaultAsync<Search>(sql, new { Id = id }, commandType: CommandType.Text);
         return result;
     }
@@ -81,6 +87,7 @@ public class SearchData
                     order by search_date desc
                     fetch first 10 rows only";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<int>(sql);
         return results.ToList();
     }
@@ -92,6 +99,7 @@ public class SearchData
                     VALUES
                     (:SearchId)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { Searchid = searchId });
     }
 
@@ -108,6 +116,7 @@ public class SearchData
             join trending_searches ts on ts.search_id = s.id
             where s.id = 1";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<Search>(sql);
         return results.ToList();
     }

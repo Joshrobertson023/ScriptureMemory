@@ -1,27 +1,28 @@
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
 using System;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
 using Dapper;
 using ScriptureMemory.Server.Tools;
-using Oracle.ManagedDataAccess.Client;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class UserPassageData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public UserPassageData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public UserPassageData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task<int> InsertUserPassage(UserPassage newPassage)
@@ -53,6 +54,7 @@ public class UserPassageData
             direction: ParameterDirection.Output
         );
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, parameters);
 
         var newId = parameters.Get<int>("NewId");
@@ -65,6 +67,7 @@ public class UserPassageData
         var sql = @"SELECT TEXT FROM VERSES WHERE VERSE_REFERENCE IN (:References)";
         // If you get an error for this, remove the paranthesis
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var result = await conn.QueryAsync<string>(sql, new { References = references });
         
         return string.Join(" ", result);
@@ -129,6 +132,7 @@ public class UserPassageData
 
         var lookup = new Dictionary<int, UserPassage>();
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.QueryAsync<UserPassageRow, VerseRow, UserPassage>(
             sql,
             (row, verseRow) =>

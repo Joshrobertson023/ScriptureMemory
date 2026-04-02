@@ -2,6 +2,7 @@
 using Dapper;
 using DataAccess.Data;
 using DataAccess.Models;
+using Npgsql;
 using ScriptureMemory.Server.Tools;
 using System.Data;
 using System.Globalization;
@@ -11,16 +12,19 @@ namespace ScriptureMemory.Server.Tools;
 public sealed class VerseManagement
 {
     private readonly VerseData _verseData;
-    private readonly IDbConnection _conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
     private readonly ILogger<VerseManagement> _logger;
 
     public VerseManagement(
         VerseData verseData,
-        [FromKeyedServices("Postgres")] IDbConnection conn,
+        IConfiguration config,
         ILogger<VerseManagement> logger)
     {
         _verseData = verseData;
-        _conn = conn;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
         _logger = logger;
     }
 
@@ -90,7 +94,8 @@ public sealed class VerseManagement
             }
         }
 
-        await _conn.ExecuteAsync(
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.ExecuteAsync(
             """
             insert into verses (book, chapter, text, memorized_count, saved_count, verse_num)
             values (@Book, @Chapter, @Text, 0, 0, @VerseNum)

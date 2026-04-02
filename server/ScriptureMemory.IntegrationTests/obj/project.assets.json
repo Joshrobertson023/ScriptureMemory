@@ -1867,18 +1867,18 @@
           }
         }
       },
-      "Npgsql/10.0.2": {
+      "Npgsql/9.0.5": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "10.0.0"
+          "Microsoft.Extensions.Logging.Abstractions": "8.0.2"
         },
         "compile": {
-          "lib/net10.0/Npgsql.dll": {
+          "lib/net8.0/Npgsql.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net10.0/Npgsql.dll": {
+          "lib/net8.0/Npgsql.dll": {
             "related": ".xml"
           }
         }
@@ -2489,7 +2489,7 @@
           "Microsoft.Extensions.Configuration.Json": "10.0.5",
           "Microsoft.Extensions.Hosting": "8.0.0",
           "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.23.0",
-          "Npgsql": "10.0.2",
+          "Npgsql": "9.0.5",
           "Oracle.ManagedDataAccess.Core": "23.26.0",
           "RestSharp": "113.1.0",
           "StackExchange.Redis": "2.7.33",
@@ -5182,21 +5182,19 @@
         "packageIcon.png"
       ]
     },
-    "Npgsql/10.0.2": {
-      "sha512": "q5RfBI+wywJSFUNDE1L4ZbHEHCFTblo8Uf6A6oe4feOUFYiUQXyAf9GBh5qEZpvJaHiEbpBPkQumjEhXCJxdrg==",
+    "Npgsql/9.0.5": {
+      "sha512": "NRZkUlTUh06f7f14wriEoO+BrJcyw/agh3xozXLM3ii7C/08SyXqcI89EMfZJuHkOcfDU8W0enGcZ8RGNVOw0w==",
       "type": "package",
-      "path": "npgsql/10.0.2",
+      "path": "npgsql/9.0.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "README.md",
-        "lib/net10.0/Npgsql.dll",
-        "lib/net10.0/Npgsql.xml",
+        "lib/net6.0/Npgsql.dll",
+        "lib/net6.0/Npgsql.xml",
         "lib/net8.0/Npgsql.dll",
         "lib/net8.0/Npgsql.xml",
-        "lib/net9.0/Npgsql.dll",
-        "lib/net9.0/Npgsql.xml",
-        "npgsql.10.0.2.nupkg.sha512",
+        "npgsql.9.0.5.nupkg.sha512",
         "npgsql.nuspec",
         "postgresql.png"
       ]

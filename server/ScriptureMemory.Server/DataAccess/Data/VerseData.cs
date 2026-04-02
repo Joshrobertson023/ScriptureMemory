@@ -1,7 +1,6 @@
 using Dapper;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -12,31 +11,31 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ScriptureMemory.Server.Tools;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class VerseData
 {
-    private readonly IDbConnection _oracleConn;
-    private readonly IDbConnection _postgresConn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
     private string selectSql = @"VERSE_ID AS Id, VERSE_REFERENCE as Reference, 
                                 USERS_SAVED_VERSE AS UsersSavedCount, USERS_MEMORIZED AS UsersMemorizedCount,
                                 VERSE_TEXT AS Text";
 
-    public VerseData(
-        [FromKeyedServices("Oracle")] IDbConnection oracleConn,
-        [FromKeyedServices("Postgres")] IDbConnection postgresConn)
+    public VerseData(IConfiguration config)
     {
-        _oracleConn = oracleConn;
-        _postgresConn = postgresConn;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)
     {
         var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";
-        var results = await _oracleConn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });
+        using var conn = new NpgsqlConnection(_connectionString);
+        var results = await conn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });
 
         return results.ToList();
     }
@@ -44,7 +43,8 @@ public class VerseData
     public async Task<List<Verse>> GetAllVerses()
     {
         var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";
-        var results = await _oracleConn.QueryAsync<Verse>(sql);
+        using var conn = new NpgsqlConnection(_connectionString);
+        var results = await conn.QueryAsync<Verse>(sql);
 
         return results.ToList();
     }
@@ -55,7 +55,8 @@ public class VerseData
                     (verse_reference, verse_text, users_saved_verse, users_memorized)
                      VALUES
                      (:Reference, :Text, :UsersSavedCount, :UsersMemorizedCount)";
-        await _oracleConn.ExecuteAsync(sql,
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.ExecuteAsync(sql,
             new 
             { 
                 Reference = verse.Reference.ToString(), 
@@ -79,7 +80,8 @@ public class VerseData
         string sql = $@"SELECT 
                         {selectSql}
                         FROM VERSES WHERE verse_reference = :Reference";
-        var results = await _oracleConn.QueryAsync<VerseRow?>(sql, new { Reference = reference });
+        using var conn = new NpgsqlConnection(_connectionString);
+        var results = await conn.QueryAsync<VerseRow?>(sql, new { Reference = reference });
         return new Verse(results.First()
             ?? throw new NullReferenceException());
     }
@@ -104,14 +106,16 @@ public class VerseData
         }
         sql.Append(")");
 
-        var rows = await _oracleConn.QueryAsync<VerseRow?>(sql.ToString(), commandType: CommandType.Text);
+        using var conn = new NpgsqlConnection(_connectionString);
+        var rows = await conn.QueryAsync<VerseRow?>(sql.ToString(), commandType: CommandType.Text);
         return rows.Select(r => new Verse(r)).ToList();
     }
 
     public async Task<Verse?> GetVerseFromId(int id)
     {
         var sql = $@"SELECT {selectSql} WHERE verse_id = :id";
-        var verses = await _oracleConn.QueryAsync<VerseRow?>(sql, new { id = id },
+        using var conn = new NpgsqlConnection(_connectionString);
+        var verses = await conn.QueryAsync<VerseRow?>(sql, new { id = id },
             commandType: CommandType.Text);
         return new Verse(verses.FirstOrDefault()
             ?? throw new ArgumentNullException());
@@ -120,7 +124,8 @@ public class VerseData
     public async Task UpdateVerseText(string text, int id)
     {
         var sql = "update verses set text = :newText where verse_id = :id";
-        await _oracleConn.ExecuteAsync(sql, new { newText = text, id = id },
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.ExecuteAsync(sql, new { newText = text, id = id },
             commandType: CommandType.Text);
         return;
     }
@@ -129,7 +134,8 @@ public class VerseData
     {
         var sql = @"UPDATE VERSES SET Users_Saved_Verse = Users_Saved_Verse + 1
                      WHERE verse_reference = :Reference";
-        await _oracleConn.ExecuteAsync(sql, new { Reference = reference },
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.ExecuteAsync(sql, new { Reference = reference },
             commandType: CommandType.Text);
     }
 
@@ -137,7 +143,8 @@ public class VerseData
     {
         var sql = @"UPDATE VERSES SET Users_Memorized = Users_Memorized + 1
                      WHERE verse_reference = :Reference";
-        await _oracleConn.ExecuteAsync(sql, new { Reference = reference },
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.ExecuteAsync(sql, new { Reference = reference },
             commandType: CommandType.Text);
     }
 
@@ -149,7 +156,8 @@ public class VerseData
                         FETCH FIRST 20 ROWS ONLY
                     )
                     WHERE USERS_SAVED_VERSE > 0";
-        var rows = await _oracleConn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
+        using var conn = new NpgsqlConnection(_connectionString);
+        var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
         return rows.Select(r => new Verse(r)).ToList();
     }
 
@@ -162,7 +170,8 @@ public class VerseData
                         FETCH FIRST 20 ROWS ONLY
                     )
                     WHERE USERS_MEMORIZED > 0";
-        var rows = await _oracleConn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
+        using var conn = new NpgsqlConnection(_connectionString);
+        var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
         return rows.Select(r => new Verse(r)).ToList();
     }
 
@@ -180,7 +189,8 @@ public class VerseData
 
         Debug.WriteLine(sql);
 
-        var rows = await _oracleConn.QueryAsync<VerseRow>(sql.ToString(), commandType: CommandType.Text);
+        using var conn = new NpgsqlConnection(_connectionString);
+        var rows = await conn.QueryAsync<VerseRow>(sql.ToString(), commandType: CommandType.Text);
 
         return rows.Select(r => new Verse(r)).ToList();
     }

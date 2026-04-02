@@ -8,11 +8,11 @@ namespace ScriptureMemory.Server.Tools
 {
     public static class Enums
     {
-        public static class UserRoles
+        public enum UserRole
         {
-            public const string User = "User";
-            public const string Admin = "Admin";
-            public const string SuperAdmin = "SuperAdmin";
+            User = 0,
+            Admin = 1,
+            SuperAdmin = 2
         }
 
         public enum CollectionVisibility

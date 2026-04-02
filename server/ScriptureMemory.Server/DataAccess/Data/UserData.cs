@@ -11,15 +11,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static ScriptureMemory.Server.Tools.Enums;
+using Npgsql;
 
 namespace DataAccess.Data;
 public class UserData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public UserData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public UserData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
 
@@ -36,6 +40,7 @@ public class UserData
                     (:Username, :FirstName, :LastName, :Email, :AuthToken, :Status, :HashedPassword, :DateRegistered,
                      :LastSeen, :Description, :Points, :VersesMemorized, :ProfilePictureUrl)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(
             sql,
             new
@@ -69,6 +74,7 @@ public class UserData
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
                     FROM USERS WHERE USERNAME = :Username";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<User>(sql, new { Username = username });
         return results.FirstOrDefault();
     }
@@ -81,6 +87,7 @@ public class UserData
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
                     FROM USERS WHERE AUTH_TOKEN = :Token";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<User>(sql, new { Token = token });
         return results.FirstOrDefault();
     }
@@ -89,6 +96,7 @@ public class UserData
     {
         var sql = @"SELECT AUTH_TOKEN as AuthToken FROM USERS WHERE USERNAME = :Username";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<string>(sql, new { Username = username });
         return results.FirstOrDefault();
     }
@@ -102,6 +110,7 @@ public class UserData
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
                     FROM USERS WHERE UPPER(EMAIL) = UPPER(:Email)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<User>(sql, new { Email = email });
         return results.ToList();
     }
@@ -109,6 +118,8 @@ public class UserData
     public async Task<string?> GetPasswordHash(string username)
     {
         var sql = $@"SELECT HASHED_PASSWORD as HashedPassword FROM USERS WHERE USERNAME = :Username";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<string>(sql, new { Username = username });
         return results.FirstOrDefault();
     }
@@ -120,6 +131,8 @@ public class UserData
                     WHERE UPPER(FIRST_NAME) = UPPER(:firstName)
                       AND UPPER(LAST_NAME) = UPPER(:lastName)
                       AND UPPER(EMAIL) = UPPER(:email)";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<string>(sql, new
         {
             firstName,
@@ -138,6 +151,7 @@ public class UserData
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
                     FROM USERS WHERE ROWNUM <= :Count";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<User>(sql, new { Count = count });
         return results.ToList();
     }
@@ -146,6 +160,7 @@ public class UserData
     {
         var sql = @"SELECT ID FROM USERS WHERE USERNAME = :Username";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<int>(sql, new { Username = username });
 
         return results.First();
@@ -159,6 +174,7 @@ public class UserData
                     PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
                     FROM USERS WHERE ID = :UserId";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<User>(sql, new { UserId = userId });
 
         return results.First();
@@ -167,6 +183,8 @@ public class UserData
     public async Task<bool> CheckUsernameExists(string username)
     {
         var sql = @"SELECT COUNT(1) FROM USERS WHERE USERNAME = :Username";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         var count = await conn.ExecuteScalarAsync<int>(sql, new { Username = username });
         return count > 0;
     }
@@ -174,6 +192,8 @@ public class UserData
     public async Task<string> GetUsernameFromId(int userId)
     {
         var sql = @"SELECT USERNAME FROM USERS WHERE ID = :UserId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<string>(sql, new { UserId = userId });
         return results.FirstOrDefault() ?? "";
     }
@@ -186,12 +206,16 @@ public class UserData
     public async Task IncrementVersesMemorized(int userId)
     {
         var sql = @"UPDATE USERS SET VERSES_MEMORIZED = NVL(VERSES_MEMORIZED, 0) + 1 WHERE ID = :Id";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { Id = userId }, commandType: CommandType.Text);
     }
 
     public async Task AddPoints(int userId, int points)
     {
         var sql = @"UPDATE USERS SET POINTS = NVL(POINTS, 0) + :points WHERE ID = :userId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { points, userId }, commandType: CommandType.Text);
     }
 
@@ -205,6 +229,8 @@ public class UserData
         var sql = @"SELECT USERNAME, EMAIL, HASHED_PASSWORD as HashedPassword
                     FROM USERS 
                     WHERE USERNAME = :username AND UPPER(EMAIL) = UPPER(:email)";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<PasswordRecoveryInfo>(sql, new
         {
             username,
@@ -221,6 +247,7 @@ public class UserData
         const string insertSql = @"INSERT INTO PASSWORD_RESETS (USER_ID, TOKEN, SENT) 
                                    VALUES (:userId, :token, SYSDATE)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var affected = await conn.ExecuteAsync(updateSql, new { token, userId }, commandType: CommandType.Text);
         if (affected == 0)
         {
@@ -233,6 +260,8 @@ public class UserData
         var sql = @"SELECT USER_ID as UserId, TOKEN, SENT 
                     FROM PASSWORD_RESETS 
                     WHERE USER_ID = :userId AND TOKEN = :token";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<PasswordResetToken>(sql, new { userId, token }, commandType: CommandType.Text);
         return results.FirstOrDefault();
     }
@@ -240,6 +269,8 @@ public class UserData
     public async Task DeletePasswordResetToken(int userId)
     {
         var sql = @"DELETE FROM PASSWORD_RESETS WHERE USER_ID = :userId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { userId }, commandType: CommandType.Text);
     }
 
@@ -251,36 +282,48 @@ public class UserData
     public async Task UpdatePassword(int userId, string hashedPassword)
     {
         var sql = @"UPDATE USERS SET HASHEDPASSWORD = :hashedPassword WHERE ID = :userId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { hashedPassword, userId }, commandType: CommandType.Text);
     }
 
     public async Task UpdateUsername(int userId, string newUsername)
     {
         var sql = @"UPDATE USERS SET USERNAME = :NewUsername WHERE ID = :UserId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { NewUsername = newUsername, UserId = userId }, commandType: CommandType.Text);
     }
 
     public async Task UpdateEmail(int userId, string newEmail)
     {
         var sql = @"UPDATE USERS SET EMAIL = :NewEmail WHERE ID = :UserId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { NewEmail = newEmail, UserId = userId }, commandType: CommandType.Text);
     }
 
     public async Task UpdateLastSeen(int userId)
     {
         var sql = @"UPDATE USERS SET LAST_SEEN = :CurrentDate WHERE ID = :UserId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { CurrentDate = DateTime.UtcNow, UserId = userId });
     }
 
     public async Task UpdateDescription(int userId, string description)
     {
         var sql = @"UPDATE USERS SET PROFILE_DESCRIPTION = :description WHERE ID = :UserId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { description = description, UserId = userId }, commandType: CommandType.Text);
     }
 
     public async Task UpdateName(int userId, string firstName, string lastName)
     {
         var sql = @"UPDATE USERS SET FIRST_NAME = :firstName, LAST_NAME = :lastName WHERE ID = :UserId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { firstName = firstName, lastName = lastName, UserId = userId }, commandType: CommandType.Text);
     }
 
@@ -302,6 +345,7 @@ public class UserData
                     WHERE rn > :Offset AND rn <= :Offset + :PageSize
                     ORDER BY rn";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<User>(sql, new { Offset = offset, PageSize = pageSize });
         return results.ToList();
     }
@@ -314,6 +358,8 @@ public class UserData
                         FROM USERS
                     )
                     WHERE ID = :UserId";
+
+        using var conn = new NpgsqlConnection(_connectionString);
         var rank = await conn.QueryFirstOrDefaultAsync<int?>(sql, new { UserId = userId });
         return rank ?? 0;
     }
@@ -339,6 +385,7 @@ public class UserData
                        OR (UPPER(FIRST_NAME) LIKE UPPER(:FirstName) AND UPPER(LAST_NAME) LIKE UPPER(:LastName))
                     ORDER BY USERNAME";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<User>(
             sql, 
             new 

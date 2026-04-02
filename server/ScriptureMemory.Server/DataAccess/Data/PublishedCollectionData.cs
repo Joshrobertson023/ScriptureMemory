@@ -1,18 +1,21 @@
 using Dapper;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System.Data;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class PublishedCollectionData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public PublishedCollectionData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public PublishedCollectionData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     /// <summary>
@@ -33,6 +36,7 @@ public class PublishedCollectionData
         parameters.Add("ApprovedStatus", collection.Status);
         parameters.Add("OrderPosition", collection.OrderPosition);
         parameters.Add("PublishedId", dbType: DbType.Int32, direction: ParameterDirection.Output);
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, parameters);
         int publishedId = parameters.Get<int>("PublishedId");
         return publishedId;
@@ -48,6 +52,7 @@ public class PublishedCollectionData
         var sql = @"SELECT PUBLISHED_ID AS PublishedId, COLLECTION_DESCRIPTION AS Description, NUM_SAVES AS NumSaves, AUTHOR_ID AS AuthorId, TITLE, APPROVED_STATUS AS Status, ORDER_POSITION AS OrderPosition
                     FROM PUBLISHED_COLLECTIONS
                     WHERE PUBLISHED_ID = :PublishedId";
+        using var conn = new NpgsqlConnection(_connectionString);
         var collection = await conn.QueryFirstOrDefaultAsync<PublishedCollection>(sql, new { PublishedId = publishedId });
         return collection ?? throw new NullReferenceException();
     }
@@ -61,6 +66,7 @@ public class PublishedCollectionData
     {
         var sql = @"SELECT AUTHOR_ID FROM PUBLISHED_COLLECTIONS WHERE PUBLISHED_ID = :PublishedId";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var authorId = await conn.ExecuteScalarAsync<int>(sql, new { PublishedId = publishedId });
 
         return authorId;
@@ -77,6 +83,7 @@ public class PublishedCollectionData
                     INNER JOIN USERS u ON c.AUTHOR_ID = u.USER_ID
                     WHERE c.PUBLISHED_ID = :PublishedId";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var authorName = await conn.ExecuteScalarAsync<string>(sql, new { PublishedId = publishedId });
 
         return authorName ?? "";
@@ -90,6 +97,7 @@ public class PublishedCollectionData
     public async Task IncrementUsersSaved(int publishedId)
     {
         var sql = @"UPDATE PUBLISHED_COLLECTIONS SET NUM_SAVES = NVL(NUM_SAVES, 0) + 1 WHERE PUBLISHED_ID = :PublishedId";
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { PublishedId = publishedId });
     }
 }

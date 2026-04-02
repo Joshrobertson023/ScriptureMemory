@@ -1,23 +1,25 @@
 using DataAccess.Models;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class VerseOfDaySuggestionData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public VerseOfDaySuggestionData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public VerseOfDaySuggestionData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task<List<VerseOfDaySuggestion>> GetAllSuggestions()
@@ -31,6 +33,7 @@ public class VerseOfDaySuggestionData
             FROM VERSE_OF_DAY_SUGGESTIONS
             ORDER BY CREATED_DATE DESC";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var records = await conn.QueryAsync<VerseOfDaySuggestionRecord>(sql, commandType: CommandType.Text);
         return records.Select(MapToModel).Where(s => s != null).ToList();
     }
@@ -46,6 +49,7 @@ public class VerseOfDaySuggestionData
             FROM VERSE_OF_DAY_SUGGESTIONS
             WHERE ID = :Id";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var record = await conn.QueryFirstOrDefaultAsync<VerseOfDaySuggestionRecord>(sql, new { Id = id }, commandType: CommandType.Text);
         return MapToModel(record);
     }
@@ -56,6 +60,7 @@ public class VerseOfDaySuggestionData
             INSERT INTO VERSE_OF_DAY_SUGGESTIONS (READABLE_REFERENCE, SUGGESTER_USERNAME, CREATED_DATE, STATUS)
             VALUES (:ReadableReference, :SuggesterUsername, :CreatedDate, :Status)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new
         {
             ReadableReference = suggestion.ReadableReference,
@@ -69,6 +74,7 @@ public class VerseOfDaySuggestionData
     {
         const string sql = @"DELETE FROM VERSE_OF_DAY_SUGGESTIONS WHERE ID = :Id";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { Id = id }, commandType: CommandType.Text);
     }
 
@@ -79,6 +85,7 @@ public class VerseOfDaySuggestionData
             SET STATUS = 'APPROVED'
             WHERE ID = :Id";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { Id = id }, commandType: CommandType.Text);
     }
 

@@ -8,17 +8,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
 
 builder.Services
-    .AddDatabaseConnections()
     .AddServices()
     .AddDataAccess();
 
 builder.Services.AddAuthorization(o =>
 {
-    o.AddPolicy("Admins", policy => policy.RequireClaim("role", Enums.UserRoles.Admin, Enums.UserRoles.SuperAdmin));
-    o.AddPolicy("SuperAdmins", policy => policy.RequireClaim("role", Enums.UserRoles.SuperAdmin));
-    o.AddPolicy("UsersOnly", policy => policy.RequireClaim("role", Enums.UserRoles.User));
-    o.AddPolicy("UsersAndAdmins", policy => policy.RequireClaim("role", Enums.UserRoles.User, Enums.UserRoles.Admin, Enums.UserRoles.SuperAdmin));
-});
+    o.AddPolicy("Admin", policy => policy.RequireClaim("role", Enums.UserRole.Admin.ToString(), Enums.UserRole.SuperAdmin.ToString()));
+    o.AddPolicy("SuperAdmin", policy => policy.RequireClaim("role", Enums.UserRole.SuperAdmin.ToString()));
+    o.AddPolicy("UserOnly", policy => policy.RequireClaim("role", Enums.UserRole.User.ToString()));
+    o.AddPolicy("UserOrAdmin", policy => policy.RequireClaim("role", Enums.UserRole.User.ToString(), Enums.UserRole.Admin.ToString(), Enums.UserRole.SuperAdmin.ToString()));
+}); 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
@@ -39,10 +38,10 @@ builder.Logging.AddDebug();
 
 var app = builder.Build();
 
-app.UseMiddleware()
-   .UseEndpoints();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware()
+   .UseEndpoints();
 
 //using var scope = app.Services.CreateScope();
 //{

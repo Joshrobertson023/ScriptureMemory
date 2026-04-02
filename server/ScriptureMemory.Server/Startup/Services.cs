@@ -22,31 +22,56 @@ public static class Services
             var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
             {
                 Name = "JWT Authentication",
-                Description = 
+                Description = "Enter JWT",
+                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+                Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
+                BearerFormat = "JWT",
             };
-        });
-    }
 
-    public static IServiceCollection AddDatabaseConnections(this IServiceCollection services)
-    {
-        services.AddKeyedScoped<IDbConnection>("Oracle", (sp, _) =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            return new OracleConnection(
-                config.GetConnectionString("DefaultConnection")
-            );
-        });
+            o.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, securityScheme);
 
-        services.AddKeyedScoped<IDbConnection>("Postgres", (sp, _) =>
-        {
-            var config = sp.GetRequiredService<IConfiguration>();
-            return new NpgsqlConnection(
-                config.GetConnectionString("PostgresConnection")
-            );
+            var securityRequirements = new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+            {
+                {
+                    new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                    {
+                        Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                        {
+                            Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                            Id = JwtBearerDefaults.AuthenticationScheme
+                        },
+                    },
+                    []
+                }
+            };
+
+            o.AddSecurityRequirement(securityRequirements);
         });
 
         return services;
     }
+
+    //public static IServiceCollection AddDatabaseConnections(this IServiceCollection services)
+    //{
+    //    services.AddKeyedScoped<IDbConnection>("Oracle", (sp, _) =>
+    //    {
+    //        var config = sp.GetRequiredService<IConfiguration>();
+    //        return new OracleConnection(
+    //            config.GetConnectionString("DefaultConnection")
+    //        );
+    //    });
+
+    //    services.AddKeyedScoped<IDbConnection>("Postgres", (sp, _) =>
+    //    {
+    //        var config = sp.GetRequiredService<IConfiguration>();
+    //        return new NpgsqlConnection(
+    //            config.GetConnectionString("PostgresConnection")
+    //        );
+    //    });
+
+    //    return services;
+    //}
 
     public static IServiceCollection AddServices(this IServiceCollection services)
     {

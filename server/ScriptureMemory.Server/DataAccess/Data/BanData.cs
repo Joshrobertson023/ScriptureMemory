@@ -1,23 +1,25 @@
 using Dapper;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class BanData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public BanData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public BanData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task<Ban?> GetActiveBan(string username)
@@ -31,6 +33,7 @@ public class BanData
             ORDER BY BAN_DATE DESC
             FETCH FIRST 1 ROWS ONLY";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         var result = await conn.QueryFirstOrDefaultAsync<Ban>(sql, new { Username = username }, commandType: CommandType.Text);
         return result;
     }
@@ -44,6 +47,7 @@ public class BanData
             WHERE USERNAME = :Username
             ORDER BY BAN_DATE DESC";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<Ban>(sql, new { Username = username }, commandType: CommandType.Text);
         return results.ToList();
     }
@@ -52,6 +56,7 @@ public class BanData
     {
         // First, set user as banned
         var updateUserSql = @"UPDATE USERS SET BANNED = 1 WHERE USERNAME = :Username";
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(updateUserSql, new { Username = username }, commandType: CommandType.Text);
 
         // Insert ban record - Oracle doesn't support RETURNING in the same way, so we'll get the ID from a sequence or use a different approach
@@ -78,6 +83,7 @@ public class BanData
     public async Task DeleteBan(int banId)
     {
         var sql = @"DELETE FROM BANS WHERE BAN_ID = :BanId";
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { BanId = banId }, commandType: CommandType.Text);
     }
 

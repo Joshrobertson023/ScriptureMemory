@@ -8,6 +8,6 @@ public class Admin
     public string? HashedPassword { get; set; }
     public string? AdminEmail { get; set; }
     public string? PersonalEmail { get; set; }
-    public string? Role { get; set; }
+    public UserRole? Role { get; set; }
 }
 

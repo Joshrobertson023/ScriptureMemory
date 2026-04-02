@@ -29,8 +29,7 @@ public class AdminService
         var passwordHasher = new PasswordHasher<Admin>();
         if (string.IsNullOrEmpty(admin?.HashedPassword))
         {
-            await _adminData.UpdatePassword(admin!.Id, 
-                passwordHasher.HashPassword(admin, password!));
+            await _adminData.UpdatePassword(admin!.Id, passwordHasher.HashPassword(admin, password));
 
             return Results.Ok(_tokenProvider.Create(admin));
         }

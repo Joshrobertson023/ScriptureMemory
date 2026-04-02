@@ -1,10 +1,7 @@
 using Dapper;
 using DataAccess.Models;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -15,16 +12,20 @@ using System.Threading.Tasks;
 using ScriptureMemory.Server.Tools;
 using DataAccess.Requests;
 using static ScriptureMemory.Server.Tools.Enums;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class CollectionData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public CollectionData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public CollectionData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     /// <summary>
@@ -53,6 +54,7 @@ public class CollectionData
 
         parameters.Add("NewId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, parameters);
 
         return parameters.Get<int>("NewId");
@@ -65,6 +67,7 @@ public class CollectionData
                     VALUES
                     (:UserId, :PublishedId, :DateSaved, :OrderPosition, :Visibility)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new
         {
             UserId = request.UserId,
@@ -84,6 +87,7 @@ public class CollectionData
     {
         var sql = @"SELECT NVL(MAX(ORDER_POSITION), 0) + 1 FROM COLLECTIONS WHERE USER_ID = :UserId";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var nextPosition = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
 
         return nextPosition;
@@ -98,6 +102,7 @@ public class CollectionData
     {
         var sql = @"SELECT COUNT(*) FROM COLLECTIONS WHERE USER_ID = :UserId AND IS_FAVORITES = 1";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId });
 
         return count > 0;
@@ -113,6 +118,7 @@ public class CollectionData
         var sql = @"SELECT COUNT(*) FROM SAVED_COLLECTIONS 
                     WHERE USER_ID = :UserId 
                     AND PUBLISHED_ID = :PublishedId";
+        using var conn = new NpgsqlConnection(_connectionString);
         var count = await conn.ExecuteScalarAsync<int>(sql, new { UserId = userId, PublishedId = publishedId });
 
         return count > 0;
@@ -153,6 +159,7 @@ public class CollectionData
                         c.PROGRESS_PERCENT
                     ORDER BY c.ORDER_POSITION";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         var collections = await conn.QueryAsync<Collection>(sql, new { UserId = userId });
         
         return collections.ToList();
@@ -203,6 +210,7 @@ public class CollectionData
                         u.USERNAME
                     ORDER BY sc.ORDER_POSITION";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var collections = await conn.QueryAsync<Collection>(sql, new { UserId = userId });
 
         return collections.ToList();
@@ -230,6 +238,7 @@ public class CollectionData
 
         parameters.Add("NewId", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, parameters);
 
         return parameters.Get<int>("NewId");
@@ -241,6 +250,7 @@ public class CollectionData
                     FROM COLLECTION_NOTES
                     WHERE COLLECTION_ID = :CollectionId";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var notes = await conn.QueryAsync<CollectionNote>(sql, new { CollectionId = collectionId });
         
         return notes?.ToList() ?? new List<CollectionNote>();

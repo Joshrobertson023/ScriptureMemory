@@ -1,15 +1,14 @@
 using Dapper;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using ScriptureMemory.Server.Tools;
 using System;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Npgsql;
 
 namespace DataAccess.Data;
 
@@ -22,16 +21,19 @@ public class PagedLogs<T>
 
 public sealed class ActivityLoggingData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
     private const string selectClause = @"ID, USER_ID as UserId, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
                                         ENTITY_ID as EntityId, CONTEXT_DESCRIPTION as ContextDescription,
                                         METADATA_JSON as JsonMetadata, SEVERITY_LEVEL as SeverityLevel,
                                         IS_ADMIN_ACTION as IsAdminAction, CREATED_AT as CreatedAt";
 
-    public ActivityLoggingData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public ActivityLoggingData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task Create(ActivityLog log)
@@ -43,6 +45,7 @@ public sealed class ActivityLoggingData
                     (:UserId, :ActionType, :EntityType, :EntityId, :ContextDescription,
                      :MetadataJson, :SeverityLevel, :IsAdminAction, :CreatedAt)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql,
             new
             {
@@ -64,6 +67,7 @@ public sealed class ActivityLoggingData
                     {selectClause}
                     FROM ACTIVITY_LOGS WHERE ID = :Id";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         return await conn.QuerySingleOrDefaultAsync<ActivityLog>(
             sql,
             new { Id = id });
@@ -76,6 +80,7 @@ public sealed class ActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -98,6 +103,7 @@ public sealed class ActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -121,6 +127,7 @@ public sealed class ActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -143,6 +150,7 @@ public sealed class ActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -166,6 +174,7 @@ public sealed class ActivityLoggingData
                      ORDER BY CREATED_AT DESC, ID DESC
                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         return new PagedLogs<ActivityLog>
         {
             Items = (await conn.QueryAsync<ActivityLog>(
@@ -183,12 +192,14 @@ public sealed class ActivityLoggingData
     public async Task<int> DeleteOlderThan(DateTime cutoff)
     {
         var sql = "DELETE FROM ACTIVITY_LOGS WHERE CREATED_AT < :Cutoff";
+        using var conn = new NpgsqlConnection(_connectionString);
         return await conn.ExecuteAsync(sql, new { Cutoff = cutoff });
     }
 
     public async Task<int> DeleteLogsForUser(string username)
     {
         var sql = "DELETE FROM ACTIVITY_LOGS WHERE USERNAME = :Username";
+        using var conn = new NpgsqlConnection(_connectionString);
         return await conn.ExecuteAsync(sql, new { Username = username });
     }
 }

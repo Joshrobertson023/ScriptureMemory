@@ -25,7 +25,7 @@ public static class AdminEndpoint
                 Role = request.Role,
             });
             return Results.Ok(result);
-        }).RequireAuthorization();
+        }).RequireAuthorization("SuperAdmin");
 
         app.MapPost("admin/login", async (
             [FromBody] AdminLoginRequest request,
@@ -42,6 +42,6 @@ public static class AdminEndpoint
             var hashedPassword = passwordHasher.HashPassword(null, request.NewPassword);
             await data.UpdatePassword(request.AdminId, hashedPassword);
             return Results.Ok();
-        });
+        }).RequireAuthorization("SuperAdmin");
     }
 }

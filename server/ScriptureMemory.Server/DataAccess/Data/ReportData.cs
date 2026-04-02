@@ -1,19 +1,22 @@
 using DataAccess.Models;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using System.Linq;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class ReportData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public ReportData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public ReportData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task CreateReport(Report report)
@@ -21,6 +24,7 @@ public class ReportData
         var sql = @"INSERT INTO REPORTS (REPORTER_USERNAME, REPORTED_USERNAME, REASON, STATUS)
                     VALUES (:ReporterUsername, :ReportedUsername, :Reason, :Status)";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new
         {
             ReporterUsername = report.Reporter_Username,
@@ -41,6 +45,7 @@ public class ReportData
                     FROM REPORTS
                     ORDER BY CREATED_DATE DESC";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<Report>(sql, commandType: CommandType.Text);
         return results;
     }
@@ -55,6 +60,7 @@ public class ReportData
                     FROM REPORTS r
                     ORDER BY r.CREATED_DATE DESC";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<ReportWithEmail>(sql, commandType: CommandType.Text);
         
         
@@ -87,6 +93,7 @@ public class ReportData
     {
         var sql = @"DELETE FROM REPORTS WHERE REPORT_ID = :ReportId";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { ReportId = reportId }, commandType: CommandType.Text);
     }
 }

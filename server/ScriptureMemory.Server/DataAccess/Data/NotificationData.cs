@@ -1,24 +1,26 @@
 using Dapper;
 using DataAccess.Models;
 using Microsoft.Extensions.Configuration;
-using Oracle.ManagedDataAccess.Client;
 using System;
-using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Npgsql;
 
 namespace DataAccess.Data;
 
 public class NotificationData
 {
-    private readonly IDbConnection conn;
+    private readonly IConfiguration _config;
+    private readonly string _connectionString;
 
-    public NotificationData([FromKeyedServices("Postgres")] IDbConnection connection)
+    public NotificationData(IConfiguration config)
     {
-        conn = connection;
+        _config = config;
+        _connectionString = _config.GetConnectionString("PostgresConnection")
+            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
     }
 
     public async Task CreateNotification(Notification notification)
@@ -28,6 +30,7 @@ public class NotificationData
                     VALUES 
                     (:Receiver, :Sender, :Message, :CreatedDate, 0, :NotificationType, :ExpirationDate)";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new
         {
             Receiver = notification.ReceiverId,
@@ -53,6 +56,7 @@ public class NotificationData
                     WHERE RECEIVER_ID = :UserId 
                     ORDER BY CREATEDDATE DESC";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         var notifications = await conn.QueryAsync<Notification>(
             sql, 
             new { UserId = userId });
@@ -78,6 +82,7 @@ public class NotificationData
             WHERE ROWNUM <= :Limit
         ";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var notifications = await conn.QueryAsync<Notification>(
             sql, 
             new 
@@ -108,6 +113,7 @@ public class NotificationData
             WHERE ROWNUM <= :Limit
         ";
 
+        using var conn = new NpgsqlConnection(_connectionString);
         var notifications = await conn.QueryAsync<Notification>(sql, new
         {
             UserId = userId,
@@ -125,6 +131,7 @@ public class NotificationData
             WHERE ID = :NotificationId
         ";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { NotificationId = notificationId }, commandType: CommandType.Text);
     }
 
@@ -136,6 +143,7 @@ public class NotificationData
             WHERE RECEIVER_ID = :UserId AND ISREAD = 0
         ";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { UserId = userId }, commandType: CommandType.Text);
     }
 
@@ -147,6 +155,7 @@ public class NotificationData
             WHERE ID = :NotificationId
         ";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -163,6 +172,7 @@ public class NotificationData
             WHERE RECEIVER_ID = :UserId AND ISREAD = 0
         ";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         var count = await conn.QueryFirstOrDefaultAsync<int>(sql, new { UserId = userId }, commandType: CommandType.Text);
         return count;
     }
@@ -176,6 +186,7 @@ public class NotificationData
             FROM USERS u
         ";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -197,6 +208,7 @@ public class NotificationData
             WHERE u.ISADMIN = 1
         ";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(
             sql, 
             new 
@@ -216,6 +228,7 @@ public class NotificationData
             WHERE RECEIVER_ID = :UserId OR SENDER_ID = :UserId
         ";
         
+        using var conn = new NpgsqlConnection(_connectionString);
         await conn.ExecuteAsync(sql, new { UserId = userId }, commandType: CommandType.Text);
     }
 }
