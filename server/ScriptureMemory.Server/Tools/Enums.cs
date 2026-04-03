@@ -15,6 +15,12 @@ namespace ScriptureMemory.Server.Tools
             SuperAdmin = 2
         }
 
+        public enum AdminActionType
+        {
+            VodAdded = 3,
+            VodDeleted = 4,
+        }
+
         public enum CollectionVisibility
         {
             Private = 0,

@@ -169,7 +169,7 @@ public sealed class EmailSenderService
         var scope = serviceProvider.CreateScope();
         var adminData = scope.ServiceProvider.GetRequiredService<AdminData>();
 
-        List<Admin> admins = await adminData.GetAllAdmins();
+        System.Collections.Generic.List<Admin> admins = await adminData.GetAllAdmins();
 
         string body = string.Empty;
 
@@ -194,6 +194,18 @@ public sealed class EmailSenderService
         else
         {
             return;
+        }
+
+        foreach (var admin in admins)
+        {
+            await SendEmail(
+                new Email(
+                    new Email.To(admin.AdminEmail ?? string.Empty, admin.AdminEmail ?? string.Empty),
+                    new Email.From("VerseApp", Data.emailFromAddress),
+                    body,
+                    "Verse of the Day Reminder"
+                )
+            );
         }
     }
 }

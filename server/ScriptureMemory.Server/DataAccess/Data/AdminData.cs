@@ -2,6 +2,7 @@ using System.Data;
 using System.Linq;
 using Dapper;
 using DataAccess.Models;
+using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Tools;
 
 namespace DataAccess.Data;
@@ -102,6 +103,48 @@ public class AdminData
         await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
         await conn.OpenAsync();
         return (await conn.QueryAsync<Admin>(sql)).ToList();
+    }
+
+
+    // -- Admin Actions ------------------------------------------------------
+    public async Task<int> InsertAdminAction(AdminAction action)
+    {
+        var sql =
+            """
+            insert into admin_actions
+            (admin_id, action_type, timestamp, json_metadata)
+            values
+            (@AdminId, @ActionType, @Timestamp, @JsonMetadata::jsonb)
+            returning id
+            """;
+
+        await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        var result = await conn.QuerySingleAsync<int>(sql, action);
+        return result;
+    }
+
+    public async Task<List<AdminAction>> GetAdminActions(int? page = null, int? pageSize = null)
+    {
+        if (page is null) page = 1;
+        if (pageSize is null) pageSize = 50;
+
+        var offset = (page - 1) * pageSize;
+
+        var sql =
+            $"""
+            select 
+            id, admin_id as AdminId, action_type as ActionType, timestamp, json_metadata as JsonMetadata
+            from admin_actions
+            order by timestamp desc
+            limit @PageSize offset @Offset
+            """;
+
+        await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        var result = await conn.QueryAsync<AdminAction>(sql, new { PageSize = pageSize, Offset = offset });
+        return result.ToList();
     }
 }
 
