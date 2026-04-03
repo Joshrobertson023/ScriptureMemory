@@ -154,7 +154,7 @@ public class Books
         [BookNames.SecondThessalonians] = new(["2 thess"], ["2 thessalonians", "2 thessalonian", "2thessalonians", "ii thessalonians", "2 thessalonain"]),
         [BookNames.FirstTimothy] = new(["1 tim"], ["1 timothy", "1 timothys", "1timothy"]),
         [BookNames.SecondTimothy] = new(["2 tim"], ["2 timothy", "2 timothys", "2timothy"]),
-        [BookNames.Titus] = new(["tit"], ["titus", "titis"]),
+        [BookNames.Titus] = new(["tit"], ["titus"]),
         [BookNames.Philemon] = new(["phlm"], ["philemon", "philemons", "phillemon"]),
         [BookNames.Hebrews] = new(["heb"], ["hebrews", "hebrew"]),
         [BookNames.James] = new(["jas"], ["james"]),

@@ -224,18 +224,18 @@ public static class ReferenceParser
     public static string GetBook(string reference)
     {
         string[] parts = reference.Split(' ');
-        if (Enums.Books.Contains(parts[0]))
-            return parts[0];
+        if (Books.TryGetBook(parts[0], out string book))
+            return book;
         else
         {
             string bookWithNumber = parts[0] + " " + parts[1];
-            if (Data.books.Contains(bookWithNumber))
-                return bookWithNumber;
+            if (Books.TryGetBook(bookWithNumber, out book))
+                return book;
             else
             {
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
-                if (Data.books.Contains(bookWithNumber))
-                    return bookWithNumber;
+                if (Books.TryGetBook(bookWithNumber, out book))
+                    return book;
                 else
                     throw new Exception($"Book {bookWithNumber} not found.");
             }
@@ -251,7 +251,7 @@ public static class ReferenceParser
     {
         string[] parts = reference.Split(' ');
 
-        if (parts.Length > 1 && Data.books.Contains(parts[0]))
+        if (parts.Length > 1 && Books.TryGetBook(parts[0], out string book))
         {
             var chapterPart = parts[1].Split(':')[0];
 
@@ -263,7 +263,7 @@ public static class ReferenceParser
         {
             string bookWithNumber = parts[0] + " " + parts[1];
 
-            if (Data.books.Contains(bookWithNumber))
+            if (Books.TryGetBook(bookWithNumber, out string _book))
             {
                 var chapterPart = parts[2].Split(':')[0];
                 if (int.TryParse(chapterPart, out int chapter))
@@ -275,7 +275,7 @@ public static class ReferenceParser
             {
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
 
-                if (Data.books.Contains(bookWithNumber))
+                if (Books.TryGetBook(bookWithNumber, out string __book))
                 {
                     var chapterPart = parts[3].Split(':')[0];
                     if (int.TryParse(chapterPart, out int chapter))

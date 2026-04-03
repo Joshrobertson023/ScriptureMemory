@@ -102,7 +102,7 @@ public class VerseData
         }).ToList();
     }
 
-    public async Task<Verse?> GetVerse(string book, int chapter, int verseNum)
+    public async Task<Verse?> GetVerses(string book, int chapter, int verseNum)
     {
         var sql =
             """
