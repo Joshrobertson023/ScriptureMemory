@@ -224,7 +224,7 @@ public static class ReferenceParser
     public static string GetBook(string reference)
     {
         string[] parts = reference.Split(' ');
-        if (Data.books.Contains(parts[0]))
+        if (Enums.Books.Contains(parts[0]))
             return parts[0];
         else
         {

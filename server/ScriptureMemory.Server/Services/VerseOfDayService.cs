@@ -23,7 +23,7 @@ public class VerseOfDayService
 
         int newId = await _data.InsertPassage(reference.ReadableReference, adminId);
 
-        List<Verse> verses = await _verseData.GetVerses(book, chapter, reference.Verses); // Todo, add this and also for single GetVerse
+        List<Verse> verses = await _verseData.GetVerses(reference.Book, reference.Chapter, reference.Verses);
 
         await _data.InsertVerses(reference.Verses, newId);
 

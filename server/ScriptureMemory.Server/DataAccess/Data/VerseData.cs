@@ -49,6 +49,102 @@ public class VerseData
         return results.ToList();
     }
 
+    public record GetVerseDto(
+        int Id,
+        string Book,
+        int Chapter,
+        string Text,
+        int UsersMemorizedCount,
+        int UsersSavedCount,
+        int VerseNum
+     );
+
+    public async Task<List<Verse>> GetVerses(string book, int chapter, List<int> verseNums)
+    {
+        var sql =
+            """
+            select
+            id as Id,
+            book as Book,
+            chapter as Chapter,
+            text as Text,
+            memorized_count as UsersMemorizedCount,
+            saved_count as UsersSavedCount,
+            verse_num as VerseNum
+            from verses
+            where book = @Book
+            and chapter = @Chapter
+            and verse_num = any(@VerseNums)
+            """;
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        var results = await conn.QueryAsync<GetVerseDto>(sql, new
+        {
+            Book = book,
+            Chapter = chapter,
+            VerseNums = verseNums.ToArray()
+        });
+
+        return results.Select(r => new Verse
+        {
+            Id = r.Id,
+            Reference = new Reference
+            {
+                Book = r.Book,
+                Chapter = r.Chapter,
+                Verses = new List<int> { r.VerseNum },
+            },
+            Text = r.Text,
+            UsersSavedCount = r.UsersSavedCount,
+            UsersMemorizedCount = r.UsersMemorizedCount
+        }).ToList();
+    }
+
+    public async Task<Verse?> GetVerse(string book, int chapter, int verseNum)
+    {
+        var sql =
+            """
+            select
+            id as Id,
+            book as Book,
+            chapter as Chapter,
+            text as Text,
+            memorized_count as UsersMemorizedCount,
+            saved_count as UsersSavedCount,
+            verse_num as VerseNum
+            from verses
+            where book = @Book
+            and chapter = @Chapter
+            and verse_num = @VerseNum
+            """;
+
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+        var result = await conn.QueryFirstOrDefaultAsync<GetVerseDto>(sql, new
+        {
+            Book = book,
+            Chapter = chapter,
+            VerseNum = verseNum
+        });
+        return result is not null
+            ? new Verse
+        {
+            Id = result.Id,
+            Reference = new Reference
+            {
+                Book = result.Book,
+                Chapter = result.Chapter,
+                Verses = new List<int> { result.VerseNum },
+            },
+            Text = result.Text,
+            UsersSavedCount = result.UsersSavedCount,
+            UsersMemorizedCount = result.UsersMemorizedCount
+        }
+        : null;
+    }
+
     public async Task InsertVerse(Verse verse)
     {
         var sql = $@"INSERT INTO VERSES 
