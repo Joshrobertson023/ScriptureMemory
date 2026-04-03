@@ -145,150 +145,98 @@ public class VerseData
         : null;
     }
 
-    public async Task InsertVerse(Verse verse)
-    {
-        var sql = $@"INSERT INTO VERSES 
-                    (verse_reference, verse_text, users_saved_verse, users_memorized)
-                     VALUES
-                     (:Reference, :Text, :UsersSavedCount, :UsersMemorizedCount)";
-        using var conn = new NpgsqlConnection(_connectionString);
-        await conn.ExecuteAsync(sql,
-            new 
-            { 
-                Reference = verse.Reference.ToString(), 
-                verse.Text,
-                verse.UsersSavedCount,
-                verse.UsersMemorizedCount
-            });
-    }
-
-    public class VerseRow
-    {
-        public int Id { get; set; }
-        public string Reference { get; set; } = string.Empty;
-        public string Text { get; set; } = string.Empty;
-        public int UsersSavedCount { get; set; }
-        public int UsersMemorizedCount { get; set; }
-    }
-
-    public async Task<Verse?> GetVerse(string reference)
-    {
-        string sql = $@"SELECT 
-                        {selectSql}
-                        FROM VERSES WHERE verse_reference = :Reference";
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<VerseRow?>(sql, new { Reference = reference });
-        return new Verse(results.First()
-            ?? throw new NullReferenceException());
-    }
-
     public async Task<List<Verse>> GetChapterVerses(string book, int chapter)
     {
-        var verseReferences = new List<string>();
-        const int mostVersesInChapter = 176;
+        var sql =
+            """
+            select
+            id as Id,
+            book as Book,
+            chapter as Chapter,
+            text as Text,
+            memorized_count as UsersMemorizedCount,
+            saved_count as UsersSavedCount,
+            verse_num as VerseNum
+            from verses
+            where book = @Book
+            and chapter = @Chapter
+            """;
 
-        for (int verse = 1; verse <= mostVersesInChapter; verse++)
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
+
+        var results = await conn.QueryAsync<GetVerseDto>(sql, new
         {
-            verseReferences.Add($"{book} {chapter}:{verse}");
-        }
+            Book = book,
+            Chapter = chapter
+        });
 
-        bool first = true;
-        StringBuilder sql = new StringBuilder($"SELECT {selectSql} FROM VERSES WHERE verse_reference IN (");
-        foreach (var reference in verseReferences)
+        return results.Select(r => new Verse
         {
-            if (first) sql.Append($"\'{reference}\'");
-            else sql.Append($",\'{reference}\'");
-            first = false;
-        }
-        sql.Append(")");
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var rows = await conn.QueryAsync<VerseRow?>(sql.ToString(), commandType: CommandType.Text);
-        return rows.Select(r => new Verse(r)).ToList();
+            Id = r.Id,
+            Reference = new Reference
+            {
+                Book = r.Book,
+                Chapter = r.Chapter,
+                Verses = new List<int> { r.VerseNum },
+            },
+            Text = r.Text,
+            UsersSavedCount = r.UsersSavedCount,
+            UsersMemorizedCount = r.UsersMemorizedCount
+        }).ToList();
     }
 
-    public async Task<Verse?> GetVerseFromId(int id)
+    public async Task<Verse?> GetVerseById(int id)
     {
-        var sql = $@"SELECT {selectSql} WHERE verse_id = :id";
-        using var conn = new NpgsqlConnection(_connectionString);
-        var verses = await conn.QueryAsync<VerseRow?>(sql, new { id = id },
-            commandType: CommandType.Text);
-        return new Verse(verses.FirstOrDefault()
-            ?? throw new ArgumentNullException());
-    }
+        var sql =
+            """
+            select
+            id as Id,
+            book as Book,
+            chapter as Chapter,
+            text as Text,
+            memorized_count as UsersMemorizedCount,
+            saved_count as UsersSavedCount,
+            verse_num as VerseNum
+            from verses
+            where id = @Id
+            """;
 
-    public async Task UpdateVerseText(string text, int id)
-    {
-        var sql = "update verses set text = :newText where verse_id = :id";
         using var conn = new NpgsqlConnection(_connectionString);
-        await conn.ExecuteAsync(sql, new { newText = text, id = id },
-            commandType: CommandType.Text);
-        return;
-    }
 
-    public async Task UpdateUsersSavedVerse(string reference)
-    {
-        var sql = @"UPDATE VERSES SET Users_Saved_Verse = Users_Saved_Verse + 1
-                     WHERE verse_reference = :Reference";
-        using var conn = new NpgsqlConnection(_connectionString);
-        await conn.ExecuteAsync(sql, new { Reference = reference },
-            commandType: CommandType.Text);
-    }
+        var verses = await conn.QueryAsync<GetVerseDto>(sql, new { Id = id });
 
-    public async Task UpdateUsersMemorizedVerse(string reference)
-    {
-        var sql = @"UPDATE VERSES SET Users_Memorized = Users_Memorized + 1
-                     WHERE verse_reference = :Reference";
-        using var conn = new NpgsqlConnection(_connectionString);
-        await conn.ExecuteAsync(sql, new { Reference = reference },
-            commandType: CommandType.Text);
-    }
-
-    public async Task<List<Verse>> GetTopSavedVerses(int top)
-    {
-        var sql = $@"SELECT * FROM (
-                        SELECT * FROM VERSES
-                        ORDER BY USERS_SAVED_VERSE DESC, VERSE_ID DESC
-                        FETCH FIRST 20 ROWS ONLY
-                    )
-                    WHERE USERS_SAVED_VERSE > 0";
-        using var conn = new NpgsqlConnection(_connectionString);
-        var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
-        return rows.Select(r => new Verse(r)).ToList();
-    }
-
-    public async Task<List<Verse>> GetTopMemorizedVerses(int top)
-    {
-        var limit = Math.Max(1, top);
-        var sql = $@"SELECT * FROM (
-                        SELECT {selectSql} FROM VERSES
-                        ORDER BY USERS_MEMORIZED DESC, VERSE_ID DESC
-                        FETCH FIRST 20 ROWS ONLY
-                    )
-                    WHERE USERS_MEMORIZED > 0";
-        using var conn = new NpgsqlConnection(_connectionString);
-        var rows = await conn.QueryAsync<VerseRow>(sql, commandType: CommandType.Text);
-        return rows.Select(r => new Verse(r)).ToList();
-    }
-
-    public async Task<List<Verse>> GetAllVersesFromReferenceList(List<string> references)
-    {
-        bool first = true;
-        StringBuilder sql = new($"SELECT {selectSql} FROM VERSES WHERE verse_reference IN (");
-        foreach (var reference in references)
+        return verses.FirstOrDefault() is not null
+            ? new Verse
         {
-            if (first) sql.Append($"\'{reference}\'");
-            else sql.Append($",\'{reference}\'");
-            first = false;
+            Id = verses.First().Id,
+            Reference = new Reference
+            {
+                Book = verses.First().Book,
+                Chapter = verses.First().Chapter,
+                Verses = new List<int> { verses.First().VerseNum },
+            },
+            Text = verses.First().Text,
+            UsersSavedCount = verses.First().UsersSavedCount,
+            UsersMemorizedCount = verses.First().UsersMemorizedCount
         }
-        sql.Append(")");
+        : null;
+    }
 
-        Debug.WriteLine(sql);
-
+    public async Task UpdateUsersSavedVerse(int id)
+    {
+        var sql = @"UPDATE VERSES SET saved_count = saved_count + 1
+                     WHERE id = @Id";
         using var conn = new NpgsqlConnection(_connectionString);
-        var rows = await conn.QueryAsync<VerseRow>(sql.ToString(), commandType: CommandType.Text);
+        await conn.ExecuteAsync(sql, new { Id = id });
+    }
 
-        return rows.Select(r => new Verse(r)).ToList();
+    public async Task UpdateUsersMemorizedVerse(int id)
+    {
+        var sql = @"UPDATE VERSES SET memorized_count = memorized_count + 1
+                     WHERE id = @Id";
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.ExecuteAsync(sql, new { Id = id });
     }
 }
 

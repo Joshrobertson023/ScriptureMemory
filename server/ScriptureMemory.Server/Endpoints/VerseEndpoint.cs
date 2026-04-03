@@ -34,13 +34,16 @@ public static class VerseEndpoint
             return Results.Ok(displayName);
         }).RequireAuthorization("User");
 
-        //app.MapGet("/verses/chapter", async (
-        //    [FromBody] GetChapterRequest request,
-        //    [FromServices] VerseData data) =>
-        //{
-        //    var results = await data.GetChapterVerses(request.Book, request.Chapter);
-        //    return Results.Ok(results);
-        //});
+        app.MapGet("/verses/chapter", async (
+            [FromBody] GetChapterRequest request,
+            [FromServices] VerseData data) =>
+        {
+            bool bookExists = Books.TryGetBook(request.Book, out string displayName);
+            if (!bookExists)
+                return Results.NotFound();
+            var results = await data.GetChapterVerses(displayName, request.Chapter);
+            return Results.Ok(results);
+        }).RequireAuthorization("User");
 
         //app.MapPut("/verses/saved/{reference}", async (
         //    string reference,
