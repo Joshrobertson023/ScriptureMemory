@@ -31,14 +31,4 @@ public class Verse
         Text = text;
         VerseNumbers = ReferenceParser.GetVersesHalfOfReference(this.Reference.ToString());
     }
-
-    public Verse(VerseRow row)
-    {
-        Id = row.Id;
-        Reference = new Reference(row.Reference);
-        Text = row.Text;
-        UsersSavedCount = row.UsersSavedCount;
-        UsersMemorizedCount = row.UsersMemorizedCount;
-        VerseNumbers = ReferenceParser.GetVersesHalfOfReference(this.Reference.ToString());
-    }
 }

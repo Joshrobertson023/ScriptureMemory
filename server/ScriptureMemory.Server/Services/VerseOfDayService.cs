@@ -6,14 +6,14 @@ namespace ScriptureMemory.Server.Services;
 
 public class VerseOfDayService
 {
-    private readonly VerseOfDayData _data;
+    private readonly VerseOfDayData _vodData;
     private readonly VerseData _verseData;
 
     public VerseOfDayService(
-        VerseOfDayData data,
+        VerseOfDayData vodData,
         VerseData verseData)
     {
-        _data = data;
+        _vodData = vodData;
         _verseData = verseData;
     }
 
@@ -21,11 +21,11 @@ public class VerseOfDayService
     {
         Reference reference = ReferenceParser.Parse(readableReference);
 
-        int newId = await _data.InsertPassage(reference.ReadableReference, adminId);
+        int newId = await _vodData.InsertPassage(reference.ReadableReference, adminId);
 
         List<Verse> verses = await _verseData.GetVerses(reference.Book, reference.Chapter, reference.Verses);
 
-        await _data.InsertVerses(reference.Verses, newId);
+        await _vodData.InsertVerses(verses, newId);
 
         return newId;
     }

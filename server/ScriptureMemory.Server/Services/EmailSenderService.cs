@@ -1,10 +1,12 @@
+using DataAccess.Data;
+using DataAccess.Models;
 using DataAccess.Requests;
+using J2N.Collections.Generic;
 using RestSharp;
 using RestSharp.Authenticators;
-using System.Security.Cryptography;
 using ScriptureMemory.Server.Tools;
+using System.Security.Cryptography;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using DataAccess.Data;
 
 namespace VerseAppNew.Server.Services;
 
@@ -160,5 +162,38 @@ public sealed class EmailSenderService
         );
 
         return Results.Ok();
+    }
+
+    public async Task NotifyAdminsUpcomingLastVod(int days)
+    {
+        var scope = serviceProvider.CreateScope();
+        var adminData = scope.ServiceProvider.GetRequiredService<AdminData>();
+
+        List<Admin> admins = await adminData.GetAllAdmins();
+
+        string body = string.Empty;
+
+        if (days <= 0)
+        {
+            body = $@"Hi Admins,
+    
+                    This is a reminder that there is currently no verse of the day scheduled for tomorrow.
+                        
+                    Please add a few VODs before tomorrow.
+                    (This is an automated message)";
+        }
+        else if (days <= 5)
+        {
+            body = $@"Hi Admins,
+    
+                    This is a reminder that there are only {days} days left until the last verse of the day.
+                        
+                    Please add a few VODs when you get the chance.
+                    (This is an automated message)";
+        }
+        else
+        {
+            return;
+        }
     }
 }

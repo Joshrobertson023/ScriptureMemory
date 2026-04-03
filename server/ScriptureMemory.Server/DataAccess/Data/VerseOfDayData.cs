@@ -39,7 +39,7 @@ public class VerseOfDayData
         return result;
     }
 
-    public async Task InsertVerses(List<int> verseIds, int vodPassageId)
+    public async Task InsertVerses(List<Verse> verses, int vodPassageId)
     {
         var sql = 
             """
@@ -52,7 +52,7 @@ public class VerseOfDayData
         await using var conn = new Npgsql.NpgsqlConnection(connectionString);
         await conn.OpenAsync();
 
-        var parameters = verseIds.Select(id => new { VerseId = id, VodPassageId = vodPassageId });
+        var parameters = verses.Select(verse => new { VerseId = verse.Id, VodPassageId = vodPassageId });
 
         await conn.ExecuteAsync(sql, parameters);
     }
@@ -74,27 +74,46 @@ public class VerseOfDayData
     {
         var sql =
             """
-            select 
-            p.reference,
-            p.admin_id as AdminId,
-            p.order_position as OrderPosition,
-            v.id as VerseId,
-            v.book as Book,
-            v.chapter as Chapter,
-            v.verse_num as VerseNum,
-            v.text as Text,
-            v.memorized_count as Memorized,
-            v.saved_count as Saved
-            from vod_passages p
-            left join vod_passages_verses pv on p.id = pv.vod_passage_id
-            left join vod_active a on p.id = a.id
-            left join verses v on pv.verse_id = v.id
+            WITH active_start AS (
+                SELECT 
+                    p.order_position AS start_position,
+                    a.first_position_date
+                FROM vod_active a
+                JOIN vod_passages p ON a.id = p.id
+            ),
+            total AS (
+                SELECT COUNT(*) AS total_count FROM vod_passages
+            ),
+            target_position AS (
+                SELECT 
+                    (
+                        (active_start.start_position - 1 + (NOW()::date - active_start.first_position_date))
+                        % total.total_count
+                    ) + 1 AS final_position
+                FROM active_start, total
+            )
+            SELECT 
+                p.reference,
+                p.admin_id AS AdminId,
+                p.order_position AS OrderPosition,
+                v.id AS VerseId,
+                v.book AS Book,
+                v.chapter AS Chapter,
+                v.verse_num AS VerseNum,
+                v.text AS Text,
+                v.memorized_count AS Memorized,
+                v.saved_count AS Saved
+            FROM vod_passages p
+            JOIN target_position tp ON p.order_position = tp.final_position
+            LEFT JOIN vod_passages_verses pv ON p.id = pv.vod_passage_id
+            LEFT JOIN verses v ON pv.verse_id = v.id
             """;
 
         await using var conn = new Npgsql.NpgsqlConnection(connectionString);
         await conn.OpenAsync();
 
         var results = await conn.QueryAsync<GetActiveVod>(sql);
+
         var grouped = results.GroupBy(r => new { r.Reference, r.AdminId, r.OrderPosition })
             .Select(g => new VerseOfDay
             {
@@ -118,6 +137,39 @@ public class VerseOfDayData
             }).FirstOrDefault();
 
         return grouped;
+    }
+
+    public async Task<int> GetDaysUntilLastVod()
+    {
+        var sql =
+            """
+            WITH active_start AS (
+                SELECT 
+                    p.order_position AS start_position,
+                    a.first_position_date
+                FROM vod_active a
+                JOIN vod_passages p ON a.id = p.id
+            ),
+            total AS (
+                SELECT COUNT(*) AS total_count FROM vod_passages
+            ),
+            current_position AS (
+                SELECT 
+                    (
+                        (active_start.start_position - 1 + (NOW()::date - active_start.first_position_date))
+                        % total.total_count
+                    ) + 1 AS final_position
+                FROM active_start, total
+            )
+            SELECT 
+                (total.total_count - current_position.final_position)::int AS days_remaining
+            FROM current_position, total
+            """;
+
+        await using var conn = new Npgsql.NpgsqlConnection(connectionString);
+        await conn.OpenAsync();
+
+        return await conn.ExecuteScalarAsync<int>(sql);
     }
 
     public async Task<List<VerseOfDay>> GetVods(int? page = null, int? pageSize = null)
