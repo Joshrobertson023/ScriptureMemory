@@ -45,6 +45,12 @@ public static class VerseEndpoint
             return Results.Ok(results);
         }).RequireAuthorization("User");
 
+        app.MapPost("/verses/reference", async (
+            [FromBody] string query) =>
+        {
+            return Results.Ok(ReferenceParser.Parse(query));
+        });
+
         //app.MapPut("/verses/saved/{reference}", async (
         //    string reference,
         //    [FromServices] VerseData data) =>

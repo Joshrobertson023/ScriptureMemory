@@ -141,7 +141,7 @@ public class Books
         [BookNames.Matthew] = new(["matt"], ["matthew", "matthews", "mathew"]),
         [BookNames.Mark] = new(["marc"], ["mark", "marks"]),
         [BookNames.Luke] = new(["luc"], ["luke", "lukes"]),
-        [BookNames.John] = new([], ["john", "johns", "jon"]),
+        [BookNames.John] = new(["jn"], ["john", "johns", "jon"]),
         [BookNames.Acts] = new([], ["acts", "act"]),
         [BookNames.Romans] = new(["rom"], ["romans", "roman"]),
         [BookNames.FirstCorinthians] = new(["1 cor"], ["1 corinthians", "1 corinthian", "1corinthians", "1 chorinthians", "i corinthians"]),

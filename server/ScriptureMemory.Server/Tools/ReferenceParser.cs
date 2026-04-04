@@ -13,16 +13,68 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>Reference { Book = "Psalms", Chapter = 119, List<string> Verses = "2-4" }</returns>
-    public static Reference Parse(string referenceString)
+    public static Reference Parse(string input)
     {
-        Reference reference = new(referenceString);
+        if (string.IsNullOrWhiteSpace(input))
+            throw new ArgumentException("Input reference cannot be null or empty.");
 
-        reference.Book = GetBook(referenceString);
-        reference.Chapter = GetChapter(referenceString);
-        reference.Verses = GetIndividualVerses(referenceString);
-        reference.ReadableReference = ConvertToReadableReference(reference.Book, reference.Chapter, reference.Verses);
+        int i = 0;
+        input = input.Trim();
+        StringBuilder referenceString = new();
+        StringBuilder book = new();
+        StringBuilder chapter = new();
+        StringBuilder verses = new();
+        Reference returnReference = new();
 
-        return reference;
+        for (; i < input.Length; i++)
+        {
+            if ((!char.IsDigit(input[i]) && !char.IsWhiteSpace(input[i]))
+                || (i <= 1)) // Case for a book like "1 John"
+            {
+                book.Append(input[i]);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        try
+        {
+            returnReference.Book = GetBook(book.ToString());
+        }
+        catch (Exception)
+        {
+            returnReference.Book = "Error parsing book";
+            return returnReference;
+        }
+
+        if (!char.IsDigit(input[i]))
+            i++;
+
+        for (; i < input.Length; i++)
+        {
+            if (char.IsDigit(input[i]))
+                chapter.Append(input[i]);
+            else
+                break;
+        }
+
+        returnReference.Chapter = Convert.ToInt32(chapter.ToString());
+
+        if (char.IsWhiteSpace(input[i])
+            || char.Equals(':', input[i]))
+            i++;
+
+        for (; i < input.Length; i++)
+        {
+            verses.Append(input[i]);
+        }
+
+        returnReference.Verses = GetIndividualVerses(verses.ToString(), false);
+        returnReference.ReadableReference = ConvertToReadableReference(returnReference.Book, returnReference.Chapter, returnReference.Verses);
+
+        return returnReference;
     }
 
     /// <summary>
@@ -155,10 +207,14 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>List<int> { 2, 3, 4, 7 }/returns>
-    public static List<int> GetIndividualVerses(string reference)
+    public static List<int> GetIndividualVerses(string reference, bool isFullReference = true)
     {
         List<int> returnList = new List<int>();
-        string verses = GetVersesHalfOfReference(reference);
+        string verses;
+        if (isFullReference)
+            verses = GetVersesHalfOfReference(reference);
+        else
+            verses = reference;
 
         foreach (string part in verses.Split(','))
         {
@@ -223,7 +279,11 @@ public static class ReferenceParser
     /// <returns>"Psalms"</returns>
     public static string GetBook(string reference)
     {
-        string[] parts = reference.Split(' ');
+        string[] parts = new string[1];
+        if (reference.Contains(' '))
+            parts = reference.Split(' ');
+        else
+            parts[0] = reference;
         if (Books.TryGetBook(parts[0], out string book))
             return book;
         else

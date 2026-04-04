@@ -22,6 +22,7 @@ builder.Services.AddAuthorization(o =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o =>
     {
+        o.MapInboundClaims = false;
         o.RequireHttpsMetadata = false;
         o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
@@ -38,8 +39,6 @@ builder.Logging.AddDebug();
 
 var app = builder.Build();
 
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseMiddleware()
    .UseEndpoints();
 

@@ -10,6 +10,4 @@ public sealed class VerseService
     {
         this.verseContext = verseContext;
     }
-
-
 }

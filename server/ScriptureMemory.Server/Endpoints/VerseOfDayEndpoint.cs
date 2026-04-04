@@ -30,7 +30,22 @@ public static class VerseOfDayEndpoint
             [FromServices] VerseOfDayService service) =>
         {
             return Results.Ok(await service.InsertVod(request.Reference, request.AdminId));
+        }).RequireAuthorization("Admin");
+
+        app.MapGet("/verseofday/daysuntillast", async (
+            [FromServices] VerseOfDayData data) =>
+        {
+            return Results.Ok(await data.GetDaysUntilLastVod());
         });
+
+        app.MapPost("/verseofday/delete", async (
+            [FromBody] DeleteVodsRequest request,
+            [FromServices] VerseOfDayService service,
+            HttpContext context) =>
+        {
+            await service.DeleteVods(request.Ids, request.AdminId);
+            return Results.Ok();
+        }).RequireAuthorization("Admin");
     }
 }
 

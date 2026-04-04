@@ -1,5 +1,6 @@
 using System.Data;
 using System.Linq;
+using System.Text.Json;
 using Dapper;
 using DataAccess.Models;
 using ScriptureMemory.Server.DataAccess.Models;
@@ -121,7 +122,13 @@ public class AdminData
         await using var conn = new Npgsql.NpgsqlConnection(_connectionString);
         await conn.OpenAsync();
 
-        var result = await conn.QuerySingleAsync<int>(sql, action);
+        var result = await conn.QuerySingleAsync<int>(sql, new
+        {
+            AdminId = action.AdminId,
+            ActionType = action.ActionType,
+            Timestamp = action.Timestamp,
+            JsonMetadata = action.JsonMetadata
+        });
         return result;
     }
 

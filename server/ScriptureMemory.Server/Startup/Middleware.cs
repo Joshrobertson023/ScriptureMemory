@@ -22,6 +22,8 @@ public static class Middleware
         app.UseStaticFiles();
         app.UseRouting();
         app.MapControllers();
+        app.UseAuthentication();
+        app.UseAuthorization();
         return app;
     }
 
@@ -29,8 +31,7 @@ public static class Middleware
     {
         app.ConfigureUserEndpoints();
         app.ConfigureVerseOfDayEndpoints();
-        //app.ConfigureVerseEndpoints();
-        //app.ConfigureVerseOfDayEndpoints();
+        app.ConfigureVerseEndpoints();
         //app.ConfigureUserPassageEndpoints();
         //app.ConfigureCollectionEndpoints();
         //app.ConfigurePracticeLogEndpoints();
