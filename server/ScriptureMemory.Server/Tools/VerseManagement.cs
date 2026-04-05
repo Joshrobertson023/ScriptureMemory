@@ -2,6 +2,7 @@
 using Dapper;
 using DataAccess.Data;
 using DataAccess.Models;
+using Microsoft.Data.Sqlite;
 using Npgsql;
 using ScriptureMemory.Server.Tools;
 using System.Data;
@@ -105,14 +106,134 @@ public sealed class VerseManagement
         _logger.LogDebug("Finished uploading verses to postgres");
     }
 
-    public async Task UploadCrossReferences()
+    public class VerseDto
     {
-        foreach (string line in File.ReadLines(@"C:\Users\there\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.txt"))
-        {
-            Reference reference = ReferenceParser.Parse(line.Split(' ')[0]);
-            Reference reference2 = ReferenceParser.Parse(line.Split(' ')[1]);
-        }
-
-        
+        public int Id { get; set; }
+        public string Book { get; set; } = string.Empty;
+        public int Chapter { get; set; }
+        public int VerseNum { get; set; }
+        public string Text { get; set; } = string.Empty;
     }
+
+    public async Task MoveCrossReferencesToSqlite()
+    {
+        string[] lines = File.ReadAllLines(@"C:\Users\there\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.txt");
+        int total = lines.Length;
+        int processed = 0;
+
+        _logger.LogDebug("Loading all verses into memory...");
+        using var pgConn = new NpgsqlConnection(_connectionString);
+        var allVerses = (await pgConn.QueryAsync<VerseDto>(
+            """
+            select id as Id, book as Book, chapter as Chapter, text as Text, verse_num as VerseNum
+            """)).ToList();
+        var versesByKey = allVerses.ToDictionary(v => (v.Book, v.Chapter, v.VerseNum));
+        _logger.LogDebug("Loaded {Count} verses", allVerses.Count);
+
+        SQLitePCL.Batteries.Init();
+        using var connection = new SqliteConnection(@"Data Source=C:\Users\there\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.db");
+        await connection.OpenAsync();
+
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText =
+            """
+        create table if not exists cross_references (
+            id integer primary key autoincrement,
+            from_verse_id integer,
+            to_passage_id integer,
+            votes integer
+        );
+        create table if not exists cross_reference_passages (
+            id integer primary key autoincrement,
+            reference text
+        );
+        create table if not exists cross_reference_passages_verses (
+            passage_id integer,
+            verse_id integer
+        );
+        """;
+        await cmd.ExecuteNonQueryAsync();
+
+        using var transaction = await connection.BeginTransactionAsync();
+        cmd.Transaction = (SqliteTransaction)transaction;
+
+        try
+        {
+            bool skip = true;
+            foreach (string line in lines)
+            {
+                if (line == "Gen.1.27\t1Cor.11.7-1Cor.11.9\t21") skip = false;
+                if (skip) continue;
+
+                string[] parts = line.Split('\t');
+                if (parts[0] == "From Verse") continue;
+
+                Reference reference = ReferenceParser.Parse(parts[0]);
+                Reference crossReference = ReferenceParser.Parse(parts[1]);
+                int votes = int.Parse(parts[2]);
+
+                cmd.CommandText =
+                    """
+                insert into cross_reference_passages (reference)
+                values ($Reference);
+                select last_insert_rowid();
+                """;
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("$Reference", reference.ReadableReference);
+                long newPassageId = (long)(await cmd.ExecuteScalarAsync())!;
+
+                foreach (int verseNum in crossReference.Verses)
+                {
+                    if (!versesByKey.TryGetValue((crossReference.Book, crossReference.Chapter, verseNum), out var crossVerse))
+                    {
+                        _logger.LogDebug("Verse not found: {Book} {Chapter}:{Verse}", crossReference.Book, crossReference.Chapter, verseNum);
+                        continue;
+                    }
+
+                    cmd.CommandText =
+                        """
+                    insert into cross_reference_passages_verses (passage_id, verse_id)
+                    values ($PassageId, $VerseId)
+                    """;
+                    cmd.Parameters.Clear();
+                    cmd.Parameters.AddWithValue("$PassageId", newPassageId);
+                    cmd.Parameters.AddWithValue("$VerseId", crossVerse.Id);
+                    await cmd.ExecuteNonQueryAsync();
+                }
+
+                if (!versesByKey.TryGetValue((reference.Book, reference.Chapter, reference.Verses.First()), out var fromVerse))
+                {
+                    _logger.LogDebug("From verse not found: {Book} {Chapter}:{Verse}", reference.Book, reference.Chapter, reference.Verses.First());
+                    continue;
+                }
+
+                cmd.CommandText =
+                    """
+                insert into cross_references (from_verse_id, to_passage_id, votes)
+                values ($FromVerseId, $ToPassageId, $Votes)
+                """;
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("$FromVerseId", fromVerse.Id);
+                cmd.Parameters.AddWithValue("$ToPassageId", newPassageId);
+                cmd.Parameters.AddWithValue("$Votes", votes);
+                await cmd.ExecuteNonQueryAsync();
+
+                processed++;
+                if (processed % 50 == 0 || processed == total)
+                {
+                    double percent = (double)processed / total * 100;
+                    _logger.LogDebug("Progress: {Processed}/{Total} ({Percent:F1}%)", processed, total, percent);
+                }
+            }
+
+            await transaction.CommitAsync();
+            _logger.LogDebug("Finished uploading cross references");
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+}
 }

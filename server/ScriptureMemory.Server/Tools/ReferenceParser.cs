@@ -28,15 +28,15 @@ public static class ReferenceParser
         while (i < span.Length && (char.IsLetter(span[i]) || i <= 1))
             i++;
 
-        try
-        {
+        //try
+        //{
             returnReference.Book = GetBook(span[..i].ToString().ToLower());
-        }
-        catch (Exception)
-        {
-            returnReference.Book = "Error parsing book";
-            return returnReference;
-        }
+        //}
+        //catch (Exception)
+        //{
+        //    returnReference.Book = "Error parsing book";
+        //    return returnReference;
+        //}
 
         if (i < span.Length && !char.IsDigit(span[i]))
             i++;
