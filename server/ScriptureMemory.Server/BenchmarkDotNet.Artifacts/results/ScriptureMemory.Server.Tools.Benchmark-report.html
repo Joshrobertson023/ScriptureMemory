@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='utf-8' />
+<title>ScriptureMemory.Server.Tools.Benchmark-20260404-192219</title>
+
+<style type="text/css">
+	table { border-collapse: collapse; display: block; width: 100%; overflow: auto; }
+	td, th { padding: 6px 13px; border: 1px solid #ddd; text-align: right; }
+	tr { background-color: #fff; border-top: 1px solid #ccc; }
+	tr:nth-child(even) { background: #f8f8f8; }
+</style>
+</head>
+<body>
+<pre><code>
+BenchmarkDotNet v0.15.8, Windows 11 (10.0.26200.8037/25H2/2025Update/HudsonValley2)
+13th Gen Intel Core i7-13620H 2.40GHz, 1 CPU, 16 logical and 10 physical cores
+.NET SDK 10.0.201
+  [Host]   : .NET 8.0.25 (8.0.25, 8.0.2526.11203), X64 RyuJIT x86-64-v3 [AttachedDebugger]
+  ShortRun : .NET 8.0.25 (8.0.25, 8.0.2526.11203), X64 RyuJIT x86-64-v3
+</code></pre>
+<pre><code>Job=ShortRun  IterationCount=3  LaunchCount=1  
+WarmupCount=3  
+</code></pre>
+
+<table>
+<thead><tr><th>Method</th><th>Input         </th><th>Mean</th><th>Error</th><th>StdDev</th><th>Ratio</th><th>RatioSD</th><th>Gen0</th><th>Allocated</th><th>Alloc Ratio</th>
+</tr>
+</thead><tbody><tr><td>Parse</td><td>1 John 2 1-5, 23</td><td>469.0 ns</td><td>76.52 ns</td><td>4.19 ns</td><td>1.00</td><td>0.01</td><td>0.0057</td><td>1560 B</td><td>1.00</td>
+</tr><tr><td>ParseSpan</td><td>1 John 2 1-5, 23</td><td>319.0 ns</td><td>60.39 ns</td><td>3.31 ns</td><td>0.68</td><td>0.01</td><td>0.0033</td><td>880 B</td><td>0.56</td>
+</tr><tr><td>Parse</td><td>John 3:16</td><td>228.6 ns</td><td>82.98 ns</td><td>4.55 ns</td><td>1.00</td><td>0.02</td><td>0.0041</td><td>1032 B</td><td>1.00</td>
+</tr><tr><td>ParseSpan</td><td>John 3:16</td><td>156.5 ns</td><td>30.07 ns</td><td>1.65 ns</td><td>0.68</td><td>0.01</td><td>0.0017</td><td>456 B</td><td>0.44</td>
+</tr><tr><td>Parse</td><td>Ps.148.14-Ps.148.112</td><td>1,170.2 ns</td><td>806.79 ns</td><td>44.22 ns</td><td>1.00</td><td>0.05</td><td>0.0095</td><td>2728 B</td><td>1.00</td>
+</tr><tr><td>ParseSpan</td><td>Ps.148.14-Ps.148.112</td><td>950.8 ns</td><td>140.83 ns</td><td>7.72 ns</td><td>0.81</td><td>0.03</td><td>0.0067</td><td>1800 B</td><td>0.66</td>
+</tr></tbody></table>
+</body>
+</html>

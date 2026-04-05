@@ -1,3 +1,4 @@
+using BenchmarkDotNet.Running;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using ScriptureMemory.Server.Startup;
 using ScriptureMemory.Server.Tools;
@@ -47,6 +48,8 @@ app.UseMiddleware()
 //    var service = scope.ServiceProvider.GetRequiredService<VerseManagement>();
 //    await service.UploadVersesToPostgres();
 //}
+
+BenchmarkRunner.Run<Benchmark>();
 
 app.Run();
 

@@ -15,7 +15,7 @@ public static class Middleware
         }
         else
         {
-            app.UseExceptionHandler("/Error");
+            //app.UseExceptionHandler("/Error");
             app.UseHsts();
         }
         app.UseHttpsRedirection();

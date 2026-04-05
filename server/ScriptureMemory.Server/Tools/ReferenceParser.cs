@@ -1,4 +1,6 @@
 ﻿using DataAccess.Models;
+using J2N.Text;
+using ScriptureMemory.Server.Files.CsvRecordModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,7 @@ namespace ScriptureMemory.Server.Tools;
 public static class ReferenceParser
 {
     /// <summary>
-    /// Convert a full reference into individual parts as strings
+    /// Convert an input into a reference object
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>Reference { Book = "Psalms", Chapter = 119, List<string> Verses = "2-4" }</returns>
@@ -18,30 +20,17 @@ public static class ReferenceParser
         if (string.IsNullOrWhiteSpace(input))
             throw new ArgumentException("Input reference cannot be null or empty.");
 
-        int i = 0;
         input = input.Trim();
-        StringBuilder referenceString = new();
-        StringBuilder book = new();
-        StringBuilder chapter = new();
-        StringBuilder verses = new();
+        ReadOnlySpan<char> span = input.AsSpan();
+        int i = 0;
         Reference returnReference = new();
 
-        for (; i < input.Length; i++)
-        {
-            if ((!char.IsDigit(input[i]) && !char.IsWhiteSpace(input[i]))
-                || (i <= 1)) // Case for a book like "1 John"
-            {
-                book.Append(input[i]);
-            }
-            else
-            {
-                break;
-            }
-        }
+        while (i < span.Length && (char.IsLetter(span[i]) || i <= 1))
+            i++;
 
         try
         {
-            returnReference.Book = GetBook(book.ToString());
+            returnReference.Book = GetBook(span[..i].ToString().ToLower());
         }
         catch (Exception)
         {
@@ -49,29 +38,52 @@ public static class ReferenceParser
             return returnReference;
         }
 
-        if (!char.IsDigit(input[i]))
+        if (i < span.Length && !char.IsDigit(span[i]))
             i++;
 
-        for (; i < input.Length; i++)
+        int chapterStart = i;
+        while (i < span.Length && char.IsDigit(span[i]))
+            i++;
+
+        returnReference.Chapter = int.Parse(span[chapterStart..i]);
+
+        if (i < span.Length && (!char.IsDigit(span[i]) || span[i] == ':'))
+            i++;
+
+        ReadOnlySpan<char> versesPartSpan = span[i..];
+
+        string verses;
+        int dashIndex = versesPartSpan.IndexOf('-');
+        if (dashIndex >= 0)
         {
-            if (char.IsDigit(input[i]))
-                chapter.Append(input[i]);
+            ReadOnlySpan<char> firstPart = versesPartSpan[..dashIndex];
+            ReadOnlySpan<char> secondPart = versesPartSpan[(dashIndex + 1)..];
+
+            if (secondPart.Length > 0 && char.IsLetter(secondPart[0]))
+            {
+                int k = firstPart.Length - 1;
+                while (k >= 0 && char.IsDigit(firstPart[k]))
+                    k--;
+                ReadOnlySpan<char> firstDigits = firstPart[(k + 1)..];
+
+                int m = secondPart.Length - 1;
+                while (m >= 0 && char.IsDigit(secondPart[m]))
+                    m--;
+                ReadOnlySpan<char> secondDigits = secondPart[(m + 1)..];
+
+                verses = string.Concat(firstDigits, "-", secondDigits);
+            }
             else
-                break;
+            {
+                verses = versesPartSpan.ToString();
+            }
         }
-
-        returnReference.Chapter = Convert.ToInt32(chapter.ToString());
-
-        if (char.IsWhiteSpace(input[i])
-            || char.Equals(':', input[i]))
-            i++;
-
-        for (; i < input.Length; i++)
+        else
         {
-            verses.Append(input[i]);
+            verses = versesPartSpan.ToString();
         }
 
-        returnReference.Verses = GetIndividualVerses(verses.ToString(), false);
+        returnReference.Verses = GetIndividualVerses(verses, false);
         returnReference.ReadableReference = ConvertToReadableReference(returnReference.Book, returnReference.Chapter, returnReference.Verses);
 
         return returnReference;

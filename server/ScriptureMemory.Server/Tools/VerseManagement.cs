@@ -104,4 +104,15 @@ public sealed class VerseManagement
 
         _logger.LogDebug("Finished uploading verses to postgres");
     }
+
+    public async Task UploadCrossReferences()
+    {
+        foreach (string line in File.ReadLines(@"C:\Users\there\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.txt"))
+        {
+            Reference reference = ReferenceParser.Parse(line.Split(' ')[0]);
+            Reference reference2 = ReferenceParser.Parse(line.Split(' ')[1]);
+        }
+
+        
+    }
 }
