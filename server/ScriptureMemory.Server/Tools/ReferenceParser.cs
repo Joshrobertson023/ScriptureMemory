@@ -100,6 +100,25 @@ public static class ReferenceParser
     }
 
     /// <summary>
+    /// Returns a Reference object from a book, chapter, and list of versess
+    /// </summary>
+    /// <param name="book"></param>
+    /// <param name="chapter"></param>
+    /// <param name="verses"></param>
+    /// <returns></returns>
+    public static Reference Parse(string book, int chapter, List<int> verses)
+    {
+        book = GetBook(book);
+        return new Reference
+        {
+            Book = book,
+            Chapter = chapter,
+            Verses = verses,
+            ReadableReference = ConvertToReadableReference(book, chapter, verses)
+        };
+    }
+
+    /// <summary>
     /// Convert a full reference into its parts for typing out during a practice session
     /// </summary>
     /// <param name="reference"></param>

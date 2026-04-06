@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
+using ScriptureMemory.Server.DataAccess.Data;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.Tools;
 using System.Data;
@@ -123,6 +124,7 @@ public static class Services
         services.AddScoped<UserData>();
         services.AddScoped<AdminData>();
         services.AddScoped<UserSettingsData>();
+        services.AddScoped<CrossReferenceData>();
         services.AddScoped<ActivityLoggingData>();
         services.AddScoped<SearchData>();
         services.AddScoped<NotificationData>();

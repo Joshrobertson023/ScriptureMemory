@@ -1,11 +1,11 @@
 using DataAccess.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Security.Cryptography.Xml;
 using System.Text.Json;
 using ScriptureMemory.Server.Tools;
 using DataAccess.Requests;
 using DataAccess.Data;
+using ScriptureMemory.Server.DataAccess.Data;
 
 namespace VerseAppNew.Server.Endpoints;
 
@@ -51,44 +51,27 @@ public static class VerseEndpoint
             return Results.Ok(ReferenceParser.Parse(query));
         });
 
-        //app.MapPut("/verses/saved/{reference}", async (
-        //    string reference,
-        //    [FromServices] VerseData data) =>
-        //{
-        //    await data.UpdateUsersSavedVerse(reference);
-        //    return Results.Ok();
-        //});
+        app.MapPost("/verses/cross-reference", async (
+            [FromBody] List<int> verseIds,
+            [FromServices] CrossReferenceData crossReferenceData) =>
+        {
+            return Results.Ok(await crossReferenceData.GetCrossReferences(verseIds));
+        });
 
-        //app.MapPut("/verses/memorized/{reference}", async (
-        //    string reference,
-        //    [FromServices] VerseData data) =>
-        //{
-        //    await data.UpdateUsersMemorizedVerse(reference);
-        //    return Results.Ok();
-        //});
+        app.MapPost("/verses/cross-reference/reference", async (
+            [FromBody] List<string> references,
+            [FromServices] CrossReferenceData crossReferenceData) =>
+        {
+            return Results.Ok(await crossReferenceData.GetCrossReferences(
+                references.Select(r => ReferenceParser.Parse(r)).ToList()));
+        });
 
-        //app.MapGet("/verses/search/{search}", async (string search, [FromServices] VerseData data) =>
-        //{
-        //    var results = await data.GetVerseSearchResults(search);
-        //    return Results.Ok(results);
-        //});
-
-        //app.MapGet("/verses/top/saved/{top}", async (
-        //    int top,
-        //    [FromServices] VerseData data) =>
-        //{
-        //    if (top == 0) top = 30;
-        //    var results = await data.GetTopSavedVerses(top);
-        //    return Results.Ok(results);
-        //});
-
-        //app.MapGet("/verses/top/memorized/{top}", async (
-        //    int top,
-        //    [FromServices] VerseData data) =>
-        //{
-        //    if (top == 0) top = 30;
-        //    var results = await data.GetTopMemorizedVerses(top);
-        //    return Results.Ok(results);
-        //});
+        app.MapGet("/verses/cross-reference/reference/{reference}", async (
+            string reference,
+            [FromServices] CrossReferenceData crossReferenceData) =>
+        {
+            return Results.Ok(await crossReferenceData.GetCrossReferences(
+                new List<Reference> { ReferenceParser.Parse(reference) }));
+        });
     }
 }

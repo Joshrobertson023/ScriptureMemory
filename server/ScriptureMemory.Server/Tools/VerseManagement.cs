@@ -189,7 +189,7 @@ public sealed class VerseManagement
                 select last_insert_rowid();
                 """;
                 cmd.Parameters.Clear();
-                cmd.Parameters.AddWithValue("$Reference", reference.ReadableReference);
+                cmd.Parameters.AddWithValue("$Reference", crossReference.ReadableReference);
                 long newPassageId = (long)(await cmd.ExecuteScalarAsync())!;
 
                 foreach (int verseNum in crossReference.Verses)

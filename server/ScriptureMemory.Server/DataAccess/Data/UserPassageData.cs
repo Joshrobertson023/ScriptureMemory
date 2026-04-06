@@ -139,11 +139,11 @@ public class UserPassageData
             {
                 if (!lookup.TryGetValue(row.Id, out var passage))
                 {
-                    passage = new UserPassage(
-                        row.UserId,
-                        row.CollectionId,
-                        row.ReadableReference)
+                    passage = new UserPassage
                     {
+                        UserId = row.UserId,
+                        CollectionId = row.CollectionId,
+                        Reference = ReferenceParser.Parse(row.ReadableReference),
                         Id = row.Id,
                         OrderPosition = row.OrderPosition,
                         DateAdded = row.DateAdded,

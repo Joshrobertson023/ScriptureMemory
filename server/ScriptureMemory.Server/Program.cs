@@ -46,7 +46,6 @@ app.UseMiddleware()
 //using var scope = app.Services.CreateScope();
 //{
 //    var service = scope.ServiceProvider.GetRequiredService<VerseManagement>();
-
 //}
 
 app.Run();
