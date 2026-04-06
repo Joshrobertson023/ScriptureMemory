@@ -11,7 +11,7 @@ namespace ScriptureMemory.Server.Tools;
 public static class ReferenceParser
 {
     /// <summary>
-    /// Convert an input into a reference object
+    /// Convert an input of an unstructured reference into a reference object
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>Reference { Book = "Psalms", Chapter = 119, List<string> Verses = "2-4" }</returns>

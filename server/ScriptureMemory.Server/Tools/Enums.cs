@@ -28,13 +28,6 @@ namespace ScriptureMemory.Server.Tools
             Public = 2
         }
 
-        public enum Status
-        {
-            Active = 0,
-            Inactive = 1,
-            Deleted = 2
-        };
-
         public enum CollectionsSort
         {
             Newest = 0,

@@ -31,34 +31,34 @@ public class UserData
     //  Insert
     // -------------------------------------------------------
 
-    public async Task CreateUser(User user)
+    public async Task<int> CreateUser()
     {
-        var sql = @"INSERT INTO USERS
-                    (USERNAME, FIRST_NAME, LAST_NAME, EMAIL, AUTH_TOKEN, USER_STATUS, HASHED_PASSWORD, DATE_REGISTERED, 
-                     LAST_SEEN, PROFILE_DESCRIPTION, POINTS, VERSES_MEMORIZED, PROFILE_PICTURE_URL)
-                    VALUES
-                    (:Username, :FirstName, :LastName, :Email, :AuthToken, :Status, :HashedPassword, :DateRegistered,
-                     :LastSeen, :Description, :Points, :VersesMemorized, :ProfilePictureUrl)";
-
         using var conn = new NpgsqlConnection(_connectionString);
-        await conn.ExecuteAsync(
-            sql,
+        int newUserId = await conn.ExecuteScalarAsync<int>(
+            """
+            insert into users 
+            (points, memorized_count, role)
+            values
+            (@Points, @VersesMemorized, @Role)
+            returning id
+            """,
             new
             {
-                Username = user.Username,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                AuthToken = user.AuthToken,
-                Status = user.Status,
-                HashedPassword = user.HashedPassword,
-                DateRegistered = user.DateRegistered,
-                LastSeen = user.LastSeen,
-                Description = user.ProfileDescription,
-                Points = user.Points,
-                VersesMemorized = user.VersesMemorizedCount,
-                ProfilePictureUrl = user.ProfilePictureUrl
+                Points = 0,
+                VersesMemorized = 0,
+                Role = UserRole.User.ToString()
             });
+        await conn.ExecuteAsync(
+            """
+            insert into user_preferences
+            (user_id)
+            values
+            (@UserId)
+            """, new
+            {
+                UserId = newUserId
+            });
+        return newUserId;
     }
 
 

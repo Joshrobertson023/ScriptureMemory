@@ -38,4 +38,34 @@ public sealed class TokenProvider(IConfiguration config)
 
         return token;
     }
+
+    public string Create(User user)
+    {
+        string secretKey = config["Jwt:Secret"]
+            ?? throw new InvalidOperationException("JWT secret key not configured");
+
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim("refresh_token_hash", user.Sessions.First().RefreshTokenHash ?? throw new ArgumentNullException("RefreshTokenHash")),
+                new Claim("role", user.Role.ToString() ?? throw new ArgumentNullException(nameof(user.Role)))
+            }),
+            Expires = DateTime.UtcNow.AddMinutes(config.GetValue<int>("Jwt:UserExpireMinutes")),
+            SigningCredentials = credentials,
+            Issuer = config["Jwt:Issuer"],
+            Audience = config["Jwt:Audience"]
+        };
+
+        var handler = new JsonWebTokenHandler();
+
+        string token = handler.CreateToken(tokenDescriptor);
+
+        return token;
+    }
 }

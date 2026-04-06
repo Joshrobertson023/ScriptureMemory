@@ -37,19 +37,19 @@ public class UserPreferencesTests : BaseIntegrationTest
         Assert.NotNull(user);
         int userId = user.Id;
 
-        Assert.NotNull(user.Settings);
-        Assert.Equal(BibleVersion.Kjv, user.Settings.BibleVersion);
-        Assert.Equal(ThemePreference.SystemDefault, user.Settings.ThemePreference);
-        Assert.True(user.Settings.PushNotificationsEnabled);
-        Assert.True(user.Settings.NotifyMemorizedVerse);
-        Assert.True(user.Settings.NotifyPublishedCollection);
-        Assert.True(user.Settings.NotifyCollectionSaved);
-        Assert.True(user.Settings.NotifyNoteLiked);
-        Assert.True(user.Settings.FriendsActivityNotificationsEnabled);
-        Assert.True(user.Settings.StreakRemindersEnabled);
-        Assert.True(user.Settings.AppBadgesEnabled);
-        Assert.True(user.Settings.PracticeTabBadgesEnabled);
-        Assert.False(user.Settings.TypeOutReference);
+        Assert.NotNull(user.Preferences);
+        Assert.Equal(BibleVersion.Kjv, user.Preferences.BibleVersion);
+        Assert.Equal(ThemePreference.SystemDefault, user.Preferences.ThemePreference);
+        Assert.True(user.Preferences.PushNotificationsEnabled);
+        Assert.True(user.Preferences.NotifyMemorizedVerse);
+        Assert.True(user.Preferences.NotifyPublishedCollection);
+        Assert.True(user.Preferences.NotifyCollectionSaved);
+        Assert.True(user.Preferences.NotifyNoteLiked);
+        Assert.True(user.Preferences.FriendsActivityNotificationsEnabled);
+        Assert.True(user.Preferences.StreakRemindersEnabled);
+        Assert.True(user.Preferences.AppBadgesEnabled);
+        Assert.True(user.Preferences.PracticeTabBadgesEnabled);
+        Assert.False(user.Preferences.TypeOutReference);
 
 
         // Update Collections Sort Preference
@@ -128,18 +128,18 @@ public class UserPreferencesTests : BaseIntegrationTest
         var finalLoginResponse = await Api.PostAsJsonAsync("/users/login/username",
             new { Username = createRequest.Username, Password = createRequest.Password });
         var finalUser = await finalLoginResponse.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(finalUser?.Settings);
-        Assert.Equal(CollectionsSort.LastPracticed, finalUser.Settings.CollectionsSort);
-        Assert.False(finalUser.Settings.SubscribedVerseOfDay);
-        Assert.False(finalUser.Settings.PushNotificationsEnabled);
-        Assert.False(finalUser.Settings.NotifyMemorizedVerse);
-        Assert.False(finalUser.Settings.NotifyPublishedCollection);
-        Assert.False(finalUser.Settings.NotifyCollectionSaved);
-        Assert.False(finalUser.Settings.NotifyNoteLiked);
-        Assert.False(finalUser.Settings.FriendsActivityNotificationsEnabled);
-        Assert.False(finalUser.Settings.StreakRemindersEnabled);
-        Assert.False(finalUser.Settings.AppBadgesEnabled);
-        Assert.False(finalUser.Settings.PracticeTabBadgesEnabled);
-        Assert.True(finalUser.Settings.TypeOutReference);
+        Assert.NotNull(finalUser?.Preferences);
+        Assert.Equal(CollectionsSort.LastPracticed, finalUser.Preferences.CollectionsSort);
+        Assert.False(finalUser.Preferences.SubscribedVerseOfDay);
+        Assert.False(finalUser.Preferences.PushNotificationsEnabled);
+        Assert.False(finalUser.Preferences.NotifyMemorizedVerse);
+        Assert.False(finalUser.Preferences.NotifyPublishedCollection);
+        Assert.False(finalUser.Preferences.NotifyCollectionSaved);
+        Assert.False(finalUser.Preferences.NotifyNoteLiked);
+        Assert.False(finalUser.Preferences.FriendsActivityNotificationsEnabled);
+        Assert.False(finalUser.Preferences.StreakRemindersEnabled);
+        Assert.False(finalUser.Preferences.AppBadgesEnabled);
+        Assert.False(finalUser.Preferences.PracticeTabBadgesEnabled);
+        Assert.True(finalUser.Preferences.TypeOutReference);
     }
 }

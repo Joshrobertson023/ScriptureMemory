@@ -38,7 +38,7 @@ public sealed class UserSettingsData
         await conn.ExecuteAsync(sql, new { version = version, userId = userId });
     }
 
-    public async Task CreateUserSettings(UserSettings settings, int userId)
+    public async Task CreateUserSettings(UserPreferences settings, int userId)
     {
         var sql = @"INSERT INTO USER_PREFERENCES
                     (USER_ID, THEME, BIBLE_VERSION, COLLECTIONS_SORT, SUBSCRIBED_VOD,
@@ -74,7 +74,7 @@ public sealed class UserSettingsData
             });
     }
 
-    public async Task<UserSettings> GetUserSettingsFromUserId(int userId)
+    public async Task<UserPreferences> GetUserSettingsFromUserId(int userId)
     {
         var sql = @"SELECT THEME as ThemePreference, 
                            BIBLE_VERSION as BibleVersion, 
@@ -92,7 +92,7 @@ public sealed class UserSettingsData
                            TYPE_OUT_REFERENCE as TypeOutReference
                     FROM USER_PREFERENCES WHERE USER_ID = :userId";
         using var conn = new NpgsqlConnection(_connectionString);
-        var result = await conn.QuerySingleOrDefaultAsync<UserSettings>(sql, new { userId });
+        var result = await conn.QuerySingleOrDefaultAsync<UserPreferences>(sql, new { userId });
         if (result is null)
             throw new Exception($"No user settings found for user id: {userId}");
         return result;

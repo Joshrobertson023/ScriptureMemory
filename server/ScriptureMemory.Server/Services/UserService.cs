@@ -4,6 +4,8 @@ using DataAccess.Models;
 using DataAccess.Requests;
 using DataAccess.Requests.UpdateRequests;
 using Microsoft.AspNetCore.Identity;
+using ScriptureMemory.Server.DataAccess.Data;
+using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Tools;
 using System.Text.Json;
 using static ScriptureMemory.Server.Tools.Enums;
@@ -13,30 +15,71 @@ namespace VerseAppNew.Server.Services;
 
 public sealed class UserService
 {
-    private readonly UserData userContext;
-    private readonly UserSettingsData settingsContext;
-    //private readonly PaidData paidContext;
-    private readonly NotificationService notificationService;
-    private readonly ActivityLogger logger;
-    private readonly EmailSenderService emailSender;
+    private readonly UserData _userContext;
+    private readonly SessionData _sessionContext;
+    private readonly UserSettingsData _settingsContext;
+    private readonly TokenProvider _tokenProvider;
+    //private readonly PaidData _paidContext;
+    private readonly NotificationService _notificationService;
+    private readonly ActivityLogger _logger;
+    private readonly EmailSenderService _emailSender;
 
     public UserService(
         UserData userContext, 
         UserSettingsData settingsContext, 
         //PaidData paidContext,
+        TokenProvider tokenProvider,
         NotificationService notificationService,
         ActivityLogger logger,
         EmailSenderService emailSender)
     {
-        this.userContext = userContext;
-        this.settingsContext = settingsContext;
+        _userContext = userContext;
+        _tokenProvider = tokenProvider;
+        _settingsContext = settingsContext;
         //this.paidContext = paidContext;
-        this.notificationService = notificationService;
-        this.logger = logger;
-        this.emailSender = emailSender;
+        _notificationService = notificationService;
+        _logger = logger;
+        _emailSender = emailSender;
     }
 
-    public async Task CreateUserFromRequest(CreateUserRequest request)
+    public async Task<IResult> CreateUser(Session session)
+    {
+        var hasher = new PasswordHasher<string>();
+
+        int newUserId = await _userContext.CreateUser();
+
+        session.RefreshTokenHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
+
+        int sessionId = await _sessionContext.CreateSession(newUserId, session);
+
+        return Results.Ok(new
+        {
+            UserId = newUserId,
+            RefreshTokenHash = session.RefreshTokenHash,
+            Jwt = _tokenProvider.Create(new User { Id = newUserId })
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public async Task CreateUserAccount(CreateUserRequest request)
     {
         PasswordHasher<User> hasher = new();
 
@@ -59,7 +102,7 @@ public sealed class UserService
         await userContext.CreateUser(user);
         user.Id = await userContext.GetUserIdFromUsername(user.Username.Trim());
 
-        await settingsContext.CreateUserSettings(user.Settings, user.Id);
+        await settingsContext.CreateUserSettings(user.Preferences, user.Id);
 
         await logger.Log(
             new ActivityLog(
@@ -72,7 +115,6 @@ public sealed class UserService
             )
         );
 
-        //Send welcome notification
         await notificationService.SendNotification(
             new Notification(
                 user.Id,
@@ -138,9 +180,7 @@ public sealed class UserService
 
     public async Task<bool> IsUsernameAvailable(string username)
     {
-        var existingUser = await userContext.GetUserFromUsername(username);
-
-        return (existingUser is null);
+        return (await userContext.GetTokenFromUsername(username)) is null;
     }
 
     public async Task<IResult> UpdateUsername(UpdateUsernameRequest request)

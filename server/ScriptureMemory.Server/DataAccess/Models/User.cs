@@ -1,60 +1,24 @@
+using ScriptureMemory.Server.DataAccess.Models;
 using static ScriptureMemory.Server.Tools.Enums;
 
 namespace DataAccess.Models;
 
-public class User
+public class User : Account
 {
     public int Id { get; set; }
-    public string Username { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
-    public string? HashedPassword { get; set; }
-    public string? AuthToken { get; set; }
-    public Status Status { get; set; } = Status.Active;
+    public string Username { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public DateTime? DateRegistered { get; set; }
-    public DateTime LastSeen { get; set; } = DateTime.UtcNow;
-    public UserSettings Settings { get; set; } = new();
+    public UserPreferences Preferences { get; set; } = new();
     public string? ProfileDescription { get; set; }
     public string? PushNotificationToken { get; set; }
     public string? ProfilePictureUrl { get; set; }
     public int VersesMemorizedCount { get; set; } = 0;
-    public bool IsAdmin { get; set; } = false;
 
     public int Points { get; set; } = 0;
 
     public Paid? Paid { get; set; }
     public byte CollectionsCount { get; set; } = 0;
-
-    public User( // Minimum to retain user identity
-        string username,
-        string firstName,
-        string lastName,
-        string email)
-    {
-        Username = username;
-        FirstName = firstName;
-        LastName = lastName;
-        Email = email;
-    }
-
-    public User( // Create a new user
-        string username,
-        string firstName,
-        string lastName,
-        string email,
-        string hashedPassword,
-        DateTime dateRegistered,
-        string authToken)
-    {
-        Username = username;
-        FirstName = firstName;
-        LastName = lastName;
-        Email = email;
-        HashedPassword = hashedPassword;
-        DateRegistered = dateRegistered;
-        AuthToken = authToken;
-    }
-
-    public User() { }
 }

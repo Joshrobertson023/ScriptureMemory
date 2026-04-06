@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "dj8ZMhw4exU=",
+  "dgSpecHash": "MVlmZ9wKJZY=",
   "success": true,
   "projectFilePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
   "expectedPackageFiles": [
@@ -25,6 +25,7 @@
     "C:\\Users\\there\\.nuget\\packages\\lucene.net.queryparser\\4.8.0-beta00017\\lucene.net.queryparser.4.8.0-beta00017.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\lucene.net.sandbox\\4.8.0-beta00017\\lucene.net.sandbox.4.8.0-beta00017.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.applicationinsights\\2.23.0\\microsoft.applicationinsights.2.23.0.nupkg.sha512",
+    "C:\\Users\\there\\.nuget\\packages\\microsoft.aspnet.identity.core\\2.2.4\\microsoft.aspnet.identity.core.2.2.4.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.3.0\\microsoft.aspnetcore.authentication.2.3.0.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.3.0\\microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\microsoft.aspnetcore.authentication.cookies\\2.3.0\\microsoft.aspnetcore.authentication.cookies.2.3.0.nupkg.sha512",
@@ -161,5 +162,18 @@
     "C:\\Users\\there\\.nuget\\packages\\xunit.v3.runner.common\\3.2.2\\xunit.v3.runner.common.3.2.2.nupkg.sha512",
     "C:\\Users\\there\\.nuget\\packages\\xunit.v3.runner.inproc.console\\3.2.2\\xunit.v3.runner.inproc.console.3.2.2.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.AspNet.Identity.Core 2.2.4' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Microsoft.AspNet.Identity.Core",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

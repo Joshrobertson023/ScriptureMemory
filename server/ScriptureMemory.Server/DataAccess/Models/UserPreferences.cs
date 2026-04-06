@@ -7,7 +7,7 @@ using static ScriptureMemory.Server.Tools.Enums;
 
 namespace DataAccess.Models;
 
-public sealed class UserSettings
+public sealed class UserPreferences
 {
     public ThemePreference ThemePreference { get; set; } = ThemePreference.SystemDefault;
     public BibleVersion BibleVersion { get; set; } = BibleVersion.Kjv;

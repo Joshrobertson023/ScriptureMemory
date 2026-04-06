@@ -75,7 +75,7 @@ public class UserTests : BaseIntegrationTest
         Assert.NotNull(tokenUser);
         Assert.Equal(tokenUser.Username, loggedInUser.Username);
         Assert.Equal(tokenUser.AuthToken, loggedInUser.AuthToken);
-        Assert.Equal(tokenUser.Settings.ThemePreference, loggedInUser.Settings.ThemePreference);
+        Assert.Equal(tokenUser.Settings.ThemePreference, loggedInUser.Preferences.ThemePreference);
     }
 
     [Fact]

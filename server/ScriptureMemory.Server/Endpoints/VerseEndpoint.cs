@@ -49,14 +49,14 @@ public static class VerseEndpoint
             [FromBody] string query) =>
         {
             return Results.Ok(ReferenceParser.Parse(query));
-        });
+        }).RequireAuthorization("User");
 
         app.MapPost("/verses/cross-reference", async (
             [FromBody] List<int> verseIds,
             [FromServices] CrossReferenceData crossReferenceData) =>
         {
             return Results.Ok(await crossReferenceData.GetCrossReferences(verseIds));
-        });
+        }).RequireAuthorization("User");
 
         app.MapPost("/verses/cross-reference/reference", async (
             [FromBody] List<string> references,
@@ -64,7 +64,7 @@ public static class VerseEndpoint
         {
             return Results.Ok(await crossReferenceData.GetCrossReferences(
                 references.Select(r => ReferenceParser.Parse(r)).ToList()));
-        });
+        }).RequireAuthorization("User");
 
         app.MapGet("/verses/cross-reference/reference/{reference}", async (
             string reference,
@@ -72,6 +72,6 @@ public static class VerseEndpoint
         {
             return Results.Ok(await crossReferenceData.GetCrossReferences(
                 new List<Reference> { ReferenceParser.Parse(reference) }));
-        });
+        }).RequireAuthorization("User");
     }
 }
