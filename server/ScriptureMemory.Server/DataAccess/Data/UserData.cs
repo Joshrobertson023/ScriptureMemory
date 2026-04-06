@@ -12,12 +12,40 @@ using System.Text;
 using System.Threading.Tasks;
 using static ScriptureMemory.Server.Tools.Enums;
 using Npgsql;
+using ScriptureMemory.Server.DataAccess.Models;
 
 namespace DataAccess.Data;
 public class UserData
 {
     private readonly IConfiguration _config;
     private readonly string _connectionString;
+
+    private const string GetQuery =
+        """
+        select
+        u.id as Id,
+        u.username as Username,
+        u.first_name as FirstName,
+        u.last_name as LastName,
+        u.email as Email,
+        u.profile_picture_url as ProfilePictureUrl,
+        u.hashed_password as HashedPassword,
+        u.date_registered as DateRegistered,
+        u.points as Points,
+        u.memorized_count as VersesMemorizedCount,
+        u.profile_description as ProfileDescription,
+        up.theme as ThemePreference,
+        up.bible_version as BibleVersion,
+        up.collections_sort as CollectionsSort,
+        up.vod_notifications as SubscribedVerseOfDay,
+        up.notify_friends_memorized_passage as NotifyFriendsMemorizedPassage,
+        up.notify_friends_published_collection as NotifyFriendsPublishedCollection,
+        up.notify_collection_saved as NotifyCollectionSaved,
+        up.notify_note_liked_comented as NotifyNoteLikedCommented,
+        up.friends_activity_notifications as FriendsActivityNotificationsEnabled,
+        up.overdue_reminders as OverdueRemindersEnabled,
+        up.type_out_reference as TypeOutReference
+        """;
 
     public UserData(IConfiguration config)
     {
@@ -34,6 +62,7 @@ public class UserData
     public async Task<int> CreateUser()
     {
         using var conn = new NpgsqlConnection(_connectionString);
+        using var transaction = await conn.BeginTransactionAsync();
         int newUserId = await conn.ExecuteScalarAsync<int>(
             """
             insert into users 
@@ -47,7 +76,7 @@ public class UserData
                 Points = 0,
                 VersesMemorized = 0,
                 Role = UserRole.User.ToString()
-            });
+            }, transaction);
         await conn.ExecuteAsync(
             """
             insert into user_preferences
@@ -57,14 +86,99 @@ public class UserData
             """, new
             {
                 UserId = newUserId
-            });
+            }, transaction);
+        await transaction.CommitAsync();
         return newUserId;
     }
 
 
-    // -------------------------------------------------------
-    //  Get
-    // -------------------------------------------------------
+    // -- Get ---------------------------------------------
+
+    public class GetUserDto
+    {
+        public int Id { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string HashedPassword { get; set; } = string.Empty;
+        public DateTime? DateRegistered { get; set; }
+        public string? ProfileDescription { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+        public int VersesMemorizedCount { get; set; }
+        public int Points { get; set; } = 0;
+        public int ThemePreference { get; set; }
+        public int BibleVersion { get; set; }
+        public int CollectionsSort { get; set; }
+        public bool SubscribedVerseOfDay { get; set; } = true;
+        public bool NotifyFriendsMemorizedPassage { get; set; } = true;
+        public bool NotifyFriendsPublishedCollection { get; set; } = true;
+        public bool NotifyCollectionSaved { get; set; } = true;
+        public bool NotifyNoteLikedCommented { get; set; } = true;
+        public bool FriendsActivityNotificationsEnabled { get; set; } = true;
+        public bool OverdueRemindersEnabled { get; set; } = true;
+        public bool TypeOutReference { get; set; } = false;
+
+        public string? RefreshTokenHash { get; set; }
+        public DateTime LastSeen { get; set; }
+        public string? PushNotificationToken { get; set; }
+    }
+
+    public async Task<User> GetUserFromById(int userId)
+    {
+        using var conn = new NpgsqlConnection(_connectionString);
+        var results = await conn.QueryAsync<GetUserDto>(
+            $"""
+            {GetQuery},
+            s.refresh_token_hash as RefreshTokenHash,
+            s.last_seen as LastSeen,
+            s.push_notification_token as PushNotificationToken
+            from users u
+            join user_preferences up on u.id = up.user_id
+            left join device_sessions s on u.id = s.user_id
+            where u.id = :UserId
+            """, new
+            {
+                UserId = userId
+            });
+
+        return results
+            .GroupBy(r => r.Id)
+            .Select(g => new User
+            {
+                Id = g.Key,
+                Username = g.First().Username,
+                FirstName = g.First().FirstName,
+                LastName = g.First().LastName,
+                Email = g.First().Email,
+                DateRegistered = g.First().DateRegistered,
+                HashedPassword = g.First().HashedPassword,
+                Preferences = new UserPreferences
+                {
+                    ThemePreference = (ThemePreference)g.First().ThemePreference,
+                    BibleVersion = (BibleVersion)g.First().BibleVersion,
+                    CollectionsSort = (CollectionsSort)g.First().CollectionsSort,
+                    SubscribedVerseOfDay = g.First().SubscribedVerseOfDay,
+                    NotifyFriendsMemorizedPassage = g.First().NotifyFriendsMemorizedPassage,
+                    NotifyFriendsPublishedCollection = g.First().NotifyFriendsPublishedCollection,
+                    NotifyCollectionSaved = g.First().NotifyCollectionSaved,
+                    NotifyNoteLikedCommented = g.First().NotifyNoteLikedCommented,
+                    FriendsActivityNotificationsEnabled = g.First().FriendsActivityNotificationsEnabled,
+                    OverdueRemindersEnabled = g.First().OverdueRemindersEnabled,
+                    TypeOutReference = g.First().TypeOutReference
+                },
+                ProfileDescription = g.First().ProfileDescription,
+                ProfilePictureUrl = g.First().ProfilePictureUrl,
+                VersesMemorizedCount = g.First().VersesMemorizedCount,
+                Points = g.First().Points,
+                Sessions = g.Where(r => r.RefreshTokenHash != null).Select(r => new Session
+                {
+                    RefreshTokenHash = r.RefreshTokenHash!,
+                    LastSeenAt = r.LastSeen,
+                    PushNotificationToken = r.PushNotificationToken
+                }).ToList()
+            }).FirstOrDefault() ?? throw new Exception("User with id " + userId + " not found");
+    }
 
     public async Task<User?> GetUserFromUsername(string username)
     {
@@ -162,20 +276,6 @@ public class UserData
 
         using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<int>(sql, new { Username = username });
-
-        return results.First();
-    }
-
-    public async Task<User> GetUserFromUserId(int userId)
-    {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
-                    HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
-                    POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
-                    PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
-                    FROM USERS WHERE ID = :UserId";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<User>(sql, new { UserId = userId });
 
         return results.First();
     }

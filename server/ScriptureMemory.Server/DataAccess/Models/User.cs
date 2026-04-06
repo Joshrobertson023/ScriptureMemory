@@ -13,7 +13,6 @@ public class User : Account
     public DateTime? DateRegistered { get; set; }
     public UserPreferences Preferences { get; set; } = new();
     public string? ProfileDescription { get; set; }
-    public string? PushNotificationToken { get; set; }
     public string? ProfilePictureUrl { get; set; }
     public int VersesMemorizedCount { get; set; } = 0;
 

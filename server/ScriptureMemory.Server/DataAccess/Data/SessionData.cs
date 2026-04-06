@@ -22,9 +22,9 @@ public class SessionData
         int sessionId = await conn.ExecuteScalarAsync<int>(
             """
             insert into device_sessions
-            (user_id, device_id, device_name, platform, refresh_token_hash, created_at, last_seen_at)
+            (user_id, device_id, device_name, platform, refresh_token_hash, push_notification_token, created_at, last_seen_at)
             values
-            (@UserId, @DeviceId, @DeviceName, @Platform, @RefreshTokenHash, @CreatedAt, @LastSeenAt)
+            (@UserId, @DeviceId, @DeviceName, @Platform, @RefreshTokenHash, @PushNotificationToken, @CreatedAt, @LastSeenAt)
             returning id
             """, new
             {
@@ -33,6 +33,7 @@ public class SessionData
                 DeviceName = session.DeviceName,
                 Platform = session.Platform,
                 RefreshTokenHash = session.RefreshTokenHash,
+                PushNotificationToken = session.PushNotificationToken,
                 CreatedAt = DateTime.UtcNow,
                 LastSeenAt = DateTime.UtcNow,
             });

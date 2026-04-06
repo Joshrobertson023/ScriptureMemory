@@ -47,6 +47,7 @@ public sealed class UserService
         var hasher = new PasswordHasher<string>();
 
         int newUserId = await _userContext.CreateUser();
+        var newUser = await _userContext.GetUserFromUserId(newUserId);
 
         session.RefreshTokenHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
 
@@ -54,9 +55,9 @@ public sealed class UserService
 
         return Results.Ok(new
         {
-            UserId = newUserId,
+            User = newUser,
             RefreshTokenHash = session.RefreshTokenHash,
-            Jwt = _tokenProvider.Create(new User { Id = newUserId })
+            Jwt = _tokenProvider.Create(newUser)
         });
     }
 }
