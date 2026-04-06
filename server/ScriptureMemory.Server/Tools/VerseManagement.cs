@@ -126,6 +126,7 @@ public sealed class VerseManagement
         var allVerses = (await pgConn.QueryAsync<VerseDto>(
             """
             select id as Id, book as Book, chapter as Chapter, text as Text, verse_num as VerseNum
+            from verses
             """)).ToList();
         var versesByKey = allVerses.ToDictionary(v => (v.Book, v.Chapter, v.VerseNum));
         _logger.LogDebug("Loaded {Count} verses", allVerses.Count);
@@ -154,16 +155,25 @@ public sealed class VerseManagement
         """;
         await cmd.ExecuteNonQueryAsync();
 
+        using var _cmd = connection.CreateCommand();
+        _cmd.CommandText =
+            """
+            delete from cross_references;
+            delete from cross_reference_passages;
+            delete from cross_reference_passages_verses;
+            """;
+        await _cmd.ExecuteNonQueryAsync();
+
         using var transaction = await connection.BeginTransactionAsync();
         cmd.Transaction = (SqliteTransaction)transaction;
 
         try
         {
-            bool skip = true;
+            //bool skip = true;
             foreach (string line in lines)
             {
-                if (line == "Gen.1.27\t1Cor.11.7-1Cor.11.9\t21") skip = false;
-                if (skip) continue;
+                //if (line == "Gen.1.27\t1Cor.11.7-1Cor.11.9\t21") skip = false;
+                //if (skip) continue;
 
                 string[] parts = line.Split('\t');
                 if (parts[0] == "From Verse") continue;
@@ -235,5 +245,4 @@ public sealed class VerseManagement
             throw;
         }
     }
-}
 }

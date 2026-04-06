@@ -59,7 +59,17 @@ public static class ReferenceParser
             ReadOnlySpan<char> firstPart = versesPartSpan[..dashIndex];
             ReadOnlySpan<char> secondPart = versesPartSpan[(dashIndex + 1)..];
 
-            if (secondPart.Length > 0 && char.IsLetter(secondPart[0]))
+            bool secondPartIsBook = false;
+            for (int l = 0; l < secondPart.Length; l++)
+            {
+                if (!char.IsDigit(secondPart[l]))
+                {
+                    secondPartIsBook = true;
+                    break;
+                }
+            }
+
+            if (secondPart.Length > 0 && secondPartIsBook)
             {
                 int k = firstPart.Length - 1;
                 while (k >= 0 && char.IsDigit(firstPart[k]))
