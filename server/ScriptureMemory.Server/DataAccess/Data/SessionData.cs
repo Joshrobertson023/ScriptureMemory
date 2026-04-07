@@ -39,4 +39,35 @@ public class SessionData
             });
         return sessionId;
     }
+
+    public async Task<string?> GetDeviceId(string refreshTokenHash)
+    {
+        using var conn = new NpgsqlConnection(_connectionString);
+        string? deviceId = await conn.ExecuteScalarAsync<string?>(
+            """
+            select device_id from device_sessions
+            where refresh_token_hash = @RefreshTokenHash
+            """, new 
+            { 
+                RefreshTokenHash = refreshTokenHash 
+            });
+        return deviceId;
+    }
+
+    public async Task UpdateRefreshToken(int userId, Session session)
+    {
+        using var conn = new NpgsqlConnection(_connectionString);
+        await conn.ExecuteAsync(
+            """
+            update device_sessions
+            set refresh_token_hash = @RefreshTokenHash, last_seen_at = @LastSeenAt
+            where user_id = @UserId and device_id = @DeviceId
+            """, new
+            {
+                UserId = userId,
+                DeviceId = session.DeviceId,
+                RefreshTokenHash = session.RefreshTokenHash,
+                LastSeenAt = DateTime.UtcNow,
+            });
+    }
 }

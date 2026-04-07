@@ -124,7 +124,7 @@ public class UserData
         public string? PushNotificationToken { get; set; }
     }
 
-    public async Task<User> GetUserFromById(int userId)
+    public async Task<User> GetUserById(int userId)
     {
         using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<GetUserDto>(
@@ -177,107 +177,129 @@ public class UserData
                     LastSeenAt = r.LastSeen,
                     PushNotificationToken = r.PushNotificationToken
                 }).ToList()
-            }).FirstOrDefault() ?? throw new Exception("User with id " + userId + " not found");
+            }).FirstOrDefault() ?? throw new Exception("User not found");
     }
 
-    public async Task<User?> GetUserFromUsername(string username)
+    public async Task<User?> GetUserByUsername(string username)
     {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
-                    HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
-                    POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
-                    PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
-                    FROM USERS WHERE USERNAME = :Username";
-
         using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<User>(sql, new { Username = username });
-        return results.FirstOrDefault();
+        var results = await conn.QueryAsync<GetUserDto>(
+            $"""
+            {GetQuery},
+            s.refresh_token_hash as RefreshTokenHash,
+            s.last_seen as LastSeen,
+            s.push_notification_token as PushNotificationToken
+            from users u
+            join user_preferences up on u.id = up.user_id
+            left join device_sessions s on u.id = s.user_id
+            where u.username = @Username
+            """, new
+            {
+                Username = username
+            });
+
+        return results
+            .GroupBy(r => r.Id)
+            .Select(g => new User
+            {
+                Id = g.Key,
+                Username = g.First().Username,
+                FirstName = g.First().FirstName,
+                LastName = g.First().LastName,
+                Email = g.First().Email,
+                DateRegistered = g.First().DateRegistered,
+                HashedPassword = g.First().HashedPassword,
+                Preferences = new UserPreferences
+                {
+                    ThemePreference = (ThemePreference)g.First().ThemePreference,
+                    BibleVersion = (BibleVersion)g.First().BibleVersion,
+                    CollectionsSort = (CollectionsSort)g.First().CollectionsSort,
+                    SubscribedVerseOfDay = g.First().SubscribedVerseOfDay,
+                    NotifyFriendsMemorizedPassage = g.First().NotifyFriendsMemorizedPassage,
+                    NotifyFriendsPublishedCollection = g.First().NotifyFriendsPublishedCollection,
+                    NotifyCollectionSaved = g.First().NotifyCollectionSaved,
+                    NotifyNoteLikedCommented = g.First().NotifyNoteLikedCommented,
+                    FriendsActivityNotificationsEnabled = g.First().FriendsActivityNotificationsEnabled,
+                    OverdueRemindersEnabled = g.First().OverdueRemindersEnabled,
+                    TypeOutReference = g.First().TypeOutReference
+                },
+                ProfileDescription = g.First().ProfileDescription,
+                ProfilePictureUrl = g.First().ProfilePictureUrl,
+                VersesMemorizedCount = g.First().VersesMemorizedCount,
+                Points = g.First().Points,
+                Sessions = g.Where(r => r.RefreshTokenHash != null).Select(r => new Session
+                {
+                    RefreshTokenHash = r.RefreshTokenHash!,
+                    LastSeenAt = r.LastSeen,
+                    PushNotificationToken = r.PushNotificationToken
+                }).ToList()
+            }).FirstOrDefault() ?? throw new Exception("User not found");
     }
 
-    public async Task<User?> GetUserFromToken(string token)
+    public async Task<User?> GetUserByRefreshToken(string refreshTokenHash)
     {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
-                    HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
-                    POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
-                    PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
-                    FROM USERS WHERE AUTH_TOKEN = :Token";
-
         using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<User>(sql, new { Token = token });
-        return results.FirstOrDefault();
-    }
+        var results = await conn.QueryAsync<GetUserDto>(
+            $"""
+            {GetQuery},
+            s.refresh_token_hash as RefreshTokenHash,
+            s.last_seen as LastSeen,
+            s.push_notification_token as PushNotificationToken
+            from users u
+            join user_preferences up on u.id = up.user_id
+            left join device_sessions s on u.id = s.user_id
+            join device_sessions ds on u.id = ds.user_id
+            where ds.refresh_token_hash = @RefreshTokenHash
+            """, new
+            {
+                RefreshTokenHash = refreshTokenHash
+            });
 
-    public async Task<string?> GetTokenFromUsername(string username)
-    {
-        var sql = @"SELECT AUTH_TOKEN as AuthToken FROM USERS WHERE USERNAME = :Username";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<string>(sql, new { Username = username });
-        return results.FirstOrDefault();
-    }
-
-
-    public async Task<List<User>> GetUsersFromEmail(string email)
-    {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
-                    HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
-                    POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
-                    PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
-                    FROM USERS WHERE UPPER(EMAIL) = UPPER(:Email)";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<User>(sql, new { Email = email });
-        return results.ToList();
+        return results
+            .GroupBy(r => r.Id)
+            .Select(g => new User
+            {
+                Id = g.Key,
+                Username = g.First().Username,
+                FirstName = g.First().FirstName,
+                LastName = g.First().LastName,
+                Email = g.First().Email,
+                DateRegistered = g.First().DateRegistered,
+                HashedPassword = g.First().HashedPassword,
+                Preferences = new UserPreferences
+                {
+                    ThemePreference = (ThemePreference)g.First().ThemePreference,
+                    BibleVersion = (BibleVersion)g.First().BibleVersion,
+                    CollectionsSort = (CollectionsSort)g.First().CollectionsSort,
+                    SubscribedVerseOfDay = g.First().SubscribedVerseOfDay,
+                    NotifyFriendsMemorizedPassage = g.First().NotifyFriendsMemorizedPassage,
+                    NotifyFriendsPublishedCollection = g.First().NotifyFriendsPublishedCollection,
+                    NotifyCollectionSaved = g.First().NotifyCollectionSaved,
+                    NotifyNoteLikedCommented = g.First().NotifyNoteLikedCommented,
+                    FriendsActivityNotificationsEnabled = g.First().FriendsActivityNotificationsEnabled,
+                    OverdueRemindersEnabled = g.First().OverdueRemindersEnabled,
+                    TypeOutReference = g.First().TypeOutReference
+                },
+                ProfileDescription = g.First().ProfileDescription,
+                ProfilePictureUrl = g.First().ProfilePictureUrl,
+                VersesMemorizedCount = g.First().VersesMemorizedCount,
+                Points = g.First().Points,
+                Sessions = g.Where(r => r.RefreshTokenHash != null).Select(r => new Session
+                {
+                    RefreshTokenHash = r.RefreshTokenHash!,
+                    LastSeenAt = r.LastSeen,
+                    PushNotificationToken = r.PushNotificationToken
+                }).ToList()
+            }).FirstOrDefault() ?? throw new Exception("User not found");
     }
 
     public async Task<string?> GetPasswordHash(string username)
     {
-        var sql = $@"SELECT HASHED_PASSWORD as HashedPassword FROM USERS WHERE USERNAME = :Username";
+        var sql = $@"select hashed_password from users where username = @Username";
 
         using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.QueryAsync<string>(sql, new { Username = username });
         return results.FirstOrDefault();
-    }
-
-    public async Task<List<string>> GetUsernamesByProfile(string firstName, string lastName, string email)
-    {
-        var sql = @"SELECT USERNAME 
-                    FROM USERS 
-                    WHERE UPPER(FIRST_NAME) = UPPER(:firstName)
-                      AND UPPER(LAST_NAME) = UPPER(:lastName)
-                      AND UPPER(EMAIL) = UPPER(:email)";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<string>(sql, new
-        {
-            firstName,
-            lastName,
-            email
-        });
-
-        return results.ToList();
-    }
-
-    public async Task<List<User>> GetUsers(int count = 100)
-    {
-        var sql = @"SELECT ID, USERNAME, FIRST_NAME as FirstName, LAST_NAME as LastName, EMAIL, AUTH_TOKEN as AuthToken, USER_STATUS as Status,
-                    HASHED_PASSWORD as HashedPassword, LAST_SEEN as LastSeen, PROFILE_DESCRIPTION AS ProfileDescription, 
-                    POINTS, VERSES_MEMORIZED AS VersesMemorizedCount, 
-                    PROFILE_PICTURE_URL AS ProfilePictureUrl, DATE_REGISTERED as DateRegistered
-                    FROM USERS WHERE ROWNUM <= :Count";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<User>(sql, new { Count = count });
-        return results.ToList();
-    }
-
-    public async Task<int> GetUserIdFromUsername(string username)
-    {
-        var sql = @"SELECT ID FROM USERS WHERE USERNAME = :Username";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<int>(sql, new { Username = username });
-
-        return results.First();
     }
 
     public async Task<bool> CheckUsernameExists(string username)
@@ -287,15 +309,6 @@ public class UserData
         using var conn = new NpgsqlConnection(_connectionString);
         var count = await conn.ExecuteScalarAsync<int>(sql, new { Username = username });
         return count > 0;
-    }
-
-    public async Task<string> GetUsernameFromId(int userId)
-    {
-        var sql = @"SELECT USERNAME FROM USERS WHERE ID = :UserId";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        var results = await conn.QueryAsync<string>(sql, new { UserId = userId });
-        return results.FirstOrDefault() ?? "";
     }
 
 

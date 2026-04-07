@@ -1,3 +1,4 @@
+using ScriptureMemory.Server.DataAccess.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,4 +12,5 @@ public sealed class LoginRequest
 {
     [Required] public string Username { get; set; } = string.Empty;
     [Required] public string Password { get; set; } = string.Empty;
+    [Required] public Session Session { get; set; } = new();
 }
