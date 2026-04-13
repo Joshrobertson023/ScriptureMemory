@@ -15,6 +15,7 @@ import {HomeScreen} from './home.screen';
 import {CollectionsScreen} from './collections.screen';
 import useGlobalStyles from '../../styles/gobalStyles';
 import { CollectionTopTabs } from './CollectionTopTabs';
+import { Users } from 'lucide-react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -95,17 +96,17 @@ export default function TabLayout() {
         >
           {/* ── Home ── */}
           <Tab.Screen
-            name="HomeTabs"
+            name="KJV Bible"
             component={HomeScreen}
             options={{
               headerShown: true,
               headerRight: () => (
-                <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 15, marginRight: 10 }}>
                   <TouchableOpacity onPress={() => { /* navigate to notifications */ }}>
-                    <Ionicons style={{ marginTop: 4 }} name="refresh" size={32} color={theme.colors.onBackground} />
+                    <Users color={theme.colors.onBackground} size={28} />
                   </TouchableOpacity>
                   <Pressable onPress={() => setIsProfileDrawerOpen(true)}>
-                    <Ionicons style={{ marginTop: 4 }} name="person-circle" size={32} color={theme.colors.onBackground} />
+                    <Ionicons style={{ }} name="person-circle" size={36} color={theme.colors.onBackground} />
                   </Pressable>
                 </View>
               ),

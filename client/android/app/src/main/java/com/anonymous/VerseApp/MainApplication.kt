@@ -1,4 +1,5 @@
 package com.anonymous.VerseApp
+import com.facebook.react.common.assets.ReactFontManager
 
 import android.app.Application
 import android.content.res.Configuration
@@ -29,6 +30,10 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-335ec6f1e9c294aec7ad619448d58e179321a1c7
+    ReactFontManager.getInstance().addCustomFont(this, "Inter", R.font.xml_inter)
+    ReactFontManager.getInstance().addCustomFont(this, "Noto Serif", R.font.xml_noto_serif)
+    // @generated end xml-fonts-init
     DefaultNewArchitectureEntryPoint.releaseLevel = try {
       ReleaseLevel.valueOf(BuildConfig.REACT_NATIVE_RELEASE_LEVEL.uppercase())
     } catch (e: IllegalArgumentException) {

@@ -1,7 +1,7 @@
 import { HelperText, TextInput } from "react-native-paper";
 import useStyles from "../../styles/gobalStyles";
 import { useState } from "react";
-import { useAppStore } from "../../store";
+import { useAppStore } from "../../stores/appState.store";
 import { useFormStore } from "../../stores/form.store";
 import { usernameExists } from "../../api/user.api";
 import { View, Text } from "react-native";

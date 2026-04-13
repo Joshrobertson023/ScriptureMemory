@@ -133,6 +133,7 @@ public static class Services
         services.AddScoped<CollectionData>();
         services.AddScoped<PublishedCollectionData>();
         services.AddScoped<VerseOfDayData>();
+        services.AddScoped<SessionData>();
         return services;
     }
 }

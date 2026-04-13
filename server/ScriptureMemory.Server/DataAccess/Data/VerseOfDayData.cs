@@ -140,7 +140,7 @@ public class VerseOfDayData
                         ReadableReference = $"{v.Book} {v.Chapter}:{v.VerseNum}"
                     },
                     Text = v.Text,
-                }).ToList(),
+                }).OrderBy(v => v.Reference.Verses.First()).ToList(),
                 MostMemorized = g.Max(v => v.Memorized),
                 MostSaved = g.Max(v => v.Saved),
                 Date = DateTime.UtcNow.Date
@@ -173,6 +173,17 @@ public class VerseOfDayData
         await conn.OpenAsync();
 
         return await conn.ExecuteScalarAsync<int>(sql);
+    }
+
+    public async Task ResetFirstVodDay()
+    {
+        using var conn = new Npgsql.NpgsqlConnection(connectionString);
+        await conn.OpenAsync();
+        await conn.ExecuteAsync(
+            """
+            update vod_active
+            set first_position_date = CURRENT_DATE
+            """);
     }
 
     public async Task<List<VerseOfDay>> GetVods(int? page = null, int? pageSize = null)

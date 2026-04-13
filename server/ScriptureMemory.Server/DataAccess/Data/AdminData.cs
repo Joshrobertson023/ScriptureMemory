@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using Dapper;
 using DataAccess.Models;
+using Microsoft.AspNet.Identity;
 using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Tools;
 

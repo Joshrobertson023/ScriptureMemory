@@ -89,17 +89,14 @@ public sealed class EmailSenderService
     public async Task<IResult> SendForgotUsernameEmail(ForgotUsernameRequest request)
     {
 
-        var fullName = request.FirstName.Trim() + " " + request.LastName.Trim();
-        var usernames = (await userContext.GetUsernamesByProfile(
-            request.FirstName.Trim(),
-            request.LastName.Trim(),
+        var usernames = (await userContext.GetUsernamesByEmail(
             request.Email.Trim())).ToList();
 
         if (!usernames.Any()) 
             return Results.NotFound();
 
         var bodyLines = usernames.Select(u => $"- {u}");
-        var body = $@"Hi {request.FirstName.Trim()},
+        var body = $@"Hi,
 
                     We received a request to retrieve the username(s) associated with this email address for VerseApp.
 
@@ -113,7 +110,7 @@ public sealed class EmailSenderService
 
         await SendEmail(
             new Email(
-                new Email.To(fullName, request.Email.Trim()),
+                new Email.To("", request.Email.Trim()),
                 new Email.From("VerseApp", Data.emailFromAddress),
                 body,
                 "Forgot Username"
@@ -137,7 +134,7 @@ public sealed class EmailSenderService
 
         var otp = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
 
-        var user = await userContext.GetUserFromUsername(request.Username.Trim());
+        var user = await userContext.GetUserByUsername(request.Username.Trim());
 
         if (user is null)
             return Results.Problem("Username not found");

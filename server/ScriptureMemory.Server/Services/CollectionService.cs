@@ -54,8 +54,8 @@ public sealed class CollectionService
         }
 
         // Ensure not saving from a published collection
-        if (newCollection.PublishedId is not null || newCollection.AuthorId is not null)
-            throw new ArgumentException("Cannot create collection: PublishedId or AuthorId should be null for user-created collection.");
+        //if (newCollection.PublishedId is not null || newCollection.AuthorId is not null)
+        //    throw new ArgumentException("Cannot create collection: PublishedId or AuthorId should be null for user-created collection.");
 
         // Default progress to null
         newCollection.ProgressPercent = null;
@@ -163,11 +163,11 @@ public sealed class CollectionService
     /// <returns>Collection</returns>
     public async Task<Collection> GetCollection(Collection collection)
     {
-        if (collection.CollectionId <= 0)
+        if (collection.Id <= 0)
             throw new InvalidOperationException("Cannot get collection: CollectionId is required.");
 
-        collection.Passages = await passageContext.GetUserPassagesPopulatedForCollection(collection.CollectionId);
-        //collection.Notes = await collectionContext.GetCollectionNotes(collection.CollectionId);
+        collection.Passages = await passageContext.GetUserPassagesPopulatedForCollection(collection.Id);
+        //collection.Notes = await collectionContext.GetCollectionNotes(collection.Id);
 
         return collection;
     }

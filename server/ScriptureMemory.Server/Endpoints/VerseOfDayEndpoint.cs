@@ -32,6 +32,13 @@ public static class VerseOfDayEndpoint
             return Results.Ok(await service.InsertVod(request.Reference, request.AdminId));
         }).RequireAuthorization("Admin");
 
+        app.MapPost("/verseofday/reset", async (
+            [FromServices] VerseOfDayData data) =>
+        {
+            await data.ResetFirstVodDay();
+            return Results.Ok();
+        }).RequireAuthorization("SuperAdmin");
+
         app.MapGet("/verseofday/daysuntillast", async (
             [FromServices] VerseOfDayData data) =>
         {

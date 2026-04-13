@@ -32,6 +32,9 @@ export const HomeScreen = () => {
     return (
         <View style={styles.screen}>
             <VerseOfDayHomeCard/>
+            <View style={{display: 'flex', marginTop: 35, width: '100%'}}>
+                <Text style={styles.h1}>For You</Text>
+            </View>
         </View>
     )
 }

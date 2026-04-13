@@ -38,66 +38,6 @@ public sealed class UserSettingsData
         await conn.ExecuteAsync(sql, new { version = version, userId = userId });
     }
 
-    public async Task CreateUserSettings(UserPreferences settings, int userId)
-    {
-        var sql = @"INSERT INTO USER_PREFERENCES
-                    (USER_ID, THEME, BIBLE_VERSION, COLLECTIONS_SORT, SUBSCRIBED_VOD,
-                     PUSH_NOTIFICATIONS_ENABLED, NOTIFY_MEMORIZED_VERSE, NOTIFY_PUBLISHED_COLLECTION,
-                     NOTIFY_COLLECTION_SAVED, NOTIFY_NOTE_LIKED, FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED,
-                     STREAK_REMINDERS_ENABLED, APP_BADGES_ENABLED, PRACTICE_TAB_BADGES_ENABLED, TYPE_OUT_REFERENCE)
-                    VALUES
-                    (:UserId, :Theme, :Version, :CollectionsSort, :SubscribedVod,
-                     :PushNotifications, :NotifyMemorizedVerse, :NotifyPublishedCollection,
-                     :NotifyCollectionSaved, :NotifyNoteLiked, :FriendsActivityEnabled, 
-                     :StreakReminders, :AppBadgesEnabled, :PracticeTabBadgesEnabled, :TypeOutReference)";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        await conn.ExecuteAsync(
-            sql,
-            new
-            {
-                UserId = userId,
-                Theme = settings.ThemePreference,
-                Version = settings.BibleVersion,
-                CollectionsSort = settings.CollectionsSort,
-                SubscribedVod = Convert.ToInt(settings.SubscribedVerseOfDay),
-                PushNotifications = Convert.ToInt(settings.PushNotificationsEnabled),
-                NotifyMemorizedVerse = Convert.ToInt(settings.NotifyMemorizedVerse),
-                NotifyPublishedCollection = Convert.ToInt(settings.NotifyPublishedCollection),
-                NotifyCollectionSaved = Convert.ToInt(settings.NotifyCollectionSaved),
-                NotifyNoteLiked = Convert.ToInt(settings.NotifyNoteLiked),
-                FriendsActivityEnabled = Convert.ToInt(settings.FriendsActivityNotificationsEnabled),
-                StreakReminders = Convert.ToInt(settings.StreakRemindersEnabled),
-                AppBadgesEnabled = Convert.ToInt(settings.AppBadgesEnabled),
-                PracticeTabBadgesEnabled = Convert.ToInt(settings.PracticeTabBadgesEnabled),
-                TypeOutReference = Convert.ToInt(settings.TypeOutReference)
-            });
-    }
-
-    public async Task<UserPreferences> GetUserSettingsFromUserId(int userId)
-    {
-        var sql = @"SELECT THEME as ThemePreference, 
-                           BIBLE_VERSION as BibleVersion, 
-                           COLLECTIONS_SORT as CollectionsSort, 
-                           SUBSCRIBED_VOD as SubscribedVerseOfDay, 
-                           PUSH_NOTIFICATIONS_ENABLED as PushNotificationsEnabled,
-                           NOTIFY_MEMORIZED_VERSE as NotifyMemorizedVerse, 
-                           NOTIFY_PUBLISHED_COLLECTION as NotifyPublishedCollection, 
-                           NOTIFY_COLLECTION_SAVED as NotifyCollectionSaved,
-                           NOTIFY_NOTE_LIKED as NotifyNoteLiked, 
-                           FRIENDS_ACTIVITY_NOTIFICATIONS_ENABLED as FriendsActivityNotificationsEnabled, 
-                           STREAK_REMINDERS_ENABLED as StreakRemindersEnabled,
-                           APP_BADGES_ENABLED as AppBadgesEnabled, 
-                           PRACTICE_TAB_BADGES_ENABLED as PracticeTabBadgesEnabled, 
-                           TYPE_OUT_REFERENCE as TypeOutReference
-                    FROM USER_PREFERENCES WHERE USER_ID = :userId";
-        using var conn = new NpgsqlConnection(_connectionString);
-        var result = await conn.QuerySingleOrDefaultAsync<UserPreferences>(sql, new { userId });
-        if (result is null)
-            throw new Exception($"No user settings found for user id: {userId}");
-        return result;
-    }
-
     public async Task UpdateCollectionsSort(Enums.CollectionsSort sortBy, int userId)
     {
         var sql = @"UPDATE USER_PREFERENCES SET COLLECTIONS_SORT = :sortBy WHERE USER_ID = :userId";

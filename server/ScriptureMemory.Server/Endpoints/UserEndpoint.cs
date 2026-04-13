@@ -5,6 +5,7 @@ using DataAccess.Requests;
 using DataAccess.Requests.UpdateRequests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ScriptureMemory.Server.DataAccess.Models;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -31,7 +32,7 @@ public static class UserEndpoint
             if (requestingUser != username)
                 return Results.Unauthorized();
 
-            var results = await data.GetUserFromUsername(username);
+            var results = await data.GetUserByUsername(username);
             if (results == null)
                 return Results.NotFound();
             return Results.Ok(results);
@@ -48,19 +49,10 @@ public static class UserEndpoint
 
         // Create a new user account
         app.MapPost("/users", async (
-            [FromBody] CreateUserRequest request,
+            [FromBody] Session session,
             [FromServices] UserService userService) =>
         {
-            try
-            {
-                await userService.CreateUserFromRequest(request);
-                return Results.Created();
-            }
-            catch (Exception ex)
-            {
-                // Return the error message and stack trace for debugging
-                return Results.BadRequest(new { error = ex.Message, details = ex.StackTrace });
-            }
+            return await userService.CreateUser(session);
         });
 
         // Check if username exists
@@ -81,15 +73,15 @@ public static class UserEndpoint
         });
 
         // Get users with a specific email address
-        app.MapGet("/users/email", async (
-            [FromBody] string email,
-            [FromServices] UserData data) =>
-        {
-            var results = await data.GetUsersFromEmail(email);
-            if (results == null)
-                return Results.NotFound();
-            return Results.Ok(results);
-        });
+        //app.MapGet("/users/email", async (
+        //    [FromBody] string email,
+        //    [FromServices] UserData data) =>
+        //{
+        //    var results = await data.GetUsersFromEmail(email);
+        //    if (results == null)
+        //        return Results.NotFound();
+        //    return Results.Ok(results);
+        //});
 
         // Get a user's password hash
         app.MapGet("/users/password/{username}", async (
@@ -103,19 +95,26 @@ public static class UserEndpoint
         });
 
         // Login a user with username and password
-        app.MapPost("/users/login/username", async (
-            [FromBody] LoginRequest request,
-            [FromServices] UserService userService) =>
-        {
-            return await userService.Login(request.Username, request.Password);
-        });
+        //app.MapPost("/users/login/username", async (
+        //    [FromBody] LoginRequest request,
+        //    [FromServices] UserService userService) =>
+        //{
+        //    return await userService.Login(request);
+        //});
 
         // Login a user from a login token
         app.MapPost("/users/login/token", async (
-            [FromBody] string token,
+            [FromBody] Session session,
             [FromServices] UserService userService) =>
         {
-            return await userService.Login(token);
+            return await userService.TokenLogin(session);
+        });
+
+        app.MapPost("/users/jwt", async (
+            [FromBody] Session session,
+            [FromServices] UserService userService) =>
+        {
+            return await userService.GetNewJwt(session);
         });
 
         // Increment the number of verses a user has memorized
@@ -155,33 +154,40 @@ public static class UserEndpoint
             return await service.Reset(request);
         });
 
-        app.MapPut("/users/username", async (
-            [FromBody] UpdateUsernameRequest request,
-            [FromServices] UserService service) =>
-        {
-            return await service.UpdateUsername(request);
-        });
+        //app.MapPost("/staff/update-password", async (
+        //    [FromBody] string newPassword,
+        //    [FromServices] AdminData data) =>
+        //{
+        //    return await data.UpdatePassword(newPassword);
+        //});
 
-        app.MapPut("/users/email", async (
-            [FromBody] UpdateEmailRequest request,
-            [FromServices] UserService service) =>
-        {
-            return await service.UpdateEmail(request);
-        });
+        //app.MapPut("/users/username", async (
+        //    [FromBody] UpdateUsernameRequest request,
+        //    [FromServices] UserService service) =>
+        //{
+        //    return await service.UpdateUsername(request);
+        //});
 
-        app.MapPut("/users/name", async (
-            [FromBody] UpdateNameRequest request,
-            [FromServices] UserService service) =>
-        {
-            return await service.UpdateName(request);
-        });
+        //app.MapPut("/users/email", async (
+        //    [FromBody] UpdateEmailRequest request,
+        //    [FromServices] UserService service) =>
+        //{
+        //    return await service.UpdateEmail(request);
+        //});
 
-        app.MapPut("/users/description", async (
-            [FromBody] UpdateDescriptionRequest request,
-            [FromServices] UserService service) =>
-        {
-            return await service.UpdateDescription(request);
-        });
+        //app.MapPut("/users/name", async (
+        //    [FromBody] UpdateNameRequest request,
+        //    [FromServices] UserService service) =>
+        //{
+        //    return await service.UpdateName(request);
+        //});
+
+        //app.MapPut("/users/description", async (
+        //    [FromBody] UpdateDescriptionRequest request,
+        //    [FromServices] UserService service) =>
+        //{
+        //    return await service.UpdateDescription(request);
+        //});
 
         app.MapGet("/leaderboard", async (
             [FromBody] GetLeaderboardRequest request,

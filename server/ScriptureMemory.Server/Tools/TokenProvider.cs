@@ -53,7 +53,7 @@ public sealed class TokenProvider(IConfiguration config)
             Subject = new ClaimsIdentity(new Claim[]
             {
                 new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim("refresh_token_hash", user.Sessions.First().RefreshTokenHash ?? throw new ArgumentNullException("RefreshTokenHash")),
+                new Claim("refresh_token_hash", user.Sessions.First().RefreshTokenHash ?? string.Empty),
                 new Claim("role", user.Role.ToString() ?? throw new ArgumentNullException(nameof(user.Role)))
             }),
             Expires = DateTime.UtcNow.AddMinutes(config.GetValue<int>("Jwt:UserExpireMinutes")),

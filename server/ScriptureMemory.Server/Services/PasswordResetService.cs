@@ -71,7 +71,6 @@ public sealed class PasswordResetService
     {
         var emailSenderResults = await emailSender.SendForgotUsernameEmail(request);
 
-        var fullName = request.FirstName + " " + request.LastName;
         await activityLogger.Log(
             new ActivityLog(
                 null,
@@ -81,8 +80,7 @@ public sealed class PasswordResetService
                 "User forgot username",
                 new
                 {
-                    Context = "Username not logged",
-                    FullName = fullName
+                    Email = request.Email
                 }
             )
         );

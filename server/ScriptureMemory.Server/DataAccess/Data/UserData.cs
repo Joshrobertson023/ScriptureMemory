@@ -41,7 +41,7 @@ public class UserData
         up.notify_friends_memorized_passage as NotifyFriendsMemorizedPassage,
         up.notify_friends_published_collection as NotifyFriendsPublishedCollection,
         up.notify_collection_saved as NotifyCollectionSaved,
-        up.notify_note_liked_comented as NotifyNoteLikedCommented,
+        up.notify_note_liked_commented as NotifyNoteLikedCommented,
         up.friends_activity_notifications as FriendsActivityNotificationsEnabled,
         up.overdue_reminders as OverdueRemindersEnabled,
         up.type_out_reference as TypeOutReference
@@ -62,20 +62,20 @@ public class UserData
     public async Task<int> CreateUser()
     {
         using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync();
         using var transaction = await conn.BeginTransactionAsync();
         int newUserId = await conn.ExecuteScalarAsync<int>(
             """
             insert into users 
-            (points, memorized_count, role)
+            (points, memorized_count)
             values
-            (@Points, @VersesMemorized, @Role)
+            (@Points, @VersesMemorized)
             returning id
             """,
             new
             {
                 Points = 0,
-                VersesMemorized = 0,
-                Role = UserRole.User.ToString()
+                VersesMemorized = 0
             }, transaction);
         await conn.ExecuteAsync(
             """
@@ -122,6 +122,8 @@ public class UserData
         public string? RefreshTokenHash { get; set; }
         public DateTime LastSeen { get; set; }
         public string? PushNotificationToken { get; set; }
+        public int? SessionId { get; set; }
+        public string? DeviceId { get; set; }
     }
 
     public async Task<User> GetUserById(int userId)
@@ -131,7 +133,7 @@ public class UserData
             $"""
             {GetQuery},
             s.refresh_token_hash as RefreshTokenHash,
-            s.last_seen as LastSeen,
+            s.last_seen_at as LastSeen,
             s.push_notification_token as PushNotificationToken
             from users u
             join user_preferences up on u.id = up.user_id
@@ -174,6 +176,66 @@ public class UserData
                 Sessions = g.Where(r => r.RefreshTokenHash != null).Select(r => new Session
                 {
                     RefreshTokenHash = r.RefreshTokenHash!,
+                    LastSeenAt = r.LastSeen,
+                    PushNotificationToken = r.PushNotificationToken
+                }).ToList()
+            }).FirstOrDefault() ?? throw new Exception("User not found");
+    }
+
+    public async Task<User> GetUserByDeviceId(string deviceId)
+    {
+        using var conn = new NpgsqlConnection(_connectionString);
+        var results = await conn.QueryAsync<GetUserDto>(
+            $"""
+            {GetQuery},
+            s.refresh_token_hash as RefreshTokenHash,
+            s.last_seen_at as LastSeen,
+            s.push_notification_token as PushNotificationToken,
+            s.id as SessionId,
+            s.device_id as DeviceId
+            from users u
+            join user_preferences up on u.id = up.user_id
+            left join device_sessions s on u.id = s.user_id
+            where s.device_id = @DeviceId
+            """, new
+            {
+                DeviceId = deviceId
+            });
+
+        return results
+            .GroupBy(r => r.Id)
+            .Select(g => new User
+            {
+                Id = g.Key,
+                Username = g.First().Username,
+                FirstName = g.First().FirstName,
+                LastName = g.First().LastName,
+                Email = g.First().Email,
+                DateRegistered = g.First().DateRegistered,
+                HashedPassword = g.First().HashedPassword,
+                Preferences = new UserPreferences
+                {
+                    ThemePreference = (ThemePreference)g.First().ThemePreference,
+                    BibleVersion = (BibleVersion)g.First().BibleVersion,
+                    CollectionsSort = (CollectionsSort)g.First().CollectionsSort,
+                    SubscribedVerseOfDay = g.First().SubscribedVerseOfDay,
+                    NotifyFriendsMemorizedPassage = g.First().NotifyFriendsMemorizedPassage,
+                    NotifyFriendsPublishedCollection = g.First().NotifyFriendsPublishedCollection,
+                    NotifyCollectionSaved = g.First().NotifyCollectionSaved,
+                    NotifyNoteLikedCommented = g.First().NotifyNoteLikedCommented,
+                    FriendsActivityNotificationsEnabled = g.First().FriendsActivityNotificationsEnabled,
+                    OverdueRemindersEnabled = g.First().OverdueRemindersEnabled,
+                    TypeOutReference = g.First().TypeOutReference
+                },
+                ProfileDescription = g.First().ProfileDescription,
+                ProfilePictureUrl = g.First().ProfilePictureUrl,
+                VersesMemorizedCount = g.First().VersesMemorizedCount,
+                Points = g.First().Points,
+                Sessions = g.Select(r => new Session
+                {
+                    Id = r.SessionId ?? 0,
+                    DeviceId = r.DeviceId ?? "",
+                    RefreshTokenHash = r.RefreshTokenHash,
                     LastSeenAt = r.LastSeen,
                     PushNotificationToken = r.PushNotificationToken
                 }).ToList()
@@ -291,6 +353,28 @@ public class UserData
                     PushNotificationToken = r.PushNotificationToken
                 }).ToList()
             }).FirstOrDefault() ?? throw new Exception("User not found");
+    }
+
+    /// <summary>
+    /// Gets usernames by email, used when user forgets their username
+    /// </summary>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<List<string>> GetUsernamesByEmail(string email)
+    {
+        using var conn = new NpgsqlConnection(_connectionString);
+        var results = await conn.QueryAsync<string>(
+            $"""
+            select username as Username
+            from users
+            where UPPER(email) = UPPER(:Email)
+            """, new
+            {
+                Email = email
+            });
+
+        return results.ToList();
     }
 
     public async Task<string?> GetPasswordHash(string username)

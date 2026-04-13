@@ -7,24 +7,24 @@ export default function useGlobalStyles() {
     screen: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      padding: 20,
+      padding: 15,
       alignItems: 'center'
     },
 
     h1: {
-      color: theme.colors.onBackground,
-      fontSize: 32,
-      fontFamily: 'Noto Serif',
-      fontWeight: 600
+      color: theme.colors.onBackgroundSoft,
+      fontSize: 28,
+      fontFamily: 'Inter',
+      fontWeight: 800
     },
 
     p1: {
-      color: theme.colors.onBackground,
+      color: theme.colors.onBackgroundSoft,
       fontSize: 20,
       fontFamily: 'Inter',
     },
     p2: {
-      color: theme.colors.onBackground,
+      color: theme.colors.onBackgroundSoft,
       fontSize: 18,
       fontFamily: 'Inter',
     },
@@ -32,7 +32,7 @@ export default function useGlobalStyles() {
 
     },
     p4: {
-      color: theme.colors.onBackground,
+      color: theme.colors.onBackgroundSoft,
       fontSize: 11,
       fontFamily: 'Inter'
     },
@@ -41,6 +41,13 @@ export default function useGlobalStyles() {
       width: 30,
       height: 30,
       backgroundColor: theme.colors.onBackground
+    },
+
+    iconText: {
+      color: theme.colors.onBackgroundSoft,
+      fontSize: 15,
+      fontWeight: 600,
+      fontFamily: 'Inter'
     },
 
 

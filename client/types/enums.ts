@@ -14,8 +14,15 @@ const CollectionsSort = {
 } as const;
 export type CollectionsSort = typeof CollectionsSort[keyof typeof CollectionsSort]
 
+const CollectionVisibility = {
+    Private: 0,
+    Friends: 1,
+    Public: 2
+} as const;
+export type CollectionVisibility = typeof CollectionVisibility[keyof typeof CollectionVisibility]
+
 const ThemePreference = {
-    SystemDefault: 0,
+    System: 0,
     Light: 1,
     Dark: 2,
 } as const;

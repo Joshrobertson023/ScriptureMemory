@@ -1,10 +1,5 @@
 {
   "expo": {
-    "splash": {
-      "image": "./assets/images/LogoIcon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#b93838ff"
-    },
     "name": "KJV Bible",
     "slug": "KJVBible",
     "version": "1.0.0",
@@ -19,16 +14,9 @@
       }
     },
     "android": {
-      // "adaptiveIcon": {
-      //   "backgroundColor": "#181818",
-      //   "foregroundImage": "./assets/images/Logo.png",
-      //   "backgroundImage": "./assets/images/Logo.png",
-      //   "monochromeImage": "./assets/images/Logo.png"
-      // },
-      "splash": {
-        "image": "./assets/images/LogoIcon.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#b93838ff"
+      "adaptiveIcon": {
+        "backgroundColor": "#CF4F4F",
+        "foregroundImage": "./assets/images/Logo.png"
       },
       // "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -41,20 +29,29 @@
     },
     "plugins": [
       [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ],
+      [
         "expo-splash-screen",
         {
-          "backgroundColor": "#b93838ff",
+          "backgroundColor": "#CF4F4F",
           "image": "./assets/images/LogoIcon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "dark": {
             "image": "./assets/images/LogoIcon.png",
-            "backgroundColor": "#b93838ff"
+            "backgroundColor": "#CF4F4F"
           }
         }
       ],
       "expo-secure-store",
-      "expo-sqlite",
       "expo-notifications",
       [
         "expo-notifications",
@@ -75,26 +72,131 @@
               {
                 "fontFamily": "Inter",
                 "fontDefinitions": [
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Thin.ttf", "weight": 100 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-ThinItalic.ttf", "weight": 100, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-ExtraLight.ttf", "weight": 200 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-ExtraLightItalic.ttf", "weight": 200, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Light.ttf", "weight": 300 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-LightItalic.ttf", "weight": 300, "style": "italic" },
                   { "path": "./assets/fonts/Inter/extras/ttf/Inter-Regular.ttf", "weight": 400 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Italic.ttf", "weight": 400, "style": "italic" },
                   { "path": "./assets/fonts/Inter/extras/ttf/Inter-Medium.ttf", "weight": 500 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-MediumItalic.ttf", "weight": 500, "style": "italic" },
                   { "path": "./assets/fonts/Inter/extras/ttf/Inter-SemiBold.ttf", "weight": 600 },
-                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Bold.ttf", "weight": 700 }
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-SemiBoldItalic.ttf", "weight": 600, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Bold.ttf", "weight": 700 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-BoldItalic.ttf", "weight": 700, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-ExtraBold.ttf", "weight": 800 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-ExtraBoldItalic.ttf", "weight": 800, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-Black.ttf", "weight": 900 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/Inter-BlackItalic.ttf", "weight": 900, "style": "italic" }
+                ]
+              },
+              {
+                "fontFamily": "InterDisplay",
+                "fontDefinitions": [
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-Thin.ttf", "weight": 100 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-ThinItalic.ttf", "weight": 100, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraLight.ttf", "weight": 200 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraLightItalic.ttf", "weight": 200, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-Light.ttf", "weight": 300 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-LightItalic.ttf", "weight": 300, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-Regular.ttf", "weight": 400 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-Italic.ttf", "weight": 400, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-Medium.ttf", "weight": 500 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-MediumItalic.ttf", "weight": 500, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-SemiBold.ttf", "weight": 600 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-SemiBoldItalic.ttf", "weight": 600, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-Bold.ttf", "weight": 700 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-BoldItalic.ttf", "weight": 700, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraBold.ttf", "weight": 800 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraBoldItalic.ttf", "weight": 800, "style": "italic" },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-Black.ttf", "weight": 900 },
+                  { "path": "./assets/fonts/Inter/extras/ttf/InterDisplay-BlackItalic.ttf", "weight": 900, "style": "italic" }
                 ]
               },
               {
                 "fontFamily": "Noto Serif",
                 "fontDefinitions": [
-                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Light.ttf", "weight": 300},
-                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Medium.ttf", "weight": 400},
-                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Regular.ttf", "weight": 500},
-                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-SemiBold.ttf", "weight": 600},
-                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Bold.ttf", "weight": 700}
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Thin.ttf", "weight": 100 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-ThinItalic.ttf", "weight": 100, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraLight.ttf", "weight": 200 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraLightItalic.ttf", "weight": 200, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Light.ttf", "weight": 300 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-LightItalic.ttf", "weight": 300, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Regular.ttf", "weight": 400 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Italic.ttf", "weight": 400, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Medium.ttf", "weight": 500 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-MediumItalic.ttf", "weight": 500, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-SemiBold.ttf", "weight": 600 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-SemiBoldItalic.ttf", "weight": 600, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Bold.ttf", "weight": 700 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-BoldItalic.ttf", "weight": 700, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraBold.ttf", "weight": 800 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraBoldItalic.ttf", "weight": 800, "style": "italic" },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-Black.ttf", "weight": 900 },
+                  { "path": "./assets/fonts/Noto_Serif/static/NotoSerif-BlackItalic.ttf", "weight": 900, "style": "italic" }
                 ]
               }
             ]
           },
           "ios": {
-            "fonts": ["./assets/fonts/Inter/extras/ttf/Inter-Regular.ttf"]
+            "fonts": [
+              "./assets/fonts/Inter/extras/ttf/Inter-Thin.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-ThinItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-ExtraLight.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-ExtraLightItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-Light.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-LightItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-Regular.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-Italic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-Medium.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-MediumItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-SemiBold.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-SemiBoldItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-Bold.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-BoldItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-ExtraBold.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-ExtraBoldItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-Black.ttf",
+              "./assets/fonts/Inter/extras/ttf/Inter-BlackItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-Thin.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-ThinItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraLight.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraLightItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-Light.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-LightItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-Regular.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-Italic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-Medium.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-MediumItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-SemiBold.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-SemiBoldItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-Bold.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-BoldItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraBold.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-ExtraBoldItalic.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-Black.ttf",
+              "./assets/fonts/Inter/extras/ttf/InterDisplay-BlackItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-Thin.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-ThinItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraLight.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraLightItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-Light.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-LightItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-Regular.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-Italic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-Medium.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-MediumItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-SemiBold.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-SemiBoldItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-Bold.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-BoldItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraBold.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-ExtraBoldItalic.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-Black.ttf",
+              "./assets/fonts/Noto_Serif/static/NotoSerif-BlackItalic.ttf"
+            ]
           }
         }
       ]

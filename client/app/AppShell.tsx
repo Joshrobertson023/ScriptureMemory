@@ -24,11 +24,14 @@ import {
 } from '@tanstack/react-query'
 import TabsNavigator from './screens/(tabs)/TabsNavigator';
 import { useUserAuthStore } from './stores/userAuth.store';
-import { loginUserWithToken } from './api/user.api';
+import { createUser, loginUserWithToken } from './api/user.api';
 import useStyles from './styles/gobalStyles';
 import { HomeScreen } from './screens/(tabs)/home.screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCustomFonts } from './styles/fonts';
+import { Session, useUserStore } from './stores/user.store';
+import * as Device from 'expo-device';
+import { CreateCollectionScreen } from './screens/collections/createNew.screen';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -39,38 +42,33 @@ export default function AppShell() {
   const theme = useAppTheme();
   const styles = useStyles();
   const fontsLoaded = useCustomFonts();
+  const authStore = useUserAuthStore();
+  const userStore = useUserStore();
 
   const [appIsReady, setAppIsReady] = useState(false);
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
-  const loadToken = useUserAuthStore(s => s.loadToken);
-  const token = useUserAuthStore(s => s.authToken);
-  const setToken = useUserAuthStore(s => s.setToken);
-  const isAuthenticated = useUserAuthStore(s => s.isAuthenticated);
-
-  // Login mutation
-    const loginMutation = useMutation({
-        mutationFn: (data: { authToken: string; }) => loginUserWithToken(token),
-        onSuccess: async (data) => {
-            if (data.authToken) {
-              await setToken(data.authToken);
-            }
-            else {
-              console.log("Error logging in with stored token.");
-              return;
-            }
-        }   
-    })
-
   // On startup try to login user with auth token, retry if could not, then navigate
   async function runStartup() {
-    // await loadToken();
-
-    // if (token) {
-    //   try {
-    //     await loginMutation.mutateAsync({ authToken: token });
-    //   } catch {}
-    // }
+    try {
+      const session: Session = {
+        deviceName: Device.deviceName || '',
+        model: Device.modelId,
+      }
+      if (authStore.refreshToken) { // If refresh token, automatically login (only users who created an account have a refresh token)
+        console.log('logging in with token')
+        await loginUserWithToken(session);
+      } else if (authStore.session.deviceId) {
+        // Get new jwt if internet connection
+        console.log('requesting new jwt')
+      } else if (!authStore.session.deviceId) {
+        // New user
+        console.log('creating new user')
+        await createUser(session);
+      }
+    } catch (Error) {
+      console.error(Error);
+    }
 
     setAppIsReady(true);
   }
@@ -111,6 +109,10 @@ export default function AppShell() {
                   name="(tabs)" 
                   component={TabsNavigator} 
                   options={{ headerShown: false, animation: 'none' }} />
+                <Stack.Screen
+                  name="createCollection"
+                  component={CreateCollectionScreen}
+                  options={{ headerShown: true, animation: 'default'}}/>
                 
                                 {/* Settings & info screens */}
                 {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />

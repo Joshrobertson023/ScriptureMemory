@@ -1,20 +1,23 @@
 import { useColorScheme, Appearance } from 'react-native';
 import { DefaultTheme } from '@react-navigation/native';
-import { useAppStore } from './store';
+import { useUserStore } from './stores/user.store';
 
 export default function useAppTheme() {
     const systemScheme = useColorScheme();
-    const themePreference = useAppStore((state) => state.themePreference);
-    const scheme = themePreference === 'system' ? (systemScheme || 'light') : themePreference;
+    const themePreference = useUserStore((state) => state.user.preferences.theme);
+    const scheme = themePreference === 0 ? (systemScheme || 'light') : themePreference;
 
     return scheme === 'dark' ? {
       ...DefaultTheme,
       colors: {
         ...DefaultTheme.colors,
         primary: '#834343',
+        brightPrimary: '#CF4F4F',
         background: '#181818',
         background2: '#222222',
         onBackground: '#F4F4F4',
+        onBackgroundSoft: '#D9D9D9',
+        onBackgroundSuperSoft: '#C3C3C3',
         elevation: '#2E2E2E',
         elevation2: '#494949',
         elevation3: '#696969',
@@ -27,9 +30,12 @@ export default function useAppTheme() {
       colors: {
         ...DefaultTheme.colors,
         primary: '#834343',
+        brightPrimary: '#CF4F4F',
         background: '#181818',
         background2: '#222222',
         onBackground: '#F4F4F4',
+        onBackgroundSoft: '#D9D9D9',
+        onBackgroundSuperSoft: '#C3C3C3',
         elevation: '#2E2E2E',
         elevation2: '#494949',
         elevation3: '#696969',

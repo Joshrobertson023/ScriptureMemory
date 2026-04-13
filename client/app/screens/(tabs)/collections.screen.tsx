@@ -13,17 +13,33 @@
 // import useStyles from '../styles';
 // import useAppTheme from '../theme';
 
-import { Button, Text, View } from "react-native";
+import { Button, FlatList, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useStyles from '../../styles/gobalStyles';
+import { CollectionsPageHeader } from "../../components/collection/header";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import { useRef } from "react";
+import CollectionsSortBottomSheet from "../../components/bottom-sheets/collectionsSortBottomSheet";
+import { useUserStore } from "../../stores/user.store";
+import { useCollectionsStore } from "../../stores/collections.store";
+import { CollectionCard } from "../../components/collection/collectionCard";
 
 export const CollectionsScreen = () => {
     const styles = useStyles();
+    const userCollections = useCollectionsStore().userCollections;
     
     return (
-        <SafeAreaView style={styles.screen}>
-            <Text style={styles.p1}>Collections</Text>
-        </SafeAreaView>
+        <View style={styles.screen}>
+            <CollectionsPageHeader />
+            
+            <FlatList
+                data={userCollections}
+                keyExtractor={(col) => col.id.toString()}
+                renderItem={({item}) => (
+                    <CollectionCard collection={item} />
+                )} 
+            />
+        </View>
     )
 }
 

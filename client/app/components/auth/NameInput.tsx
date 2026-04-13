@@ -1,7 +1,7 @@
 import { Alert, Keyboard, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { ActivityIndicator, HelperText, TextInput } from 'react-native-paper';
 import useStyles from "../../styles/gobalStyles";
-import { useAppStore } from '../../store';
+import { useAppStore } from '../../stores/appState.store';
 import { useState } from 'react';
 import { useFormStore } from '../../stores/form.store';
 

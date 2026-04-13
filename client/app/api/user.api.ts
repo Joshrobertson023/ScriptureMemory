@@ -1,91 +1,72 @@
 import { BibleVersion } from "../../types/enums";
-import { User } from "../../types/user/user";
+import { Session, useUserStore } from "../stores/user.store";
+import { useUserAuthStore } from "../stores/userAuth.store";
 import { baseUrl } from "./baseUrl";
 
-export async function usernameExists(
-    username: string
-): Promise<boolean> {
-    const response = await fetch(
-        `${baseUrl}/users/exists/${encodeURIComponent(username)}`
-    );
-    if (!response.ok) {
-        const responseText = await response.text();
-        throw new Error(responseText || 'Failed to create user');
-    }
-    const data: { exists: boolean } = await response.json();
-    return data.exists;
-}
+export async function createUser(session: Session): Promise<void> {
+    const userStore = useUserStore.getState();
+    const authStore = useUserAuthStore.getState();
+    console.log('creating new account2')
 
-export async function createUser(
-    username: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    password: string,
-    bibleVersion: BibleVersion
-): Promise<void> {
     const response = await fetch(
         `${baseUrl}/users`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({username, firstName, lastName, email, password, bibleVersion}),
+            body: JSON.stringify(session),
         }
     );
+    if (response.ok) {
+        const data = await response.json();
+        userStore.setUser(data.user);
+        authStore.setJwt(data.jwt);
+        console.info('data.user.sessions[0]:' + data.user.sessions[0])
+        authStore.setSession(data.user.sessions[0]);
+    } 
     if (!response.ok) {
-        let errorMessage = 'Failed to create user';
-        let errorDetails = null;
-        try {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const errorJson = await response.json();
-                errorMessage = errorJson.error || JSON.stringify(errorJson);
-                errorDetails = errorJson.details || null;
-                console.log('Full error response:', errorJson);
-            } else {
-                errorMessage = await response.text();
-                console.log('Full error response (text):', errorMessage);
-            }
-        } catch (err) {
-            console.log('Error parsing error response:', err);
-        }
-        throw new Error(errorMessage);
-    }
+    const errorBody = await response.text(); // use .text() not .json() in case it's not JSON
+    console.error('Error body:', errorBody);
+}
 }
 
-export async function loginUser(username: string, password: string): Promise<User> {
-    try {
-        const response = await fetch(`${baseUrl}/users/login/username`, {
+export async function getNewJwt(session: Session): Promise<void> {
+    const userStore = useUserStore.getState();
+    const authStore = useUserAuthStore.getState();
+
+    const response = await fetch(
+        `${baseUrl}/users/jwt`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({username, password}),
-        });
-        if (response.ok) {
-            const loggedInUser = (await response.json());
-            return loggedInUser as User;
-        } else {
-            throw new Error('Login failed');
+            body: JSON.stringify({session}),
         }
-    } catch (error) {
-        throw error;
+    );
+    if (response.ok) {
+        const data = await response.json();
+        authStore.setJwt(data.jwt);
+    } else {
+        throw Error('Error getting new jwt');
     }
 }
 
-export async function loginUserWithToken(token: string): Promise<User> {
+export async function loginUserWithToken(session: Session): Promise<void> {
+    const userStore = useUserStore.getState();
+    const authStore = useUserAuthStore.getState();
+
     try {
         const response = await fetch(`${baseUrl}/users/login/token`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(token),
+            body: JSON.stringify(session),
         });
         if (response.ok) {
-            const loggedInUser = (await response.json());
-            return loggedInUser as User;
+            const data = await response.json();
+            userStore.setUser(data.user);
+            authStore.setJwt(data.jwt);
         } else {
             throw new Error('Login failed');
         }

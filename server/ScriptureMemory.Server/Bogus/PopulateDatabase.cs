@@ -1,6 +1,7 @@
 using DataAccess.Data;
 using DataAccess.Models;
 using DataAccess.Requests;
+using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Tools;
 using VerseAppNew.Server.Services;
 using static ScriptureMemory.Server.Tools.Enums;
@@ -51,41 +52,40 @@ public sealed class PopulateDatabase
                 Email = user.Email,
                 Password = user.HashedPassword?.Length >= Data.MIN_PASSWORD_LENGTH ? user.HashedPassword : user.HashedPassword+user.HashedPassword+user.HashedPassword
             };
-            await userService.CreateUserFromRequest(request);
         }
 
         logger.LogInformation($"Finished PopulateUsers() with {count} count");
     }
 
-    public async Task PopulateSearch(int count = 10000, int uniqueTerms = 100)
-    {
-        logger.LogInformation($"Starting PopulateSearch() with {count} count");
+    //public async Task PopulateSearch(int count = 10000, int uniqueTerms = 100)
+    //{
+    //    logger.LogInformation($"Starting PopulateSearch() with {count} count");
 
-        var random = new Random();
-        var searchGenerator = new SearchGenerator();
-        var generatedSearches = searchGenerator.Generate(uniqueTerms);
+    //    var random = new Random();
+    //    var searchGenerator = new SearchGenerator();
+    //    var generatedSearches = searchGenerator.Generate(uniqueTerms);
 
-        var users = await userContext.GetUsers(100);
+    //    var users = await userContext.GetUsers(100);
 
-        for (int i = 0; i < count; i++)
-        {
-            var randomSearch = generatedSearches[random.Next(generatedSearches.Count)];
-            SearchRequest request = new(
-                users[random.Next(users.Count)].Id,
-                randomSearch.SearchTerm,
-                randomSearch.SearchType
-            );
+    //    for (int i = 0; i < count; i++)
+    //    {
+    //        var randomSearch = generatedSearches[random.Next(generatedSearches.Count)];
+    //        SearchRequest request = new(
+    //            users[random.Next(users.Count)].Id,
+    //            randomSearch.SearchTerm,
+    //            randomSearch.SearchType
+    //        );
 
-            switch (request.SearchType)
-            {
-                case SearchType.Verse:
-                    await searchService.SearchVerses(request);
-                    break;
-                default:
-                    break;
-            }
-        }
+    //        switch (request.SearchType)
+    //        {
+    //            case SearchType.Verse:
+    //                await searchService.SearchVerses(request);
+    //                break;
+    //            default:
+    //                break;
+    //        }
+    //    }
 
-        logger.LogInformation($"Finished PopulateSearch() with {count} count");
-    }
+    //    logger.LogInformation($"Finished PopulateSearch() with {count} count");
+    //}
 }
