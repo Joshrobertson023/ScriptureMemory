@@ -4,9 +4,11 @@ using DataAccess.Data;
 using DataAccess.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using ScriptureMemory.Server.DataAccess.Data;
 using ScriptureMemory.Server.DataAccess.Requests;
 using ScriptureMemory.Server.DataAccess.Requests.UpdateRequests;
 using ScriptureMemory.Server.Services;
+using ScriptureMemory.Server.Tools;
 using VerseAppNew.Server.Services;
 
 namespace VerseAppNew.Server.Endpoints;
@@ -42,6 +44,23 @@ public static class AdminEndpoint
             var hashedPassword = passwordHasher.HashPassword(null, request.NewPassword);
             await data.UpdatePassword(request.AdminId, hashedPassword);
             return Results.Ok();
+        }).RequireAuthorization("SuperAdmin");
+
+        app.MapPost("admin/category/create", async (
+            [FromBody] CreateCategoryRequest request,
+            [FromServices] CategoryData data,
+            [FromServices] CategoryService service,
+            [FromServices] EmbeddingGenerator embeddingGenerator) =>
+        {
+            var category = new Category
+            {
+                Name = request.Name,
+                Description = request.Description,
+            };
+            category.Embedding = await embeddingGenerator.GenerateEmbedding(category.GetEmbeddingText());
+            var result = await data.CreateCategory(category);
+            await service.AssignVersesToNewCategory(category);
+            return Results.Ok(result);
         }).RequireAuthorization("SuperAdmin");
     }
 }

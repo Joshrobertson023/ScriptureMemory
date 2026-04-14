@@ -92,7 +92,7 @@ public sealed class SearchService
                 Rank = 1
             });
 
-            List<Vector> verseEmbeddings = await _embeddingGenerator.GetEmbeddings(passage.Verses.Select(v => v.Text).ToList());
+            List<Vector> verseEmbeddings = await _embeddingGenerator.GenerateEmbeddings(passage.Verses.Select(v => v.Text).ToList());
             List<Verse> semanticSearchResults = await _verseData.GetVersesSemanticSearch(verseEmbeddings); 
 
             foreach (var verse in semanticSearchResults)
@@ -112,7 +112,7 @@ public sealed class SearchService
         else
         {
             // Single verse search
-            var singleVerseSearchResults = await _verseData.GetVersesSemanticSearch(await _embeddingGenerator.GetEmbedding(search));
+            var singleVerseSearchResults = await _verseData.GetVersesSemanticSearch(await _embeddingGenerator.GenerateEmbedding(search));
 
             foreach (var verse in singleVerseSearchResults)
             {

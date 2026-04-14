@@ -27,23 +27,23 @@ public class EmbeddingGenerator
         _apiKey = config["OpenAi:OPENAI_API_KEY"]!;
     }
 
-    public async Task<Vector> GetEmbedding(string input)
+    public async Task<Vector> GenerateEmbedding(string input)
     {
         EmbeddingClient client = new("text-embedding-3-small", new ApiKeyCredential(_apiKey));
         OpenAIEmbedding embedding = client.GenerateEmbedding(input);
         return new Vector(embedding.ToFloats().ToArray());
     }
 
-    public async Task<List<Vector>> GetEmbeddings(List<string> inputs)
+    public async Task<List<Vector>> GenerateEmbeddings(List<string> inputs)
     {
         EmbeddingClient client = new("text-embedding-3-small", new ApiKeyCredential(_apiKey));
         OpenAIEmbeddingCollection embeddings = await client.GenerateEmbeddingsAsync(inputs);
         return embeddings.Select(e => new Vector(e.ToFloats().ToArray())).ToList();
     }
 
-    public async Task<Vector> GenerateEmbedding(Verse verse)
+    public async Task<Vector> GenerateVerseEmbedding(Verse verse)
     {
-        return await GetEmbedding(verse.GetEmbeddingText());
+        return await GenerateEmbedding(verse.GetEmbeddingText());
     }
 
     public async Task GenerateAllVerseEmbeddings()
@@ -52,7 +52,7 @@ public class EmbeddingGenerator
 
         foreach (var verse in allVerses)
         {
-            Vector embedding = await GenerateEmbedding(verse);
+            Vector embedding = await GenerateVerseEmbedding(verse);
             verse.Embedding = embedding;
 
             await _verseData.InsertEmbedding(verse);
