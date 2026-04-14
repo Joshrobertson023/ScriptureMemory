@@ -157,7 +157,7 @@ public class UserPassageData
                 }
 
                 var verse = new Verse(
-                    new DataAccess.Models.Reference(verseRow.ReadableReference),
+                    ReferenceParser.Parse(verseRow.ReadableReference),
                     verseRow.Text)
                 {
                     Id = verseRow.VerseId,

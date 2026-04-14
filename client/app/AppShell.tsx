@@ -112,7 +112,19 @@ export default function AppShell() {
                 <Stack.Screen
                   name="createCollection"
                   component={CreateCollectionScreen}
-                  options={{ headerShown: true, animation: 'default'}}/>
+                  options={{
+                    headerShown: true,
+                    headerTitle: 'Create Collection',
+                    animation: 'default',
+                    headerStyle: {
+                      backgroundColor: theme.colors.background2,
+                    },
+                    headerTitleStyle: {
+                      color: theme.colors.onBackground,
+                    },
+                    headerTintColor: theme.colors.onBackground,
+                  }}
+                />
                 
                                 {/* Settings & info screens */}
                 {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />

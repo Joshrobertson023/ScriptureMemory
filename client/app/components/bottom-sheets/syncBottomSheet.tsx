@@ -7,14 +7,14 @@ interface SyncBottomSheetProps {
 }
 
 const SyncBottomSheet = forwardRef<TrueSheet, SyncBottomSheetProps>(
-    ({syncStatus}, ref) => {
+    ({ syncStatus }, ref) => (
         <TrueSheet
             ref={ref}
-            detents={[.45]}
+            detents={[0.45]}
         >
             <Text>Sync status: {syncStatus}</Text>
         </TrueSheet>
-    }
-)
+    )
+);
 
 export default SyncBottomSheet;

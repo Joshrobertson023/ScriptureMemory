@@ -81,6 +81,7 @@ namespace ScriptureMemory.Server.Tools
 
         public enum SearchType
         {
+            Any,
             Verse,
             Passage,
             Collection,

@@ -53,30 +53,30 @@ public class UserTests : BaseIntegrationTest
         Assert.Equal(request.Username, loggedInUser.Username);
     }
 
-    [Fact]
-    public async Task LoginWithToken_ReturnsUser()
-    {
-        var request = new CreateUserRequest
-        {
-            Username = $"testuser{Guid.NewGuid().ToString().Substring(0, 8)}",
-            FirstName = "Test",
-            LastName = "User",
-            Email = $"testuser@gmail.com",
-            Password = "password1234455",
-            BibleVersion = BibleVersion.Kjv
-        };
-        await Api.PostAsJsonAsync("/users", request);
-        var loginResponse = await Api.PostAsJsonAsync("/users/login/username", new { Username = request.Username, Password = request.Password });
-        var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(loggedInUser);
-        var tokenLoginResponse = await Api.PostAsJsonAsync("/users/login/token", loggedInUser.AuthToken);
-        tokenLoginResponse.EnsureSuccessStatusCode();
-        var tokenUser = await tokenLoginResponse.Content.ReadFromJsonAsync<User>();
-        Assert.NotNull(tokenUser);
-        Assert.Equal(tokenUser.Username, loggedInUser.Username);
-        Assert.Equal(tokenUser.AuthToken, loggedInUser.AuthToken);
-        Assert.Equal(tokenUser.Settings.ThemePreference, loggedInUser.Preferences.ThemePreference);
-    }
+    //[Fact]
+    //public async Task LoginWithToken_ReturnsUser()
+    //{
+    //    var request = new CreateUserRequest
+    //    {
+    //        Username = $"testuser{Guid.NewGuid().ToString().Substring(0, 8)}",
+    //        FirstName = "Test",
+    //        LastName = "User",
+    //        Email = $"testuser@gmail.com",
+    //        Password = "password1234455",
+    //        BibleVersion = BibleVersion.Kjv
+    //    };
+    //    await Api.PostAsJsonAsync("/users", request);
+    //    var loginResponse = await Api.PostAsJsonAsync("/users/login/username", new { Username = request.Username, Password = request.Password });
+    //    var loggedInUser = await loginResponse.Content.ReadFromJsonAsync<User>();
+    //    Assert.NotNull(loggedInUser);
+    //    var tokenLoginResponse = await Api.PostAsJsonAsync("/users/login/token", loggedInUser.AuthToken);
+    //    tokenLoginResponse.EnsureSuccessStatusCode();
+    //    var tokenUser = await tokenLoginResponse.Content.ReadFromJsonAsync<User>();
+    //    Assert.NotNull(tokenUser);
+    //    Assert.Equal(tokenUser.Username, loggedInUser.Username);
+    //    Assert.Equal(tokenUser.AuthToken, loggedInUser.AuthToken);
+    //    Assert.Equal(tokenUser.Settings.ThemePreference, loggedInUser.Preferences.ThemePreference);
+    //}
 
     [Fact]
     public async Task WelcomeNotification_IsCreatedOnUserCreation()

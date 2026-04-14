@@ -62,7 +62,7 @@ public static class ReferenceParser
             bool secondPartIsBook = false;
             for (int l = 0; l < secondPart.Length; l++)
             {
-                if (!char.IsDigit(secondPart[l]))
+                if (char.IsLetter(secondPart[l]))
                 {
                     secondPartIsBook = true;
                     break;

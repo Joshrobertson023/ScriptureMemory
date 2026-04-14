@@ -1,4 +1,6 @@
-﻿using VerseAppNew.Server.Apis;
+﻿using Npgsql;
+using ScriptureMemory.Server.Endpoints;
+using VerseAppNew.Server.Apis;
 using VerseAppNew.Server.Endpoints;
 
 namespace ScriptureMemory.Server.Startup;
@@ -32,6 +34,7 @@ public static class Middleware
         app.ConfigureUserEndpoints();
         app.ConfigureVerseOfDayEndpoints();
         app.ConfigureVerseEndpoints();
+        app.ConfigureSearchEndpoints();
         //app.ConfigureUserPassageEndpoints();
         //app.ConfigureCollectionEndpoints();
         //app.ConfigurePracticeLogEndpoints();

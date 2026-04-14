@@ -11,6 +11,13 @@ export default function useGlobalStyles() {
       alignItems: 'center'
     },
 
+    bottomSheetContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20
+    },
+
     h1: {
       color: theme.colors.onBackgroundSoft,
       fontSize: 28,
@@ -29,7 +36,9 @@ export default function useGlobalStyles() {
       fontFamily: 'Inter',
     },
     p3: {
-
+      color: theme.colors.onBackgroundSoft,
+      fontSize: 15,
+      fontFamily: 'Inter',
     },
     p4: {
       color: theme.colors.onBackgroundSoft,
@@ -48,6 +57,28 @@ export default function useGlobalStyles() {
       fontSize: 15,
       fontWeight: 600,
       fontFamily: 'Inter'
+    },
+
+    elevationButton: {
+      width: '100%',
+      borderRadius: 5,
+      backgroundColor: theme.colors.elevation,
+      display: 'flex',
+      paddingVertical: 12,
+      paddingHorizontal: 25,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+
+    outlineButtonSkinny: {
+      backgroundColor: 'transparent',
+      borderColor: theme.colors.onBackground,
+      borderWidth: 1,
+      borderRadius: 20,
+      height: 30,
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
 
 
@@ -119,10 +150,10 @@ export default function useGlobalStyles() {
       fontFamily: 'Inter',
     },
     input: {
-      width: '100%',
+      flex: 1,
       backgroundColor: theme.colors.elevation,
       color: theme.colors.onBackground,
-      borderRadius: '18px',
+      borderRadius: 10,
       marginBottom: 12,
       height: 50,
       borderWidth: 0.2,

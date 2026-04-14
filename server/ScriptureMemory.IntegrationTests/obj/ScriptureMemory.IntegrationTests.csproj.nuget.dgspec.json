@@ -534,6 +534,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Azure.AI.OpenAI": {
+              "target": "Package",
+              "version": "[2.9.0-beta.1, )"
+            },
+            "Azure.Identity": {
+              "target": "Package",
+              "version": "[1.21.0, )"
+            },
             "BenchmarkDotNet": {
               "target": "Package",
               "version": "[0.15.8, )"
@@ -570,13 +578,29 @@
               "target": "Package",
               "version": "[10.0.5, )"
             },
+            "Microsoft.Extensions.AI.OpenAI": {
+              "target": "Package",
+              "version": "[10.4.1, )"
+            },
+            "Microsoft.Extensions.Configuration": {
+              "target": "Package",
+              "version": "[10.0.5, )"
+            },
             "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[10.0.5, )"
+            },
+            "Microsoft.Extensions.Configuration.UserSecrets": {
               "target": "Package",
               "version": "[10.0.5, )"
             },
             "Microsoft.Extensions.Hosting": {
               "target": "Package",
               "version": "[8.0.0, )"
+            },
+            "Microsoft.SemanticKernel.Connectors.InMemory": {
+              "target": "Package",
+              "version": "[1.74.0-preview, )"
             },
             "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
               "target": "Package",
@@ -589,6 +613,14 @@
             "Oracle.ManagedDataAccess.Core": {
               "target": "Package",
               "version": "[23.26.0, )"
+            },
+            "Pgvector": {
+              "target": "Package",
+              "version": "[0.3.2, )"
+            },
+            "Pgvector.Dapper": {
+              "target": "Package",
+              "version": "[0.3.1, )"
             },
             "RestSharp": {
               "target": "Package",
@@ -605,6 +637,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[9.0.6, )"
+            },
+            "System.Linq.AsyncEnumerable": {
+              "target": "Package",
+              "version": "[10.0.5, )"
             }
           },
           "imports": [

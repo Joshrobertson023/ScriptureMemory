@@ -45,7 +45,8 @@ app.UseMiddleware()
 
 //using var scope = app.Services.CreateScope();
 //{
-//    var service = scope.ServiceProvider.GetRequiredService<VerseManagement>();
+//    var service = scope.ServiceProvider.GetRequiredService<EmbeddingGenerator>();
+//    await service.GenerateAllVerseEmbeddings();
 //}
 
 app.Run();

@@ -14,19 +14,19 @@ public sealed class Reference
     public List<int> Verses { get; set; } = new();
     public string ReadableReference { get; set; } = string.Empty;
 
-    public Reference(string book, int chapter, List<int> verses)
-    {
-        Book = book;
-        Chapter = chapter;
-        Verses = verses;
-    }
+    //public Reference(string book, int chapter, List<int> verses)
+    //{
+    //    Book = book;
+    //    Chapter = chapter;
+    //    Verses = verses;
+    //}
 
-    public Reference(string readableReference)
-    {
-        Book = ReferenceParser.GetBook(readableReference);
-        Chapter = ReferenceParser.GetChapter(readableReference);
-        Verses = ReferenceParser.GetIndividualVerses(readableReference);
-    }
+    //public Reference(string readableReference)
+    //{
+    //    Book = ReferenceParser.GetBook(readableReference);
+    //    Chapter = ReferenceParser.GetChapter(readableReference);
+    //    Verses = ReferenceParser.GetIndividualVerses(readableReference);
+    //}
 
     public override string ToString()
     {

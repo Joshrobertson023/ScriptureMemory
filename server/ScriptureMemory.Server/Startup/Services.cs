@@ -1,4 +1,5 @@
-﻿using DataAccess.Data;
+﻿using Dapper;
+using DataAccess.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
@@ -9,6 +10,8 @@ using System.Data;
 using System.Text;
 using VerseAppNew.Server.Bogus;
 using VerseAppNew.Server.Services;
+using Pgvector;
+using Pgvector.Dapper;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -79,6 +82,8 @@ public static class Services
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGenWithAuth();
 
+        SqlMapper.AddTypeHandler(new VectorTypeHandler());
+
         services.AddHttpClient("ExpoPush", client =>
         {
             client.BaseAddress = new Uri("https://exp.host");
@@ -115,6 +120,8 @@ public static class Services
         services.AddScoped<VerseOfDayService>();
 
         services.AddScoped<VerseManagement>();
+
+        services.AddScoped<EmbeddingGenerator>();
 
         return services;
     }
