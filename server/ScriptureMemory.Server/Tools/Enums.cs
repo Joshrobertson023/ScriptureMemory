@@ -89,6 +89,12 @@ namespace ScriptureMemory.Server.Tools
             User
         }
 
+        public enum SearchResultType
+        {
+            ExactPassage,
+            SemanticVerse
+        }
+
 
         // Logging
 

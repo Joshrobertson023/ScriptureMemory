@@ -29,34 +29,15 @@ public sealed class SearchService
         _embeddingGenerator = embeddingGenerator;
     }
 
-    public async Task TrackSearch(DataAccess.Requests.SearchRequest request)
-    {
-        switch(request.SearchType)
-        {
-            case SearchType.Verse:
-                //await 
-                break;
-        }
-    }
-
-    public async Task<IResult> SearchVerses(DataAccess.Requests.SearchRequest request)
-    {
-        // Log the search
-        await logger.Log(
-            new ActivityLog(
-                request.UserId,
-                ActionType.Search,
-                EntityType.Verse,
-                null,
-                $"Searched for '{request.Search}'",
-                null
-            )
-        );
-
-        await TrackSearch(request);
-
-        return Results.Ok();
-    }
+    //public async Task TrackSearch(DataAccess.Requests.SearchRequest request)
+    //{
+    //    switch(request.SearchType)
+    //    {
+    //        case SearchType.Verse:
+    //            //await 
+    //            break;
+    //    }
+    //}
 
     public async Task<IResult> Search(DataAccess.Requests.SearchRequest request)
     {
@@ -80,13 +61,14 @@ public sealed class SearchService
         }
     }
 
-    private async Task<List<Verse>> GetPassageSearchResults(string search)
+    private async Task<List<SearchResult>> GetPassageSearchResults(string search)
     {
         // If single verse search, do this normal semantic search:
         // If multiple verses / passage, get passage, then semantic results per verse
 
         Reference? reference = null;
         bool searchByReference = true;
+        var results = new List<SearchResult>();
 
         try
         {
@@ -97,16 +79,54 @@ public sealed class SearchService
             searchByReference = false;
         }
 
-        if ((searchByReference || reference is not null)
+        if (reference is not null
             && reference.Verses.Count > 1)
         {
             // Searching multiple verses / a passage
+            var passage = await _verseData.GetPassage(reference);
+
+            results.Add(new SearchResult
+            {
+                Type = SearchResultType.ExactPassage,
+                Passage = passage,
+                Rank = 1
+            });
+
+            List<Vector> verseEmbeddings = await _embeddingGenerator.GetEmbeddings(passage.Verses.Select(v => v.Text).ToList());
+            List<Verse> semanticSearchResults = await _verseData.GetVersesSemanticSearch(verseEmbeddings); 
+
+            foreach (var verse in semanticSearchResults)
+            {
+                results.Add(new SearchResult
+                {
+                    Type = SearchResultType.SemanticVerse,
+                    Verse = verse,
+                    Rank = 2
+                });
+            }
+
+            return results
+                .OrderByDescending(r => r.Rank)
+                .ToList();
         }
         else
         {
             // Single verse search
-            return await _verseData.GetVersesSemanticSearch(
-                    new Vector(await _embeddingGenerator.GetEmbedding(search)));
+            var singleVerseSearchResults = await _verseData.GetVersesSemanticSearch(await _embeddingGenerator.GetEmbedding(search));
+
+            foreach (var verse in singleVerseSearchResults)
+            {
+                results.Add(new SearchResult
+                {
+                    Type = SearchResultType.SemanticVerse,
+                    Verse = verse,
+                    Rank = 1
+                });
+            }
+
+            return results
+                .OrderByDescending(r => r.Rank)
+                .ToList();
         }
     }
 }

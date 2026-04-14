@@ -284,7 +284,6 @@ public class VerseData
     public async Task<Passage> GetPassage(Reference reference)
     {
         using var conn = _dataSource.OpenConnection();
-        await conn.OpenAsync();
         var results = await conn.QueryAsync<GetVerseDto>(
             """
             select
@@ -344,6 +343,44 @@ public class VerseData
             """, new
             {
                 queryEmbedding
+            });
+        return results.Select(v => new Verse
+        {
+            Id = v.Id,
+            Reference = new Reference
+            {
+                Book = v.Book,
+                Chapter = v.Chapter,
+                Verses = new List<int> { v.VerseNum }
+            },
+            Text = v.Text,
+            UsersSavedCount = v.UsersSavedCount,
+            UsersMemorizedCount = v.UsersMemorizedCount
+        }).ToList();
+    }
+
+    public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> queryEmbeddings)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var results = await conn.QueryAsync<GetVerseDto>(
+            """
+            SELECT
+                v.id,
+                v.book,
+                v.chapter,
+                v.text,
+                v.memorized_count,
+                v.saved_count,
+                v.verse_num,
+                MIN(v.embedding <-> q.embedding) AS distance
+            FROM verses v
+            CROSS JOIN UNNEST(@queryEmbeddings) AS q(embedding)
+            GROUP BY v.id
+            ORDER BY distance
+            LIMIT 25;
+            """, new
+            {
+                queryEmbeddings
             });
         return results.Select(v => new Verse
         {

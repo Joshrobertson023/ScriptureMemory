@@ -1,12 +1,21 @@
+using DataAccess.Models;
+using ScriptureMemory.Server.DataAccess.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ScriptureMemory.Server.Tools.Enums;
 
-namespace ScriptureMemoryLibrary;
-public class SearchResult
+namespace DataAccess.Models;
+
+public sealed class SearchResult
 {
-    public string reference { get; set; }
-    public string text { get; set; }
+    public int Rank { get; set; }
+
+    public SearchResultType Type { get; set; }
+
+    public Passage? Passage { get; set; }
+    public Verse? Verse { get; set; }
+    public double? Score { get; set; }
 }
