@@ -44,7 +44,7 @@ public sealed class SearchService
         // Implement Bible searching, recent searches, save user and collection searching for later
         // Be able to return whatever search results wanted, so mix of passages and collections based on weights from semantic search
         // If search book, return top results for passages in book
-        // Have AI implement semantic search
+        // Use AI/embeddings to implement semantic search
 
         // before this:
             // Figure out style for categories on passages
@@ -66,6 +66,8 @@ public sealed class SearchService
         // If single verse search, do this normal semantic search:
         // If multiple verses / passage, get passage, then semantic results per verse
 
+        const int MAX_RESULTS = 50;
+
         Reference? reference = null;
         bool searchByReference = true;
         var results = new List<SearchResult>();
@@ -76,7 +78,7 @@ public sealed class SearchService
         }
         catch
         {
-            searchByReference = false;
+            // Don't search by reference
         }
 
         if (reference is not null
@@ -92,15 +94,63 @@ public sealed class SearchService
                 Rank = 1
             });
 
-            List<Vector> verseEmbeddings = await _embeddingGenerator.GenerateEmbeddings(passage.Verses.Select(v => v.Text).ToList());
-            List<Verse> semanticSearchResults = await _verseData.GetVersesSemanticSearch(verseEmbeddings); 
+            List<Vector> verseEmbeddings = await _embeddingGenerator.GenerateEmbeddings(passage.Verses.Select(v => v.GetEmbeddingText()).ToList());
 
-            foreach (var verse in semanticSearchResults)
+            Verse[][] semanticResultsPerVerse = new Verse[passage.Verses.Count][];
+            int totalResults = semanticResultsPerVerse.Sum(row => row.Length);
+            List<Verse> allResults = new();
+            Dictionary<float, Verse[]> ranks = new();
+
+            for (int i = 0; i < passage.Verses.Count; i++)
+            {
+                List<Verse> _results = await _verseData.GetVersesSemanticSearch(verseEmbeddings.ElementAt(i));
+
+                for (int j = 0; j < _results.Count; j++)
+                {
+                    semanticResultsPerVerse[i][j] = _results[j];
+                    allResults.Add(_results[j]);
+                }
+
+                // Todo: compute the ranks here
+            }
+
+            // Rank by num of semantic results per row, and num saved / memorized, later refactor to include others
+
+            foreach (var result in allResults)
+            {
+                // First rank is by number of results for the Verse compared to everything else
+                double averageLength = semanticResultsPerVerse.Average(row => row.Length);
+                double resultsRank = rank.Value.Length / averageLength;
+
+                double totalAverageMemorized = semanticResultsPerVerse.Average(row => row.Average(v => v.UsersMemorizedCount));
+                double totalAverageSaved = semanticResultsPerVerse.Average(row => row.Average(v => v.UsersSavedCount));
+
+                double averageMemorized = rank.Value.Average(v => v.UsersMemorizedCount);
+                double averageSaved = rank.Value.Average(v => v.UsersSavedCount);
+
+                double memorizedRank = averageMemorized / totalAverageMemorized;
+                double savedRank = averageSaved / totalAverageSaved;
+
+                 = (float)(memorizedRank + savedRank) / 2;
+            }
+
+
+
+            int totalReturns = totalResults < MAX_RESULTS ? totalResults : MAX_RESULTS;
+
+            for (int i = 0; i < totalReturns; i++)
+            {
+
+            }
+
+
+
+            for (int i = 0; i < semanticResultsPerVerse.Count; i++)
             {
                 results.Add(new SearchResult
                 {
                     Type = SearchResultType.SemanticVerse,
-                    Verse = verse,
+                    Verse = semanticResultsPerVerse[i],
                     Rank = 2
                 });
             }
@@ -112,10 +162,24 @@ public sealed class SearchService
         else
         {
             // Single verse search
-            var singleVerseSearchResults = await _verseData.GetVersesSemanticSearch(await _embeddingGenerator.GenerateEmbedding(search));
+            var passage = await _verseData.GetPassage(reference);
+
+            results.Add(new SearchResult
+            {
+                Type = SearchResultType.ExactPassage,
+                Passage = passage,
+                Rank = 2
+            });
+
+            var embedding = await _embeddingGenerator.GenerateEmbedding(passage.Verses.First().GetEmbeddingText());
+
+            var singleVerseSearchResults = await _verseData.GetVersesSemanticSearch(embedding);
 
             foreach (var verse in singleVerseSearchResults)
             {
+                if (verse.Id == passage.Verses.First().Id)
+                    continue;
+
                 results.Add(new SearchResult
                 {
                     Type = SearchResultType.SemanticVerse,

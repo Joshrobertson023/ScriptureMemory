@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Running;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Npgsql;
 using ScriptureMemory.Server.Startup;
 using ScriptureMemory.Server.Tools;
 using System.Text;
@@ -38,6 +39,15 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
+var connectionString = builder.Configuration.GetConnectionString("PostgresConnection")
+    ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
+
+NpgsqlDataSourceBuilder dataSourceBuilder = new(connectionString);
+dataSourceBuilder.UseVector();
+NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+
+builder.Services.AddSingleton(dataSource);
+
 var app = builder.Build();
 
 app.UseMiddleware()
@@ -46,7 +56,6 @@ app.UseMiddleware()
 //using var scope = app.Services.CreateScope();
 //{
 //    var service = scope.ServiceProvider.GetRequiredService<EmbeddingGenerator>();
-//    await service.GenerateAllVerseEmbeddings();
 //}
 
 app.Run();

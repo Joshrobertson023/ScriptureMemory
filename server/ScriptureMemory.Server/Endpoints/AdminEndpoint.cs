@@ -45,22 +45,5 @@ public static class AdminEndpoint
             await data.UpdatePassword(request.AdminId, hashedPassword);
             return Results.Ok();
         }).RequireAuthorization("SuperAdmin");
-
-        app.MapPost("admin/category/create", async (
-            [FromBody] CreateCategoryRequest request,
-            [FromServices] CategoryData data,
-            [FromServices] CategoryService service,
-            [FromServices] EmbeddingGenerator embeddingGenerator) =>
-        {
-            var category = new Category
-            {
-                Name = request.Name,
-                Description = request.Description,
-            };
-            category.Embedding = await embeddingGenerator.GenerateEmbedding(category.GetEmbeddingText());
-            var result = await data.CreateCategory(category);
-            await service.AssignVersesToNewCategory(category);
-            return Results.Ok(result);
-        }).RequireAuthorization("SuperAdmin");
     }
 }

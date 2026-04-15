@@ -8,7 +8,7 @@ public static class SearchEndpoint
 {
     public static void ConfigureSearchEndpoints(this WebApplication app)
     {
-        app.MapPost("search/add-passage", async (
+        app.MapPost("search", async (
             [FromBody] SearchRequest request,
             [FromServices] SearchService service) =>
         {

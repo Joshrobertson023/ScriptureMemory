@@ -4,64 +4,36 @@ using Pgvector;
 using ScriptureMemory.Server.DataAccess.Data;
 using ScriptureMemory.Server.DataAccess.Models;
 
-namespace ScriptureMemory.Server.Services;
-
 public class CategoryService
 {
-
     private readonly VerseData _verseData;
     private readonly CategoryData _categoryData;
-    private readonly string _apiKey;
 
-    public CategoryService(
-        VerseData verseData,
-        CategoryData categoryData,
-        IConfiguration config)
+    private const float DefaultSimilarityThreshold = 0.35f;
+    private const int NumToAssign = 500;
+
+    public CategoryService(VerseData verseData, CategoryData categoryData)
     {
         _verseData = verseData;
         _categoryData = categoryData;
-        _apiKey = config["OpenAi:OPENAI_API_KEY"]!;
     }
 
-    public async Task AssignCategoryToAllVerses(Category category)
+    public async Task AssignVersesToCategory(
+        Category category,
+        string source = "ai",
+        float threshold = DefaultSimilarityThreshold)
     {
-        var verses = await _verseData.GetAllVerses();
+        var matches = await _verseData.GetVersesBySimilarity(category.Embedding, threshold, NumToAssign);
 
-        foreach (var verse in verses)
+        var assignments = matches.Select(m => new VerseCategory
         {
-            float similarity = CosineSimilarity(verse.Embedding, category.Embedding);
+            VerseId = m.Verse.Id,
+            CategoryId = category.Id,
+            AssignmentSource = source,
+            Confidence = m.Similarity
+        });
 
-            if (similarity > 0.75f)
-            {
-                await _categoryData.AssignVerseToCategory(new VerseCategory
-                {
-                    VerseId = verse.Id,
-                    CategoryId = category.Id,
-                    AssignmentSource = "ai",
-                    Confidence = similarity
-                });
-            }
-        }
-    }
-
-    public async Task AssignVersesToNewCategory(Category category)
-    {
-        var verses = await _verseData.GetAllVerses();
-
-        foreach (var verse in verses)
-        {
-            float similarity = CosineSimilarity(verse.Embedding, category.Embedding);
-            if (similarity > 0.75f)
-            {
-                await _categoryData.AssignVerseToCategory(new VerseCategory
-                {
-                    VerseId = verse.Id,
-                    CategoryId = category.Id,
-                    AssignmentSource = "ai",
-                    Confidence = similarity
-                });
-            }
-        }
+        await _categoryData.BulkAssignVersesToCategory(assignments.ToList());
     }
 
     public async Task AssignVerseToCategory(Verse verse, Category category)
@@ -75,16 +47,21 @@ public class CategoryService
             AssignmentSource = "admin",
             Confidence = similarity
         });
-
     }
 
-    float CosineSimilarity(Vector a, Vector b)
+    private static float CosineSimilarity(Vector a, Vector b)
     {
         var va = a.ToArray();
         var vb = b.ToArray();
-        float dot = va.Zip(vb, (x, y) => x * y).Sum();
-        float magA = MathF.Sqrt(va.Sum(x => x * x));
-        float magB = MathF.Sqrt(vb.Sum(x => x * x));
-        return dot / (magA * magB);
+
+        float dot = 0f, magA = 0f, magB = 0f;
+        for (int i = 0; i < va.Length; i++)
+        {
+            dot += va[i] * vb[i];
+            magA += va[i] * va[i];
+            magB += vb[i] * vb[i];
+        }
+
+        return dot / (MathF.Sqrt(magA) * MathF.Sqrt(magB));
     }
 }

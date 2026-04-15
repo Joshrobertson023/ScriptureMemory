@@ -41,6 +41,7 @@ public static class Middleware
         //app.ConfigurePracticeSessionEndpoints();
         //app.ConfigureNotificationEndpoints();
         app.ConfigureAdminEndpoints();
+        app.ConfigureCategoriesEndpoints();
         //app.ConfigureRelationshipEndpoints();
         //app.ConfigurePopularSearchEndpoints();
         //app.ConfigureReportEndpoints();

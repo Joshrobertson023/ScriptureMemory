@@ -17,6 +17,7 @@ public class Verse
     public int UsersMemorizedCount { get; set; } = 0;
     public string VerseNumbers { get; set; } // Typable part of reference that has verses
     public Vector? Embedding { get; set; }
+    public List<Category> Categories { get; set; } = new();
 
     public Verse() { }
 

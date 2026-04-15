@@ -108,6 +108,50 @@ public class VerseData
         public int VerseNum { get; set; }
         public Vector? Embedding { get; set; }
         public double? Distance { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
+    }
+
+    public async Task<IEnumerable<(Verse Verse, float Similarity)>> GetVersesBySimilarity(
+        Vector embedding,
+        float minSimilarity,
+        int limit = 100)
+    {
+        using var conn = _dataSource.OpenConnection();
+        var results = await conn.QueryAsync<GetVerseDto>(
+            """
+        SELECT
+            id AS Id,
+            book AS Book,
+            chapter AS Chapter,
+            text AS Text,
+            memorized_count AS UsersMemorizedCount,
+            saved_count AS UsersSavedCount,
+            verse_num AS VerseNum,
+            (1 - (embedding <=> @embedding))::float4 AS Distance
+        FROM verses
+        WHERE (1 - (embedding <=> @embedding)) >= @minSimilarity
+        ORDER BY embedding <=> @embedding
+        LIMIT @limit
+        """, new { embedding, minSimilarity, limit });
+
+        return results.Select(r => (
+            Verse: new Verse
+            {
+                Id = r.Id,
+                Reference = new Reference
+                {
+                    Book = r.Book,
+                    Chapter = r.Chapter,
+                    Verses = new List<int> { r.VerseNum }
+                },
+                Text = r.Text,
+                UsersSavedCount = r.UsersSavedCount,
+                UsersMemorizedCount = r.UsersMemorizedCount,
+                Embedding = r.Embedding
+            },
+            Similarity: (float)(r.Distance ?? 0)
+        ));
     }
 
     public async Task<List<Verse>> GetVerses(string book, int chapter, List<int> verseNums)
@@ -130,7 +174,6 @@ public class VerseData
             """;
 
         using var conn = _dataSource.OpenConnection();
-        await conn.OpenAsync();
 
         var results = await conn.QueryAsync<GetVerseDto>(sql, new
         {
@@ -323,39 +366,50 @@ public class VerseData
         };
     }
 
-    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding)
+    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, int maxResults = 25)
     {
         using var conn = _dataSource.OpenConnection();
         var results = await conn.QueryAsync<GetVerseDto>(
-            """
+            $"""
             select
-            id as Id,
-            book as Book,
-            chapter as Chapter,
-            text as Text,
-            memorized_count as UsersMemorizedCount,
-            saved_count as UsersSavedCount,
-            verse_num as VerseNum,
-            embedding <-> @queryEmbedding as distance
-            from verses
-            order by embedding <-> @queryEmbedding
-            limit 25
+            v.id as Id,
+            v.book as Book,
+            v.chapter as Chapter,
+            v.text as Text,
+            v.memorized_count as UsersMemorizedCount,
+            v.saved_count as UsersSavedCount,
+            v.verse_num as VerseNum,
+            v.embedding <-> @queryEmbedding as distance,
+            c.id as CategoryId,
+            c.name as CategoryName
+            from verses v 
+            left join verse_categories vc on v.id = vc.verse_id
+            left join categories c on vc.category_id = c.id
+            order by v.embedding <-> @queryEmbedding
+            limit {maxResults}
             """, new
             {
                 queryEmbedding
             });
-        return results.Select(v => new Verse
+        return results
+            .GroupBy(v => v.Id)
+            .Select(g => new Verse
         {
-            Id = v.Id,
+            Id = g.First().Id,
             Reference = new Reference
             {
-                Book = v.Book,
-                Chapter = v.Chapter,
-                Verses = new List<int> { v.VerseNum }
+                Book = g.First().Book,
+                Chapter = g.First().Chapter,
+                Verses = new List<int> { g.First().VerseNum }
             },
-            Text = v.Text,
-            UsersSavedCount = v.UsersSavedCount,
-            UsersMemorizedCount = v.UsersMemorizedCount
+            Text = g.First().Text,
+            UsersSavedCount = g.First().UsersSavedCount,
+            UsersMemorizedCount = g.First().UsersMemorizedCount,
+            Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category
+            {
+                Id = v.CategoryId,
+                Name = v.CategoryName
+            }).ToList()
         }).ToList();
     }
 
@@ -372,8 +426,12 @@ public class VerseData
                 v.memorized_count,
                 v.saved_count,
                 v.verse_num,
-                MIN(v.embedding <-> q.embedding) AS distance
+                MIN(v.embedding <-> q.embedding) AS distance,
+                c.id AS CategoryId,
+                c.name AS CategoryName
             FROM verses v
+            left join verse_categories vc on v.id = vc.verse_id
+            left join categories c on vc.category_id = c.id
             CROSS JOIN UNNEST(@queryEmbeddings) AS q(embedding)
             GROUP BY v.id
             ORDER BY distance
@@ -382,18 +440,25 @@ public class VerseData
             {
                 queryEmbeddings
             });
-        return results.Select(v => new Verse
+        return results
+            .GroupBy(v => v.Id)
+            .Select(g => new Verse
         {
-            Id = v.Id,
+            Id = g.First().Id,
             Reference = new Reference
             {
-                Book = v.Book,
-                Chapter = v.Chapter,
-                Verses = new List<int> { v.VerseNum }
+                Book = g.First().Book,
+                Chapter = g.First().Chapter,
+                Verses = new List<int> { g.First().VerseNum }
             },
-            Text = v.Text,
-            UsersSavedCount = v.UsersSavedCount,
-            UsersMemorizedCount = v.UsersMemorizedCount
+            Text = g.First().Text,
+            UsersSavedCount = g.First().UsersSavedCount,
+            UsersMemorizedCount = g.First().UsersMemorizedCount,
+            Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category
+            {
+                Id = v.CategoryId,
+                Name = v.CategoryName
+            }).ToList()
         }).ToList();
     }
 

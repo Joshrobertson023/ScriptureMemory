@@ -50,7 +50,7 @@ public class EmbeddingGenerator
     {
         var allVerses = await _verseData.GetAllVerses();
 
-        foreach (var verse in allVerses)
+        foreach (var verse in allVerses.Where(v => v.Embedding == null))
         {
             Vector embedding = await GenerateVerseEmbedding(verse);
             verse.Embedding = embedding;
