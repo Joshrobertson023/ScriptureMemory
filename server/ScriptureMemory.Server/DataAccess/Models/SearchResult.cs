@@ -11,11 +11,11 @@ namespace DataAccess.Models;
 
 public sealed class SearchResult
 {
-    public int Rank { get; set; }
+    public float Rank { get; set; }
 
     public SearchResultType Type { get; set; }
 
     public Passage? Passage { get; set; }
     public Verse? Verse { get; set; }
-    public double? Score { get; set; }
+    public float? Score { get; set; }
 }

@@ -94,70 +94,80 @@ public sealed class SearchService
                 Rank = 1
             });
 
-            List<Vector> verseEmbeddings = await _embeddingGenerator.GenerateEmbeddings(passage.Verses.Select(v => v.GetEmbeddingText()).ToList());
+            var passageResults = await _verseData.GetVersesSemanticSearch(
+                await _embeddingGenerator.GenerateEmbeddings(
+                    passage.Verses.Select(v => v.GetEmbeddingText()).ToList()));
 
-            Verse[][] semanticResultsPerVerse = new Verse[passage.Verses.Count][];
-            int totalResults = semanticResultsPerVerse.Sum(row => row.Length);
-            List<Verse> allResults = new();
-            Dictionary<float, Verse[]> ranks = new();
+            //List<Vector> verseEmbeddings = await _embeddingGenerator.GenerateEmbeddings(passage.Verses.Select(v => v.GetEmbeddingText()).ToList());
 
-            for (int i = 0; i < passage.Verses.Count; i++)
-            {
-                List<Verse> _results = await _verseData.GetVersesSemanticSearch(verseEmbeddings.ElementAt(i));
+            //Verse[][] semanticResultsPerVerse = new Verse[passage.Verses.Count][];
+            //List<Verse> allVerses = new();
 
-                for (int j = 0; j < _results.Count; j++)
-                {
-                    semanticResultsPerVerse[i][j] = _results[j];
-                    allResults.Add(_results[j]);
-                }
+            //for (int i = 0; i < passage.Verses.Count; i++)
+            //{
+            //    List<Verse> _results = await _verseData.GetVersesSemanticSearch(verseEmbeddings.ElementAt(i));
 
-                // Todo: compute the ranks here
-            }
+            //    semanticResultsPerVerse[i] = new Verse[_results.Count];
 
-            // Rank by num of semantic results per row, and num saved / memorized, later refactor to include others
+            //    for (int j = 0; j < _results.Count; j++)
+            //    {
+            //        semanticResultsPerVerse[i][j] = _results[j];
+            //        allVerses.Add(_results[j]);
+            //    }
+            //}
 
-            foreach (var result in allResults)
-            {
-                // First rank is by number of results for the Verse compared to everything else
-                double averageLength = semanticResultsPerVerse.Average(row => row.Length);
-                double resultsRank = rank.Value.Length / averageLength;
+            //// Remove original passage verses if present
+            //List<int> passageVerseIds = (passage.Verses.Select(v => v.Id == v.Id).ToList());
+            //allVerses = allVerses.Where(v => v.Id != passage.Verses.)
 
-                double totalAverageMemorized = semanticResultsPerVerse.Average(row => row.Average(v => v.UsersMemorizedCount));
-                double totalAverageSaved = semanticResultsPerVerse.Average(row => row.Average(v => v.UsersSavedCount));
+            //    // TODO: COmment out all this and save for later
 
-                double averageMemorized = rank.Value.Average(v => v.UsersMemorizedCount);
-                double averageSaved = rank.Value.Average(v => v.UsersSavedCount);
+            //int totalResults = semanticResultsPerVerse.Sum(row => row.Length);
+            //List<(Verse verse, float rank)> ranks = new();
 
-                double memorizedRank = averageMemorized / totalAverageMemorized;
-                double savedRank = averageSaved / totalAverageSaved;
+            //float totalMemorized = allVerses.Sum(v => v.UsersMemorizedCount);
+            //float totalSaved = allVerses.Sum(v => v.UsersSavedCount);
 
-                 = (float)(memorizedRank + savedRank) / 2;
-            }
+            //float averageMemorized = totalMemorized / allVerses.Count;
+            //float averageSaved = totalSaved / allVerses.Count;
 
+            //for (int i = 0; i < allVerses.Count(); i++)
+            //{
+            //    float memorizedRank = allVerses[i].UsersMemorizedCount / averageMemorized;
+            //    float savedRank = allVerses[i].UsersSavedCount / averageSaved;
 
+            //    float rank = (memorizedRank + savedRank) > 0
+            //        ? (memorizedRank + savedRank) / 2
+            //        : 0;
 
-            int totalReturns = totalResults < MAX_RESULTS ? totalResults : MAX_RESULTS;
+            //    ranks.Add((allVerses[i], rank));
+            //}
 
-            for (int i = 0; i < totalReturns; i++)
-            {
+            //int totalReturns = totalResults < MAX_RESULTS ? totalResults : MAX_RESULTS;
 
-            }
+            //ranks.Sort((a, b) => b.rank.CompareTo(a.rank));
 
+            //for (int i = 0; i < totalReturns; i++)
+            //{
+            //    results.Add(new SearchResult
+            //    {
+            //        Type = SearchResultType.SemanticVerse,
+            //        Verse = ranks[i].verse,
+            //        Rank = ranks[i].rank
+            //    });
+            //}
 
-
-            for (int i = 0; i < semanticResultsPerVerse.Count; i++)
+            foreach (var _passage in passageResults)
             {
                 results.Add(new SearchResult
                 {
                     Type = SearchResultType.SemanticVerse,
-                    Verse = semanticResultsPerVerse[i],
+                    Verse = _passage,
                     Rank = 2
                 });
             }
 
-            return results
-                .OrderByDescending(r => r.Rank)
-                .ToList();
+            return results;
         }
         else
         {

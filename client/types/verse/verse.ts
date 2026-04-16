@@ -1,3 +1,4 @@
+import { Category } from "../category";
 import { Reference } from "./reference";
 
 export interface Verse {
@@ -7,4 +8,5 @@ export interface Verse {
     usersSavedCount: number;
     usersMemorizedCount: number;
     verseNumbers: string;
+    categories: Category[];
 }

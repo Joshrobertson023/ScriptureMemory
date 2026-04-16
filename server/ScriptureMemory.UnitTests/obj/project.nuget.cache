@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "G+gL5GdHmNY=",
+  "dgSpecHash": "6eZL4w0NF7c=",
   "success": true,
   "projectFilePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
   "expectedPackageFiles": [
@@ -172,6 +172,30 @@
     "C:\\Users\\there\\.nuget\\packages\\xunit.v3.runner.inproc.console\\3.2.2\\xunit.v3.runner.inproc.console.3.2.2.nupkg.sha512"
   ],
   "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx",
+      "projectPath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf",
+      "projectPath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
     {
       "code": "NU1701",
       "level": "Warning",

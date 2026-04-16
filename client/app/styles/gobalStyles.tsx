@@ -159,6 +159,16 @@ export default function useGlobalStyles() {
       borderWidth: 0.2,
       paddingLeft: 10,
     },
+    search: {
+      flex: 1,
+      backgroundColor: theme.colors.elevation,
+      color: theme.colors.onBackground,
+      borderRadius: 30,
+      marginBottom: 12,
+      height: 50,
+      borderWidth: 0.2,
+      paddingLeft: 10,
+    },
     errorInput: {
       borderColor: 'red',
       borderWidth: 2,

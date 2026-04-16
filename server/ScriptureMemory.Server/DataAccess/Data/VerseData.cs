@@ -403,6 +403,7 @@ public class VerseData
                 Verses = new List<int> { g.First().VerseNum }
             },
             Text = g.First().Text,
+            Distance = g.First().Distance,
             UsersSavedCount = g.First().UsersSavedCount,
             UsersMemorizedCount = g.First().UsersMemorizedCount,
             Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category
@@ -423,9 +424,9 @@ public class VerseData
                 v.book,
                 v.chapter,
                 v.text,
-                v.memorized_count,
-                v.saved_count,
-                v.verse_num,
+                v.memorized_count as UsersMemorizedCount,
+                v.saved_count as UsersSavedCount,
+                v.verse_num as VerseNum,
                 MIN(v.embedding <-> q.embedding) AS distance,
                 c.id AS CategoryId,
                 c.name AS CategoryName
@@ -433,7 +434,7 @@ public class VerseData
             left join verse_categories vc on v.id = vc.verse_id
             left join categories c on vc.category_id = c.id
             CROSS JOIN UNNEST(@queryEmbeddings) AS q(embedding)
-            GROUP BY v.id
+            GROUP BY v.id, c.id
             ORDER BY distance
             LIMIT 25;
             """, new
@@ -454,11 +455,13 @@ public class VerseData
             Text = g.First().Text,
             UsersSavedCount = g.First().UsersSavedCount,
             UsersMemorizedCount = g.First().UsersMemorizedCount,
-            Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category
-            {
-                Id = v.CategoryId,
-                Name = v.CategoryName
-            }).ToList()
+            Categories = g
+                .Where(c => c.CategoryId != 0)
+                .Select(c => new Category
+                {
+                    Id = c.CategoryId,
+                    Name = c.CategoryName,
+                }).ToList()
         }).ToList();
     }
 

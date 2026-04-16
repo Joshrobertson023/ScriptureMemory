@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "8GRc4iwarl4=",
+  "dgSpecHash": "tk63bDyW7Xk=",
   "success": true,
   "projectFilePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
   "expectedPackageFiles": [
@@ -167,6 +167,30 @@
     "C:\\Users\\there\\.nuget\\packages\\xunit.runner.visualstudio\\3.1.4\\xunit.runner.visualstudio.3.1.4.nupkg.sha512"
   ],
   "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx",
+      "projectPath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf",
+      "projectPath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\there\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
     {
       "code": "NU1701",
       "level": "Warning",
