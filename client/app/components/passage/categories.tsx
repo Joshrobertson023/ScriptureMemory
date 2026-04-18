@@ -20,12 +20,12 @@ const Categories = ({categories, multiline}: CategoriesProps) => {
     }, [categories]);
 
     return (
-        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+        <View style={{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
             {multiline ? (
                 categories.map((category, index) => {
                     return (
                         <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
-                            backgroundColor: theme.colors.elevation, borderRadius: 30
+                            backgroundColor: theme.colors.elevation, borderRadius: 30, paddingHorizontal: 15
                         }}>
                             <Text style={styles.p4}>{category.name}</Text>
                         </View>
@@ -36,7 +36,7 @@ const Categories = ({categories, multiline}: CategoriesProps) => {
                     {firstTwoCategories.map((category, index) => {
                         return (
                             <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                backgroundColor: theme.colors.elevation, borderRadius: 30
+                                backgroundColor: theme.colors.elevation, borderRadius: 30, paddingHorizontal: 15, paddingVertical: 2
                             }}>
                                 <Text style={styles.p4}>{category.name}</Text>
                             </View>

@@ -115,7 +115,7 @@ export const CreateCollectionScreen = () => {
                     keyExtractor={(item) => `${item.type}-${item.id}`}
                     renderItem={({item}) => {
                         if (item.type === 'passage')
-                            return <NewCollectionPassage userPassage={item} />;
+                            return <NewCollectionPassage userPassage={item} itemId={item.id} />;
                         if (item.type === 'note')
                             return <CollectionNote note={item.note} />;
                         return null;

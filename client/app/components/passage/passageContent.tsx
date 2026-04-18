@@ -34,7 +34,7 @@ const PassageContent = React.memo(({passage}: PassageContentProps) => {
             setPassageBottomSheet(userPassage);
             setPassageSheetOpen(true);
         }}>
-            <View style={{}}>
+            <View style={{maxWidth: '88%'}}>
                 <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>
                 <View>
                     {passage.verses.map((verse, index) => (
