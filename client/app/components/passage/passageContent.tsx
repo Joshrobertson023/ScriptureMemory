@@ -10,6 +10,7 @@ import { UserPassage } from "../../../types/passages/userPassage";
 import Categories from "./categories";
 import { Category } from "../../../types/category";
 import React from "react";
+import { Check } from "lucide-react-native";
 
 interface PassageContentProps {
     passage: Passage;
@@ -18,7 +19,6 @@ interface PassageContentProps {
 const PassageContent = React.memo(({passage}: PassageContentProps) => {
     const styles = useGlobalStyles();
     const theme = useAppTheme();
-    const verseSheet = useRef<TrueSheet>(null);
     const {setPassageSheetOpen, setPassageBottomSheet} = useBottomSheetsStore();
 
     const allCategories = React.useMemo(() =>
@@ -42,6 +42,15 @@ const PassageContent = React.memo(({passage}: PassageContentProps) => {
                             {passage.verses.length > 1 && (verse.reference.verses.at(0) + ": ")}{verse.text}
                         </Text>
                     ))}
+                </View>
+                
+                <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginVertical: 10}}>
+                    <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7}}>
+                    </View>
+                    <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7}}>
+                        <Check size={16} color={theme.colors.onBackground} />
+                        <Text style={styles.p4}>In 1 Collection</Text>
+                    </View>
                 </View>
 
                 <Categories categories={allCategories} multiline={false} />

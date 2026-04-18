@@ -15,20 +15,12 @@ import { useSearchStore } from "../stores/search.store";
 export const AddPassageScreen = () => {
     const styles = useGlobalStyles();
     const theme = useAppTheme();
-    const [search, setSearch] = useState('');
     const [loadingSearch, setLoadingSearch] = useState(false);
     const { searchQuery, searchResults, setSearchQuery, setSearchResults, clearSearch } = useSearchStore();
+    const [search, setSearch] = useState(searchQuery);  
 
     const userId = useUserStore().user.id;
     const jwt = useUserAuthStore().jwt;
-
-    useEffect(() => {
-        void useSearchStore.persist.rehydrate();
-    }, []);
-
-    useEffect(() => {
-        setSearch(searchQuery);
-    }, [searchQuery]);
 
     const handleSearch = async () => {
         if (search.trim() === '')
@@ -89,9 +81,9 @@ export const AddPassageScreen = () => {
             {searchResults.length > 0 &&
                 <FlatList
                     data={searchResults}
-                    initialNumToRender={5}
-                    maxToRenderPerBatch={5}
-                    windowSize={5}
+                    initialNumToRender={1}
+                    maxToRenderPerBatch={2}
+                    windowSize={3}
                     removeClippedSubviews={true}
                     keyExtractor={(item) => item.reference.readableReference}
                     renderItem={({item}) => <AddPassage passage={item} />}

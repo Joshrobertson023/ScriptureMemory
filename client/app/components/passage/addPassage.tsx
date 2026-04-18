@@ -25,17 +25,6 @@ const AddPassage = React.memo(({passage}: AddPassageProps) => {
         <View style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', padding: 10}}>
             <PassageContent passage={passage} />
 
-            
-
-            <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginVertical: 10}}>
-                <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7}}>
-                </View>
-                <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7}}>
-                    <Check size={16} color={theme.colors.onBackground} />
-                    <Text style={styles.p4}>In 1 Collection</Text>
-                </View>
-            </View>
-
             {passageSaved ? (
                 <TouchableHighlight onPress={() => {
                         if (savedPassageItem) {

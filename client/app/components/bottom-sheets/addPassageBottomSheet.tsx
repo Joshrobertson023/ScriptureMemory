@@ -9,7 +9,7 @@ const AddPassageBottomSheet = forwardRef<TrueSheet>(
                 ref={ref}
                 detents={[1]}
                 scrollable
-                
+                initialDetentIndex={0}
             >
                 <AddPassageScreen />
             </TrueSheet>

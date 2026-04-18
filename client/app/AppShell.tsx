@@ -35,6 +35,7 @@ import { CreateCollectionScreen } from './screens/collections/createNew.screen';
 import PassageBottomSheet from './components/bottom-sheets/passageBottomSheet';
 import { useBottomSheetsStore } from './stores/bottomSheets.store';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
+import { useSearchStore } from './stores/search.store';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -106,6 +107,10 @@ export default function AppShell() {
         passageSheet.current?.dismiss();
       }
     })
+
+    useEffect(() => {
+        void useSearchStore.persist.rehydrate();
+    }, []);
 
   if (!appIsReady || !fontsLoaded) {
     return <ActivityIndicator />;

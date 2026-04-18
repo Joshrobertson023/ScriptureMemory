@@ -21,13 +21,12 @@ const NewCollectionPassage = ({userPassage}: NewCollectionPassageProps) => {
     const isActive = useIsActive();
 
     return (
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+            <PassageContent passage={passage} />
+
+                
             <TouchableOpacity onLongPress={drag} disabled={isActive}>
                 <GripVertical size={20} color={theme.colors.onBackground} />
-            </TouchableOpacity>
-
-            <TouchableOpacity>
-                <PassageContent passage={passage} />
             </TouchableOpacity>
         </View>
     )
