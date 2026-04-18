@@ -1,0 +1,54 @@
+import { TouchableWithoutFeedback, Text, View } from "react-native"
+import { Passage } from "../../../types/passages/passage"
+import useGlobalStyles from "../../styles/gobalStyles";
+import useAppTheme from "../../theme";
+import { TrueSheet } from "@lodev09/react-native-true-sheet";
+import { useEffect, useRef, useState } from "react";
+import PassageBottomSheet from "../bottom-sheets/passageBottomSheet";
+import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
+import { UserPassage } from "../../../types/passages/userPassage";
+import Categories from "./categories";
+import { Category } from "../../../types/category";
+import React from "react";
+
+interface PassageContentProps {
+    passage: Passage;
+}
+
+const PassageContent = React.memo(({passage}: PassageContentProps) => {
+    const styles = useGlobalStyles();
+    const theme = useAppTheme();
+    const verseSheet = useRef<TrueSheet>(null);
+    const {setPassageSheetOpen, setPassageBottomSheet} = useBottomSheetsStore();
+
+    const allCategories = React.useMemo(() =>
+        Array.from(new Map(passage.verses.flatMap(v => v.categories).map(c => [c.id, c])).values()),
+        [passage]
+    );
+
+    return (
+        <TouchableWithoutFeedback onPress={() => {
+            const userPassage: UserPassage = {
+                passage: passage
+            }
+            setPassageBottomSheet(userPassage);
+            setPassageSheetOpen(true);
+        }}>
+            <View style={{}}>
+                <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>
+                <View>
+                    {passage.verses.map((verse, index) => (
+                        <Text key={verse.id} style={styles.p3}>
+                            {passage.verses.length > 1 && (verse.reference.verses.at(0) + ": ")}{verse.text}
+                        </Text>
+                    ))}
+                </View>
+
+                <Categories categories={allCategories} multiline={false} />
+            </View>
+        </TouchableWithoutFeedback>
+    )
+}
+)
+
+export default PassageContent;

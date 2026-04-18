@@ -30,8 +30,9 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
-    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-335ec6f1e9c294aec7ad619448d58e179321a1c7
+    // @generated begin xml-fonts-init - expo prebuild (DO NOT MODIFY) sync-246f81c66735145003a19f057ea14c2c55dcb790
     ReactFontManager.getInstance().addCustomFont(this, "Inter", R.font.xml_inter)
+    ReactFontManager.getInstance().addCustomFont(this, "InterDisplay", R.font.xml_inter_display)
     ReactFontManager.getInstance().addCustomFont(this, "Noto Serif", R.font.xml_noto_serif)
     // @generated end xml-fonts-init
     DefaultNewArchitectureEntryPoint.releaseLevel = try {

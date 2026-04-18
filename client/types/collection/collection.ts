@@ -1,6 +1,5 @@
 import { CollectionVisibility } from "../enums";
-import { CollectionNote } from "../notes/collectionNote";
-import { UserPassage } from "../passages/userPassage";
+import { CollectionItem } from "./collectionItem";
 
 export interface Collection {
     id: number;
@@ -14,6 +13,5 @@ export interface Collection {
     isArchived: boolean;
     description: string;
     progressPercent: number;
-    passages: UserPassage[];
-    notes: CollectionNote[];
+    items: CollectionItem[];
 }

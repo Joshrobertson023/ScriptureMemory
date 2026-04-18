@@ -1,14 +1,16 @@
 import { create } from "zustand";
 import { Collection } from "../../types/collection/collection";
+import { CollectionItem } from "../../types/collection/collectionItem";
 import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Passage } from "../../types/passages/passage";
 import { UserPassage } from "../../types/passages/userPassage";
 import { Reference } from "../../types/verse/reference";
+import { Note } from "../../types/note";
 
 const LOCAL_ID_PREFIX = -1;
 
-const initialCollection: Collection = {
+export const initialCollection: Collection = {
     id: 0,
     userId: 0,
     title: '',
@@ -20,8 +22,7 @@ const initialCollection: Collection = {
     isArchived: false,
     description: '',
     progressPercent: 0,
-    passages: [],
-    notes: []
+    items: []
 }
 
 const initialReference: Reference = {
@@ -31,34 +32,32 @@ const initialReference: Reference = {
     readableReference: ''
 }
 
-export const initialUserPassage: UserPassage = {
-    id: 0,
-    userId: 0,
-    orderPosition: 0,
-    collectionId: 0,
-    dateAdded: new Date,
-    progressPercent: 0,
-    timesMemorized: 0,
-    lastPracticed: new Date,
-    dueDate: new Date,
-    notifyMemorized: true,
+const initialPassage: Passage = {
     reference: initialReference,
     verses: []
+}
+
+export const initialUserPassage: UserPassage = {
+    passage: initialPassage
 }
 
 interface CollectionsStore {
     userCollections: Collection[];
     newCollection: Collection;
     _localIdCounter: number;
-    _localPassageIdCounter: number; // Local id counter for passages
+    _localPassageIdCounter: number;
+
     setCollections: (c: Collection[]) => void;
     setCollection: (c: Collection) => void;
     setNewCollection: (nc: Collection) => void;
+    setNewCollectionVisibility: (v: number) => void;
+    setNewCollectionItems: (items: CollectionItem[]) => void;
     addPassageToNewCollection: (p: Passage) => void;
-    removePassageFromNewCollection: (p: Passage) => void;
+    addNoteToNewCollection: (note: Note) => void;
+    removeItemFromNewCollection: (id: number) => void;
     addCollection: (c: Omit<Collection, 'id'>) => Collection;
     reconcileServerId: (localId: number, serverId: number) => void;
-    reconcilePassageServerId: (localId: number, serverId: number) => void; // Replace local passage id with server id after first sync
+    reconcilePassageServerId: (localId: number, serverId: number) => void;
 }
 
 export const useCollectionsStore = create<CollectionsStore>()(
@@ -68,6 +67,8 @@ export const useCollectionsStore = create<CollectionsStore>()(
             newCollection: initialCollection,
             _localIdCounter: 0,
             _localPassageIdCounter: 0,
+
+
             setCollections(c: Collection[]) {
                 set({ userCollections: c })
             },
@@ -103,13 +104,13 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 set((state) => ({
                     userCollections: state.userCollections.map((c) => ({
                         ...c,
-                        passages: c.passages.map((p) =>
-                            p.id === localId ? { ...p, id: serverId } : p)
+                        items: c.items.map((i) =>
+                            i.id === localId ? { ...i, id: serverId } : i)
                     })),
                     newCollection: {
                         ...state.newCollection,
-                        passages: state.newCollection.passages.map((p) =>
-                            p.id === localId ? { ...p, id: serverId } : p)
+                        items: state.newCollection.items.map((i) =>
+                            i.id === localId ? { ...i, id: serverId } : i)
                     }
                 }));
             },
@@ -120,47 +121,70 @@ export const useCollectionsStore = create<CollectionsStore>()(
              * Adds a passage to newCollection with a unique local (negative) id
              * Ignores the passage if it already exists
              */
+            setNewCollectionVisibility(v: number) {
+                set((state) => ({
+                    newCollection: {
+                        ...state.newCollection,
+                        visibility: v
+                    } as Collection
+                }));
+            },
+            setNewCollectionItems(items) {
+                set((state) => ({
+                    newCollection: {
+                        ...state.newCollection,
+                        items,
+                    }
+                }));
+            },
             addPassageToNewCollection(p: Passage) {
                 const state = get();
-                if (state.newCollection.passages.some((existing) => existing.reference.readableReference === p.reference.readableReference)) 
+                const alreadyExists = state.newCollection.items.some(
+                    (i) => i.type === 'passage' && i.passage.reference.readableReference === p.reference.readableReference
+                );
+                if (alreadyExists)
                     return;
 
                 const nextCounter = state._localPassageIdCounter + 1;
-                const passageWithLocalId: UserPassage = {
-                    ...p,
+                const item: CollectionItem = {
+                    type: 'passage',
                     id: nextCounter * LOCAL_ID_PREFIX,
-                    userId: 0,
-                    orderPosition: 0,
-                    collectionId: 0,
-                    dateAdded: new Date,
-                    progressPercent: 0,
-                    timesMemorized: 0,
-                    lastPracticed: new Date,
-                    dueDate: new Date,
-                    notifyMemorized: true,
+                    passage: p,
                 };
                 set((state) => ({
                     _localPassageIdCounter: nextCounter,
                     newCollection: {
                         ...state.newCollection,
-                        passages: [...state.newCollection.passages, passageWithLocalId]
+                        items: [...state.newCollection.items, item],
                     }
                 }));
             },
-            /**
-             * Removes a passage from newCollection by id
-             */
-            removePassageFromNewCollection(p: Passage) {
+            addNoteToNewCollection(note: Note) {
+                const nextCounter = get()._localPassageIdCounter + 1;
+                const item: CollectionItem = {
+                    type: 'note',
+                    id: nextCounter * LOCAL_ID_PREFIX,
+                    note,
+                };
+                set((state) => ({
+                    _localPassageIdCounter: nextCounter,
+                    newCollection: {
+                        ...state.newCollection,
+                        items: [...state.newCollection.items, item],
+                    }
+                }));
+            },
+            removeItemFromNewCollection(id: number) {
                 set((state) => ({
                     newCollection: {
                         ...state.newCollection,
-                        passages: state.newCollection.passages.filter((existing) => existing.reference.readableReference !== p.reference.readableReference)
+                        items: state.newCollection.items.filter((i) => i.id !== id),
                     }
                 }));
             }
         }),
         {
-            name: 'collection-storage',
+            name: 'collection-storage-3',
             storage: createJSONStorage(() => AsyncStorage)
         }
     )

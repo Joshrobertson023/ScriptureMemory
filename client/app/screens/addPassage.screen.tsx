@@ -1,22 +1,34 @@
-import { Text, TextInput, View, useWindowDimensions } from "react-native"
+import { ActivityIndicator, View } from "react-native"
 import useGlobalStyles from "../styles/gobalStyles"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useAppTheme from "../theme";
-import { Search } from "lucide-react-native";
 import { FlatList } from "react-native-gesture-handler";
-import { Passage } from "../../types/passages/passage";
 import { searchPassage } from "../api/verses.api";
 import { Snackbar } from "react-native-snackbar";
 import * as Clipboard from 'expo-clipboard';
-import { UserPassage } from "../../types/passages/userPassage";
 import AddPassage from "../components/passage/addPassage";
+import { useUserStore } from "../stores/user.store";
+import { useUserAuthStore } from "../stores/userAuth.store";
+import { Searchbar } from "react-native-paper";
+import { useSearchStore } from "../stores/search.store";
 
 export const AddPassageScreen = () => {
     const styles = useGlobalStyles();
     const theme = useAppTheme();
     const [search, setSearch] = useState('');
-    const [searchResults, setSearchResults] = useState<Passage[]>([]);
     const [loadingSearch, setLoadingSearch] = useState(false);
+    const { searchQuery, searchResults, setSearchQuery, setSearchResults, clearSearch } = useSearchStore();
+
+    const userId = useUserStore().user.id;
+    const jwt = useUserAuthStore().jwt;
+
+    useEffect(() => {
+        void useSearchStore.persist.rehydrate();
+    }, []);
+
+    useEffect(() => {
+        setSearch(searchQuery);
+    }, [searchQuery]);
 
     const handleSearch = async () => {
         if (search.trim() === '')
@@ -24,16 +36,25 @@ export const AddPassageScreen = () => {
 
         setLoadingSearch(true);
         try {
-            setSearchResults(await searchPassage(search));
-        } catch (error) {
-            console.error('error searching');
+            console.log('searching')
+            setSearchQuery(search);
+            setSearchResults(await searchPassage(search, userId, jwt));
+        } catch (error: any) {
+            console.error('error searching', error);
+
+            const errorMessage =
+                error?.message ||
+                error?.toString?.() ||
+                JSON.stringify(error) ||
+                'Unknown error';
+
             Snackbar.show({
                 text: 'We encountered an error',
-                duration: Snackbar.LENGTH_SHORT,
+                duration: Snackbar.LENGTH_LONG,
                 action: {
                     text: 'COPY ERROR',
                     textColor: theme.colors.onBackground,
-                    onPress: async () => {await Clipboard.setStringAsync(String(error))}
+                    onPress: async () => {await Clipboard.setStringAsync(errorMessage)}
                 }
             })
         } finally {
@@ -43,22 +64,40 @@ export const AddPassageScreen = () => {
 
     return (
         <View style={{...styles.screen, paddingTop: 40}}>
-            <View style={{display: 'flex', flexDirection: 'row', backgroundColor: theme.colors.elevation, padding: 10}}>
-                <Search size={28} color={theme.colors.onBackground} />
-                <TextInput
-                    style={[styles.search, { flex: 0, width: '100%', marginLeft: 25}]}
-                    value={search}
-                    onChangeText={(text) => setSearch(text)}
-                    placeholder="Search the Bible"
-                    onSubmitEditing={handleSearch} // Triggers when Enter is pressed
-                    returnKeyType="search"
+            <Searchbar
+                placeholder="Search the Bible"
+                onChangeText={(value) => {
+                    setSearch(value);
+                    setSearchQuery(value);
+                    if (value.trim() === '') {
+                        clearSearch();
+                    }
+                }}
+                value={search} 
+                loading={loadingSearch}
+                style={styles.search}
+                inputStyle={styles.p3}
+                iconColor={theme.colors.onBackgroundSoft}
+                placeholderTextColor={theme.colors.onBackgroundSoft}
+                onIconPress={handleSearch}
+                onClearIconPress={() => {
+                    clearSearch();
+                }}
+                onSubmitEditing={handleSearch}
                 />
-            </View>
 
-            <FlatList
-                data={searchResults}
-                keyExtractor={(item) => item.reference.readableReference}
-                renderItem={({item}) => <AddPassage passage={item} />} />
+            {searchResults.length > 0 &&
+                <FlatList
+                    data={searchResults}
+                    initialNumToRender={5}
+                    maxToRenderPerBatch={5}
+                    windowSize={5}
+                    removeClippedSubviews={true}
+                    keyExtractor={(item) => item.reference.readableReference}
+                    renderItem={({item}) => <AddPassage passage={item} />}
+                />
+            }
+
         </View>
     )
 }

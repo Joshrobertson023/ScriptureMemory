@@ -32,6 +32,9 @@ import { useCustomFonts } from './styles/fonts';
 import { Session, useUserStore } from './stores/user.store';
 import * as Device from 'expo-device';
 import { CreateCollectionScreen } from './screens/collections/createNew.screen';
+import PassageBottomSheet from './components/bottom-sheets/passageBottomSheet';
+import { useBottomSheetsStore } from './stores/bottomSheets.store';
+import { TrueSheet } from '@lodev09/react-native-true-sheet';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -46,6 +49,9 @@ export default function AppShell() {
   const userStore = useUserStore();
 
   const [appIsReady, setAppIsReady] = useState(false);
+
+  const passageSheet = React.useRef<TrueSheet>(null);
+  const {passageSheetOpen} = useBottomSheetsStore();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   // On startup try to login user with auth token, retry if could not, then navigate
@@ -91,6 +97,15 @@ export default function AppShell() {
         if (fontsLoaded) 
             SplashScreen.hideAsync().catch(() => {});
     }, [appIsReady, fontsLoaded]);
+
+    // set passage bottom sheet ref
+    useEffect(() => {
+      if (passageSheetOpen) {
+        passageSheet.current?.present();
+      } else {
+        passageSheet.current?.dismiss();
+      }
+    })
 
   if (!appIsReady || !fontsLoaded) {
     return <ActivityIndicator />;
@@ -177,6 +192,7 @@ export default function AppShell() {
                 /> */}
               </Stack.Navigator>
             </NavigationContainer>
+          <PassageBottomSheet ref={passageSheet}/>
       </GestureHandlerRootView>
     )
 }

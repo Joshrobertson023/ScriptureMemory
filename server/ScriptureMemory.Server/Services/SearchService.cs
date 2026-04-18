@@ -3,6 +3,7 @@ using DataAccess.Data;
 using DataAccess.Models;
 using Pgvector;
 using ScriptureMemory.Server.DataAccess.Models;
+using ScriptureMemory.Server.Files.CsvRecordModels;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.Tools;
 using System.DirectoryServices.Protocols;
@@ -78,6 +79,7 @@ public sealed class SearchService
         }
         catch
         {
+            reference = null;
             // Don't search by reference
         }
 
@@ -86,6 +88,7 @@ public sealed class SearchService
         {
             // Searching multiple verses / a passage
             var passage = await _verseData.GetPassage(reference);
+            passage.Reference = reference;
 
             results.Add(new SearchResult
             {
@@ -162,7 +165,20 @@ public sealed class SearchService
                 results.Add(new SearchResult
                 {
                     Type = SearchResultType.SemanticVerse,
-                    Verse = _passage,
+                    Passage = new Passage
+                    {
+                        Reference = new Reference
+                        {
+                            Book = _passage.Reference.Book,
+                            Chapter = _passage.Reference.Chapter,
+                            Verses = _passage.Reference.Verses,
+                            ReadableReference = ReferenceParser.ConvertToReadableReference(
+                                _passage.Reference.Book,
+                                _passage.Reference.Chapter,
+                                _passage.Reference.Verses)
+                        },
+                        Verses = new List<DataAccess.Models.Verse> { _passage }
+                    },
                     Rank = 2
                 });
             }
@@ -172,28 +188,31 @@ public sealed class SearchService
         else
         {
             // Single verse search
-            var passage = await _verseData.GetPassage(reference);
+            //var passage = await _verseData.SemanticSearch(search);
 
-            results.Add(new SearchResult
-            {
-                Type = SearchResultType.ExactPassage,
-                Passage = passage,
-                Rank = 2
-            });
-
-            var embedding = await _embeddingGenerator.GenerateEmbedding(passage.Verses.First().GetEmbeddingText());
+            var embedding = await _embeddingGenerator.GenerateEmbedding(search);
 
             var singleVerseSearchResults = await _verseData.GetVersesSemanticSearch(embedding);
 
             foreach (var verse in singleVerseSearchResults)
             {
-                if (verse.Id == passage.Verses.First().Id)
-                    continue;
-
                 results.Add(new SearchResult
                 {
                     Type = SearchResultType.SemanticVerse,
-                    Verse = verse,
+                    Passage = new Passage
+                    { 
+                        Reference = new Reference
+                        {
+                            Book = verse.Reference.Book,
+                            Chapter = verse.Reference.Chapter,
+                            Verses = verse.Reference.Verses,
+                            ReadableReference = ReferenceParser.ConvertToReadableReference(
+                                verse.Reference.Book,
+                                verse.Reference.Chapter,
+                                verse.Reference.Verses)
+                        },
+                        Verses = new List<DataAccess.Models.Verse> { verse }
+                    },
                     Rank = 1
                 });
             }

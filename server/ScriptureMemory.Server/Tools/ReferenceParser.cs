@@ -15,10 +15,10 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>Reference { Book = "Psalms", Chapter = 119, List<string> Verses = "2-4" }</returns>
-    public static Reference Parse(string input)
+    public static Reference? Parse(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
-            throw new ArgumentException("Input reference cannot be null or empty.");
+            return null;
 
         input = input.Trim();
         ReadOnlySpan<char> span = input.AsSpan();

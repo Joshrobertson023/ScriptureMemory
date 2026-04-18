@@ -15,7 +15,8 @@ export default function useGlobalStyles() {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 20
+      padding: 35,
+      gap: 5
     },
 
     h1: {
@@ -39,6 +40,7 @@ export default function useGlobalStyles() {
       color: theme.colors.onBackgroundSoft,
       fontSize: 15,
       fontFamily: 'Inter',
+      lineHeight: 20
     },
     p4: {
       color: theme.colors.onBackgroundSoft,
@@ -71,14 +73,19 @@ export default function useGlobalStyles() {
     },
 
     outlineButtonSkinny: {
-      backgroundColor: 'transparent',
       borderColor: theme.colors.onBackground,
       borderWidth: 1,
       borderRadius: 20,
-      height: 30,
+      height: 25,
       width: '100%',
+      
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    outlineButtonSkinnyText: {
+      color: theme.colors.onBackgroundSoft,
+      fontSize: 12,
+      fontFamily: 'Inter'
     },
 
 
@@ -160,12 +167,9 @@ export default function useGlobalStyles() {
       paddingLeft: 10,
     },
     search: {
-      flex: 1,
       backgroundColor: theme.colors.elevation,
       color: theme.colors.onBackground,
       borderRadius: 30,
-      marginBottom: 12,
-      height: 50,
       borderWidth: 0.2,
       paddingLeft: 10,
     },
