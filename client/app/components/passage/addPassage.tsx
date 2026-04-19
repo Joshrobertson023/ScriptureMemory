@@ -1,4 +1,4 @@
-import { Text, TouchableHighlight, View } from "react-native";
+import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Passage } from "../../../types/passages/passage";
 import useGlobalStyles from "../../styles/gobalStyles";
 import { useCollectionsStore } from "../../stores/collections.store";
@@ -11,8 +11,18 @@ interface AddPassageProps {
     passage: Passage;
 }
 
+const useLocalStyles = () => StyleSheet.create({
+    container: {
+        display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', padding: 10
+    },
+    button: {
+        width: '100%', flex: 1
+    }
+})
+
 const AddPassage = React.memo(({passage}: AddPassageProps) => {
-    const styles = useGlobalStyles();
+    const globalStyles = useGlobalStyles();
+    const styles = useLocalStyles();
     const theme = useAppTheme();
     const {addPassageToNewCollection, removeItemFromNewCollection, newCollection} = useCollectionsStore();
 
@@ -22,7 +32,7 @@ const AddPassage = React.memo(({passage}: AddPassageProps) => {
     const passageSaved = !!savedPassageItem;
 
     return (
-        <View style={{display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', padding: 10}}>
+        <View style={styles.container}>
             <PassageContent passage={passage} />
 
             {passageSaved ? (
@@ -30,17 +40,17 @@ const AddPassage = React.memo(({passage}: AddPassageProps) => {
                         if (savedPassageItem) {
                             removeItemFromNewCollection(savedPassageItem.id);
                         }
-                    }} style={{width: '100%', flex: 1}}>
-                    <View style={styles.outlineButtonSkinny}>
-                        <Text style={styles.outlineButtonSkinnyText}>Remove</Text>
+                    }} style={styles.button}>
+                    <View style={globalStyles.outlineButtonSkinny}>
+                        <Text style={globalStyles.outlineButtonSkinnyText}>Remove</Text>
                     </View>
                 </TouchableHighlight>
             ) : (
                 <TouchableHighlight onPress={() => {
                         addPassageToNewCollection(passage);
-                    }} style={{width: '100%', flex: 1}}>
-                    <View style={styles.outlineButtonSkinny}>
-                        <Text style={styles.outlineButtonSkinnyText}>Add</Text>
+                    }} style={styles.button}>
+                    <View style={globalStyles.outlineButtonSkinny}>
+                        <Text style={globalStyles.outlineButtonSkinnyText}>Add</Text>
                     </View>
                 </TouchableHighlight>
             )}

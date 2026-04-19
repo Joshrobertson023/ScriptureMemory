@@ -1,10 +1,10 @@
 import { Alert, TextInput, Text, TouchableOpacity, View } from "react-native"
 import useGlobalStyles from "../../styles/gobalStyles"
-import { initialCollection, useCollectionsStore } from "../../stores/collections.store";
-import { ArrowUpDown, ChevronRight } from "lucide-react-native";
+import { useCollectionsStore } from "../../stores/collections.store";
+import { BadgePlus, Check, ChevronRight } from "lucide-react-native";
 import useAppTheme from "../../theme";
 import VisibilityBottomSheet from "../../components/bottom-sheets/visibilityBottomSheet";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import AddPassageBottomSheet from "../../components/bottom-sheets/addPassageBottomSheet";
 import NewCollectionPassage from "../../components/passage/newCollectionPassage";
@@ -13,66 +13,81 @@ import ReorderableList, { reorderItems } from "react-native-reorderable-list";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../types/router";
+import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
+import AddNoteBottomSheet from "../../components/bottom-sheets/addNoteBottomSheet";
+import { Note } from "../../../types/note";
+import { useAppStore } from "../../stores/appState.store";
 
 export const CreateCollectionScreen = () => {
     const styles = useGlobalStyles();
     const theme = useAppTheme();
-    const {newCollection, setNewCollection, setNewCollectionItems} = useCollectionsStore();
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    const {
+        newCollection,
+        setNewCollection,
+        setNewCollectionItems,
+        addNoteToNewCollection,
+        updateNoteInNewCollection,
+        removeItemFromNewCollection
+    } = useCollectionsStore();
+    const {setNoteBottomSheet, setNoteSheetOpen, noteSheetOpen} = useBottomSheetsStore();
 
-    // Local list state avoids persistence churn during drag operations.
     const [items, setItems] = useState(newCollection.items);
     const visibilityBottomSheet = useRef<TrueSheet>(null);
     const addPassageBottomSheet = useRef<TrueSheet>(null);
-    const bypassBackPromptRef = useRef(false);
+    const addNoteBottomSheet = useRef<TrueSheet>(null);
+
+    const {addCollection, clearNewCollection} = useCollectionsStore();
+    const {setSyncStatus} = useAppStore();
 
     useEffect(() => {
-        setItems(newCollection.items);
-    }, [newCollection.items.length]);
+        if (noteSheetOpen) {
+            addNoteBottomSheet.current?.present();
+        } else {
+            addNoteBottomSheet.current?.dismiss();
+        }
+    }, [noteSheetOpen]);
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', (e) => {
-            if (bypassBackPromptRef.current) {
-                bypassBackPromptRef.current = false;
-                return;
-            }
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-            e.preventDefault();
-            Alert.alert(
-                'Save draft',
-                'Would you like to save your progress for later?',
-                [
-                    {
-                        text: 'Cancel',
-                        style: 'cancel',
-                    },
-                    {
-                        text: 'Delete',
-                        style: 'destructive',
-                        onPress: () => {
-                            setNewCollection(initialCollection);
-                            bypassBackPromptRef.current = true;
-                            navigation.dispatch(e.data.action);
-                        },
-                    },
-                    {
-                        text: 'Save Draft',
-                        onPress: () => {
-                            const updatedDraft = {
-                                ...newCollection,
-                                items,
-                            };
-                            setNewCollection(updatedDraft);
-                            bypassBackPromptRef.current = true;
-                            navigation.dispatch(e.data.action);
-                        },
-                    },
-                ]
-            );
-        });
+    const saveCollection = () => {
+        addCollection(newCollection);
+        clearNewCollection();
+        //setSyncStatus('Syncing');
+        navigation.goBack();
 
-        return unsubscribe;
-    }, [navigation, newCollection, items, setNewCollection]);
+    }
+
+    const saveNewCollectionNote = (text: string, itemId: number | null) => {
+        console.log(text)
+        console.log(itemId)
+        if (itemId !== null) {
+            updateNoteInNewCollection(itemId, text);
+            return;
+        }
+
+        const note: Note = {
+            id: 0,
+            text
+        };
+        addNoteToNewCollection(note);
+    };
+
+    const deleteNewCollectionNote = (itemId: number | null) => {
+        if (itemId === null) {
+            return;
+        }
+        removeItemFromNewCollection(itemId);
+    };
+
+    useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <TouchableOpacity onPress={saveCollection}>
+                    <Check size={28} color={theme.colors.onBackground} />
+                </TouchableOpacity>
+            )
+        })
+    }, [navigation])
 
     return (
             <View style={{...styles.screen, gap: 5}}>
@@ -84,9 +99,10 @@ export const CreateCollectionScreen = () => {
                         style={styles.input}
                         placeholder="New Collection Title"
                     />
-                    <TouchableOpacity >
-                        <ArrowUpDown size={28} color={theme.colors.onBackground} />
-                    </TouchableOpacity>
+                    {/* <TouchableOpacity style={{...styles.elevationButton, width: '35%', flexDirection: 'column', padding: -10}}>
+                        <BadgePlus size={22} color={theme.colors.onBackground} />
+                        <Text style={styles.p3}>Create</Text>
+                    </TouchableOpacity> */}
                 </View>
 
                 <TouchableOpacity 
@@ -104,20 +120,29 @@ export const CreateCollectionScreen = () => {
                     </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.elevationButton} onPress={() => addPassageBottomSheet.current?.present()}>
-                    <Text style={styles.p3}>Add Passage</Text>
-                </TouchableOpacity>
+                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', gap: 10}}>
+                    <TouchableOpacity style={{...styles.elevationButton, width: '49%'}} onPress={() => addPassageBottomSheet.current?.present()}>
+                        <Text style={styles.p3}>Add Passage</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={{...styles.elevationButton, width: '49%'}} onPress={() => {
+                        setNoteBottomSheet({ id: 0, text: '' }, null);
+                        setNoteSheetOpen(true);
+                    }}>
+                        <Text style={styles.p3}>Add Note</Text>
+                    </TouchableOpacity>
+                </View>
 
                 <View style={{height: 10}} />
                 
                 <ReorderableList
-                    data={items}
+                    data={newCollection.items}
                     keyExtractor={(item) => `${item.type}-${item.id}`}
                     renderItem={({item}) => {
                         if (item.type === 'passage')
                             return <NewCollectionPassage userPassage={item} itemId={item.id} />;
                         if (item.type === 'note')
-                            return <CollectionNote note={item.note} />;
+                            return <CollectionNote note={item.note} itemId={item.id} />;
                         return null;
                     }}
                     onReorder={({from, to}) => {
@@ -127,12 +152,21 @@ export const CreateCollectionScreen = () => {
                     }}
                 />
 
+                {/* <TouchableOpacity style={{...styles.elevationButton, position: 'absolute', bottom: 40}}>
+                    <Text style={styles.p3}>Create</Text>
+                </TouchableOpacity> */}
+
                 <VisibilityBottomSheet 
                     ref={visibilityBottomSheet}
                     currentVisibility={newCollection.visibility}
                 />
                 <AddPassageBottomSheet
                     ref={addPassageBottomSheet}
+                />
+                <AddNoteBottomSheet
+                    ref={addNoteBottomSheet}
+                    onSave={saveNewCollectionNote}
+                    onDelete={deleteNewCollectionNote}
                 />
             </View>
     )

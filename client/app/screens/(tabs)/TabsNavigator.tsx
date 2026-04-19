@@ -10,11 +10,10 @@ import useAppTheme from '../../theme';
 
 // Import your screen components
 import {BibleScreen} from './bible.screen';
-import {ExploreScreen} from './explore.screen';
+import {ExploreScreen} from './profile.screen';
 import {HomeScreen} from './home.screen';
-import {CollectionsScreen} from './collections.screen';
+import { CollectionsScreen } from './collections.screen';
 import useGlobalStyles from '../../styles/gobalStyles';
-import { CollectionTopTabs } from './CollectionTopTabs';
 import { Users } from 'lucide-react-native';
 
 const Tab = createBottomTabNavigator();
@@ -128,9 +127,9 @@ export default function TabLayout() {
           {/* ── Practice ── */}
           <Tab.Screen
             name="Collections"
-            component={CollectionTopTabs}
+            component={CollectionsScreen}
             options={{
-              headerShown: false,
+              headerShown: true,
               tabBarIcon: ({ focused }) => (
                 <View style={{ position: 'relative' }}>
                   <Ionicons
@@ -145,16 +144,11 @@ export default function TabLayout() {
                   Collections
                 </Text>
               ),
-              headerRight: () => (
-                <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
-                  <TouchableOpacity onPress={() => { /* navigate to notifications */ }}>
-                    <Ionicons style={{ marginTop: 4 }} name="refresh" size={32} color={theme.colors.onBackground} />
-                  </TouchableOpacity>
-                  <Pressable onPress={() => setIsProfileDrawerOpen(true)}>
-                    <Ionicons style={{ marginTop: 4 }} name="person-circle" size={32} color={theme.colors.onBackground} />
-                  </Pressable>
-                </View>
-              ),
+              headerSearchBarOptions: {
+                placeholder: "Search Collections...",
+                onChangeText: (event) => 
+                    console.log(event.nativeEvent.text),
+              }
             }}
           />
 

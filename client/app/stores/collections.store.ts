@@ -50,10 +50,12 @@ interface CollectionsStore {
     setCollections: (c: Collection[]) => void;
     setCollection: (c: Collection) => void;
     setNewCollection: (nc: Collection) => void;
+    clearNewCollection: () => void;
     setNewCollectionVisibility: (v: number) => void;
     setNewCollectionItems: (items: CollectionItem[]) => void;
     addPassageToNewCollection: (p: Passage) => void;
     addNoteToNewCollection: (note: Note) => void;
+    updateNoteInNewCollection: (itemId: number, text: string) => void;
     removeItemFromNewCollection: (id: number) => void;
     addCollection: (c: Omit<Collection, 'id'>) => Collection;
     reconcileServerId: (localId: number, serverId: number) => void;
@@ -117,6 +119,9 @@ export const useCollectionsStore = create<CollectionsStore>()(
             setNewCollection(nc: Collection) {
                 set({ newCollection: nc })
             },
+            clearNewCollection() {
+                set({ newCollection: initialCollection })
+            },
             /**
              * Adds a passage to newCollection with a unique local (negative) id
              * Ignores the passage if it already exists
@@ -171,6 +176,24 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     newCollection: {
                         ...state.newCollection,
                         items: [...state.newCollection.items, item],
+                    }
+                }));
+            },
+            updateNoteInNewCollection(itemId: number, text: string) {
+                set((state) => ({
+                    newCollection: {
+                        ...state.newCollection,
+                        items: state.newCollection.items.map((item) => {
+                            if (item.type !== 'note' || item.id !== itemId)
+                                return item;
+                            return {
+                                ...item,
+                                note: {
+                                    ...item.note,
+                                    text
+                                }
+                            };
+                        }),
                     }
                 }));
             },

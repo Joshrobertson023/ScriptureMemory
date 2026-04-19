@@ -1,4 +1,4 @@
-import { TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Passage } from "../../../types/passages/passage";
 import PassageContent from "./passageContent";
 import { UserPassage } from "../../../types/passages/userPassage";
@@ -12,6 +12,15 @@ interface NewCollectionPassageProps {
     itemId: number;
 }
 
+const useLocalStyles = () => StyleSheet.create({
+    container: {
+        maxWidth: '100%', flexDirection: 'row', alignItems: 'center', gap: 10
+    },
+    icons: {
+        justifyContent: 'flex-start', alignItems: 'flex-start', height: '100%', width: 50, gap: 10
+    }
+})
+
 const NewCollectionPassage = ({userPassage, itemId}: NewCollectionPassageProps) => {
     const passage: Passage = {
         reference: userPassage.passage.reference,
@@ -21,14 +30,15 @@ const NewCollectionPassage = ({userPassage, itemId}: NewCollectionPassageProps) 
     const theme = useAppTheme();
     const drag = useReorderableDrag();
     const isActive = useIsActive();
+    const styles = useLocalStyles();
 
     const removeItemFromNewCollection = useCollectionsStore().removeItemFromNewCollection;
 
     return (
-        <View style={{maxWidth: '100%', flexDirection: 'row', alignItems: 'center', gap: 10}}>
-            <PassageContent passage={passage} />
+        <View style={[styles.container]}>
+            <PassageContent passage={passage} maxWidth={'90%'} />
 
-            <View style={{justifyContent: 'space-between', alignItems: 'stretch'}}>
+            <View style={[styles.icons]}>
                 <TouchableOpacity onLongPress={drag} disabled={isActive}>
                     <GripVertical size={20} color={theme.colors.onBackground} />
                 </TouchableOpacity>

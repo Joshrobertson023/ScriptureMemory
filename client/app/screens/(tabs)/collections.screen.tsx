@@ -9,26 +9,29 @@ import { useUserStore } from "../../stores/user.store";
 import { useCollectionsStore } from "../../stores/collections.store";
 import { CollectionCard } from "../../components/collection/collectionCard";
 import SearchResult from "../../components/collection/searchResults";
+import useGlobalStyles from "../../styles/gobalStyles";
 
 export const CollectionsScreen = () => {
-    const styles = useStyles();
+    const globalStyles = useGlobalStyles();
     const userCollections = useCollectionsStore().userCollections;
     const [searchQuery, setSearchQuery] = useState('');
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.screen}>
-                <CollectionsPageHeader onSearch={setSearchQuery} />
-                {searchQuery.length > 0 ? (
-                    <SearchResult query={searchQuery} />
-                ) : (
-                    <FlatList
-                        data={userCollections}
-                        keyExtractor={(col) => col.id.toString()}
-                        renderItem={({ item }) => <CollectionCard collection={item} />}
-                        keyboardShouldPersistTaps="handled"
-                    />
-                )}
+            <View style={globalStyles.screen}>
+                <CollectionsPageHeader />
+                <View style={globalStyles.collectionCardsContainer}>
+                    {searchQuery.length > 0 ? (
+                        <SearchResult query={searchQuery} />
+                    ) : (
+                        <FlatList
+                            data={userCollections}
+                            keyExtractor={(col) => col.id.toString()}
+                            renderItem={({ item }) => <CollectionCard collection={item} />}
+                            keyboardShouldPersistTaps="handled"
+                        />
+                    )}
+                </View>
             </View>
         </TouchableWithoutFeedback>
     );

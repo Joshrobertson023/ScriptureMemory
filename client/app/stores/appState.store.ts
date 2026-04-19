@@ -18,12 +18,15 @@ interface AppState {
   publishingCollection: Collection | undefined;
   themePreference: ThemePreference;
   errorMessage: ErrorMessage;
+  syncStatus: 'Syncing' | 'Error' | 'Synced';
   
   setEditingCollection: (collection: Collection | undefined) => void;
   setPublishingCollection: (collection: Collection | undefined) => void;
   setThemePreference: (preference: ThemePreference) => void;
 
   displayErrorMessage: (msg: ErrorMessage) => void;
+
+  setSyncStatus: (s: 'Syncing' | 'Error' | 'Synced') => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -33,6 +36,7 @@ export const useAppStore = create<AppState>((set) => ({
     selectedUserVerse: undefined,
     themePreference: 0,
     errorMessage: initialErrorMessage,
+    syncStatus: 'Error',
 
     setEditingCollection: (collection: Collection | undefined) => set({editingCollection: collection ? collection : undefined}),
     setPublishingCollection: (collection: Collection | undefined) => set({publishingCollection: collection ? collection : undefined}),
@@ -40,5 +44,9 @@ export const useAppStore = create<AppState>((set) => ({
 
     displayErrorMessage: (msg: ErrorMessage) => {
         set({errorMessage: msg })
+    },
+
+    setSyncStatus: (s: 'Syncing' | 'Error' | 'Synced') => {
+        set({syncStatus: s})
     }
 }))

@@ -13,7 +13,7 @@ const PassageBottomSheet = forwardRef<TrueSheet>(
         const {passageBottomSheet} = useBottomSheetsStore();
 
         return (
-            <TrueSheet ref={ref} detents={[0.5, 1]}>
+            <TrueSheet ref={ref} detents={[0.5, 1]} onDidDismiss={close}>
                 <Text style={styles.p3}>{passageBottomSheet.passage.reference.readableReference}</Text>
             </TrueSheet>
         )

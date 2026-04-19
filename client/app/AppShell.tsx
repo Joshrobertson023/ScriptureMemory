@@ -106,7 +106,7 @@ export default function AppShell() {
       } else {
         passageSheet.current?.dismiss();
       }
-    })
+    }, [passageSheetOpen])
 
     useEffect(() => {
         void useSearchStore.persist.rehydrate();
@@ -134,13 +134,14 @@ export default function AppShell() {
                   component={CreateCollectionScreen}
                   options={{
                     headerShown: true,
-                    headerTitle: 'Create Collection',
+                    headerTitle: 'New Collection',
                     animation: 'default',
                     headerStyle: {
                       backgroundColor: theme.colors.background2,
                     },
                     headerTitleStyle: {
                       color: theme.colors.onBackground,
+                      fontSize: 20
                     },
                     headerTintColor: theme.colors.onBackground,
                   }}

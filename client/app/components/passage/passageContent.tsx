@@ -1,4 +1,4 @@
-import { TouchableWithoutFeedback, Text, View } from "react-native"
+import { TouchableWithoutFeedback, Text, View, StyleProp, ViewStyle, StyleSheet, DimensionValue } from "react-native"
 import { Passage } from "../../../types/passages/passage"
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
@@ -14,10 +14,27 @@ import { Check } from "lucide-react-native";
 
 interface PassageContentProps {
     passage: Passage;
+    style?: StyleProp<ViewStyle>;
+    maxWidth?: DimensionValue;
 }
 
-const PassageContent = React.memo(({passage}: PassageContentProps) => {
+const useLocalStyles = () => {
+    return StyleSheet.create({
+        container: {
+            
+        },
+        row1: {
+            flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginVertical: 10
+        },
+        row2: {
+            flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7
+        }
+    })
+}
+
+const PassageContent = React.memo(({passage, maxWidth}: PassageContentProps) => {
     const styles = useGlobalStyles();
+    const localStyles = useLocalStyles();
     const theme = useAppTheme();
     const {setPassageSheetOpen, setPassageBottomSheet} = useBottomSheetsStore();
 
@@ -29,12 +46,12 @@ const PassageContent = React.memo(({passage}: PassageContentProps) => {
     return (
         <TouchableWithoutFeedback onPress={() => {
             const userPassage: UserPassage = {
-                passage: passage
+                passage: passage,
             }
             setPassageBottomSheet(userPassage);
             setPassageSheetOpen(true);
         }}>
-            <View style={{maxWidth: '88%'}}>
+            <View style={[localStyles.container, {maxWidth}]}>
                 <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>
                 <View>
                     {passage.verses.map((verse, index) => (
@@ -44,10 +61,10 @@ const PassageContent = React.memo(({passage}: PassageContentProps) => {
                     ))}
                 </View>
                 
-                <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginVertical: 10}}>
-                    <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7}}>
+                <View style={[localStyles.row1]}>
+                    <View style={[localStyles.row2]}>
                     </View>
-                    <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7}}>
+                    <View style={[localStyles.row2]}>
                         <Check size={16} color={theme.colors.onBackground} />
                         <Text style={styles.p4}>In 1 Collection</Text>
                     </View>

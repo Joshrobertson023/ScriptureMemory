@@ -1,6 +1,6 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { Category } from "../../../types/category"
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
 
@@ -9,9 +9,31 @@ interface CategoriesProps {
     multiline: boolean;
 }
 
+
 const Categories = ({categories, multiline}: CategoriesProps) => {
-    const styles = useGlobalStyles();
+    const globalStyles = useGlobalStyles();
     const theme = useAppTheme();
+    const useLocalStyles = () => useMemo(() => StyleSheet.create({
+        container: {
+            flexDirection: 'row', marginBottom: 20
+        },
+        innerContainer: {
+            flexDirection: 'row', gap: 10
+        },
+        categoryName: {
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                backgroundColor: theme.colors.elevation, borderRadius: 30, paddingHorizontal: 15
+                            },
+                            twoCategoryName: {
+                                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                backgroundColor: theme.colors.elevation, borderRadius: 30, paddingHorizontal: 15, paddingVertical: 2
+                            },
+                            categoriesExtra: {
+            display: 'flex', justifyContent: 'center', alignItems: 'center',
+            backgroundColor: theme.colors.elevation, borderRadius: 30
+        }
+    }), [theme])
+    const styles = useLocalStyles();
 
     const [firstTwoCategories, setFirstTwoCategories] = useState<Category[]>([]);
 
@@ -20,33 +42,29 @@ const Categories = ({categories, multiline}: CategoriesProps) => {
     }, [categories]);
 
     return (
-        <View style={{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+        <View style={styles.container}>
             {multiline ? (
-                categories.map((category, index) => {
-                    return (
-                        <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
-                            backgroundColor: theme.colors.elevation, borderRadius: 30, paddingHorizontal: 15
-                        }}>
-                            <Text style={styles.p4}>{category.name}</Text>
-                        </View>
-                    )
-                })
+                <View style={styles.innerContainer}>
+                    {categories.map((category, index) => {
+                        return (
+                            <View style={styles.categoryName}>
+                                <Text style={globalStyles.p4}>{category.name}</Text>
+                            </View>
+                        )
+                    })}
+                </View>
             ) : (
-                <View>
+                <View style={styles.innerContainer}>
                     {firstTwoCategories.map((category, index) => {
                         return (
-                            <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                backgroundColor: theme.colors.elevation, borderRadius: 30, paddingHorizontal: 15, paddingVertical: 2
-                            }}>
-                                <Text style={styles.p4}>{category.name}</Text>
+                            <View style={styles.twoCategoryName}>
+                                <Text style={globalStyles.p4}>{category.name}</Text>
                             </View>
                         )
                     })}
                     {categories.length > 2 && (
-                        <View style={{display: 'flex', justifyContent: 'center', alignItems: 'center',
-                            backgroundColor: theme.colors.elevation, borderRadius: 30
-                        }}>
-                            <Text style={styles.p4}>+{categories.length - 2}</Text>
+                        <View style={styles.categoriesExtra}>
+                            <Text style={globalStyles.p4}>+{categories.length - 2}</Text>
                         </View>
                     )}
                 </View>

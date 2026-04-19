@@ -1,14 +1,36 @@
 import { StyleSheet } from 'react-native';
 import useAppTheme from '../theme';
+import { useMemo } from 'react';
 
 export default function useGlobalStyles() {  
   const theme = useAppTheme();
-  return StyleSheet.create({
+  return useMemo(() => StyleSheet.create({
     screen: {
       flex: 1,
       backgroundColor: theme.colors.background,
       padding: 15,
       alignItems: 'center'
+    },
+
+    centerContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    topContainer: {
+      display: 'flex',
+      justifyContent: 'flex-start',
+      alignItems: 'center',
+    },
+    leftContainer: {
+      display: 'flex',
+      alignItems: 'center',
+    },
+    rowContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      flexDirection: 'row'
     },
 
     bottomSheetContainer: {
@@ -87,75 +109,7 @@ export default function useGlobalStyles() {
       fontSize: 12,
       fontFamily: 'Inter'
     },
-
-
-    scrollContainer: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    centered: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '100%',
-    },
-    collectionsContainer: {
-      flex: 1,
-      width: '100%',
-    },
-    collectionItem: {
-      height: 80,
-      marginTop: 25,
-      borderRadius: 10,
-      display: 'flex',
-      justifyContent: 'flex-start',
-      width: '100%',
-      marginBottom: 0,
-      backgroundColor: theme.colors.background,
-    },
-    text: {
-      color: theme.colors.onBackground,
-      fontSize: 20,
-      marginBottom: 16,
-      fontFamily: 'Inter',
-    },
-    startupText: {
-      color: theme.colors.onBackground,
-      fontSize: 24,
-      marginBottom: 16,
-      fontFamily: 'Inter',
-      fontWeight: 900,
-    },
-    tinyText: {
-      color: theme.colors.onBackground,
-      fontSize: 16,
-      fontFamily: 'Inter',
-    },
-    inputText: {
-      color: theme.colors.onBackground,
-      fontSize: 16,
-      marginTop: 5,
-      backgroundColor: theme.colors.white,
-      fontFamily: 'Inter',
-    },
-    headline: {
-      color: theme.colors.white,
-      fontSize: 42,
-      top: -96,
-      fontFamily: 'Inter',
-    },
-    subheading: {
-      color: theme.colors.onBackground,
-      fontSize: 26,
-      fontFamily: 'Inter',
-    },
-    errorMessage: {
-      color: theme.colors.white,
-      fontSize: 18,
-      marginBottom: 10,
-      fontFamily: 'Inter',
-    },
+    
     input: {
       flex: 1,
       backgroundColor: theme.colors.elevation,
@@ -166,91 +120,41 @@ export default function useGlobalStyles() {
       borderWidth: 0.2,
       paddingLeft: 10,
     },
+    
     search: {
+      flex: 1,
       backgroundColor: theme.colors.elevation,
       color: theme.colors.onBackground,
-      borderRadius: 30,
+      borderRadius: 40,
+      marginBottom: 12,
+      height: 50,
       borderWidth: 0.2,
       paddingLeft: 10,
     },
-    errorInput: {
-      borderColor: 'red',
-      borderWidth: 2,
-    },
-    button_outlined: {
-      backgroundColor: 'transparent',
-      borderColor: theme.colors.onBackground,
-      borderWidth: 1,
-      borderRadius: 20,
-      height: 40,
+    
+    /**
+     * Collection cards
+     */
+    collectionCardsContainer: {
+      display: 'flex',
+      gap: 20,
       width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
+      marginTop: 10
     },
-    button_filled: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: 20,
-      height: 40,
+    collectionCard: {
+      backgroundColor: theme.colors.elevation,
       width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
+      borderRadius: 10,
+      height: 75,
+      paddingHorizontal: 17,
+      paddingVertical: 10
     },
-    button_text: {
-      backgroundColor: 'transparent',
-      borderRadius: 20,
-      height: 40,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
+    collectionCardTitle: {
+      color: theme.colors.onBackgroundSoft,
+      fontSize: 18,
+      fontWeight: 700,
       fontFamily: 'Inter',
-    },
-    buttonText_filled: {
-      color: theme.colors.background,
-      fontSize: 16,
-      fontFamily: 'Inter',
-    },
-    buttonText_outlined: {
-      color: theme.colors.onBackground,
-      fontSize: 16,
-      fontWeight: 600,
-      fontFamily: 'Inter',
-    },
-    signinButton: {
-      marginBottom: 10,
-    },
-    // Global button styles for React Native Button component
-    button: {
-      borderRadius: 20,
-      height: 40,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    buttonOutlined: {
-      backgroundColor: 'transparent',
-      borderColor: theme.colors.onBackground,
-      borderWidth: 1,
-      borderRadius: 20,
-      height: 40,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    buttonFilled: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: 20,
-      height: 40,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    buttonText: {
-      backgroundColor: 'transparent',
-      borderRadius: 20,
-      height: 40,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-  });
+    }
+  }), [theme]);
 
 }
