@@ -34,17 +34,6 @@ export default function TabLayout() {
   SystemUI.setBackgroundColorAsync(theme.colors.background);
 
   return (
-      <Drawer
-        style={{ flex: 1, backgroundColor: theme.colors.background }}
-        open={isProfileDrawerOpen}
-        onOpen={() => setIsProfileDrawerOpen(true)}
-        onClose={() => setIsProfileDrawerOpen(false)}
-        drawerPosition="right"
-        drawerType="front"
-        overlayStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
-        drawerStyle={{ width: '80%', backgroundColor: theme.colors.background }}
-        renderDrawerContent={() => <View />}
-      >
         <Tab.Navigator
           tabBar={(props: BottomTabBarProps) => <BottomTabBar {...props} />}
           screenOptions={{
@@ -228,6 +217,5 @@ export default function TabLayout() {
             }}
           />
         </Tab.Navigator>
-      </Drawer>
   );
 }

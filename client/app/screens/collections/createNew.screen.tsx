@@ -4,7 +4,7 @@ import { useCollectionsStore } from "../../stores/collections.store";
 import { BadgePlus, Check, ChevronRight } from "lucide-react-native";
 import useAppTheme from "../../theme";
 import VisibilityBottomSheet from "../../components/bottom-sheets/visibilityBottomSheet";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import AddPassageBottomSheet from "../../components/bottom-sheets/addPassageBottomSheet";
 import NewCollectionPassage from "../../components/passage/newCollectionPassage";
@@ -17,6 +17,7 @@ import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import AddNoteBottomSheet from "../../components/bottom-sheets/addNoteBottomSheet";
 import { Note } from "../../../types/note";
 import { useAppStore } from "../../stores/appState.store";
+import { Snackbar } from "react-native-snackbar";
 
 export const CreateCollectionScreen = () => {
     const styles = useGlobalStyles();
@@ -49,13 +50,26 @@ export const CreateCollectionScreen = () => {
 
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-    const saveCollection = () => {
-        addCollection(newCollection);
+    const saveCollection = useCallback(() => {
+        const current = useCollectionsStore.getState().newCollection;
+
+        if (current.title.trim() === '')
+            setNewCollection({...newCollection, title: 'New Collection'})
+
+        if (current.items.length <= 0) {
+            Snackbar.show({
+                text: 'A new collection must have at least a note or passage.',
+                duration: Snackbar.LENGTH_SHORT
+            });
+            return;
+        }
+
+        addCollection(current);
         clearNewCollection();
         //setSyncStatus('Syncing');
         navigation.goBack();
 
-    }
+    }, [navigation]);
 
     const saveNewCollectionNote = (text: string, itemId: number | null) => {
         console.log(text)

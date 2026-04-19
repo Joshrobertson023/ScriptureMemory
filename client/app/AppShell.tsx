@@ -108,10 +108,6 @@ export default function AppShell() {
       }
     }, [passageSheetOpen])
 
-    useEffect(() => {
-        void useSearchStore.persist.rehydrate();
-    }, []);
-
   if (!appIsReady || !fontsLoaded) {
     return <ActivityIndicator />;
   } 
@@ -146,56 +142,6 @@ export default function AppShell() {
                     headerTintColor: theme.colors.onBackground,
                   }}
                 />
-                
-                                {/* Settings & info screens */}
-                {/* <Stack.Screen name="privacy"       component={PrivacyScreen}       options={{ title: 'Privacy Policy',              ...sharedHeaderStyle }} />
-                <Stack.Screen name="terms"         component={TermsScreen}         options={{ title: 'Terms of Service',            ...sharedHeaderStyle }} />
-                <Stack.Screen name="activity"      component={ActivityScreen}      options={{ title: 'Activity Tracking & Sharing', ...sharedHeaderStyle }} />
-                <Stack.Screen name="about"         component={AboutScreen}         options={{ title: 'About',                       ...sharedHeaderStyle }} />
-                <Stack.Screen name="notifications" component={NotificationsScreen} options={{ title: 'Notifications',               ...sharedHeaderStyle }} />
-                <Stack.Screen name="admin"         component={AdminScreen}         options={{ title: 'Admin Panel',                 ...sharedHeaderStyle }} />
-                <Stack.Screen name="settings"      component={SettingsScreen}      options={{ title: 'Settings',                    ...sharedHeaderStyleNoShadow }} />
-                <Stack.Screen name="practiceSession" component={PracticeSessionScreen} options={{ title: 'Practice',               ...sharedHeaderStyle }} /> */}
-
-                {/* Profile / content screens */}
-                {/* <Stack.Screen name="user"     component={UserScreen}     options={{ headerShown: false }} />
-                <Stack.Screen name="book"     component={BookScreen}     options={{ headerShown: false }} />
-                <Stack.Screen name="chapters" component={ChaptersScreen} options={{ headerShown: false }} /> */}
-
-                {/* Collections screens */}
-                {/* <Stack.Screen name="collections/addnew"                component={AddNewCollectionScreen}       options={{ title: 'New Collection',      ...sharedHeaderStyleNoShadow }} />
-                <Stack.Screen name="collections/reorderCollections"    component={ReorderCollectionsScreen}     options={{ title: 'Reorder Collections',  ...sharedHeaderStyleNoShadow }} />
-                <Stack.Screen name="collections/reorderVerses"         component={ReorderVersesScreen}          options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
-                <Stack.Screen name="collections/reorderExistingVerses" component={ReorderExistingVersesScreen}  options={{ title: 'Reorder Passages',     ...sharedHeaderStyleNoShadow }} />
-                <Stack.Screen name="collections/editCollection"        component={EditCollectionScreen}         options={{ title: 'Edit Collection',      ...sharedHeaderStyleNoShadow }} />
-                <Stack.Screen name="collections/publishCollection"     component={PublishCollectionScreen}      options={{ title: 'Publish Collection',   ...sharedHeaderStyleNoShadow }} /> */}
-
-                {/* <Stack.Screen
-                  name="collections/[id]"
-                  component={CollectionDetailScreen}
-                  options={{
-                    title: '',
-                    ...sharedHeaderStyleNoShadow,
-                    headerRight: () => (
-                      <View style={{ flexDirection: 'row', gap: 15, marginRight: 10 }}>
-                        <TouchableOpacity onPress={() => {}}>
-                          <Ionicons
-                            style={{ marginTop: 4 }}
-                            name="ellipsis-vertical"
-                            size={32}
-                            color={theme.colors.onBackground}
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    ),
-                  }}
-                /> */}
-
-                {/* <Stack.Screen
-                  name="explore/collection/[id]"
-                  component={ExploreCollectionScreen}
-                  options={{ title: '', ...sharedHeaderStyle }}
-                /> */}
               </Stack.Navigator>
             </NavigationContainer>
           <PassageBottomSheet ref={passageSheet}/>

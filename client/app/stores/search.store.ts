@@ -14,6 +14,7 @@ interface SearchStore {
 }
 
 export const useSearchStore = create<SearchStore>()(
+    persist(
         (set) => ({
             searchQuery: '',
             searchResults: [],
@@ -34,4 +35,9 @@ export const useSearchStore = create<SearchStore>()(
                 set({ searchQuery: '', searchResults: [] });
             },
         }),
+        {
+            name: 'search-storage',
+            storage: createJSONStorage(() => AsyncStorage),
+        }
+    )
 );

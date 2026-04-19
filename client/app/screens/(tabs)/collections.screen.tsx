@@ -10,28 +10,34 @@ import { useCollectionsStore } from "../../stores/collections.store";
 import { CollectionCard } from "../../components/collection/collectionCard";
 import SearchResult from "../../components/collection/searchResults";
 import useGlobalStyles from "../../styles/gobalStyles";
+import ReorderableList, { reorderItems } from "react-native-reorderable-list";
 
 export const CollectionsScreen = () => {
     const globalStyles = useGlobalStyles();
-    const userCollections = useCollectionsStore().userCollections;
+    const {userCollections, setCollections} = useCollectionsStore();
     const [searchQuery, setSearchQuery] = useState('');
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={globalStyles.screen}>
-                <CollectionsPageHeader />
-                <View style={globalStyles.collectionCardsContainer}>
-                    {searchQuery.length > 0 ? (
-                        <SearchResult query={searchQuery} />
-                    ) : (
-                        <FlatList
+                {searchQuery.length > 0 ? (
+                    <SearchResult query={searchQuery} />
+                ) : (
+                    <>
+                        <ReorderableList
+                            onReorder={({from, to}) => {
+                                const updated = reorderItems(userCollections, from, to);
+                                setCollections(updated);
+                            }}
                             data={userCollections}
                             keyExtractor={(col) => col.id.toString()}
                             renderItem={({ item }) => <CollectionCard collection={item} />}
                             keyboardShouldPersistTaps="handled"
+                            ListHeaderComponent={<CollectionsPageHeader />}
+                            ListFooterComponent={<View style={{height: 100}} />}
                         />
-                    )}
-                </View>
+                    </>
+                )}
             </View>
         </TouchableWithoutFeedback>
     );

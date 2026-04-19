@@ -49,6 +49,7 @@ interface CollectionsStore {
 
     setCollections: (c: Collection[]) => void;
     setCollection: (c: Collection) => void;
+    deleteCollection: (id: number) => void;
     setNewCollection: (nc: Collection) => void;
     clearNewCollection: () => void;
     setNewCollectionVisibility: (v: number) => void;
@@ -91,6 +92,11 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     userCollections: [...state.userCollections, newCollection]
                 }));
                 return newCollection;
+            },
+            deleteCollection(id: number) {
+                set((state) => ({
+                    userCollections: state.userCollections.filter((c) => c.id !== id)
+                }))
             },
             reconcileServerId(localId: number, serverId: number) {
                 set((state) => ({

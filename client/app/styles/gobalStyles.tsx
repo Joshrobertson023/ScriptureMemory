@@ -122,7 +122,6 @@ export default function useGlobalStyles() {
     },
     
     search: {
-      flex: 1,
       backgroundColor: theme.colors.elevation,
       color: theme.colors.onBackground,
       borderRadius: 40,
@@ -147,13 +146,16 @@ export default function useGlobalStyles() {
       borderRadius: 10,
       height: 75,
       paddingHorizontal: 17,
-      paddingVertical: 10
+      paddingVertical: 12,
+      flexDirection: 'row',
+      justifyContent: 'space-between'
     },
     collectionCardTitle: {
       color: theme.colors.onBackgroundSoft,
       fontSize: 18,
       fontWeight: 700,
       fontFamily: 'Inter',
+      marginTop: -2
     }
   }), [theme]);
 

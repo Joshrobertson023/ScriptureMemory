@@ -27,7 +27,7 @@ export const CollectionsPageHeader = () => {
 
     return (
         <>
-            <View style={{ width: '100%', display: 'flex', justifyContent: 'space-between', flexDirection: 'row' }}>
+            <View style={{ width: '100%', marginBottom: 10, display: 'flex', justifyContent: 'space-between', flexDirection: 'row' }}>
                 <TouchableOpacity onPress={() => navigation.navigate('createCollection')}>
                     <Plus size={28} color={theme.colors.onBackground} />
                 </TouchableOpacity>
