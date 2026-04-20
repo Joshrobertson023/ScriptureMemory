@@ -32,7 +32,7 @@ export const CreateCollectionScreen = () => {
     } = useCollectionsStore();
     const {setNoteBottomSheet, setNoteSheetOpen, noteSheetOpen} = useBottomSheetsStore();
 
-    const [items, setItems] = useState(newCollection.items);
+    const [items, setItems] = useState(newCollection.items ?? []);
     const visibilityBottomSheet = useRef<TrueSheet>(null);
     const addPassageBottomSheet = useRef<TrueSheet>(null);
     const addNoteBottomSheet = useRef<TrueSheet>(null);
@@ -150,9 +150,10 @@ export const CreateCollectionScreen = () => {
                 <View style={{height: 10}} />
                 
                 <ReorderableList
-                    data={newCollection.items}
+                    data={newCollection.items ?? []}
                     keyExtractor={(item) => `${item.type}-${item.id}`}
                     renderItem={({item}) => {
+                        if (!item) return null;
                         if (item.type === 'passage')
                             return <NewCollectionPassage userPassage={item} itemId={item.id} />;
                         if (item.type === 'note')
@@ -160,8 +161,8 @@ export const CreateCollectionScreen = () => {
                         return null;
                     }}
                     onReorder={({from, to}) => {
-                        const updated = reorderItems(items, from, to);
-                        setItems(updated);
+                        const current = useCollectionsStore.getState().newCollection.items ?? [];
+                        const updated = reorderItems(current, from, to);
                         setNewCollectionItems(updated);
                     }}
                 />

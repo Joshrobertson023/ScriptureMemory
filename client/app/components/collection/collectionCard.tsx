@@ -4,7 +4,7 @@ import { Collection } from "../../../types/collection/collection";
 import { useEffect, useMemo, useRef } from "react";
 import useAppTheme from "../../theme";
 import useGlobalStyles from "../../styles/gobalStyles";
-import { Archive, Clock, List, Trash } from "lucide-react-native";
+import { Archive, Clock, List, Pencil, PencilLine, Trash } from "lucide-react-native";
 import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
 import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useNavigation } from "@react-navigation/native";
@@ -81,6 +81,14 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
             padding: 20,
             marginTop: 10,
             borderRadius: 10,
+            marginRight: 5
+        },
+        sideEdit: {
+            backgroundColor: '#6b6f7c',
+            justifyContent: 'center',
+            padding: 20,
+            marginTop: 10,
+            borderRadius: 10,
             marginLeft: 5
         }
     }), [theme])
@@ -103,7 +111,7 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
             break;
     }
 
-    const {deleteCollection} = useCollectionsStore();
+    const {deleteCollection, setEditingCollection, addCollectionToArchived} = useCollectionsStore();
 
     const RightActions = () => (
         <>
@@ -114,18 +122,29 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
             >
                 <Trash size={25} color={theme.colors.background} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.sideArchive}
+            <TouchableOpacity style={styles.sideEdit}
                 onPress={() => {
-
+                    setEditingCollection(collection);
+                    navigation.navigate('editCollection');
                 }}
             >
-                <Archive size={25} color={theme.colors.background} />
+                <Pencil size={25} color={theme.colors.background} />
             </TouchableOpacity>
         </>
     )
 
+    const LeftActions = () => (
+            <TouchableOpacity style={styles.sideArchive}
+                onPress={() => {
+                    addCollectionToArchived(collection.id);
+                }}
+            >
+                <Archive size={25} color={theme.colors.background} />
+            </TouchableOpacity>
+    )
+
     return (
-        <Swipeable renderRightActions={() => <RightActions />}>
+        <Swipeable renderRightActions={() => <RightActions />} renderLeftActions={() => <LeftActions />}>
             <TouchableHighlight onLongPress={drag} disabled={isActive} style={styles.highlight} 
                 onPress={() => {
                     console.log(collection.id)

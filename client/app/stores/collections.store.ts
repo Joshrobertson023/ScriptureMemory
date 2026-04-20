@@ -327,7 +327,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
             }
         }),
         {
-            name: 'collection-storage-3',
+            name: 'collection-storage-5',
             storage: createJSONStorage(() => AsyncStorage)
         }
     )

@@ -39,6 +39,7 @@ import { useSearchStore } from './stores/search.store';
 import CollectionScreen from './screens/collections/collection';
 import AddNoteBottomSheet from './components/bottom-sheets/addNoteBottomSheet';
 import SyncBottomSheet from './components/bottom-sheets/syncBottomSheet';
+import EditCollectionScreen from './screens/collections/editCollection.screen';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -145,6 +146,22 @@ export default function AppShell() {
                   options={{
                     headerShown: true,
                     headerTitle: 'New Collection',
+                    animation: 'default',
+                    headerStyle: {
+                      backgroundColor: theme.colors.background2,
+                    },
+                    headerTitleStyle: {
+                      color: theme.colors.onBackground,
+                      fontSize: 20
+                    },
+                    headerTintColor: theme.colors.onBackground,
+                  }}
+                />
+                <Stack.Screen
+                  name="editCollection"
+                  component={EditCollectionScreen}
+                  options={{
+                    headerShown: true,
                     animation: 'default',
                     headerStyle: {
                       backgroundColor: theme.colors.background2,

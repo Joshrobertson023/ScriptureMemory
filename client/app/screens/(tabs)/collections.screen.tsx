@@ -1,7 +1,6 @@
 import { Button, FlatList, Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useStyles from '../../styles/gobalStyles';
-import { CollectionsPageHeader } from "../../components/collection/header";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
 import { useRef, useState } from "react";
 import CollectionsSortBottomSheet from "../../components/bottom-sheets/collectionsSortBottomSheet";

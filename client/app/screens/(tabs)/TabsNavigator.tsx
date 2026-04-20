@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BottomTabBar, BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import * as SystemUI from 'expo-system-ui';
 import React, { useRef, useState } from 'react';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
@@ -17,6 +17,8 @@ import useGlobalStyles from '../../styles/gobalStyles';
 import { CloudAlert, CloudCheck, CloudSync, Plus, Users } from 'lucide-react-native';
 import { useAppStore } from '../../stores/appState.store';
 import { useBottomSheetsStore } from '../../stores/bottomSheets.store';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../types/router';
 
 const Tab = createBottomTabNavigator();
 
@@ -26,10 +28,7 @@ export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const inactiveColor = theme.colors.elevation3;
 
-  // Replace these with your actual state/store values
-  const user = { isPaid: false };
-  const numNotifications = 0;
-  const overdueCount = 0;
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
   const {syncStatus} = useAppStore();
