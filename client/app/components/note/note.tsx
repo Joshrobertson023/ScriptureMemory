@@ -3,10 +3,10 @@ import { Note } from "../../../types/note";
 import useGlobalStyles from "../../styles/gobalStyles";
 import { Pencil } from "lucide-react-native";
 import useAppTheme from "../../theme";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 interface NoteProps {
     note: Note;
@@ -33,7 +33,13 @@ const NoteComponent = ({ note, itemId }: NoteProps) => {
     const styles = useLocalStyles();
     const drag = useReorderableDrag();
     const isActive = useIsActive();
-    const {setNoteBottomSheet, setNoteSheetOpen} = useBottomSheetsStore();
+    const {setNoteBottomSheet, setNoteSheetOpen, noteSheetOpen} = useBottomSheetsStore();
+    const swipeable = useRef<SwipeableMethods>(null);
+
+    useEffect(() => {
+        if (!noteSheetOpen)
+            swipeable.current?.close();
+    }, [noteSheetOpen]);
 
     const RightActions = () => (
         <TouchableOpacity
@@ -48,7 +54,7 @@ const NoteComponent = ({ note, itemId }: NoteProps) => {
     );
 
     return (
-        <Swipeable renderRightActions={() => <RightActions />}>
+        <Swipeable  ref={swipeable}  renderRightActions={() => <RightActions />}>
             <TouchableWithoutFeedback onLongPress={drag} disabled={isActive}>
                 <View style={styles.container}>
                     <Text style={globalStyles.p3}>{note.text}</Text>

@@ -1,15 +1,16 @@
 import { StyleSheet, Text, TouchableHighlight, TouchableNativeFeedback, TouchableOpacity, View } from "react-native";
 import { useCollectionsStore } from "../../stores/collections.store"
 import { Collection } from "../../../types/collection/collection";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import useAppTheme from "../../theme";
 import useGlobalStyles from "../../styles/gobalStyles";
 import { Archive, Clock, List, Trash } from "lucide-react-native";
 import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../types/router";
+import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 
 interface CollecitonCardProps {
     collection: Collection;

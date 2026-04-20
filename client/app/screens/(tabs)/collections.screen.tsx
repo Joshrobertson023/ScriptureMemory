@@ -33,7 +33,6 @@ export const CollectionsScreen = () => {
                             keyExtractor={(col) => col.id.toString()}
                             renderItem={({ item }) => <CollectionCard collection={item} />}
                             keyboardShouldPersistTaps="handled"
-                            ListHeaderComponent={<CollectionsPageHeader />}
                             ListFooterComponent={<View style={{height: 100}} />}
                         />
                     </>

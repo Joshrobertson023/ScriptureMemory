@@ -9,10 +9,12 @@ interface BottomSheetsStore {
     noteBottomSheet: Note;
     noteBottomSheetItemId: number | null;
     noteSheetOpen: boolean;
+    syncSheetOpen: boolean;
     setPassageBottomSheet: (up: UserPassage) => void;
     setPassageSheetOpen: (o: boolean) => void;
     setNoteBottomSheet: (note: Note, itemId: number | null) => void;
     setNoteSheetOpen: (o: boolean) => void;
+    setSyncSheetOpen: (o: boolean) => void;
     clearNoteBottomSheet: () => void;
 }
 
@@ -28,6 +30,7 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         noteBottomSheet: initialNote,
         noteBottomSheetItemId: null,
         noteSheetOpen: false,
+        syncSheetOpen: false,
 
         setPassageBottomSheet(up: UserPassage) {
             set((state) => ({
@@ -51,6 +54,12 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         setNoteSheetOpen(o) {
             set(() => ({
                 noteSheetOpen: o
+            }));
+        },
+
+        setSyncSheetOpen(o: boolean) {
+            set(() => ({
+                syncSheetOpen: o
             }));
         },
 

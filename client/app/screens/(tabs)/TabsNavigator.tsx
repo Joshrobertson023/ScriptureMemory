@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { BottomTabBar, BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import * as SystemUI from 'expo-system-ui';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { Drawer } from 'react-native-drawer-layout';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,7 +14,9 @@ import {ExploreScreen} from './profile.screen';
 import {HomeScreen} from './home.screen';
 import { CollectionsScreen } from './collections.screen';
 import useGlobalStyles from '../../styles/gobalStyles';
-import { Users } from 'lucide-react-native';
+import { CloudAlert, CloudCheck, CloudSync, Plus, Users } from 'lucide-react-native';
+import { useAppStore } from '../../stores/appState.store';
+import { useBottomSheetsStore } from '../../stores/bottomSheets.store';
 
 const Tab = createBottomTabNavigator();
 
@@ -30,6 +32,8 @@ export default function TabLayout() {
   const overdueCount = 0;
 
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
+  const {syncStatus} = useAppStore();
+  const {setSyncSheetOpen} = useBottomSheetsStore();
 
   SystemUI.setBackgroundColorAsync(theme.colors.background);
 
@@ -119,6 +123,7 @@ export default function TabLayout() {
             component={CollectionsScreen}
             options={{
               headerShown: true,
+              headerTitle: '',
               tabBarIcon: ({ focused }) => (
                 <View style={{ position: 'relative' }}>
                   <Ionicons
@@ -132,6 +137,22 @@ export default function TabLayout() {
                 <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
                   Collections
                 </Text>
+              ),
+              headerLeft: () => (
+                <TouchableOpacity style={{marginLeft: 10}} onPress={() => navigation.navigate('createCollection')}>
+                    <Plus size={28} color={theme.colors.onBackground} />
+                </TouchableOpacity>
+              ),
+              headerRight: () => (
+                <TouchableOpacity onPress={() => { setSyncSheetOpen(true) }}>
+                        {syncStatus === 'Synced' ? (
+                            <CloudCheck size={28} color={theme.colors.onBackground} />
+                        ) : syncStatus === 'Syncing' ? (
+                            <CloudSync size={28} color={theme.colors.onBackground} />
+                        ) : (
+                            <CloudAlert size={28} color={theme.colors.onBackground} />
+                        )}
+                    </TouchableOpacity>
               ),
               headerSearchBarOptions: {
                 placeholder: "Search Collections...",

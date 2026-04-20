@@ -38,6 +38,7 @@ import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useSearchStore } from './stores/search.store';
 import CollectionScreen from './screens/collections/collection';
 import AddNoteBottomSheet from './components/bottom-sheets/addNoteBottomSheet';
+import SyncBottomSheet from './components/bottom-sheets/syncBottomSheet';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -55,7 +56,8 @@ export default function AppShell() {
 
   const passageSheet = React.useRef<TrueSheet>(null);
   const noteSheet = React.useRef<TrueSheet>(null);
-  const {passageSheetOpen, noteSheetOpen} = useBottomSheetsStore();
+  const syncSheet = React.useRef<TrueSheet>(null);
+  const {passageSheetOpen, noteSheetOpen, syncSheetOpen} = useBottomSheetsStore();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   // On startup try to login user with auth token, retry if could not, then navigate
@@ -111,6 +113,15 @@ export default function AppShell() {
       }
     }, [passageSheetOpen])
 
+    // set sync bottom sheet ref
+    useEffect(() => {
+      if (syncSheetOpen) {
+        syncSheet.current?.present();
+      } else {
+        syncSheet.current?.dismiss();
+      }
+    }, [syncSheetOpen])
+
   if (!appIsReady || !fontsLoaded) {
     return <ActivityIndicator />;
   } 
@@ -163,6 +174,7 @@ export default function AppShell() {
               </Stack.Navigator>
             </NavigationContainer>
           <PassageBottomSheet ref={passageSheet}/>
+          <SyncBottomSheet ref={syncSheet}/>
       </GestureHandlerRootView>
     )
 }

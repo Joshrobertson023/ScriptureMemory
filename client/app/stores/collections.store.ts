@@ -43,7 +43,9 @@ export const initialUserPassage: UserPassage = {
 
 interface CollectionsStore {
     userCollections: Collection[];
+    archivedCollections: Collection[];
     newCollection: Collection;
+    editingCollection: Collection;
     _localIdCounter: number;
     _localPassageIdCounter: number;
 
@@ -69,13 +71,21 @@ interface CollectionsStore {
 
     reconcileServerId: (localId: number, serverId: number) => void;
     reconcilePassageServerId: (localId: number, serverId: number) => void;
+
+    setEditingCollection: (c: Collection) => void;
+    clearEditingCollection: () => void;
+
+    addCollectionToArchived: (id: number) => void;
+    removeCollectionFromArchived: (id: number) => void;
 }
 
 export const useCollectionsStore = create<CollectionsStore>()(
     persist(
         (set, get) => ({
             userCollections: [],
+            archivedCollections: [],
             newCollection: initialCollection,
+            editingCollection: initialCollection,
             _localIdCounter: 0,
             _localPassageIdCounter: 0,
 
@@ -280,6 +290,40 @@ export const useCollectionsStore = create<CollectionsStore>()(
                         items: state.newCollection.items.filter((i) => i.id !== id),
                     }
                 }));
+            },
+
+            setEditingCollection(c: Collection) {
+                set((state) => ({
+                    editingCollection: c
+                }))
+            },
+            clearEditingCollection() {
+                set((state) => ({
+                    editingCollection: initialCollection
+                }))
+            },
+
+            addCollectionToArchived(id: number) {
+                const state = get();
+                const collection = state.userCollections.find((col) => col.id === id);
+                if (!collection) return;
+                this.deleteCollection(id);
+
+                set((state) => ({
+                    archivedCollections: [
+                        ...state.archivedCollections, collection
+                    ]
+                }))
+            },
+            removeCollectionFromArchived(id: number) {
+                const state = get();
+                const collection = state.archivedCollections.find((col) => col.id === id);
+                if (!collection) return;
+
+                set((state) => ({
+                    userCollections: [...state.userCollections, collection],
+                    archivedCollections: state.archivedCollections.filter((col) => col.id !== id)
+                }))
             }
         }),
         {
