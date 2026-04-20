@@ -10,7 +10,8 @@ export async function getVod(): Promise<Vod> {
             const data = await response.json();
             return data;
         } else {
-            throw new Error('Login failed');
+            const responseText = await response.text();
+            throw new Error(responseText || 'Failed to fetch verse of day');
         }
     } catch (error) {
         throw error;

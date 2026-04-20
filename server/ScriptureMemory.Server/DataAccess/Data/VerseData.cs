@@ -14,6 +14,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Npgsql;
 using ScriptureMemory.Server.DataAccess.Models;
 using Pgvector;
+using static ScriptureMemory.Server.Tools.Enums;
 
 namespace DataAccess.Data;
 
@@ -366,8 +367,9 @@ public class VerseData
         };
     }
 
-    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, int maxResults = 25)
+    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, Verse? similarVerse = null)
     {
+        int maxResults = 50;
         using var conn = _dataSource.OpenConnection();
         var results = await conn.QueryAsync<GetVerseDto>(
             $"""
@@ -391,7 +393,7 @@ public class VerseData
             {
                 queryEmbedding
             });
-        return results
+        var all = results
             .GroupBy(v => v.Id)
             .Select(g => new Verse
         {
@@ -412,6 +414,15 @@ public class VerseData
                 Name = v.CategoryName
             }).ToList()
         }).ToList();
+
+        if (similarVerse is not null)
+        {
+            return all.Where(v => v.Id != similarVerse.Id).ToList();
+        }
+        else
+        {
+            return all;
+        }
     }
 
     public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> queryEmbeddings)
@@ -479,5 +490,133 @@ public class VerseData
                      WHERE id = @Id";
         using var conn = _dataSource.OpenConnection();
         await conn.ExecuteAsync(sql, new { Id = id });
+    }
+
+    class VerseCardDto
+    {
+        public int VerseId { get; set; }
+        public string Book { get; set; } = string.Empty;
+        public int Chapter { get; set; }
+        public string VerseText { get; set; } = string.Empty;
+        public int VerseTotalMemorizedCount { get; set; }
+        public int VerseTotalSavedCount { get; set; }
+        public int VerseNum { get; set; }
+        public Vector? VerseEmbedding { get; set; }
+
+        public int? CategoryId { get; set; }
+        public string? CategoryName { get; set; }
+
+        public int? CrossReferenceVotes { get; set; }
+        public string? CrossReferenceReference { get; set; }
+        public string? CRText { get; set; }
+        public int? CRVerseId { get; set; }
+        public string? CRBook { get; set; }
+        public int? CRChapter { get; set; }
+        public int? CRVerseNum { get; set; }
+        public int? CRMemorized { get; set; }
+        public int? CRSaved { get; set; }
+
+        public int? CollectionId { get; set; }
+        public string? CollectionTitle { get; set; }
+        public CollectionVisibility? CollectionVisibility { get; set; }
+    }
+
+    public async Task<VerseCardResponse> GetVerseCardResponse(int userId, int verseId)
+    {
+        using var conn = _dataSource.OpenConnection();
+
+        var results = await conn.QueryAsync<VerseCardDto>(
+            """
+            select
+            v.id as VerseId,
+            v.book as Book,
+            v.chapter as Chapter,
+            v.text as VerseText,
+            v.memorized_count as VerseTotalMemorizedCount,
+            v.saved_count as VerseTotalSavedCount,
+            v.verse_num as VerseNum,
+            v.embedding as VerseEmbedding,
+            c.id as CategoryId,
+            c.name as CategoryName,
+            crp.reference as CrossReferenceReference,
+            cr.votes as CrossReferenceVotes,
+            crv.text as CRText,
+            crv.id as CRVerseId,
+            crv.book as CRBook,
+            crv.chapter as CRChapter,
+            crv.verse_num as CRVerseNum,
+            crv.memorized_count as CRMemorized,
+            crv.saved_count as CRSaved,
+            col.id as CollectionId,
+            col.title as CollectionTitle,
+            col.visibility as CollectionVisibility
+            from verses v
+            left join verse_categories vc on vc.verse_id = v.id
+            left join categories c on c.id = vc.category_id
+            left join cross_references cr on cr.from_verse_id = v.id
+            left join cross_reference_passages_verses crpv on crpv.passage_id = cr.to_passage_id
+            left join cross_reference_passages crp on crp.id = crpv.passage_id
+            left join verses crv on crv.id = crpv.verse_id
+            left join passages_verses pv on pv.verse_id = v.id
+            left join collection_passages cp on cp.id = pv.passage_id
+            left join collections col on col.id = cp.collection_id
+                and col.is_deleted = false
+                and col.user_id = @userId
+            where v.id = @verseId
+            """, new
+            {
+                verseId,
+                userId
+            });
+
+        var grouped = results.GroupBy(dto => dto.VerseId).FirstOrDefault();
+        if (grouped is null)
+            return new VerseCardResponse { };
+
+        var first = grouped.First();
+
+        return new VerseCardResponse
+        {
+            Verse = new Verse
+            {
+                Id = first.VerseId,
+                Reference = ReferenceParser.Parse(
+                    $"{first.Book} " +
+                    $"{first.Chapter}:" +
+                    $"{first.VerseNum}")
+                    ?? throw new NullReferenceException("Reference"),
+                Text = first.VerseText,
+                UsersSavedCount = first.VerseTotalSavedCount,
+                UsersMemorizedCount = first.VerseTotalMemorizedCount,
+                Categories = grouped
+                    .Where(g => g.CategoryId is not null)
+                    .DistinctBy(g => g.CategoryId)
+                    .Select(c => new Category
+                    {
+                        Id = c.CategoryId ?? 0,
+                        Name = c.CategoryName ?? ""
+                    }).ToList(),
+            },
+            NumPracticed = 0,
+            NextDue = DateTime.UtcNow,
+            CrossReferences = grouped
+                .Where(g => g.CrossReferenceReference is not null)
+                .DistinctBy(g => g.CRVerseId)
+                .Select(c => new Verse
+                {
+                    Id = c.CRVerseId ?? 0,
+                    ReadableReference = $"{c.CRBook} {c.CRChapter}:{c.CRVerseNum}",
+                    Votes = c.CrossReferenceVotes
+                }).OrderByDescending(g => g.Votes).ToList(),
+            Collections = grouped
+                .Where(g => g.CollectionId is not null)
+                .DistinctBy(g => g.CollectionId)
+                .Select(c => new Collection
+                {
+                    Id = c.CollectionId ?? 0,
+                    Title = c.CollectionTitle ?? string.Empty,
+                    Visibility = c.CollectionVisibility ?? CollectionVisibility.Private
+                }).ToList()
+        };
     }
 }

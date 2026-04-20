@@ -26,6 +26,7 @@ export const CreateCollectionScreen = () => {
         newCollection,
         setNewCollection,
         setNewCollectionItems,
+        addPassageToNewCollection,
         addNoteToNewCollection,
         updateNoteInNewCollection,
         removeItemFromNewCollection
@@ -177,6 +178,9 @@ export const CreateCollectionScreen = () => {
                 />
                 <AddPassageBottomSheet
                     ref={addPassageBottomSheet}
+                    collectionItems={newCollection.items ?? []}
+                    savePassage={addPassageToNewCollection}
+                    removePassage={removeItemFromNewCollection}
                 />
                 <AddNoteBottomSheet
                     ref={addNoteBottomSheet}

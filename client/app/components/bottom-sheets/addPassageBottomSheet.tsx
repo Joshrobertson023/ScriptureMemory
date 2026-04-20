@@ -2,9 +2,17 @@ import { forwardRef } from "react"
 import { AddPassageScreen } from "../../screens/addPassage.screen"
 import { TrueSheet } from "@lodev09/react-native-true-sheet"
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store"
+import { Passage } from "../../../types/passages/passage"
+import { CollectionItem } from "../../../types/collection/collectionItem"
 
-const AddPassageBottomSheet = forwardRef<TrueSheet>(
-    (_, ref) => {
+interface AddPassageBottomSheetProps {
+    collectionItems: CollectionItem[];
+    savePassage: (passage: Passage) => void;
+    removePassage: (itemId: number) => void;
+}
+
+const AddPassageBottomSheet = forwardRef<TrueSheet, AddPassageBottomSheetProps>(
+    ({ collectionItems, savePassage, removePassage }: AddPassageBottomSheetProps, ref) => {
         const {setPassageSheetOpen} = useBottomSheetsStore();
         return (
             <TrueSheet
@@ -13,7 +21,11 @@ const AddPassageBottomSheet = forwardRef<TrueSheet>(
                 scrollable
                 onDidDismiss={() => setPassageSheetOpen(false)}
             >
-                <AddPassageScreen />
+                <AddPassageScreen
+                    collectionItems={collectionItems}
+                    savePassage={savePassage}
+                    removePassage={removePassage}
+                />
             </TrueSheet>
         )
     }

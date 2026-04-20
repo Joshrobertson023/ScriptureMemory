@@ -12,6 +12,8 @@ public class Verse
 {
     public int Id { get; set; } = 0;
     public Reference Reference { get; set; }
+    public string? ReadableReference { get; set; }
+    public int? Votes { get; set; }
     public string Text { get; set; }
     public int UsersSavedCount { get; set; } = 0;
     public int UsersMemorizedCount { get; set; } = 0;

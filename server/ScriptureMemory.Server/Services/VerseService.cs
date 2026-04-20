@@ -1,4 +1,6 @@
 using DataAccess.Data;
+using ScriptureMemory.Server.DataAccess.Models;
+using ScriptureMemory.Server.DataAccess.Requests;
 
 namespace VerseAppNew.Server.Services;
 

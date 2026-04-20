@@ -11,8 +11,16 @@ import { useUserStore } from "../stores/user.store";
 import { useUserAuthStore } from "../stores/userAuth.store";
 import { Searchbar } from "react-native-paper";
 import { useSearchStore } from "../stores/search.store";
+import { CollectionItem } from "../../types/collection/collectionItem";
+import { Passage } from "../../types/passages/passage";
 
-export const AddPassageScreen = () => {
+interface AddPassageScreenProps {
+    collectionItems: CollectionItem[];
+    savePassage: (passage: Passage) => void;
+    removePassage: (itemId: number) => void;
+}
+
+export const AddPassageScreen = ({ collectionItems, savePassage, removePassage }: AddPassageScreenProps) => {
     const styles = useGlobalStyles();
     const theme = useAppTheme();
     const [loadingSearch, setLoadingSearch] = useState(false);
@@ -86,7 +94,19 @@ export const AddPassageScreen = () => {
                     windowSize={3}
                     removeClippedSubviews={true}
                     keyExtractor={(item) => item.reference.readableReference}
-                    renderItem={({item}) => <AddPassage passage={item} />}
+                    renderItem={({item}) => {
+                        const savedPassageItem = collectionItems.find(
+                            (i) => i.type === 'passage' && i.passage.reference.readableReference === item.reference.readableReference
+                        );
+                        return (
+                            <AddPassage
+                                passage={item}
+                                savedItemId={savedPassageItem?.id ?? null}
+                                savePassage={savePassage}
+                                removePassage={removePassage}
+                            />
+                        );
+                    }}
                 />
             }
 

@@ -4,14 +4,16 @@ import React from "react";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import useGlobalStyles from "../../styles/gobalStyles";
 import { useVod } from "../../hooks/useVod";
+import { useAppStore } from "../../stores/appState.store";
 
 export const VerseOfDayHomeCard = () => {
     const theme = useAppTheme();
     const style = useGlobalStyles();
-    const { data: vod, isLoading, error } = useVod();
     const SAVED_MEMORIZED_VIEW_THRESHOLD = 10;
 
-    if (vod?.id !== null) {
+    const {vod} = useAppStore();
+
+    if (vod.reference !== '') {
         return (
             <View style={{width: '100%', backgroundColor: theme.colors.primary, borderRadius: 10, 
                 flexDirection: 'row', justifyContent: 'space-between', padding: 20}}>

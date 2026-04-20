@@ -11,7 +11,6 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
 import { TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { ActivityIndicator } from 'react-native';
 
 import useAppTheme from './theme';
 
@@ -40,6 +39,8 @@ import CollectionScreen from './screens/collections/collection';
 import AddNoteBottomSheet from './components/bottom-sheets/addNoteBottomSheet';
 import SyncBottomSheet from './components/bottom-sheets/syncBottomSheet';
 import EditCollectionScreen from './screens/collections/editCollection.screen';
+import { useVod } from './hooks/useVod';
+import { useAppStore } from './stores/appState.store';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -54,6 +55,9 @@ export default function AppShell() {
   const userStore = useUserStore();
 
   const [appIsReady, setAppIsReady] = useState(false);
+
+  const { data: vod, isFetched: vodLoaded } = useVod();
+  const {setVod} = useAppStore();
 
   const passageSheet = React.useRef<TrueSheet>(null);
   const noteSheet = React.useRef<TrueSheet>(null);
@@ -102,8 +106,14 @@ export default function AppShell() {
     useEffect(() => {
       if (appIsReady) 
         if (fontsLoaded) 
+          if (vodLoaded)
             SplashScreen.hideAsync().catch(() => {});
-    }, [appIsReady, fontsLoaded]);
+    }, [appIsReady, fontsLoaded, vodLoaded]);
+
+    useEffect(() => {
+      if (vod)
+        setVod(vod);
+    }, [vod, setVod]);
 
     // set passage bottom sheet ref
     useEffect(() => {
@@ -123,8 +133,8 @@ export default function AppShell() {
       }
     }, [syncSheetOpen])
 
-  if (!appIsReady || !fontsLoaded) {
-    return <ActivityIndicator />;
+  if (!appIsReady || !fontsLoaded || !vodLoaded) {
+    return null;
   } 
 
 

@@ -10,7 +10,7 @@ import useAppTheme from '../../theme';
 
 // Import your screen components
 import {BibleScreen} from './bible.screen';
-import {ExploreScreen} from './profile.screen';
+import {ProfileScreen} from './profile.screen';
 import {HomeScreen} from './home.screen';
 import { CollectionsScreen } from './collections.screen';
 import useGlobalStyles from '../../styles/gobalStyles';
@@ -143,7 +143,7 @@ export default function TabLayout() {
                 </TouchableOpacity>
               ),
               headerRight: () => (
-                <TouchableOpacity onPress={() => { setSyncSheetOpen(true) }}>
+                <TouchableOpacity style={{marginRight: 10}} onPress={() => { setSyncSheetOpen(true) }}>
                         {syncStatus === 'Synced' ? (
                             <CloudCheck size={28} color={theme.colors.onBackground} />
                         ) : syncStatus === 'Syncing' ? (
@@ -218,20 +218,20 @@ export default function TabLayout() {
 
           {/* ── Explore ── */}
           <Tab.Screen
-            name="Explore"
-            component={ExploreScreen}
+            name="Profile"
+            component={ProfileScreen}
             options={{
               headerShown: false,
               tabBarIcon: ({ focused }) => (
                 <Ionicons
-                  name={focused ? 'planet' : 'planet-outline'}
+                  name={focused ? 'person' : 'person-outline'}
                   color={focused ? theme.colors.onBackground : inactiveColor}
                   size={28}
                 />
               ),
               tabBarLabel: ({ focused }) => (
                 <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
-                  Explore
+                  Profile
                 </Text>
               ),
             }}

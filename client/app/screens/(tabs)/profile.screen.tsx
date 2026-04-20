@@ -2,7 +2,7 @@ import { Button, Text, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import useStyles from '../../styles/gobalStyles';
 
-export const ExploreScreen = () => {
+export const ProfileScreen = () => {
     const styles = useStyles();
     
     return (

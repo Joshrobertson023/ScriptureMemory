@@ -2,6 +2,8 @@
 import { BibleVersion, Status, ThemePreference } from '../../types/enums';
 import { ThemeProvider } from '@react-navigation/native';
 import { Collection } from '../../types/collection/collection';
+import { Vod } from '../../types/verse/vod';
+import { initialReference } from './collections.store';
 
 export interface ErrorMessage {
     type: string;
@@ -13,13 +15,22 @@ const initialErrorMessage: ErrorMessage = {
     message: ''
 }
 
+const initialVod: Vod = {
+    reference: '',
+    verses: [],
+    mostMemorized: 0,
+    mostSaved: 0
+}
+
 interface AppState {
   editingCollection: Collection | undefined;
   publishingCollection: Collection | undefined;
   themePreference: ThemePreference;
   errorMessage: ErrorMessage;
   syncStatus: 'Syncing' | 'Error' | 'Synced';
+  vod: Vod;
   
+  setVod: (vod: Vod) => void;
   setEditingCollection: (collection: Collection | undefined) => void;
   setPublishingCollection: (collection: Collection | undefined) => void;
   setThemePreference: (preference: ThemePreference) => void;
@@ -37,6 +48,10 @@ export const useAppStore = create<AppState>((set) => ({
     themePreference: 0,
     errorMessage: initialErrorMessage,
     syncStatus: 'Error',
+    vod: initialVod,
+
+    setVod: (vod: Vod) => 
+        set({vod: vod}),
 
     setEditingCollection: (collection: Collection | undefined) => set({editingCollection: collection ? collection : undefined}),
     setPublishingCollection: (collection: Collection | undefined) => set({publishingCollection: collection ? collection : undefined}),

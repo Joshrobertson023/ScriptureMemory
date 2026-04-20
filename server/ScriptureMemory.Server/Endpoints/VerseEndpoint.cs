@@ -6,6 +6,8 @@ using ScriptureMemory.Server.Tools;
 using DataAccess.Requests;
 using DataAccess.Data;
 using ScriptureMemory.Server.DataAccess.Data;
+using ScriptureMemory.Server.DataAccess.Requests;
+using Pgvector;
 
 namespace VerseAppNew.Server.Endpoints;
 
@@ -25,14 +27,14 @@ public static class VerseEndpoint
             if (results == null)
                 return Results.NotFound();
             return Results.Ok(results);
-        }).RequireAuthorization("User");
+        });//.RequireAuthorization("User");
 
         app.MapGet("/verses/book/exists", async (
             [FromBody] string book) =>
         {
             bool exists = Books.TryGetBook(book, out string displayName);
             return Results.Ok(displayName);
-        }).RequireAuthorization("User");
+        });//.RequireAuthorization("User");
 
         app.MapGet("/verses/chapter", async (
             [FromBody] GetChapterRequest request,
@@ -43,20 +45,20 @@ public static class VerseEndpoint
                 return Results.NotFound();
             var results = await data.GetChapterVerses(displayName, request.Chapter);
             return Results.Ok(results);
-        }).RequireAuthorization("User");
+        });//.RequireAuthorization("User");
 
         app.MapPost("/verses/reference", async (
             [FromBody] string query) =>
         {
             return Results.Ok(ReferenceParser.Parse(query));
-        }).RequireAuthorization("User");
+        });//.RequireAuthorization("User");
 
         app.MapPost("/verses/cross-reference", async (
             [FromBody] List<int> verseIds,
             [FromServices] CrossReferenceData crossReferenceData) =>
         {
             return Results.Ok(await crossReferenceData.GetCrossReferences(verseIds));
-        }).RequireAuthorization("User");
+        });//.RequireAuthorization("User");
 
         app.MapPost("/verses/cross-reference/reference", async (
             [FromBody] List<string> references,
@@ -64,7 +66,7 @@ public static class VerseEndpoint
         {
             return Results.Ok(await crossReferenceData.GetCrossReferences(
                 references.Select(r => ReferenceParser.Parse(r)).ToList()));
-        }).RequireAuthorization("User");
+        });//.RequireAuthorization("User");
 
         app.MapGet("/verses/cross-reference/reference/{reference}", async (
             string reference,
@@ -72,6 +74,23 @@ public static class VerseEndpoint
         {
             return Results.Ok(await crossReferenceData.GetCrossReferences(
                 new List<Reference> { ReferenceParser.Parse(reference) }));
-        }).RequireAuthorization("User");
+        });//.RequireAuthorization("User");
+
+        app.MapPost("/verses/verse-card", async (
+            [FromBody] GetVerseCardRequest request,
+            [FromServices] VerseData data) =>
+        {
+            return Results.Ok(await data.GetVerseCardResponse(request.UserId, request.VerseId));
+        });//.RequireAuthorization("User");
+
+        app.MapPost("/verses/similar", async(
+            [FromBody] Verse verse,
+            [FromServices] VerseData data,
+            [FromServices] EmbeddingGenerator embeddingGenerator) =>
+        {
+            return Results.Ok(await data.GetVersesSemanticSearch(
+                await embeddingGenerator.GenerateEmbedding(verse.GetEmbeddingText()),
+                verse));
+        });
     }
 }

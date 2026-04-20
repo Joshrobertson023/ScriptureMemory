@@ -25,7 +25,7 @@ export const initialCollection: Collection = {
     items: []
 }
 
-const initialReference: Reference = {
+export const initialReference: Reference = {
     book: '',
     chapter: 0,
     verses: [],
