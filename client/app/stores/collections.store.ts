@@ -50,6 +50,13 @@ interface CollectionsStore {
     setCollections: (c: Collection[]) => void;
     setCollection: (c: Collection) => void;
     deleteCollection: (id: number) => void;
+    setCollectionItems: (cId: number, i: CollectionItem[]) => void;
+    removeItemFromCollection: (cId: number, itemId: number) => void;
+
+    addNoteToCollection: (cId: number, note: Note) => void;
+    updateNoteInCollection: (cId: number, itemId: number, text: string) => void;
+    removeNoteFromCollection: (cId: number, itemId: number) => void;
+
     setNewCollection: (nc: Collection) => void;
     clearNewCollection: () => void;
     setNewCollectionVisibility: (v: number) => void;
@@ -59,6 +66,7 @@ interface CollectionsStore {
     updateNoteInNewCollection: (itemId: number, text: string) => void;
     removeItemFromNewCollection: (id: number) => void;
     addCollection: (c: Omit<Collection, 'id'>) => Collection;
+
     reconcileServerId: (localId: number, serverId: number) => void;
     reconcilePassageServerId: (localId: number, serverId: number) => void;
 }
@@ -93,6 +101,68 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 }));
                 return newCollection;
             },
+            setCollectionItems(cId: number, i: CollectionItem[]) {
+                const state = get();
+                const collectionExists = state.userCollections.some((col) => col.id === cId);
+                if (!collectionExists)
+                    return;
+                set((state) => ({
+                    userCollections: state.userCollections.map((col) =>
+                    col.id === cId ? {...col, items: i } : col)
+                }))
+            },
+            removeItemFromCollection(cId: number, itemId: number) {
+                const state = get();
+                const collection = state.userCollections.find((col) => col.id === cId);
+                if (!collection)
+                    return;
+
+                set((currentState) => ({
+                    userCollections: currentState.userCollections.map((col) =>
+                        col.id === cId
+                            ? { ...col, items: col.items.filter((item) => item.id !== itemId) }
+                            : col
+                    )
+                }));
+            },
+
+            addNoteToCollection(cId: number, note: Note) {
+                const nextCounter = get()._localPassageIdCounter + 1;
+                const item: CollectionItem = {
+                    type: 'note',
+                    id: nextCounter * LOCAL_ID_PREFIX,
+                    note,
+                };
+                set((state) => ({
+                    _localPassageIdCounter: nextCounter,
+                    userCollections: state.userCollections.map((c) =>
+                        c.id === cId ? { ...c, items: [...c.items, item] } : c
+                    )
+                }));
+            },
+            updateNoteInCollection(cId: number, itemId: number, text: string) {
+                set((state) => ({
+                    userCollections: state.userCollections.map((c) =>
+                        c.id !== cId ? c : {
+                            ...c,
+                            items: c.items.map((i) =>
+                                i.type !== 'note' || i.id !== itemId ? i : { ...i, note: { ...i.note, text } }
+                            )
+                        }
+                    )
+                }));
+            },
+            removeNoteFromCollection(cId: number, itemId: number) {
+                set((state) => ({
+                    userCollections: state.userCollections.map((c) =>
+                        c.id !== cId ? c : {
+                            ...c,
+                            items: c.items.filter((i) => i.id !== itemId)
+                        }
+                    )
+                }));
+            },
+
             deleteCollection(id: number) {
                 set((state) => ({
                     userCollections: state.userCollections.filter((c) => c.id !== id)

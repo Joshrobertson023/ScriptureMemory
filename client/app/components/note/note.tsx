@@ -8,12 +8,12 @@ import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 
-interface CollectionNoteProps {
+interface NoteProps {
     note: Note;
     itemId: number;
 }
 
-const CollectionNote = ({ note, itemId }: CollectionNoteProps) => {
+const NoteComponent = ({ note, itemId }: NoteProps) => {
     const globalStyles = useGlobalStyles();
     const theme = useAppTheme();
     const useLocalStyles = () => useMemo(() => StyleSheet.create({
@@ -58,4 +58,4 @@ const CollectionNote = ({ note, itemId }: CollectionNoteProps) => {
     );
 };
 
-export default CollectionNote;
+export default NoteComponent;

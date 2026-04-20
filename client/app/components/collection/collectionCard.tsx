@@ -7,12 +7,16 @@ import useGlobalStyles from "../../styles/gobalStyles";
 import { Archive, Clock, List, Trash } from "lucide-react-native";
 import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../../types/router";
 
 interface CollecitonCardProps {
     collection: Collection;
 }
 
 export const CollectionCard = ({collection}: CollecitonCardProps) => {
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
     const useLocalStyles = () => useMemo(() => StyleSheet.create({
@@ -123,7 +127,8 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
         <Swipeable renderRightActions={() => <RightActions />}>
             <TouchableHighlight onLongPress={drag} disabled={isActive} style={styles.highlight} 
                 onPress={() => {
-                    
+                    console.log(collection.id)
+                    navigation.navigate('collection', { id: collection.id })
             }}>
                 <View style={globalStyles.collectionCard}>
                     <View style={styles.section}>

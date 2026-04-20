@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Passage } from "../../../types/passages/passage";
-import PassageContent from "./passageContent";
+import AddPassageContent from "./addPassageContent";
 import { UserPassage } from "../../../types/passages/userPassage";
 import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
 import { GripVertical, Trash2 } from "lucide-react-native";
@@ -36,7 +36,7 @@ const NewCollectionPassage = ({userPassage, itemId}: NewCollectionPassageProps) 
 
     return (
         <View style={[styles.container]}>
-            <PassageContent passage={passage} maxWidth={'90%'} />
+            <AddPassageContent passage={passage} maxWidth={'90%'} />
 
             <View style={[styles.icons]}>
                 <TouchableOpacity onLongPress={drag} disabled={isActive}>

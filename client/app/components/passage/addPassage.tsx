@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Passage } from "../../../types/passages/passage";
 import useGlobalStyles from "../../styles/gobalStyles";
 import { useCollectionsStore } from "../../stores/collections.store";
-import PassageContent from "./passageContent";
+import AddPassageContent from "./addPassageContent";
 import { Check, Users } from "lucide-react-native";
 import useAppTheme from "../../theme";
 import React from "react";
@@ -33,7 +33,7 @@ const AddPassage = React.memo(({passage}: AddPassageProps) => {
 
     return (
         <View style={styles.container}>
-            <PassageContent passage={passage} />
+            <AddPassageContent passage={passage} />
 
             {passageSaved ? (
                 <TouchableHighlight onPress={() => {

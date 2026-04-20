@@ -36,6 +36,8 @@ import PassageBottomSheet from './components/bottom-sheets/passageBottomSheet';
 import { useBottomSheetsStore } from './stores/bottomSheets.store';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useSearchStore } from './stores/search.store';
+import CollectionScreen from './screens/collections/collection';
+import AddNoteBottomSheet from './components/bottom-sheets/addNoteBottomSheet';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -52,7 +54,8 @@ export default function AppShell() {
   const [appIsReady, setAppIsReady] = useState(false);
 
   const passageSheet = React.useRef<TrueSheet>(null);
-  const {passageSheetOpen} = useBottomSheetsStore();
+  const noteSheet = React.useRef<TrueSheet>(null);
+  const {passageSheetOpen, noteSheetOpen} = useBottomSheetsStore();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   // On startup try to login user with auth token, retry if could not, then navigate
@@ -132,6 +135,21 @@ export default function AppShell() {
                     headerShown: true,
                     headerTitle: 'New Collection',
                     animation: 'default',
+                    headerStyle: {
+                      backgroundColor: theme.colors.background2,
+                    },
+                    headerTitleStyle: {
+                      color: theme.colors.onBackground,
+                      fontSize: 20
+                    },
+                    headerTintColor: theme.colors.onBackground,
+                  }}
+                />
+                <Stack.Screen
+                  name="collection"
+                  component={CollectionScreen}
+                  options={{
+                    headerShown: true,
                     headerStyle: {
                       backgroundColor: theme.colors.background2,
                     },

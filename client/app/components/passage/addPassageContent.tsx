@@ -16,8 +16,6 @@ interface PassageContentProps {
     passage: Passage;
     style?: StyleProp<ViewStyle>;
     maxWidth?: DimensionValue;
-    onLongPress?: () => void;
-    disabled?: boolean;
 }
 
 const useLocalStyles = () => {
@@ -34,7 +32,7 @@ const useLocalStyles = () => {
     })
 }
 
-const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: PassageContentProps) => {
+const AddPassageContent = React.memo(({passage, maxWidth}: PassageContentProps) => {
     const styles = useGlobalStyles();
     const localStyles = useLocalStyles();
     const theme = useAppTheme();
@@ -46,7 +44,7 @@ const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: P
     );
 
     return (
-        <TouchableWithoutFeedback onLongPress={onLongPress} disabled={disabled} onPress={() => {
+        <TouchableWithoutFeedback onPress={() => {
             const userPassage: UserPassage = {
                 passage: passage,
             }
@@ -66,6 +64,10 @@ const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: P
                 <View style={[localStyles.row1]}>
                     <View style={[localStyles.row2]}>
                     </View>
+                    <View style={[localStyles.row2]}>
+                        <Check size={16} color={theme.colors.onBackground} />
+                        <Text style={styles.p4}>In 1 Collection</Text>
+                    </View>
                 </View>
 
                 <Categories categories={allCategories} multiline={false} />
@@ -75,4 +77,4 @@ const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: P
 }
 )
 
-export default PassageContent;
+export default AddPassageContent;
