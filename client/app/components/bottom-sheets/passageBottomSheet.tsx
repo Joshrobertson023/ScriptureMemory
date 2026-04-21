@@ -3,11 +3,10 @@ import { forwardRef, Fragment, useMemo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
-import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
+import { getPassageCacheKey, useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { initialVerseCardResponse } from "../../../types/verse/verseCard";
 import Categories from "../passage/categories";
 import PassageSheetMetadata from "../passage/passageSheetMetadata";
-import { useVerseCard } from "../../hooks/useVerseCard";
 
 interface PassageBottomSheetProps {
     canGoBack?: boolean;
@@ -58,8 +57,8 @@ const PassageBottomSheet = forwardRef<TrueSheet, PassageBottomSheetProps>(
         } = useBottomSheetsStore();
 
         const activePassage = canGoBack ? passageBottomSheet2 : passageBottomSheet;
-
-        const { data, isLoading } = useVerseCard(activePassage.passage.verses);
+        const passageKey = useMemo(() => getPassageCacheKey(activePassage), [activePassage]);
+        const passageCardData = useBottomSheetsStore((state) => state.passageCardCache[passageKey]);
 
         return (
             <TrueSheet
@@ -102,8 +101,8 @@ const PassageBottomSheet = forwardRef<TrueSheet, PassageBottomSheetProps>(
                     />
                     <PassageSheetMetadata
                         passage={activePassage}
-                        loading={isLoading}
-                        data={data ?? initialVerseCardResponse}
+                        loading={!passageCardData}
+                        data={passageCardData ?? initialVerseCardResponse}
                     />
                 </View>
             </TrueSheet>

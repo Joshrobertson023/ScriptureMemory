@@ -553,7 +553,7 @@ public class VerseData
             left join collections col on col.id = cp.collection_id
                 and col.is_deleted = false
                 and col.user_id = @userId
-            where v.id = any(@verseId)
+            where v.id = any(@verseIds)
             """, new
             {
                 verseIds = verseIds.ToArray(),
