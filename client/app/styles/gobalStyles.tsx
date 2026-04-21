@@ -66,7 +66,7 @@ export default function useGlobalStyles() {
     },
     p4: {
       color: theme.colors.onBackgroundSoft,
-      fontSize: 11,
+      fontSize: 12,
       fontFamily: 'Inter'
     },
 
@@ -109,6 +109,10 @@ export default function useGlobalStyles() {
       fontSize: 12,
       fontFamily: 'Inter'
     },
+
+    linkButtonText: {
+      textDecorationLine: 'underline',
+    },
     
     input: {
       flex: 1,
@@ -129,6 +133,20 @@ export default function useGlobalStyles() {
       height: 50,
       borderWidth: 0.2,
       paddingLeft: 10,
+    },
+
+    verseReference: {
+      fontFamily: 'Noto Serif',
+      fontSize: 20,
+      fontWeight: 600,
+      color: theme.colors.onBackgroundSuperSoft
+    },
+    verseText: {
+      fontFamily: 'Noto Serif',
+      fontSize: 19,
+      fontWeight: 400,
+      color: theme.colors.onBackgroundSuperSoft,
+      lineHeight: 29
     },
     
     /**

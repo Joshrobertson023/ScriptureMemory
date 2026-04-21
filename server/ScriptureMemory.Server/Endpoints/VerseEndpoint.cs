@@ -80,7 +80,7 @@ public static class VerseEndpoint
             [FromBody] GetVerseCardRequest request,
             [FromServices] VerseData data) =>
         {
-            return Results.Ok(await data.GetVerseCardResponse(request.UserId, request.VerseId));
+            return Results.Ok(await data.GetVerseCardResponse(request.UserId, request.VerseIds));
         });//.RequireAuthorization("User");
 
         app.MapPost("/verses/similar", async(

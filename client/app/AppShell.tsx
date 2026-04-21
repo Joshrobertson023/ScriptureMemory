@@ -60,9 +60,10 @@ export default function AppShell() {
   const {setVod} = useAppStore();
 
   const passageSheet = React.useRef<TrueSheet>(null);
+  const passageSheet2 = React.useRef<TrueSheet>(null);
   const noteSheet = React.useRef<TrueSheet>(null);
   const syncSheet = React.useRef<TrueSheet>(null);
-  const {passageSheetOpen, noteSheetOpen, syncSheetOpen} = useBottomSheetsStore();
+  const {passageSheetOpen, noteSheetOpen, syncSheetOpen, passageSheet2Open} = useBottomSheetsStore();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   // On startup try to login user with auth token, retry if could not, then navigate
@@ -123,6 +124,14 @@ export default function AppShell() {
         passageSheet.current?.dismiss();
       }
     }, [passageSheetOpen])
+
+    useEffect(() => {
+      if (passageSheet2Open) {
+        passageSheet2.current?.present();
+      } else {
+        passageSheet2.current?.dismiss();
+      }
+    }, [passageSheet2Open]);
 
     // set sync bottom sheet ref
     useEffect(() => {
@@ -201,6 +210,7 @@ export default function AppShell() {
               </Stack.Navigator>
             </NavigationContainer>
           <PassageBottomSheet ref={passageSheet}/>
+          <PassageBottomSheet ref={passageSheet2} canGoBack/>
           <SyncBottomSheet ref={syncSheet}/>
       </GestureHandlerRootView>
     )

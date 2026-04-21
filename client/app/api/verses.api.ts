@@ -1,4 +1,5 @@
 import { Passage } from "../../types/passages/passage";
+import { VerseCardResponse } from "../../types/verse/verseCard";
 import { useUserStore } from "../stores/user.store";
 import { useUserAuthStore } from "../stores/userAuth.store";
 import { baseUrl } from "./baseUrl";
@@ -29,17 +30,45 @@ export async function searchPassage(search: string, userId: number, jwt: string)
             const data: SearchResult[] = await response.json();
             return data.map(r => r.passage);
         } else {
-            const text = await response.text(); // 👈 read once
+            const text = await response.text();
 
             let errorMessage = 'Error searching';
 
             try {
-                const data = JSON.parse(text);  // 👈 manually parse
+                const data = JSON.parse(text);
                 errorMessage = data?.message || text;
             } catch {
-                errorMessage = text; // 👈 plain text fallback
+                errorMessage = text;
             }
 
+            throw new Error(errorMessage);
+        }
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function getVerseCard(userId: number, verseIds: number[], jwt: string): Promise<VerseCardResponse> {
+    try {
+        const response = await fetch(`${baseUrl}/verses/verse-card`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            },
+            body: JSON.stringify({ userId, verseIds }),
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const text = await response.text();
+            let errorMessage = 'Error fetching verse card';
+            try {
+                const data = JSON.parse(text);
+                errorMessage = data?.message || text;
+            } catch {
+                errorMessage = text;
+            }
             throw new Error(errorMessage);
         }
     } catch (error) {

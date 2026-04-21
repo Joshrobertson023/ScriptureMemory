@@ -495,12 +495,8 @@ public class VerseData
     class VerseCardDto
     {
         public int VerseId { get; set; }
-        public string Book { get; set; } = string.Empty;
-        public int Chapter { get; set; }
-        public string VerseText { get; set; } = string.Empty;
         public int VerseTotalMemorizedCount { get; set; }
         public int VerseTotalSavedCount { get; set; }
-        public int VerseNum { get; set; }
         public Vector? VerseEmbedding { get; set; }
 
         public int? CategoryId { get; set; }
@@ -521,7 +517,7 @@ public class VerseData
         public CollectionVisibility? CollectionVisibility { get; set; }
     }
 
-    public async Task<VerseCardResponse> GetVerseCardResponse(int userId, int verseId)
+    public async Task<VerseCardResponse> GetVerseCardResponse(int userId, List<int> verseIds)
     {
         using var conn = _dataSource.OpenConnection();
 
@@ -529,13 +525,8 @@ public class VerseData
             """
             select
             v.id as VerseId,
-            v.book as Book,
-            v.chapter as Chapter,
-            v.text as VerseText,
             v.memorized_count as VerseTotalMemorizedCount,
             v.saved_count as VerseTotalSavedCount,
-            v.verse_num as VerseNum,
-            v.embedding as VerseEmbedding,
             c.id as CategoryId,
             c.name as CategoryName,
             crp.reference as CrossReferenceReference,
@@ -562,61 +553,37 @@ public class VerseData
             left join collections col on col.id = cp.collection_id
                 and col.is_deleted = false
                 and col.user_id = @userId
-            where v.id = @verseId
+            where v.id = any(@verseId)
             """, new
             {
-                verseId,
+                verseIds = verseIds.ToArray(),
                 userId
             });
 
-        var grouped = results.GroupBy(dto => dto.VerseId).FirstOrDefault();
-        if (grouped is null)
+        var allGroups = results.GroupBy(dto => dto.VerseId).ToList();
+        if (!allGroups.Any())
             return new VerseCardResponse { };
-
-        var first = grouped.First();
 
         return new VerseCardResponse
         {
-            Verse = new Verse
-            {
-                Id = first.VerseId,
-                Reference = ReferenceParser.Parse(
-                    $"{first.Book} " +
-                    $"{first.Chapter}:" +
-                    $"{first.VerseNum}")
-                    ?? throw new NullReferenceException("Reference"),
-                Text = first.VerseText,
-                UsersSavedCount = first.VerseTotalSavedCount,
-                UsersMemorizedCount = first.VerseTotalMemorizedCount,
-                Categories = grouped
-                    .Where(g => g.CategoryId is not null)
-                    .DistinctBy(g => g.CategoryId)
-                    .Select(c => new Category
-                    {
-                        Id = c.CategoryId ?? 0,
-                        Name = c.CategoryName ?? ""
-                    }).ToList(),
-            },
+            TotalSaved = allGroups.Sum(g => g.Max(r => r.VerseTotalSavedCount)),
+            TotalMemorized = allGroups.Sum(g => g.Max(r => r.VerseTotalMemorizedCount)),
             NumPracticed = 0,
             NextDue = DateTime.UtcNow,
-            CrossReferences = grouped
-                .Where(g => g.CrossReferenceReference is not null)
-                .DistinctBy(g => g.CRVerseId)
-                .Select(c => new Verse
-                {
-                    Id = c.CRVerseId ?? 0,
-                    ReadableReference = $"{c.CRBook} {c.CRChapter}:{c.CRVerseNum}",
-                    Votes = c.CrossReferenceVotes
-                }).OrderByDescending(g => g.Votes).ToList(),
-            Collections = grouped
-                .Where(g => g.CollectionId is not null)
-                .DistinctBy(g => g.CollectionId)
-                .Select(c => new Collection
-                {
-                    Id = c.CollectionId ?? 0,
-                    Title = c.CollectionTitle ?? string.Empty,
-                    Visibility = c.CollectionVisibility ?? CollectionVisibility.Private
-                }).ToList()
+            CrossReferences = allGroups
+                .SelectMany(g => g
+                    .Where(r => r.CrossReferenceReference is not null)
+                    .DistinctBy(r => r.CRVerseId)
+                    .Select(c => new Verse
+                    {
+                        Id = c.CRVerseId ?? 0,
+                        ReadableReference = $"{c.CRBook} {c.CRChapter}:{c.CRVerseNum}",
+                        Votes = c.CrossReferenceVotes
+                    }))
+                .DistinctBy(v => v.Id)
+                .Where(v => !verseIds.Contains(v.Id))
+                .OrderByDescending(v => v.Votes)
+                .ToList(),
         };
     }
 }

@@ -1,16 +1,13 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "../app/hooks/queryClient";
 import AppShell from "./AppShell";
 
-export const RootStackParamList = {
-  
-}
+export const RootStackParamList = {}
 
 export default function App() {
-  const queryClient = new QueryClient();
-
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AppShell />
-    </QueryClientProvider>
-  )
+    return (
+        <QueryClientProvider client={queryClient}>
+            <AppShell />
+        </QueryClientProvider>
+    );
 }
