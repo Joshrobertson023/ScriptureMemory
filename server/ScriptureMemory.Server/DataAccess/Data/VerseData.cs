@@ -573,16 +573,32 @@ public class VerseData
             CrossReferences = allGroups
                 .SelectMany(g => g
                     .Where(r => r.CrossReferenceReference is not null)
-                    .DistinctBy(r => r.CRVerseId)
-                    .Select(c => new Verse
+                    .GroupBy(r => r.CrossReferenceReference!)
+                    .Select(crGroup =>
                     {
-                        Id = c.CRVerseId ?? 0,
-                        ReadableReference = $"{c.CRBook} {c.CRChapter}:{c.CRVerseNum}",
-                        Votes = c.CrossReferenceVotes
-                    }))
-                .DistinctBy(v => v.Id)
-                .Where(v => !verseIds.Contains(v.Id))
-                .OrderByDescending(v => v.Votes)
+                        var reference = ReferenceParser.Parse(crGroup.Key);
+                        if (reference == null)
+                            return null;
+                        
+                        return new Passage
+                        {
+                            Reference = reference,
+                            Verses = crGroup
+                                .DistinctBy(r => r.CRVerseId)
+                                .Where(r => r.CRVerseId.HasValue && r.CRBook != null && r.CRChapter.HasValue && r.CRVerseNum.HasValue)
+                                .Select(r => new Verse
+                                {
+                                    Id = r.CRVerseId ?? 0,
+                                    Reference = ReferenceParser.Parse(r.CRBook ?? "", r.CRChapter ?? 0, new List<int> { r.CRVerseNum ?? 0 }),
+                                    Text = r.CRText ?? "",
+                                    ReadableReference = $"{r.CRBook} {r.CRChapter}:{r.CRVerseNum}"
+                                })
+                                .ToList()
+                        };
+                    })
+                    .Where(p => p != null)
+                    .Cast<Passage>())
+                .Where(p => p.Verses.Count > 0 && !verseIds.Contains(p.Verses.First().Id))
                 .ToList(),
         };
     }

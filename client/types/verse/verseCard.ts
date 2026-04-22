@@ -3,13 +3,14 @@ import { Collection } from "../collection/collection";
 import { Note } from "../note";
 import { UserPassage } from "../passages/userPassage";
 import { Verse } from "./verse"
+import { Passage } from "../passages/passage";
 
 export type VerseCardResponse = {
     totalSaved: number;
     totalMemorized: number;
     numPracticed: number;
     nextDue: Date;
-    crossReferences: Verse[];
+    crossReferences: Passage[];
     similar: Verse[];
 }
 

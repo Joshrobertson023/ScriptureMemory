@@ -19,6 +19,10 @@ interface BottomSheetsStore {
     passageBottomSheet2: UserPassage;
     passageSheet2Open: boolean;
     passageCardCache: Record<string, VerseCardResponse>;
+    viewNotesBottomSheet: UserPassage;
+    viewNotesSheetOpen: boolean;
+    saveToCollectionBottomSheet: UserPassage;
+    saveToCollectionSheetOpen: boolean;
 
     noteBottomSheet: Note;
     noteBottomSheetItemId: number | null;
@@ -31,6 +35,10 @@ interface BottomSheetsStore {
     setPassageSheet2Open: (o: boolean) => void;
     setPassageCardCache: (cacheKey: string, data: VerseCardResponse) => void;
     clearPassageCardCache: () => void;
+    setViewNotesBottomSheet: (up: UserPassage) => void;
+    setViewNotesSheetOpen: (o: boolean) => void;
+    setSaveToCollectionBottomSheet: (up: UserPassage) => void;
+    setSaveToCollectionSheetOpen: (o: boolean) => void;
 
     setNoteBottomSheet: (note: Note, itemId: number | null) => void;
     setNoteSheetOpen: (o: boolean) => void;
@@ -50,6 +58,10 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         passageBottomSheet2: initialUserPassage,
         passageSheet2Open: false,
         passageCardCache: {},
+        viewNotesBottomSheet: initialUserPassage,
+        viewNotesSheetOpen: false,
+        saveToCollectionBottomSheet: initialUserPassage,
+        saveToCollectionSheetOpen: false,
 
         noteBottomSheet: initialNote,
         noteBottomSheetItemId: null,
@@ -84,6 +96,22 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
             set(() => ({
                 passageCardCache: {},
             }));
+        },
+
+        setViewNotesBottomSheet(up: UserPassage) {
+            set(() => ({ viewNotesBottomSheet: up }));
+        },
+
+        setViewNotesSheetOpen(o: boolean) {
+            set(() => ({ viewNotesSheetOpen: o }));
+        },
+
+        setSaveToCollectionBottomSheet(up: UserPassage) {
+            set(() => ({ saveToCollectionBottomSheet: up }));
+        },
+
+        setSaveToCollectionSheetOpen(o: boolean) {
+            set(() => ({ saveToCollectionSheetOpen: o }));
         },
         
 

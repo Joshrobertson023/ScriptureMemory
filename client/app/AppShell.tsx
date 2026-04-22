@@ -32,6 +32,8 @@ import { Session, useUserStore } from './stores/user.store';
 import * as Device from 'expo-device';
 import { CreateCollectionScreen } from './screens/collections/createNew.screen';
 import PassageBottomSheet from './components/bottom-sheets/passageBottomSheet';
+import ViewNotesBottomSheet from './components/bottom-sheets/viewNotesBottomSheet';
+import SaveToCollectionBottomSheet from './components/bottom-sheets/saveToCollectionBottomSheet';
 import { useBottomSheetsStore } from './stores/bottomSheets.store';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useSearchStore } from './stores/search.store';
@@ -61,9 +63,18 @@ export default function AppShell() {
 
   const passageSheet = React.useRef<TrueSheet>(null);
   const passageSheet2 = React.useRef<TrueSheet>(null);
+  const viewNotesSheet = React.useRef<TrueSheet>(null);
+  const saveToCollectionSheet = React.useRef<TrueSheet>(null);
   const noteSheet = React.useRef<TrueSheet>(null);
   const syncSheet = React.useRef<TrueSheet>(null);
-  const {passageSheetOpen, noteSheetOpen, syncSheetOpen, passageSheet2Open} = useBottomSheetsStore();
+  const {
+    passageSheetOpen,
+    noteSheetOpen,
+    syncSheetOpen,
+    passageSheet2Open,
+    viewNotesSheetOpen,
+    saveToCollectionSheetOpen,
+  } = useBottomSheetsStore();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
   // On startup try to login user with auth token, retry if could not, then navigate
@@ -132,6 +143,22 @@ export default function AppShell() {
         passageSheet2.current?.dismiss();
       }
     }, [passageSheet2Open]);
+
+    useEffect(() => {
+      if (viewNotesSheetOpen) {
+        viewNotesSheet.current?.present();
+      } else {
+        viewNotesSheet.current?.dismiss();
+      }
+    }, [viewNotesSheetOpen]);
+
+    useEffect(() => {
+      if (saveToCollectionSheetOpen) {
+        saveToCollectionSheet.current?.present();
+      } else {
+        saveToCollectionSheet.current?.dismiss();
+      }
+    }, [saveToCollectionSheetOpen]);
 
     // set sync bottom sheet ref
     useEffect(() => {
@@ -211,6 +238,8 @@ export default function AppShell() {
             </NavigationContainer>
           <PassageBottomSheet ref={passageSheet}/>
           <PassageBottomSheet ref={passageSheet2} canGoBack/>
+          <ViewNotesBottomSheet ref={viewNotesSheet} />
+          <SaveToCollectionBottomSheet ref={saveToCollectionSheet} />
           <SyncBottomSheet ref={syncSheet}/>
       </GestureHandlerRootView>
     )

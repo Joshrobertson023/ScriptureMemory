@@ -1,12 +1,13 @@
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
-import { forwardRef, Fragment, useMemo } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { forwardRef, Fragment, useMemo, useEffect } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, BackHandler } from "react-native";
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
 import { getPassageCacheKey, useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { initialVerseCardResponse } from "../../../types/verse/verseCard";
 import Categories from "../passage/categories";
 import PassageSheetMetadata from "../passage/passageSheetMetadata";
+import CrossReferences from "../passage/crossReferences";
 
 interface PassageBottomSheetProps {
     canGoBack?: boolean;
@@ -53,23 +54,51 @@ const PassageBottomSheet = forwardRef<TrueSheet, PassageBottomSheetProps>(
             passageBottomSheet,
             setPassageSheetOpen,
             passageBottomSheet2,
-            setPassageSheet2Open
+            setPassageSheet2Open,
+            setViewNotesSheetOpen,
+            setSaveToCollectionSheetOpen
         } = useBottomSheetsStore();
 
         const activePassage = canGoBack ? passageBottomSheet2 : passageBottomSheet;
         const passageKey = useMemo(() => getPassageCacheKey(activePassage), [activePassage]);
         const passageCardData = useBottomSheetsStore((state) => state.passageCardCache[passageKey]);
+        const crossReferences = passageCardData?.crossReferences ?? [];
+
+        useEffect(() => {
+            if (!canGoBack) return;
+
+            const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+                setPassageSheet2Open(false);
+                setPassageSheetOpen(true);
+                return true;
+            });
+
+            return () => backHandler.remove();
+        }, [canGoBack, setPassageSheet2Open, setPassageSheetOpen]);
 
         return (
             <TrueSheet
                 ref={ref}
                 detents={[0.5, 1]}
-                onDidDismiss={() => canGoBack ? setPassageSheet2Open(false) : setPassageSheetOpen(false)}
+                onDidDismiss={() => {
+                    if (canGoBack) {
+                        setPassageSheet2Open(false);
+                        setPassageSheetOpen(true);
+                        return;
+                    }
+
+                    setPassageSheetOpen(false);
+                }}
                 onDidPresent={() => canGoBack ? setPassageSheet2Open(true) : setPassageSheetOpen(true)}
-            >
+                style={{backgroundColor: theme.colors.background}}
+                scrollable
+           >
                 <View style={styles.sheetContainer}>
                     {canGoBack && (
-                        <TouchableOpacity onPress={() => setPassageSheet2Open(false)}>
+                        <TouchableOpacity onPress={() => {
+                            setPassageSheet2Open(false);
+                            setPassageSheetOpen(true);
+                        }}>
                             <Text style={[globalStyles.p3, globalStyles.linkButtonText]}>
                                 Back to {passageBottomSheet.passage.reference.readableReference}
                             </Text>
@@ -104,6 +133,28 @@ const PassageBottomSheet = forwardRef<TrueSheet, PassageBottomSheetProps>(
                         loading={!passageCardData}
                         data={passageCardData ?? initialVerseCardResponse}
                     />
+                    <View style={{height: 20}} />
+                    <TouchableOpacity style={globalStyles.elevationButton} onPress={() => {
+                        setViewNotesSheetOpen(true);
+                    }}>
+                        <Text style={globalStyles.p3}>
+                            Notes
+                        </Text>
+                    </TouchableOpacity>
+                    <View style={{height: 10}} />
+                    <TouchableOpacity style={globalStyles.elevationButton} onPress={() => {
+                        setSaveToCollectionSheetOpen(true);
+                    }}>
+                        <Text style={globalStyles.p3}>
+                            Add to Collection
+                        </Text>
+                    </TouchableOpacity>
+
+                    <View style={{height: 20}} />
+                    <CrossReferences 
+                        crossReferences={crossReferences}
+                        loading={!passageCardData}
+                        canGoBack={canGoBack} />
                 </View>
             </TrueSheet>
         );
