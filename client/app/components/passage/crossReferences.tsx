@@ -4,41 +4,37 @@ import useAppTheme from "../../theme";
 import { Passage } from "../../../types/passages/passage";
 import Skeleton from "react-native-reanimated-skeleton";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
+import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
+import { UserPassage } from "../../../types/passages/userPassage";
 
 export interface CrossReferencesProps {
     crossReferences: Passage[];
     loading: boolean;
-    canGoBack?: boolean;
 }
 
-const CrossReferences = ({ crossReferences, loading, canGoBack = false }: CrossReferencesProps) => {
+const CrossReferences = ({ crossReferences, loading }: CrossReferencesProps) => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
     const skeletonProps = {
         boneColor: theme.colors.elevation,
         highlightColor: theme.colors.elevation3,
     };
-    const { setPassageSheet2Open, setPassageSheetOpen, setPassageBottomSheet2 } = useBottomSheetsStore();
+    const {
+        setPassageSheetOpen,
+    } = useBottomSheetsStore();
 
     const skeletonStyle = { width: '90%' as const };
     const skeletonLayout = [{ width: '100%' as const, height: 75, borderRadius: 4 }];
 
-    const handleCrossReferencePress = (passage: Passage) => {
-        if (canGoBack) {
-            // On sheet 2: close sheet 2, set new data, reopen sheet 2
-            setPassageSheet2Open(false);
-            setTimeout(() => {
-                setPassageBottomSheet2({ passage });
-                setTimeout(() => {
-                    setPassageSheet2Open(true);
-                }, 50);
-            }, 150);
-        } else {
-            // On sheet 1: close sheet 1, set sheet 2 data, open sheet 2
-            setPassageSheetOpen(false);
-            setPassageBottomSheet2({ passage });
-            setPassageSheet2Open(true);
+    const {
+        goToNextPassage
+    } = useBottomSheetStack();
+
+    const handleCrossReferencePress = (p: Passage) => {
+        const up: UserPassage = {
+            passage: p,
         }
+        goToNextPassage(up);
     };
 
     return (

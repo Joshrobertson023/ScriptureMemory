@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScriptureMemory.IntegrationTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+09f21a1c3fa7c8fa657338de60ccaa88f5249314")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4016869d7fc73d3af65d0440190ef7b47e0bf429")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScriptureMemory.IntegrationTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScriptureMemory.IntegrationTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

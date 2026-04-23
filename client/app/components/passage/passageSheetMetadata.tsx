@@ -43,14 +43,12 @@ const PassageSheetMetadata = ({ passage, data, loading }: PassageSheetMetadataPr
         <View style={styles.container}>
             <View style={styles.column}>
 
-                {collectionsCount > 0 && (
-                    <View style={styles.item}>
-                        <Check size={15} color={theme.colors.onBackground} />
-                        <Text style={[globalStyles.p4, styles.text]}>
-                            In {collectionsCount} {collectionsCount === 1 ? 'Collection' : 'Collections'}
-                        </Text>
-                    </View>
-                )}
+                <View style={styles.item}>
+                    <Check size={15} color={theme.colors.onBackground} />
+                    <Text style={[globalStyles.p4, styles.text]}>
+                        In {collectionsCount} {collectionsCount === 1 ? 'collection' : 'collections'}
+                    </Text>
+                </View>
 
                 {(passage.timesMemorized ?? 0) > 0 && (
                     <View style={styles.item}>

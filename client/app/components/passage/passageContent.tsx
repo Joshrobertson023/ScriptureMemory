@@ -38,7 +38,7 @@ const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: P
     const styles = useGlobalStyles();
     const localStyles = useLocalStyles();
     const theme = useAppTheme();
-    const {setPassageSheetOpen, setPassageBottomSheet} = useBottomSheetsStore();
+    const {setPassageSheetOpen, setPassageBottomSheet, pushPassage, passageSheetStack} = useBottomSheetsStore();
 
     const allCategories = React.useMemo(() =>
         Array.from(new Map(passage.verses.flatMap(v => v.categories).map(c => [c.id, c])).values()),
@@ -49,6 +49,9 @@ const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: P
         <TouchableWithoutFeedback onLongPress={onLongPress} disabled={disabled} onPress={() => {
             const userPassage: UserPassage = {
                 passage: passage,
+            }
+            if (passageSheetStack.length === 0) {
+                pushPassage(userPassage);
             }
             setPassageBottomSheet(userPassage);
             setPassageSheetOpen(true);

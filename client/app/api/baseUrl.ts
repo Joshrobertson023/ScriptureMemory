@@ -1,1 +1,1 @@
-export const baseUrl = "http://10.65.154.121:5160";
+export const baseUrl = "http://10.48.210.121:5160";

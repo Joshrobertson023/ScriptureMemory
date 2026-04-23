@@ -71,7 +71,6 @@ export default function AppShell() {
     passageSheetOpen,
     noteSheetOpen,
     syncSheetOpen,
-    passageSheet2Open,
     viewNotesSheetOpen,
     saveToCollectionSheetOpen,
   } = useBottomSheetsStore();
@@ -134,15 +133,7 @@ export default function AppShell() {
       } else {
         passageSheet.current?.dismiss();
       }
-    }, [passageSheetOpen])
-
-    useEffect(() => {
-      if (passageSheet2Open) {
-        passageSheet2.current?.present();
-      } else {
-        passageSheet2.current?.dismiss();
-      }
-    }, [passageSheet2Open]);
+    }, [passageSheetOpen]);
 
     useEffect(() => {
       if (viewNotesSheetOpen) {

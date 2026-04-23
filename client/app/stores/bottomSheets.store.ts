@@ -10,14 +10,15 @@ import { queryClient } from "../hooks/queryClient";
 
 export const getPassageCacheKey = (up: UserPassage) => {
     const { book, chapter, verses } = up.passage.reference;
-    return `${book}:${chapter}:${verses.join(',')}`;
+    return `${up.id}-${book}:${chapter}:${verses.join(',')}`; // Remove up.id if stopped working
 };
 
 interface BottomSheetsStore {
+    passageSheetStack: UserPassage[];
     passageBottomSheet: UserPassage;
     passageSheetOpen: boolean;
-    passageBottomSheet2: UserPassage;
-    passageSheet2Open: boolean;
+    passageSheetPendingTransition: { kind: "next"; passage: UserPassage } | { kind: "last" } | null;
+
     passageCardCache: Record<string, VerseCardResponse>;
     viewNotesBottomSheet: UserPassage;
     viewNotesSheetOpen: boolean;
@@ -31,8 +32,16 @@ interface BottomSheetsStore {
 
     setPassageBottomSheet: (up: UserPassage) => void;
     setPassageSheetOpen: (o: boolean) => void;
-    setPassageBottomSheet2: (up: UserPassage) => void;
-    setPassageSheet2Open: (o: boolean) => void;
+    setPassageSheetPendingTransition: (transition: { kind: "next"; passage: UserPassage } | { kind: "last" } | null) => void;
+
+    pushPassage: (up: UserPassage) => void;
+    // Push passage, set as this, close and reopen
+    popPassage: () => void;
+    // Pop passage, set last, close and reopen
+    setBottomPassageLastInStack: () => void;
+    clearStack: () => void;
+    // Reset array, close
+
     setPassageCardCache: (cacheKey: string, data: VerseCardResponse) => void;
     clearPassageCardCache: () => void;
     setViewNotesBottomSheet: (up: UserPassage) => void;
@@ -53,10 +62,11 @@ const initialNote: Note = {
 
 export const useBottomSheetsStore = create<BottomSheetsStore>()(
     (set, get) => ({
+        passageSheetStack: [],
         passageBottomSheet: initialUserPassage,
         passageSheetOpen: false,
-        passageBottomSheet2: initialUserPassage,
-        passageSheet2Open: false,
+        passageSheetPendingTransition: null,
+
         passageCardCache: {},
         viewNotesBottomSheet: initialUserPassage,
         viewNotesSheetOpen: false,
@@ -75,12 +85,35 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         setPassageSheetOpen(o: boolean) {
             set(() => ({ passageSheetOpen: o }));
         },
-        setPassageBottomSheet2(up: UserPassage) {
-            set(() => ({ passageBottomSheet2: up }));
-            void loadPassageCard(up, set, get);
+
+        setPassageSheetPendingTransition(transition) {
+            set(() => ({ passageSheetPendingTransition: transition }));
         },
-        setPassageSheet2Open(o: boolean) {
-            set(() => ({ passageSheet2Open: o }));
+
+        pushPassage(up: UserPassage) {
+            set((state) => ({
+                passageSheetStack: [...state.passageSheetStack, up],
+            }));
+        },
+        popPassage() {
+            const state = get();
+
+            if (state.passageSheetStack.length <= 1)
+                return;
+
+            set((state) => ({
+                passageSheetStack: state.passageSheetStack.slice(0, -1),
+            }));
+        },
+        setBottomPassageLastInStack() {
+            set((state) => ({
+                passageBottomSheet: state.passageSheetStack.at(-1)
+            }))
+        },
+        clearStack() {
+            set((state) => ({
+                passageSheetStack: []
+            }))
         },
 
         setPassageCardCache(cacheKey: string, data: VerseCardResponse) {

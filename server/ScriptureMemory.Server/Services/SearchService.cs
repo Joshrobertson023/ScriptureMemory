@@ -83,8 +83,7 @@ public sealed class SearchService
             // Don't search by reference
         }
 
-        if (reference is not null
-            && reference.Verses.Count > 1)
+        if (reference is not null)
         {
             // Searching multiple verses / a passage
             var passage = await _verseData.GetPassage(reference);
@@ -187,9 +186,6 @@ public sealed class SearchService
         }
         else
         {
-            // Single verse search
-            //var passage = await _verseData.SemanticSearch(search);
-
             var embedding = await _embeddingGenerator.GenerateEmbedding(search);
 
             var singleVerseSearchResults = await _verseData.GetVersesSemanticSearch(embedding);
