@@ -3,10 +3,11 @@ import { UserPassage } from "../../types/passages/userPassage";
 import { initialUserPassage } from "./collections.store";
 import { Note } from "../../types/note";
 import { VerseCardResponse } from "../../types/verse/verseCard";
-import { getVerseCard } from "../api/verses.api";
+import { getSimilarVerses, getVerseCard } from "../api/verses.api";
 import { useUserAuthStore } from "./userAuth.store";
 import { useUserStore } from "./user.store";
 import { queryClient } from "../hooks/queryClient";
+import { Passage } from "../../types/passages/passage";
 
 export const getPassageCacheKey = (up: UserPassage) => {
     const { book, chapter, verses } = up.passage.reference;
@@ -20,6 +21,7 @@ interface BottomSheetsStore {
     passageSheetPendingTransition: { kind: "next"; passage: UserPassage } | { kind: "last" } | null;
 
     passageCardCache: Record<string, VerseCardResponse>;
+    similarPassagesCache: Record<string, Passage[]>;
     viewNotesBottomSheet: UserPassage;
     viewNotesSheetOpen: boolean;
     saveToCollectionBottomSheet: UserPassage;
@@ -44,6 +46,8 @@ interface BottomSheetsStore {
 
     setPassageCardCache: (cacheKey: string, data: VerseCardResponse) => void;
     clearPassageCardCache: () => void;
+    setSimilarPassagesCache: (cacheKey: string, data: Passage[]) => void;
+    clearSimilarPassagesCache: () => void;
     setViewNotesBottomSheet: (up: UserPassage) => void;
     setViewNotesSheetOpen: (o: boolean) => void;
     setSaveToCollectionBottomSheet: (up: UserPassage) => void;
@@ -68,6 +72,7 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         passageSheetPendingTransition: null,
 
         passageCardCache: {},
+    similarPassagesCache: {},
         viewNotesBottomSheet: initialUserPassage,
         viewNotesSheetOpen: false,
         saveToCollectionBottomSheet: initialUserPassage,
@@ -81,6 +86,7 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         setPassageBottomSheet(up: UserPassage) {
             set(() => ({ passageBottomSheet: up }));
             void loadPassageCard(up, set, get);
+            void loadSimilarPassages(up, set, get);
         },
         setPassageSheetOpen(o: boolean) {
             set(() => ({ passageSheetOpen: o }));
@@ -128,6 +134,21 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         clearPassageCardCache() {
             set(() => ({
                 passageCardCache: {},
+            }));
+        },
+
+        setSimilarPassagesCache(cacheKey: string, data: Passage[]) {
+            set((state) => ({
+                similarPassagesCache: {
+                    ...state.similarPassagesCache,
+                    [cacheKey]: data,
+                },
+            }));
+        },
+
+        clearSimilarPassagesCache() {
+            set(() => ({
+                similarPassagesCache: {},
             }));
         },
 
@@ -204,6 +225,36 @@ async function loadPassageCard(
     set((state: any) => ({
         passageCardCache: {
             ...state.passageCardCache,
+            [cacheKey]: response,
+        },
+    }));
+}
+
+async function loadSimilarPassages(
+    up: UserPassage,
+    set: any,
+    get: any
+) {
+    const cacheKey = getPassageCacheKey(up);
+    const existing = get().similarPassagesCache[cacheKey];
+    if (existing) {
+        return;
+    }
+
+    const jwt = useUserAuthStore.getState().jwt;
+    if (!jwt || up.passage.verses.length === 0) {
+        return;
+    }
+
+    const response = await queryClient.fetchQuery({
+        queryKey: ['similarPassages', cacheKey],
+        queryFn: () => getSimilarVerses(up.passage, jwt),
+        staleTime: Infinity,
+    });
+
+    set((state: any) => ({
+        similarPassagesCache: {
+            ...state.similarPassagesCache,
             [cacheKey]: response,
         },
     }));

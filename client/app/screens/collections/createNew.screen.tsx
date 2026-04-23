@@ -53,9 +53,7 @@ export const CreateCollectionScreen = () => {
 
     const saveCollection = useCallback(() => {
         const current = useCollectionsStore.getState().newCollection;
-
-        if (current.title.trim() === '')
-            setNewCollection({...newCollection, title: 'New Collection'})
+        const title = current.title.trim() === '' ? 'New Collection' : current.title.trim();
 
         if (current.items.length <= 0) {
             Snackbar.show({
@@ -65,16 +63,17 @@ export const CreateCollectionScreen = () => {
             return;
         }
 
-        addCollection(current);
+        addCollection({
+            ...current,
+            title,
+        });
         clearNewCollection();
         //setSyncStatus('Syncing');
         navigation.goBack();
 
-    }, [navigation]);
+    }, [addCollection, clearNewCollection, navigation]);
 
     const saveNewCollectionNote = (text: string, itemId: number | null) => {
-        console.log(text)
-        console.log(itemId)
         if (itemId !== null) {
             updateNoteInNewCollection(itemId, text);
             return;
@@ -102,7 +101,7 @@ export const CreateCollectionScreen = () => {
                 </TouchableOpacity>
             )
         })
-    }, [navigation])
+    }, [navigation, saveCollection, theme.colors.onBackground])
 
     return (
             <View style={{...styles.screen, gap: 5}}>

@@ -19,9 +19,15 @@ const PassageSheetMetadata = ({ passage, data, loading }: PassageSheetMetadataPr
     const globalStyles = useGlobalStyles();
     const { userCollections } = useCollectionsStore();
 
-    const verseRef = passage.passage.reference.readableReference;
+    const passageVerseIds = useMemo(
+        () => new Set(passage.passage.verses.map((verse) => verse.id)),
+        [passage]
+    );
+
     const collectionsCount = userCollections.filter(c =>
-        c.items.some(i => i.type === 'passage' && i.passage.reference.readableReference === verseRef)
+        c.items.some(i =>
+            i.type === 'passage' && i.passage.verses.some((verse) => passageVerseIds.has(verse.id))
+        )
     ).length;
 
     const styles = useMemo(() => StyleSheet.create({

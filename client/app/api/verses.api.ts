@@ -75,3 +75,36 @@ export async function getVerseCard(userId: number, verseIds: number[], jwt: stri
         throw error;
     }
 }
+
+export async function getSimilarVerses(passage: Passage, jwt: string): Promise<Passage[]> {
+    try {
+        console.log('requesting similar for ' + passage.reference.readableReference)
+        const response = await fetch(`${baseUrl}/verses/similar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            },
+            body: JSON.stringify(passage),
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            let errorMessage = 'Error fetching similar verses';
+            try {
+                const data = JSON.parse(text);
+                errorMessage = data?.message || text;
+            } catch {
+                errorMessage = text;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        console.log(data.length);
+
+        return data as Passage[];
+    } catch (error) {
+        throw error;
+    }
+}

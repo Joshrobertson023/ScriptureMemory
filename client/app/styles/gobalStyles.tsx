@@ -93,6 +93,17 @@ export default function useGlobalStyles() {
       justifyContent: 'center',
       alignItems: 'center'
     },
+    elevationButtomSquare: {
+      width: '19%',
+      borderRadius: 5,
+      backgroundColor: theme.colors.elevation,
+      display: 'flex',
+      paddingVertical: 12,
+      paddingHorizontal: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 2
+    },
 
     outlineButtonSkinny: {
       borderColor: theme.colors.onBackground,

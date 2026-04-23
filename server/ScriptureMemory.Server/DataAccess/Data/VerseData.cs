@@ -367,7 +367,7 @@ public class VerseData
         };
     }
 
-    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, Verse? similarVerse = null)
+    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, Passage? similarPassage = null)
     {
         int maxResults = 50;
         using var conn = _dataSource.OpenConnection();
@@ -396,28 +396,28 @@ public class VerseData
         var all = results
             .GroupBy(v => v.Id)
             .Select(g => new Verse
-        {
-            Id = g.First().Id,
-            Reference = new Reference
             {
-                Book = g.First().Book,
-                Chapter = g.First().Chapter,
-                Verses = new List<int> { g.First().VerseNum }
-            },
-            Text = g.First().Text,
-            Distance = g.First().Distance,
-            UsersSavedCount = g.First().UsersSavedCount,
-            UsersMemorizedCount = g.First().UsersMemorizedCount,
-            Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category
-            {
-                Id = v.CategoryId,
-                Name = v.CategoryName
-            }).ToList()
+                Id = g.First().Id,
+                Reference = new Reference
+                {
+                    Book = g.First().Book,
+                    Chapter = g.First().Chapter,
+                    Verses = new List<int> { g.First().VerseNum }
+                },
+                Text = g.First().Text,
+                Distance = g.First().Distance,
+                UsersSavedCount = g.First().UsersSavedCount,
+                UsersMemorizedCount = g.First().UsersMemorizedCount,
+                Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category
+                {
+                    Id = v.CategoryId,
+                    Name = v.CategoryName
+                }).ToList()
         }).ToList();
 
-        if (similarVerse is not null)
+        if (similarPassage is not null)
         {
-            return all.Where(v => v.Id != similarVerse.Id).ToList();
+            return all;//.Where(v => v.Id != similarPassage.Verses.Any(v => v.Id).ToList();
         }
         else
         {
@@ -457,12 +457,8 @@ public class VerseData
             .Select(g => new Verse
         {
             Id = g.First().Id,
-            Reference = new Reference
-            {
-                Book = g.First().Book,
-                Chapter = g.First().Chapter,
-                Verses = new List<int> { g.First().VerseNum }
-            },
+            Reference = ReferenceParser.Parse($"{g.First().Book} {g.First().Chapter}:{g.First().VerseNum}") 
+                ?? throw new Exception(),
             Text = g.First().Text,
             UsersSavedCount = g.First().UsersSavedCount,
             UsersMemorizedCount = g.First().UsersMemorizedCount,

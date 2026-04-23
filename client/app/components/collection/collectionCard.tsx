@@ -1,23 +1,25 @@
-import { StyleSheet, Text, TouchableHighlight, TouchableNativeFeedback, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
 import { useCollectionsStore } from "../../stores/collections.store"
 import { Collection } from "../../../types/collection/collection";
-import { useEffect, useMemo, useRef } from "react";
+import { useContext, useMemo } from "react";
 import useAppTheme from "../../theme";
 import useGlobalStyles from "../../styles/gobalStyles";
-import { Archive, Clock, List, Pencil, PencilLine, Trash } from "lucide-react-native";
+import { Archive, Clock, List, Pencil, Trash } from "lucide-react-native";
 import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
-import Swipeable, { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { useNavigation } from "@react-navigation/native";
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { NavigationContext } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../../types/router";
-import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 
 interface CollecitonCardProps {
     collection: Collection;
+    onLongPress?: () => void;
+    longPressDisabled?: boolean;
+    onPress?: (collection: Collection) => void;
 }
 
-export const CollectionCard = ({collection}: CollecitonCardProps) => {
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+export const CollectionCard = ({collection, onLongPress, longPressDisabled = false, onPress}: CollecitonCardProps) => {
+    const navigation = useContext(NavigationContext) as NativeStackNavigationProp<RootStackParamList> | null;
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
     const useLocalStyles = () => useMemo(() => StyleSheet.create({
@@ -93,8 +95,6 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
         }
     }), [theme])
     const styles = useLocalStyles();
-    const drag = useReorderableDrag();
-    const isActive = useIsActive();
 
     const totalPassages = (collection.items.map((item) => item.type === 'passage')).reduce((prev, next) => prev + 1, 0);
     const totalOverdue = 0;
@@ -125,7 +125,7 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
             <TouchableOpacity style={styles.sideEdit}
                 onPress={() => {
                     setEditingCollection(collection);
-                    navigation.navigate('editCollection');
+                    navigation?.navigate('editCollection');
                 }}
             >
                 <Pencil size={25} color={theme.colors.background} />
@@ -145,10 +145,13 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
 
     return (
         <Swipeable renderRightActions={() => <RightActions />} renderLeftActions={() => <LeftActions />}>
-            <TouchableHighlight onLongPress={drag} disabled={isActive} style={styles.highlight} 
+            <TouchableHighlight onLongPress={onLongPress} disabled={longPressDisabled} style={styles.highlight} 
                 onPress={() => {
-                    console.log(collection.id)
-                    navigation.navigate('collection', { id: collection.id })
+                    if (onPress) {
+                        onPress(collection);
+                        return;
+                    }
+                    navigation?.navigate('collection', { id: collection.id })
             }}>
                 <View style={globalStyles.collectionCard}>
                     <View style={styles.section}>
@@ -182,3 +185,16 @@ export const CollectionCard = ({collection}: CollecitonCardProps) => {
         </Swipeable>
     )
 }
+
+export const ReorderableCollectionCard = ({ collection }: { collection: Collection }) => {
+    const drag = useReorderableDrag();
+    const isActive = useIsActive();
+
+    return (
+        <CollectionCard
+            collection={collection}
+            onLongPress={drag}
+            longPressDisabled={isActive}
+        />
+    );
+};

@@ -8,6 +8,7 @@ using DataAccess.Data;
 using ScriptureMemory.Server.DataAccess.Data;
 using ScriptureMemory.Server.DataAccess.Requests;
 using Pgvector;
+using ScriptureMemory.Server.DataAccess.Models;
 
 namespace VerseAppNew.Server.Endpoints;
 
@@ -84,13 +85,24 @@ public static class VerseEndpoint
         });//.RequireAuthorization("User");
 
         app.MapPost("/verses/similar", async(
-            [FromBody] Verse verse,
+            [FromBody] Passage passage,
             [FromServices] VerseData data,
             [FromServices] EmbeddingGenerator embeddingGenerator) =>
         {
-            return Results.Ok(await data.GetVersesSemanticSearch(
-                await embeddingGenerator.GenerateEmbedding(verse.GetEmbeddingText()),
-                verse));
+            List<string> references = new();
+            passage.Verses.ForEach(v => references.Add(v.GetEmbeddingText()));
+
+            var similarVerses = await data.GetVersesSemanticSearch(
+                    await embeddingGenerator.GenerateEmbeddings(references));
+
+            List<Passage> results = new();
+            similarVerses.ForEach(v => results.Add(new Passage
+            {
+                Reference = v.Reference,
+                Verses = new List<Verse> { v }
+            }));
+
+            return Results.Ok(results);
         });
     }
 }

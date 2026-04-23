@@ -2,18 +2,15 @@ import { TouchableWithoutFeedback, Text, View, StyleProp, ViewStyle, StyleSheet,
 import { Passage } from "../../../types/passages/passage"
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
-import { TrueSheet } from "@lodev09/react-native-true-sheet";
-import { useEffect, useRef, useState } from "react";
-import PassageBottomSheet from "../bottom-sheets/passageBottomSheet";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { UserPassage } from "../../../types/passages/userPassage";
 import Categories from "./categories";
-import { Category } from "../../../types/category";
 import React from "react";
-import { Check } from "lucide-react-native";
+import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
 
 interface PassageContentProps {
     passage: Passage;
+    userPassageId?: number;
     style?: StyleProp<ViewStyle>;
     maxWidth?: DimensionValue;
     onLongPress?: () => void;
@@ -34,11 +31,12 @@ const useLocalStyles = () => {
     })
 }
 
-const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: PassageContentProps) => {
+const PassageContent = React.memo(({passage, userPassageId, maxWidth, onLongPress, disabled}: PassageContentProps) => {
     const styles = useGlobalStyles();
     const localStyles = useLocalStyles();
     const theme = useAppTheme();
-    const {setPassageSheetOpen, setPassageBottomSheet, pushPassage, passageSheetStack} = useBottomSheetsStore();
+    const { setPassageSheetOpen, setPassageBottomSheet, pushPassage, passageSheetStack } = useBottomSheetsStore();
+    const { goToNextPassage } = useBottomSheetStack();
 
     const allCategories = React.useMemo(() =>
         Array.from(new Map(passage.verses.flatMap(v => v.categories).map(c => [c.id, c])).values()),
@@ -49,12 +47,16 @@ const PassageContent = React.memo(({passage, maxWidth, onLongPress, disabled}: P
         <TouchableWithoutFeedback onLongPress={onLongPress} disabled={disabled} onPress={() => {
             const userPassage: UserPassage = {
                 passage: passage,
+                id: userPassageId ?? 0,
             }
             if (passageSheetStack.length === 0) {
                 pushPassage(userPassage);
+                setPassageBottomSheet(userPassage);
+                setPassageSheetOpen(true);
+                return;
             }
-            setPassageBottomSheet(userPassage);
-            setPassageSheetOpen(true);
+
+            goToNextPassage(userPassage);
         }}>
             <View style={[localStyles.container, {maxWidth}]}>
                 <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>

@@ -55,7 +55,12 @@ const PassageComponent = ({userPassage, itemId, collectionId}: PassageProps) => 
     return (
         <Swipeable renderRightActions={() => <RightActions />}>
             <View style={styles.container}>
-                <PassageContent passage={passage} onLongPress={drag} disabled={isActive} />
+                <PassageContent
+                    passage={passage}
+                    userPassageId={userPassage.id ?? itemId}
+                    onLongPress={drag}
+                    disabled={isActive}
+                />
             </View>
         </Swipeable>
     )

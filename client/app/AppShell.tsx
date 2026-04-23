@@ -43,6 +43,7 @@ import SyncBottomSheet from './components/bottom-sheets/syncBottomSheet';
 import EditCollectionScreen from './screens/collections/editCollection.screen';
 import { useVod } from './hooks/useVod';
 import { useAppStore } from './stores/appState.store';
+import { navigationRef } from './navigation';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -168,7 +169,7 @@ export default function AppShell() {
     return (
         
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-            <NavigationContainer theme={theme}>
+            <NavigationContainer theme={theme} ref={navigationRef}>
               <Stack.Navigator
                 screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
               >
@@ -228,7 +229,7 @@ export default function AppShell() {
               </Stack.Navigator>
             </NavigationContainer>
           <PassageBottomSheet ref={passageSheet}/>
-          <PassageBottomSheet ref={passageSheet2} canGoBack/>
+          <PassageBottomSheet ref={passageSheet2}/>
           <ViewNotesBottomSheet ref={viewNotesSheet} />
           <SaveToCollectionBottomSheet ref={saveToCollectionSheet} />
           <SyncBottomSheet ref={syncSheet}/>

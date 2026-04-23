@@ -27,7 +27,7 @@ const AddPassage = React.memo(({passage, savedItemId, savePassage, removePassage
 
     return (
         <View style={styles.container}>
-            <AddPassageContent passage={passage} />
+            <AddPassageContent passage={passage} userPassageId={savedItemId ?? undefined} />
 
             {passageSaved ? (
                 <TouchableHighlight onPress={() => {

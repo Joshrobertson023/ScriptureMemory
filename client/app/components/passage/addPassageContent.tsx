@@ -14,6 +14,7 @@ import { Check } from "lucide-react-native";
 
 interface PassageContentProps {
     passage: Passage;
+    userPassageId?: number;
     style?: StyleProp<ViewStyle>;
     maxWidth?: DimensionValue;
 }
@@ -32,7 +33,7 @@ const useLocalStyles = () => {
     })
 }
 
-const AddPassageContent = React.memo(({passage, maxWidth}: PassageContentProps) => {
+const AddPassageContent = React.memo(({passage, userPassageId, maxWidth}: PassageContentProps) => {
     const styles = useGlobalStyles();
     const localStyles = useLocalStyles();
     const theme = useAppTheme();
@@ -47,6 +48,7 @@ const AddPassageContent = React.memo(({passage, maxWidth}: PassageContentProps) 
         <TouchableWithoutFeedback onPress={() => {
             const userPassage: UserPassage = {
                 passage: passage,
+                id: userPassageId ?? 0,
             }
             if (passageSheetStack.length === 0) {
                 pushPassage(userPassage);

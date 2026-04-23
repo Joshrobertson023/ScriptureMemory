@@ -36,7 +36,7 @@ const NewCollectionPassage = ({userPassage, itemId}: NewCollectionPassageProps) 
 
     return (
         <View style={[styles.container]}>
-            <AddPassageContent passage={passage} maxWidth={'90%'} />
+            <AddPassageContent passage={passage} userPassageId={userPassage.id ?? itemId} maxWidth={'90%'} />
 
             <View style={[styles.icons]}>
                 <TouchableOpacity onLongPress={drag} disabled={isActive}>

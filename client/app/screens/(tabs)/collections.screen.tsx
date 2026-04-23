@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import CollectionsSortBottomSheet from "../../components/bottom-sheets/collectionsSortBottomSheet";
 import { useUserStore } from "../../stores/user.store";
 import { useCollectionsStore } from "../../stores/collections.store";
-import { CollectionCard } from "../../components/collection/collectionCard";
+import { ReorderableCollectionCard } from "../../components/collection/collectionCard";
 import SearchResult from "../../components/collection/searchResults";
 import useGlobalStyles from "../../styles/gobalStyles";
 import ReorderableList, { reorderItems } from "react-native-reorderable-list";
@@ -30,7 +30,7 @@ export const CollectionsScreen = () => {
                             }}
                             data={userCollections}
                             keyExtractor={(col) => col.id.toString()}
-                            renderItem={({ item }) => <CollectionCard collection={item} />}
+                            renderItem={({ item }) => <ReorderableCollectionCard collection={item} />}
                             keyboardShouldPersistTaps="handled"
                             ListFooterComponent={<View style={{height: 100}} />}
                         />
