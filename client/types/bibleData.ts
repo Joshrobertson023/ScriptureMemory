@@ -3,7 +3,7 @@ export interface BibleBook {
   chapters: number;
 }
 
-export const bibleBooks: BibleBook[] = [
+export const oldTestamentBooks: BibleBook[] = [
   { name: "Genesis", chapters: 50 },
   { name: "Exodus", chapters: 40 },
   { name: "Leviticus", chapters: 27 },
@@ -43,6 +43,9 @@ export const bibleBooks: BibleBook[] = [
   { name: "Haggai", chapters: 2 },
   { name: "Zechariah", chapters: 14 },
   { name: "Malachi", chapters: 4 },
+];
+
+export const newTestamentBooks: BibleBook[] = [
   { name: "Matthew", chapters: 28 },
   { name: "Mark", chapters: 16 },
   { name: "Luke", chapters: 24 },
@@ -70,17 +73,17 @@ export const bibleBooks: BibleBook[] = [
   { name: "3 John", chapters: 1 },
   { name: "Jude", chapters: 1 },
   { name: "Revelation", chapters: 22 }
-];
+]
 
 export function getChaptersForBook(bookName: string): number {
-  const book = bibleBooks.find(b => b.name === bookName);
+  const book = oldTestamentBooks.concat(newTestamentBooks).find(b => b.name === bookName);
   return book?.chapters || 0;
 }
 
 export function getBookByIndex(index: number): BibleBook | undefined {
-  return bibleBooks[index];
+  return oldTestamentBooks.concat(newTestamentBooks)[index];
 }
 
 export function getAllBooks(): BibleBook[] {
-  return bibleBooks;
+  return oldTestamentBooks.concat(newTestamentBooks);
 }

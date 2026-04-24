@@ -188,7 +188,13 @@ export default function AppShell() {
                 <Stack.Screen 
                   name="(tabs)" 
                   component={TabsNavigator} 
-                  options={{ headerShown: false, animation: 'none' }} />
+                  options={{ headerShown: false, animation: 'none' }} 
+                />
+                {/* <Stack.Screen
+                  name="(practice)"
+                  component={PracticeLayout}
+                  options={{headerShown: false, animation: 'none'}}
+                /> */}
                 <Stack.Screen
                   name="createCollection"
                   component={CreateCollectionScreen}

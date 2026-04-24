@@ -50,7 +50,7 @@ export default function useGlobalStyles() {
 
     p1: {
       color: theme.colors.onBackgroundSoft,
-      fontSize: 20,
+      fontSize: 22,
       fontFamily: 'Inter',
     },
     p2: {
