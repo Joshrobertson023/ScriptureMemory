@@ -64,6 +64,7 @@ interface CollectionsStore {
     setNewCollectionVisibility: (v: number) => void;
     setNewCollectionItems: (items: CollectionItem[]) => void;
     addPassageToNewCollection: (p: Passage) => void;
+    addPassageToCollection: (cId: number, p: Passage) => void;
     addNoteToNewCollection: (note: Note) => void;
     updateNoteInNewCollection: (itemId: number, text: string) => void;
     removeItemFromNewCollection: (id: number) => void;
@@ -231,7 +232,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
             addPassageToNewCollection(p: Passage) {
                 const state = get();
                 const alreadyExists = state.newCollection.items.some(
-                    (i) => i.type === 'passage' && i.passage.reference.readableReference === p.reference.readableReference
+                    (i) => i.type === 'passage' && i.passage.passage.reference.readableReference === p.reference.readableReference
                 );
                 if (alreadyExists)
                     return;
@@ -240,7 +241,10 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 const item: CollectionItem = {
                     type: 'passage',
                     id: nextCounter * LOCAL_ID_PREFIX,
-                    passage: p,
+                    passage: {
+                        id: nextCounter * LOCAL_ID_PREFIX,
+                        passage: p,
+                    },
                 };
                 set((state) => ({
                     _localPassageIdCounter: nextCounter,
@@ -248,6 +252,38 @@ export const useCollectionsStore = create<CollectionsStore>()(
                         ...state.newCollection,
                         items: [...state.newCollection.items, item],
                     }
+                }));
+            },
+            addPassageToCollection(cId: number, p: Passage) {
+                const state = get();
+                const collection = state.userCollections.find((col) => col.id === cId);
+                if (!collection) {
+                    return;
+                }
+
+                const alreadyExists = collection.items.some(
+                    (i) => i.type === 'passage' && i.passage.passage.reference.readableReference === p.reference.readableReference
+                );
+                if (alreadyExists) {
+                    return;
+                }
+
+                const nextCounter = state._localPassageIdCounter + 1;
+                const item: CollectionItem = {
+                    type: 'passage',
+                    id: nextCounter * LOCAL_ID_PREFIX,
+                    passage: {
+                        id: nextCounter * LOCAL_ID_PREFIX,
+                        collectionId: cId,
+                        passage: p,
+                    },
+                };
+
+                set((currentState) => ({
+                    _localPassageIdCounter: nextCounter,
+                    userCollections: currentState.userCollections.map((col) =>
+                        col.id === cId ? { ...col, items: [...col.items, item] } : col
+                    )
                 }));
             },
             addNoteToNewCollection(note: Note) {
@@ -327,7 +363,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
             }
         }),
         {
-            name: 'collection-storage-5',
+            name: 'collection-storage-6',
             storage: createJSONStorage(() => AsyncStorage)
         }
     )

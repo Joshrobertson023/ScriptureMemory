@@ -6,9 +6,10 @@ import Skeleton from "react-native-reanimated-skeleton";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
 import { UserPassage } from "../../../types/passages/userPassage";
+import { CrossReferenceGroup } from "../../../types/verse/verseCard";
 
 export interface CrossReferencesProps {
-    crossReferences: Passage[];
+    crossReferences: CrossReferenceGroup[];
     loading: boolean;
 }
 
@@ -56,26 +57,38 @@ const CrossReferences = ({ crossReferences, loading }: CrossReferencesProps) => 
                 )}
 
                 {!loading && crossReferences.length > 0 && (
-                    <Text style={{ ...globalStyles.p3, lineHeight: 25 }}>
-                        {crossReferences.map((passage, index) => (
+                    <View style={{ gap: 8 }}>
+                        {crossReferences.map((group) => (
                             <Text
-                                key={`${passage.reference.readableReference}-${index}`}
-                                numberOfLines={1}
-                                onPress={() => handleCrossReferencePress(passage)}
+                                key={`${group.fromVerse.id}-${group.fromVerse.reference.readableReference}`}
+                                style={{ ...globalStyles.p3, lineHeight: 25 }}
                             >
-                                <Text
-                                    style={{
-                                        ...globalStyles.p3,
-                                        textDecorationLine: 'underline',
-                                        lineHeight: 25,
-                                    }}
-                                >
-                                    {passage.reference.readableReference}
-                                </Text>
-                                {index < crossReferences.length - 1 ? ';  ' : ''}
+                                {crossReferences.length > 1 && (
+                                    <Text style={{ ...globalStyles.p3, lineHeight: 25 }}>
+                                        {'v. ' + group.fromVerse.reference.verses.at(0) + ': '}
+                                    </Text>
+                                )} 
+                                {group.crossReferences.map((passage, index) => (
+                                    <Text
+                                        key={`${passage.reference.readableReference}-${index}`}
+                                        numberOfLines={1}
+                                        onPress={() => handleCrossReferencePress(passage)}
+                                    >
+                                        <Text
+                                            style={{
+                                                ...globalStyles.p3,
+                                                textDecorationLine: 'underline',
+                                                lineHeight: 25,
+                                            }}
+                                        >
+                                            {passage.reference.readableReference}
+                                        </Text>
+                                        {index < group.crossReferences.length - 1 ? '; ' : ''}
+                                    </Text>
+                                ))}
                             </Text>
                         ))}
-                    </Text>
+                    </View>
                 )}
             </View>
         </Skeleton>

@@ -5,7 +5,7 @@ import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
 import { getPassageCacheKey, useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { initialVerseCardResponse } from "../../../types/verse/verseCard";
-import Categories from "../passage/categories";
+import CategoriesBottomSheetContent from "../passage/categoriesBottomSheetContent";
 import PassageSheetMetadata from "../passage/passageSheetMetadata";
 import CrossReferences from "../passage/crossReferences";
 import PassageSheetActions from "../passage/passageSheetActions";
@@ -78,7 +78,7 @@ const PassageBottomSheet = forwardRef<TrueSheet>(
         const collections: Collection[] = useCollectionsStore(useShallow((state) => 
             state.userCollections.filter((col) => 
             col.items.some((i) =>
-                i.type === 'passage' && i.passage.verses.some((verse) => passageVerseIds.has(verse.id))
+                i.type === 'passage' && i.passage.passage.verses.some((verse) => passageVerseIds.has(verse.id))
             ))));
 
         return (
@@ -128,7 +128,9 @@ const PassageBottomSheet = forwardRef<TrueSheet>(
                             </Text>
                         </View>
                     </View>
-                    <Categories
+
+                    <View style={{height: 20}} />
+                    <CategoriesBottomSheetContent
                         categories={passageBottomSheet.passage.verses.at(0)?.categories || []}
                         multiline
                     />

@@ -2,13 +2,9 @@ import { TouchableWithoutFeedback, Text, View, StyleProp, ViewStyle, StyleSheet,
 import { Passage } from "../../../types/passages/passage"
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
-import { TrueSheet } from "@lodev09/react-native-true-sheet";
-import { useEffect, useRef, useState } from "react";
-import PassageBottomSheet from "../bottom-sheets/passageBottomSheet";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { UserPassage } from "../../../types/passages/userPassage";
 import Categories from "./categories";
-import { Category } from "../../../types/category";
 import React from "react";
 import { Check } from "lucide-react-native";
 

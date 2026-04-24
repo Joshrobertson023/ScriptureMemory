@@ -34,6 +34,7 @@ import { CreateCollectionScreen } from './screens/collections/createNew.screen';
 import PassageBottomSheet from './components/bottom-sheets/passageBottomSheet';
 import ViewNotesBottomSheet from './components/bottom-sheets/viewNotesBottomSheet';
 import SaveToCollectionBottomSheet from './components/bottom-sheets/saveToCollectionBottomSheet';
+import CategoriesBottomSheet from './components/bottom-sheets/categoriesBottomSheet';
 import { useBottomSheetsStore } from './stores/bottomSheets.store';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
 import { useSearchStore } from './stores/search.store';
@@ -68,12 +69,14 @@ export default function AppShell() {
   const saveToCollectionSheet = React.useRef<TrueSheet>(null);
   const noteSheet = React.useRef<TrueSheet>(null);
   const syncSheet = React.useRef<TrueSheet>(null);
+  const categoriesSheet = React.useRef<TrueSheet>(null);
   const {
     passageSheetOpen,
     noteSheetOpen,
     syncSheetOpen,
     viewNotesSheetOpen,
     saveToCollectionSheetOpen,
+    categoriesSheetOpen,
   } = useBottomSheetsStore();
   
   // ─── Startup ──────────────────────────────────────────────────────────────────
@@ -161,6 +164,14 @@ export default function AppShell() {
       }
     }, [syncSheetOpen])
 
+    useEffect(() => {
+      if (categoriesSheetOpen) {
+        categoriesSheet.current?.present();
+      } else {
+        categoriesSheet.current?.dismiss();
+      }
+    }, [categoriesSheetOpen]);
+
   if (!appIsReady || !fontsLoaded || !vodLoaded) {
     return null;
   } 
@@ -233,6 +244,7 @@ export default function AppShell() {
           <ViewNotesBottomSheet ref={viewNotesSheet} />
           <SaveToCollectionBottomSheet ref={saveToCollectionSheet} />
           <SyncBottomSheet ref={syncSheet}/>
+          <CategoriesBottomSheet ref={categoriesSheet} />
       </GestureHandlerRootView>
     )
 }

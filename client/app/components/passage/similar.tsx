@@ -2,6 +2,7 @@ import { Text, View } from "react-native";
 import useAppTheme from "../../theme";
 import useGlobalStyles from "../../styles/gobalStyles";
 import { Passage } from "../../../types/passages/passage";
+import { UserPassage } from "../../../types/passages/userPassage";
 import { FlatList } from "react-native-gesture-handler";
 import PassageContent from "./passageContent";
 import Skeleton from "react-native-reanimated-skeleton";
@@ -27,8 +28,8 @@ const Similar = ({reference, similarPassages = [], isLoading}: SimilarProps) => 
 
     return (
         <View style={{marginTop: 20}}>
-            <Text style={globalStyles.p2}>
-                Similar to {reference}
+            <Text style={{...globalStyles.p2, marginBottom: 15}}>
+                Similar to {reference}:
             </Text>
 
             <Skeleton
@@ -46,7 +47,14 @@ const Similar = ({reference, similarPassages = [], isLoading}: SimilarProps) => 
                 {!isLoading && similarPassages.length > 0 && (
                     <FlatList
                         data={similarPassages}
-                        renderItem={({item}) => <PassageContent passage={item} />}
+                        renderItem={({item}) => {
+                            const userPassage: UserPassage = {
+                                passage: item,
+                                id: 0,
+                            };
+
+                            return <PassageContent userPassage={userPassage} />;
+                        }}
                     />
                 )}
             </Skeleton>

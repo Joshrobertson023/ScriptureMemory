@@ -12,20 +12,37 @@ interface PassageSheetActionsProps {
 const PassageSheetActions = ({ passageBottomSheet }: PassageSheetActionsProps) => {
     const globalStyles = useGlobalStyles();
     const theme = useAppTheme();
-    const { setSaveToCollectionSheetOpen, setViewNotesSheetOpen } = useBottomSheetsStore();
+    const {
+        setSaveToCollectionBottomSheet,
+        setSaveToCollectionSheetOpen,
+        setViewNotesBottomSheet,
+        setViewNotesSheetOpen
+    } = useBottomSheetsStore();
 
     return (
         <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5 }}>
-            <TouchableOpacity style={globalStyles.elevationButtomSquare} onPress={() => setSaveToCollectionSheetOpen(true)}>
+            <TouchableOpacity
+                style={globalStyles.elevationButtomSquare}
+                onPress={() => {
+                    setSaveToCollectionBottomSheet(passageBottomSheet);
+                    setSaveToCollectionSheetOpen(true);
+                }}
+            >
                 <BookmarkPlus size={20} color={theme.colors.onBackground} strokeWidth={1.3} />
                 <Text style={{ ...globalStyles.p4, fontWeight: 600 }}>
                     Save
                 </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={globalStyles.elevationButtomSquare} onPress={() => setViewNotesSheetOpen(true)}>
+            <TouchableOpacity
+                style={globalStyles.elevationButtomSquare}
+                onPress={() => {
+                    setViewNotesBottomSheet(passageBottomSheet);
+                    setViewNotesSheetOpen(true);
+                }}
+            >
                 <NotebookText size={20} color={theme.colors.onBackground} strokeWidth={1.3} />
                 <Text style={{ ...globalStyles.p4, fontWeight: 600 }}>
-                    Notes {passageBottomSheet.notes?.length && passageBottomSheet.notes?.length > 0 && (passageBottomSheet.notes?.length)}
+                    Notes
                 </Text>
             </TouchableOpacity>
             <TouchableOpacity style={globalStyles.elevationButtomSquare}>

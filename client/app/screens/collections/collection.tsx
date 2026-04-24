@@ -63,7 +63,7 @@ const CollectionScreen = () => {
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({item}) => {
                         if (item.type === 'passage')
-                            return <PassageComponent userPassage={item} itemId={item.id} collectionId={collection.id} />;
+                            return <PassageComponent userPassage={item.passage} itemId={item.id} collectionId={collection.id} />;
                         if (item.type === 'note')
                             return <NoteComponent note={item.note} itemId={item.id} />;
                         return null;

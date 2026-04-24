@@ -155,7 +155,7 @@ export const CreateCollectionScreen = () => {
                     renderItem={({item}) => {
                         if (!item) return null;
                         if (item.type === 'passage')
-                            return <NewCollectionPassage userPassage={item} itemId={item.id} />;
+                            return <NewCollectionPassage userPassage={item.passage} itemId={item.id} />;
                         if (item.type === 'note')
                             return <CollectionNote note={item.note} itemId={item.id} />;
                         return null;

@@ -1,5 +1,4 @@
 import { TouchableWithoutFeedback, Text, View, StyleProp, ViewStyle, StyleSheet, DimensionValue } from "react-native"
-import { Passage } from "../../../types/passages/passage"
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
@@ -9,8 +8,7 @@ import React from "react";
 import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
 
 interface PassageContentProps {
-    passage: Passage;
-    userPassageId?: number;
+    userPassage: UserPassage;
     style?: StyleProp<ViewStyle>;
     maxWidth?: DimensionValue;
     onLongPress?: () => void;
@@ -31,12 +29,17 @@ const useLocalStyles = () => {
     })
 }
 
-const PassageContent = React.memo(({passage, userPassageId, maxWidth, onLongPress, disabled}: PassageContentProps) => {
+const PassageContent = React.memo(({userPassage, maxWidth, onLongPress, disabled}: PassageContentProps) => {
     const styles = useGlobalStyles();
     const localStyles = useLocalStyles();
     const theme = useAppTheme();
     const { setPassageSheetOpen, setPassageBottomSheet, pushPassage, passageSheetStack } = useBottomSheetsStore();
     const { goToNextPassage } = useBottomSheetStack();
+    const passage = userPassage.passage;
+
+    if (!passage) {
+        return null;
+    }
 
     const allCategories = React.useMemo(() =>
         Array.from(new Map(passage.verses.flatMap(v => v.categories).map(c => [c.id, c])).values()),
@@ -45,18 +48,16 @@ const PassageContent = React.memo(({passage, userPassageId, maxWidth, onLongPres
 
     return (
         <TouchableWithoutFeedback onLongPress={onLongPress} disabled={disabled} onPress={() => {
-            const userPassage: UserPassage = {
-                passage: passage,
-                id: userPassageId ?? 0,
-            }
+            const selectedUserPassage: UserPassage = userPassage;
+
             if (passageSheetStack.length === 0) {
-                pushPassage(userPassage);
-                setPassageBottomSheet(userPassage);
+                pushPassage(selectedUserPassage);
+                setPassageBottomSheet(selectedUserPassage);
                 setPassageSheetOpen(true);
                 return;
             }
 
-            goToNextPassage(userPassage);
+            goToNextPassage(selectedUserPassage);
         }}>
             <View style={[localStyles.container, {maxWidth}]}>
                 <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>

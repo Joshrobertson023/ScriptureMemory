@@ -8,6 +8,6 @@ public class VerseCardResponse
     public int TotalMemorized { get; set; }
     public int NumPracticed { get; set; }
     public DateTime NextDue { get; set; }
-    public List<Passage> CrossReferences { get; set; } = new();
+    public List<CrossReferenceResponse> CrossReferences { get; set; } = new();
     public List<Verse> Similar { get; set; } = new();
 }

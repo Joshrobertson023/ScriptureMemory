@@ -26,7 +26,7 @@ const PassageSheetMetadata = ({ passage, data, loading }: PassageSheetMetadataPr
 
     const collectionsCount = userCollections.filter(c =>
         c.items.some(i =>
-            i.type === 'passage' && i.passage.verses.some((verse) => passageVerseIds.has(verse.id))
+            i.type === 'passage' && i.passage.passage.verses.some((verse) => passageVerseIds.has(verse.id))
         )
     ).length;
 

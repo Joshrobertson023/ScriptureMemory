@@ -114,7 +114,7 @@ const EditCollectionScreen = () => {
     const saveEditingCollectionPassage = (passage: Passage) => {
         setLocalCollection((prev) => {
             const alreadyExists = prev.items.some(
-                (i) => i.type === 'passage' && i.passage.reference.readableReference === passage.reference.readableReference
+                (i) => i.type === 'passage' && i.passage.passage.reference.readableReference === passage.reference.readableReference
             );
             if (alreadyExists) {
                 return prev;
@@ -126,7 +126,10 @@ const EditCollectionScreen = () => {
             const newItem: CollectionItem = {
                 type: 'passage',
                 id: nextLocalId,
-                passage
+                passage: {
+                    id: nextLocalId,
+                    passage,
+                }
             };
 
             return {
@@ -193,7 +196,7 @@ const EditCollectionScreen = () => {
                     keyExtractor={(item) => `${item.type}-${item.id}`}
                     renderItem={({item}) => {
                         if (item.type === 'passage')
-                            return <NewCollectionPassage userPassage={item} itemId={item.id} />;
+                            return <NewCollectionPassage userPassage={item.passage} itemId={item.id} />;
                         if (item.type === 'note')
                             return <CollectionNote note={item.note} itemId={item.id} />;
                         return null;

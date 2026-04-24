@@ -1,5 +1,4 @@
 import { StyleSheet, View } from "react-native";
-import { Passage } from "../../../types/passages/passage";
 import { UserPassage } from "../../../types/passages/userPassage";
 import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -30,11 +29,6 @@ const useLocalStyles = () => StyleSheet.create({
 })
 
 const PassageComponent = ({userPassage, itemId, collectionId}: PassageProps) => {
-    const passage: Passage = {
-        reference: userPassage.passage.reference,
-        verses: userPassage.passage.verses
-    }
-
     const theme = useAppTheme();
     const drag = useReorderableDrag();
     const isActive = useIsActive();
@@ -56,8 +50,7 @@ const PassageComponent = ({userPassage, itemId, collectionId}: PassageProps) => 
         <Swipeable renderRightActions={() => <RightActions />}>
             <View style={styles.container}>
                 <PassageContent
-                    passage={passage}
-                    userPassageId={userPassage.id ?? itemId}
+                    userPassage={userPassage}
                     onLongPress={drag}
                     disabled={isActive}
                 />

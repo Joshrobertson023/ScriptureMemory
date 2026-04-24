@@ -5,12 +5,17 @@ import { UserPassage } from "../passages/userPassage";
 import { Verse } from "./verse"
 import { Passage } from "../passages/passage";
 
+export interface CrossReferenceGroup {
+    fromVerse: Verse;
+    crossReferences: Passage[];
+}
+
 export type VerseCardResponse = {
     totalSaved: number;
     totalMemorized: number;
     numPracticed: number;
     nextDue: Date;
-    crossReferences: Passage[];
+    crossReferences: CrossReferenceGroup[];
     similar: Verse[];
 }
 

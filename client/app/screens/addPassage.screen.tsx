@@ -96,7 +96,7 @@ export const AddPassageScreen = ({ collectionItems, savePassage, removePassage }
                     keyExtractor={(item) => item.reference.readableReference}
                     renderItem={({item}) => {
                         const savedPassageItem = collectionItems.find(
-                            (i) => i.type === 'passage' && i.passage.reference.readableReference === item.reference.readableReference
+                            (i) => i.type === 'passage' && i.passage.passage.reference.readableReference === item.reference.readableReference
                         );
                         return (
                             <AddPassage

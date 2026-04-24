@@ -8,6 +8,7 @@ import { useUserAuthStore } from "./userAuth.store";
 import { useUserStore } from "./user.store";
 import { queryClient } from "../hooks/queryClient";
 import { Passage } from "../../types/passages/passage";
+import { Category } from "../../types/category";
 
 export const getPassageCacheKey = (up: UserPassage) => {
     const { book, chapter, verses } = up.passage.reference;
@@ -26,6 +27,8 @@ interface BottomSheetsStore {
     viewNotesSheetOpen: boolean;
     saveToCollectionBottomSheet: UserPassage;
     saveToCollectionSheetOpen: boolean;
+    categoriesBottomSheet: Category | null;
+    categoriesSheetOpen: boolean;
 
     noteBottomSheet: Note;
     noteBottomSheetItemId: number | null;
@@ -52,6 +55,9 @@ interface BottomSheetsStore {
     setViewNotesSheetOpen: (o: boolean) => void;
     setSaveToCollectionBottomSheet: (up: UserPassage) => void;
     setSaveToCollectionSheetOpen: (o: boolean) => void;
+    setCategoriesBottomSheet: (category: Category | null) => void;
+    setCategoriesSheetOpen: (o: boolean) => void;
+    clearCategoriesBottomSheet: () => void;
 
     setNoteBottomSheet: (note: Note, itemId: number | null) => void;
     setNoteSheetOpen: (o: boolean) => void;
@@ -72,11 +78,13 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
         passageSheetPendingTransition: null,
 
         passageCardCache: {},
-    similarPassagesCache: {},
+        similarPassagesCache: {},
         viewNotesBottomSheet: initialUserPassage,
         viewNotesSheetOpen: false,
         saveToCollectionBottomSheet: initialUserPassage,
         saveToCollectionSheetOpen: false,
+        categoriesBottomSheet: null,
+        categoriesSheetOpen: false,
 
         noteBottomSheet: initialNote,
         noteBottomSheetItemId: null,
@@ -166,6 +174,18 @@ export const useBottomSheetsStore = create<BottomSheetsStore>()(
 
         setSaveToCollectionSheetOpen(o: boolean) {
             set(() => ({ saveToCollectionSheetOpen: o }));
+        },
+
+        setCategoriesBottomSheet(category: Category | null) {
+            set(() => ({ categoriesBottomSheet: category }));
+        },
+
+        setCategoriesSheetOpen(o: boolean) {
+            set(() => ({ categoriesSheetOpen: o }));
+        },
+
+        clearCategoriesBottomSheet() {
+            set(() => ({ categoriesBottomSheet: null }));
         },
         
 

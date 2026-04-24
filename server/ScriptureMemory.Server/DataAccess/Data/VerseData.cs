@@ -101,9 +101,9 @@ public class VerseData
     public class GetVerseDto
     {
         public int Id { get; set; }
-        public string Book { get; set; }
+        public string Book { get; set; } = string.Empty;
         public int Chapter { get; set; }
-        public string Text { get; set; }
+        public string Text { get; set; } = string.Empty;
         public int UsersMemorizedCount { get; set; }
         public int UsersSavedCount { get; set; }
         public int VerseNum { get; set; }
@@ -491,6 +491,9 @@ public class VerseData
     class VerseCardDto
     {
         public int VerseId { get; set; }
+        public string VerseBook { get; set; } = string.Empty;
+        public int VerseChapter { get; set; }
+        public int VerseNum { get; set; }
         public int VerseTotalMemorizedCount { get; set; }
         public int VerseTotalSavedCount { get; set; }
         public Vector? VerseEmbedding { get; set; }
@@ -521,6 +524,9 @@ public class VerseData
             """
             select
             v.id as VerseId,
+            v.book as VerseBook,
+            v.chapter as VerseChapter,
+            v.verse_num as VerseNum,
             v.memorized_count as VerseTotalMemorizedCount,
             v.saved_count as VerseTotalSavedCount,
             c.id as CategoryId,
@@ -567,34 +573,52 @@ public class VerseData
             NumPracticed = 0,
             NextDue = DateTime.UtcNow,
             CrossReferences = allGroups
-                .SelectMany(g => g
-                    .Where(r => r.CrossReferenceReference is not null)
-                    .GroupBy(r => r.CrossReferenceReference!)
-                    .Select(crGroup =>
+                .Select(g => new CrossReferenceResponse
+                {
+                    FromVerse = new Verse
                     {
-                        var reference = ReferenceParser.Parse(crGroup.Key);
-                        if (reference == null)
-                            return null;
-                        
-                        return new Passage
+                        Id = g.First().VerseId,
+                        Reference = ReferenceParser.Parse(
+                            g.First().VerseBook,
+                            g.First().VerseChapter,
+                            new List<int> { g.First().VerseNum }),
+                        Text = string.Empty,
+                        ReadableReference = ReferenceParser.Parse(
+                            g.First().VerseBook,
+                            g.First().VerseChapter,
+                            new List<int> { g.First().VerseNum })?.ReadableReference
+                    },
+                    CrossReferences = g
+                        .Where(r => r.CrossReferenceReference is not null)
+                        .GroupBy(r => r.CrossReferenceReference!)
+                        .Select(crGroup =>
                         {
-                            Reference = reference,
-                            Verses = crGroup
-                                .DistinctBy(r => r.CRVerseId)
-                                .Where(r => r.CRVerseId.HasValue && r.CRBook != null && r.CRChapter.HasValue && r.CRVerseNum.HasValue)
-                                .Select(r => new Verse
-                                {
-                                    Id = r.CRVerseId ?? 0,
-                                    Reference = ReferenceParser.Parse(r.CRBook ?? "", r.CRChapter ?? 0, new List<int> { r.CRVerseNum ?? 0 }),
-                                    Text = r.CRText ?? "",
-                                    ReadableReference = $"{r.CRBook} {r.CRChapter}:{r.CRVerseNum}"
-                                })
-                                .ToList()
-                        };
-                    })
-                    .Where(p => p != null)
-                    .Cast<Passage>())
-                .Where(p => p.Verses.Count > 0 && !verseIds.Contains(p.Verses.First().Id))
+                            var reference = ReferenceParser.Parse(crGroup.Key);
+                            if (reference == null)
+                                return null;
+
+                            return new Passage
+                            {
+                                Reference = reference,
+                                Verses = crGroup
+                                    .DistinctBy(r => r.CRVerseId)
+                                    .Where(r => r.CRVerseId.HasValue && r.CRBook != null && r.CRChapter.HasValue && r.CRVerseNum.HasValue)
+                                    .Select(r => new Verse
+                                    {
+                                        Id = r.CRVerseId ?? 0,
+                                        Reference = ReferenceParser.Parse(r.CRBook ?? "", r.CRChapter ?? 0, new List<int> { r.CRVerseNum ?? 0 }),
+                                        Text = r.CRText ?? "",
+                                        ReadableReference = $"{r.CRBook} {r.CRChapter}:{r.CRVerseNum}"
+                                    })
+                                    .ToList()
+                            };
+                        })
+                        .Where(p => p != null)
+                        .Cast<Passage>()
+                        .Where(p => p.Verses.Count > 0 && !verseIds.Contains(p.Verses.First().Id))
+                        .ToList()
+                })
+                .Where(group => group.CrossReferences.Count > 0)
                 .ToList(),
         };
     }
