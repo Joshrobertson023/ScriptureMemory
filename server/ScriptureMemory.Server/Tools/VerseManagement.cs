@@ -115,7 +115,7 @@ public sealed class VerseManagement
         public string Text { get; set; } = string.Empty;
     }
 
-    public async Task MoveCrossReferencesToSqlite()
+    public async Task UploadCrossReferences()
     {
         string[] lines = File.ReadAllLines(@"C:\Users\there\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.txt");
         int total = lines.Length;

@@ -1,4 +1,5 @@
 import { Passage } from "../../types/passages/passage";
+import { Verse } from "../../types/verse/verse";
 import { VerseCardResponse } from "../../types/verse/verseCard";
 import { useUserStore } from "../stores/user.store";
 import { useUserAuthStore } from "../stores/userAuth.store";
@@ -104,6 +105,41 @@ export async function getSimilarVerses(passage: Passage, jwt: string): Promise<P
         console.log(data.length);
 
         return data as Passage[];
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function getChapterVerses(book: string, chapter: number, jwt: string): Promise<Verse[]> {
+    try {
+        const response = await fetch(`${baseUrl}/verses/chapter`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${jwt}`
+            },
+            body: JSON.stringify({
+                book,
+                chapter
+            }),
+        });
+
+        if (!response.ok) {
+            const text = await response.text();
+            let errorMessage = 'Error fetching chapter verses';
+            try {
+                const data = JSON.parse(text);
+                errorMessage = data?.message || text;
+            } catch {
+                errorMessage = text;
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        console.log(data.length);
+
+        return data as Verse[];
     } catch (error) {
         throw error;
     }

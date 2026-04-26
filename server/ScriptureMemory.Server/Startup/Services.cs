@@ -121,6 +121,8 @@ public static class Services
         services.AddScoped<CategoryService>();
 
         services.AddScoped<VerseManagement>();
+        services.AddScoped<LexiconConverter>();
+        services.AddScoped<BibleApi>();
 
         services.AddScoped<EmbeddingGenerator>();
 
@@ -129,6 +131,7 @@ public static class Services
 
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
+        services.AddScoped<IRequestDbConnection, RequestDbConnection>();
         services.AddScoped<UserData>();
         services.AddScoped<AdminData>();
         services.AddScoped<UserSettingsData>();

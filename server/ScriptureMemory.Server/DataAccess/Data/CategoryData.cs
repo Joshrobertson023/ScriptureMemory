@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using DataAccess.Models;
-using Npgsql;
 using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Tools;
 
@@ -8,16 +7,16 @@ namespace ScriptureMemory.Server.DataAccess.Data;
 
 public class CategoryData
 {
-    private readonly NpgsqlDataSource _dataSource;
+    private readonly IRequestDbConnection _requestDbConnection;
 
-    public CategoryData(NpgsqlDataSource dataSource)
+    public CategoryData(IRequestDbConnection requestDbConnection)
     {
-        _dataSource = dataSource;
+        _requestDbConnection = requestDbConnection;
     }
 
     public async Task<int> CreateCategory(Category newCategory)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var sql = """
             insert into categories (name, description, embedding, created_at)
             values (@Name, @Description, @Embedding, @CreatedAt)
@@ -35,7 +34,7 @@ public class CategoryData
 
     public async Task AssignVerseToCategory(VerseCategory vc)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         await conn.ExecuteAsync(
             """
             insert into verse_categories
@@ -53,7 +52,7 @@ public class CategoryData
 
     public async Task UnassignVerseToCategory(int verseId, int categoryId)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         await conn.ExecuteAsync(
             """
             delete from verse_categories
@@ -67,7 +66,7 @@ public class CategoryData
 
     public async Task<List<Category>> GetCategories()
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<Category>(
             """
             select id, name, description
@@ -90,7 +89,7 @@ public class CategoryData
 
     public async Task<List<Verse>> GetVersesInCategory(int categoryId)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<GetVerseDto>(
             """
             select v.id, v.book, v.chapter, v.verse_num as VerseNum, v.text, v.memorized_count as UsersMemorizedCount, v.saved_count as UsersSavedCount, v.saved_count as UsersSavedCount
@@ -110,7 +109,7 @@ public class CategoryData
 
     public async Task BulkAssignVersesToCategory(List<VerseCategory> assignments)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         await conn.ExecuteAsync(
             """
         INSERT INTO verse_categories (verse_id, category_id, assignment_source, confidence)
@@ -123,7 +122,7 @@ public class CategoryData
 
     public async Task DeleteCategory(int categoryId)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         using var transaction = await conn.BeginTransactionAsync();
         await conn.ExecuteAsync(
             """

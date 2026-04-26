@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { BottomTabBar, BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import * as SystemUI from 'expo-system-ui';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
 import { Drawer } from 'react-native-drawer-layout';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -19,6 +19,8 @@ import { useAppStore } from '../../stores/appState.store';
 import { useBottomSheetsStore } from '../../stores/bottomSheets.store';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../types/router';
+import { TabBarVisibilityContext } from '../../components/bottomTabWrapper';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 const Tab = createBottomTabNavigator();
 
@@ -34,16 +36,46 @@ export default function TabLayout() {
   const {syncStatus} = useAppStore();
   const {setSyncSheetOpen} = useBottomSheetsStore();
 
-  SystemUI.setBackgroundColorAsync(theme.colors.background);
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(theme.colors.background).catch(() => {});
+  }, [theme.colors.background]);
+
+  const context = useContext(TabBarVisibilityContext);
+  const fallbackTranslateY = useSharedValue(0);
+  const tabBarTranslateY = context?.tabBarTranslateY ?? fallbackTranslateY;
+  const tabBarAnimatedStyle = useAnimatedStyle(
+    () => ({
+      transform: [{ translateY: tabBarTranslateY.value }],
+    }),
+    [tabBarTranslateY]
+  );
 
   return (
         <Tab.Navigator
-          tabBar={(props: BottomTabBarProps) => <BottomTabBar {...props} />}
+          tabBar={(props: BottomTabBarProps) => (
+            <Animated.View style={tabBarAnimatedStyle}>
+              <BottomTabBar {...props} />
+            </Animated.View>
+          )}
           screenOptions={{
             animation: 'fade',
             tabBarActiveTintColor: theme.colors.onBackground,
             tabBarInactiveTintColor: theme.colors.inactiveTab,
             tabBarLabelPosition: 'below-icon',
+            tabBarStyle: {
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: theme.colors.background,
+              height: 70 + insets.bottom + 10,
+              paddingBottom: Math.max(insets.bottom, 10) + 10,
+              paddingTop: 10,
+              paddingLeft: 5,
+              paddingRight: 5,
+              borderTopColor: theme.colors.elevation2,
+              borderTopWidth: 0.2,
+            },
             tabBarItemStyle: {
               alignItems: 'center',
               justifyContent: 'center',
@@ -73,16 +105,6 @@ export default function TabLayout() {
               color: theme.colors.onBackground,
             },
             headerTintColor: theme.colors.onBackground,
-            tabBarStyle: {
-              backgroundColor: theme.colors.background,
-              height: 70 + insets.bottom + 10,
-              paddingBottom: Math.max(insets.bottom, 10) + 10,
-              paddingTop: 10,
-              paddingLeft: 5,
-              paddingRight: 5,
-              borderTopColor: theme.colors.elevation2,
-              borderTopWidth: 0.2,
-            },
           }}
         >
           {/* ── Home ── */}

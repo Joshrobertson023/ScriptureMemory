@@ -19,8 +19,36 @@ const useReferenceParser = () => {
         return parts;
     }
 
+    const convertToReadableReference = (book: string, chapter: number, verses: number[]): string => {
+        if (!verses || verses.length === 0) return '';
+
+        const sorted = [...verses].sort((a, b) => a - b);
+        let result = `${book} ${chapter}:`;
+
+        let i = 0;
+        while (i < sorted.length) {
+            if (i > 0) result += ', ';
+
+            let rangeStart = sorted[i];
+            let rangeEnd = rangeStart;
+
+            while (i + 1 < sorted.length && sorted[i + 1] === sorted[i] + 1) {
+                i++;
+                rangeEnd = sorted[i];
+            }
+
+            result += rangeStart;
+            if (rangeEnd > rangeStart) result += `-${rangeEnd}`;
+
+            i++;
+        }
+
+        return result;
+    }
+
     return {
-        getVerseTypingPart
+        getVerseTypingPart,
+        convertToReadableReference
     }
 }
 

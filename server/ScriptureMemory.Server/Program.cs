@@ -7,7 +7,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddUserSecrets<Program>();
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
 
 builder.Services
     .AddServices()
@@ -51,11 +54,12 @@ builder.Services.AddSingleton(dataSource);
 var app = builder.Build();
 
 app.UseMiddleware()
-   .UseEndpoints();
+    .UseEndpoints();
 
 //using var scope = app.Services.CreateScope();
 //{
-//    var service = scope.ServiceProvider.GetRequiredService<EmbeddingGenerator>();
+//    var service = scope.ServiceProvider.GetRequiredService<BibleApi>();
+//    await service.UpdateBiblesInDatabase(app.Logger, app.Configuration);
 //}
 
 app.Run();

@@ -37,7 +37,7 @@ public static class VerseEndpoint
             return Results.Ok(displayName);
         });//.RequireAuthorization("User");
 
-        app.MapGet("/verses/chapter", async (
+        app.MapPost("/verses/chapter", async (
             [FromBody] GetChapterRequest request,
             [FromServices] VerseData data) =>
         {

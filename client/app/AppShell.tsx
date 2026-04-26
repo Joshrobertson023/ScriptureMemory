@@ -45,6 +45,8 @@ import EditCollectionScreen from './screens/collections/editCollection.screen';
 import { useVod } from './hooks/useVod';
 import { useAppStore } from './stores/appState.store';
 import { navigationRef } from './navigation';
+import { BottomTabWrapper } from './components/bottomTabWrapper';
+import { PaperProvider } from 'react-native-paper';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -180,6 +182,8 @@ export default function AppShell() {
     return (
         
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+        <PaperProvider>
+        <BottomTabWrapper>
             <NavigationContainer theme={theme} ref={navigationRef}>
               <Stack.Navigator
                 screenOptions={{ contentStyle: { backgroundColor: theme.colors.background } }}
@@ -251,6 +255,8 @@ export default function AppShell() {
           <SaveToCollectionBottomSheet ref={saveToCollectionSheet} />
           <SyncBottomSheet ref={syncSheet}/>
           <CategoriesBottomSheet ref={categoriesSheet} />
+        </BottomTabWrapper>
+        </PaperProvider>
       </GestureHandlerRootView>
     )
 }

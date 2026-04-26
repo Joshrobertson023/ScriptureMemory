@@ -1,6 +1,5 @@
 using Dapper;
 using DataAccess.Models;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,8 +9,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ScriptureMemory.Server.Tools;
+using ScriptureMemory.Server.DataAccess.Data;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using Npgsql;
 using ScriptureMemory.Server.DataAccess.Models;
 using Pgvector;
 using static ScriptureMemory.Server.Tools.Enums;
@@ -20,9 +19,7 @@ namespace DataAccess.Data;
 
 public class VerseData
 {
-    private readonly IConfiguration _config;
-    private readonly string _connectionString;
-    private readonly NpgsqlDataSource _dataSource;
+    private readonly IRequestDbConnection _requestDbConnection;
 
     private string selectSql = """
         select
@@ -36,22 +33,15 @@ public class VerseData
         embedding as Embedding
         """;
 
-    public VerseData(IConfiguration config)
+    public VerseData(IRequestDbConnection requestDbConnection)
     {
-        _config = config;
-        _connectionString = _config.GetConnectionString("PostgresConnection")
-            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
-        
-        NpgsqlDataSourceBuilder builder = new NpgsqlDataSourceBuilder(_connectionString);
-        builder.UseVector();
-
-        _dataSource = builder.Build();
+        _requestDbConnection = requestDbConnection;
     }
 
     public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)
     {
         var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });
 
         return results.ToList();
@@ -60,7 +50,7 @@ public class VerseData
     public async Task<List<Verse>> GetAllVerses()
     {
         var sql = $@"{selectSql} FROM VERSES";
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<GetVerseDto>(sql);
 
         return results.Select(r => new Verse
@@ -81,7 +71,7 @@ public class VerseData
 
     public async Task InsertEmbedding(Verse verse)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         await conn.ExecuteAsync(
             """
             update verses 
@@ -118,7 +108,7 @@ public class VerseData
         float minSimilarity,
         int limit = 100)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<GetVerseDto>(
             """
         SELECT
@@ -174,7 +164,7 @@ public class VerseData
             and verse_num = any(@VerseNums)
             """;
 
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
 
         var results = await conn.QueryAsync<GetVerseDto>(sql, new
         {
@@ -217,8 +207,7 @@ public class VerseData
             and verse_num = @VerseNum
             """;
 
-        using var conn = _dataSource.OpenConnection();
-        await conn.OpenAsync();
+        var conn = _requestDbConnection.Connection;
         var result = await conn.QueryFirstOrDefaultAsync<GetVerseDto>(sql, new
         {
             Book = book,
@@ -251,16 +240,13 @@ public class VerseData
             book as Book,
             chapter as Chapter,
             text as Text,
-            memorized_count as UsersMemorizedCount,
-            saved_count as UsersSavedCount,
             verse_num as VerseNum
             from verses
             where book = @Book
             and chapter = @Chapter
             """;
 
-        using var conn = _dataSource.OpenConnection();
-        await conn.OpenAsync();
+        var conn = _requestDbConnection.Connection;
 
         var results = await conn.QueryAsync<GetVerseDto>(sql, new
         {
@@ -271,16 +257,11 @@ public class VerseData
         return results.Select(r => new Verse
         {
             Id = r.Id,
-            Reference = new Reference
-            {
-                Book = r.Book,
-                Chapter = r.Chapter,
-                Verses = new List<int> { r.VerseNum },
-            },
+            Reference = ReferenceParser.Parse($"{r.Book} {r.Chapter}:{r.VerseNum}"),
             Text = r.Text,
             UsersSavedCount = r.UsersSavedCount,
             UsersMemorizedCount = r.UsersMemorizedCount
-        }).ToList();
+        }).OrderBy(v => v.Reference.Verses.First()).ToList();
     }
 
     public async Task<Verse?> GetVerseById(int id)
@@ -299,7 +280,7 @@ public class VerseData
             where id = @Id
             """;
 
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
 
         var verses = await conn.QueryAsync<GetVerseDto>(sql, new { Id = id });
 
@@ -327,7 +308,7 @@ public class VerseData
 
     public async Task<Passage> GetPassage(Reference reference)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<GetVerseDto>(
             """
             select
@@ -370,7 +351,7 @@ public class VerseData
     public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, Passage? similarPassage = null)
     {
         int maxResults = 50;
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<GetVerseDto>(
             $"""
             select
@@ -427,7 +408,7 @@ public class VerseData
 
     public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> queryEmbeddings)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         var results = await conn.QueryAsync<GetVerseDto>(
             """
             SELECT
@@ -476,7 +457,7 @@ public class VerseData
     {
         var sql = @"UPDATE VERSES SET saved_count = saved_count + 1
                      WHERE id = @Id";
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         await conn.ExecuteAsync(sql, new { Id = id });
     }
 
@@ -484,7 +465,7 @@ public class VerseData
     {
         var sql = @"UPDATE VERSES SET memorized_count = memorized_count + 1
                      WHERE id = @Id";
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
         await conn.ExecuteAsync(sql, new { Id = id });
     }
 
@@ -518,7 +499,7 @@ public class VerseData
 
     public async Task<VerseCardResponse> GetVerseCardResponse(int userId, List<int> verseIds)
     {
-        using var conn = _dataSource.OpenConnection();
+        var conn = _requestDbConnection.Connection;
 
         var results = await conn.QueryAsync<VerseCardDto>(
             """
