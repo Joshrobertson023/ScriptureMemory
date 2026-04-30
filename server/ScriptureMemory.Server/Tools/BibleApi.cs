@@ -31,6 +31,13 @@ public class Content
     public List<Content> Items { get; set; }
 }
 
+// Todo
+// - Refactor codebase to use new verse / chapter paradigm
+// - Use recursion to flatten items to store plain verse text and json content
+// - Store chapter content as-is in database
+// - Create models for chapter content, accounting for all possible styles / indentation
+// - Method that uses recursion to extract chapter content into a class to display in React Native
+
 public class ChaptersData
 {
     public string Id { get; set; }
@@ -40,7 +47,7 @@ public class ChaptersData
 public class BibleApi
 {
     /// <summary>
-    /// Sync Postgres bible data with API.Bible data (at least every 30 days) as it says in their Terms
+    /// Sync Postgres bible data with API.Bible data (at least every 30 days) as it says in their Terms & Conditions
     /// </summary>
     /// <param name="_logger"></param>
     /// <param name="_config"></param>
