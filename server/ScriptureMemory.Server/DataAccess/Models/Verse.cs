@@ -10,36 +10,10 @@ using static DataAccess.Data.VerseData;
 namespace DataAccess.Models;
 public class Verse
 {
-    public int Id { get; set; } = 0;
-    public Reference Reference { get; set; }
-    public string? ReadableReference { get; set; }
-    public int? Votes { get; set; }
-    public string Text { get; set; }
-    public int UsersSavedCount { get; set; } = 0;
-    public int UsersMemorizedCount { get; set; } = 0;
-    public string VerseNumbers { get; set; } // Typable part of reference that has verses
-    public Vector? Embedding { get; set; }
-    public double? Distance { get; set; }
-    public List<Category> Categories { get; set; } = new();
-
-    public Verse() { }
-
-    public string GetEmbeddingText()
-    {
-        return $"{Reference.ReadableReference} {Text}";
-    }
-
-    public Verse(Reference reference, string text, string verseNumbers)
-    {
-        Reference = reference;
-        Text = text;
-        VerseNumbers = verseNumbers;
-    }
-
-    public Verse(Reference reference, string text)
-    {
-        Reference = reference;
-        Text = text;
-        VerseNumbers = ReferenceParser.GetVersesHalfOfReference(this.Reference.ToString());
-    }
+    public string Id { get; set; } = string.Empty;
+    public string Book { get; set; } = string.Empty;
+    public int Chapter { get; set; }
+    public int VerseNum { get; set; }
+    public int MemorizedCount { get; set; }
+    public int SavedCount { get; set; }
 }

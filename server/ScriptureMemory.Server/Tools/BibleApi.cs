@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Text.Json;
 using static ScriptureMemory.Server.Tools.BibleData;
 
 namespace ScriptureMemory.Server.Tools;
@@ -12,13 +13,13 @@ public class DataRoot
 {
     public string Id { get; set; }
     public string BibleId { get; set; }
-    public int Number { get; set; }
+    public string Number { get; set; }
     public string BookId { get; set; }
     public string Reference { get; set; } // chapter reference
     public string Copyright { get; set; }
     public int VerseCount { get; set; }
     public List<Content> Content { get; set; }
-
+    //public string Content { get; set; }
 }
 
 public class Content
@@ -32,6 +33,7 @@ public class Content
 
 public class ChaptersData
 {
+    public string Id { get; set; }
     public string Number { get; set; }
 }
 
@@ -46,8 +48,8 @@ public class BibleApi
     public async Task SyncDatabaseWithApiBible(ILogger _logger, IConfiguration _config)
     {
         using HttpClient http = new();
-        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _config["ApiBible:ApiKey"]);
-        string baseUrl = "https://rest.api.bible";
+        http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
+        string baseUrl = "https://rest.api.bible/v1";
 
         // For each translation
         for (int bibleIndex = 0; bibleIndex < BibleData.Bibles.Count; bibleIndex++)
@@ -71,18 +73,28 @@ public class BibleApi
                 {
                     _logger.LogError("Failed to get chapters:" + ex.Message);
                 }
-                int numChapters = chapters.Sum(c => Convert.ToInt32(c.Number));
+
+                int numChapters = 0;
+                foreach (var chapter in chapters)
+                {
+                    int.TryParse(chapter.Number, out var chapterNum);
+                    numChapters = chapterNum > 0
+                        ? numChapters += 1
+                        : numChapters;
+                }
 
                 // For each chapter in the book
                 for (int chapterIndex = 0; chapterIndex < numChapters; chapterIndex++)
                 {
                     // Get the chapter content
-                    var response = http.GetFromJsonAsync<ApiResponse<DataRoot>>(
+                    var response = await http.GetFromJsonAsync<ApiResponse<DataRoot>>(
                         $"{baseUrl}/bibles/{bibleId}" +
-                        $"/books/{bookAbbr}" +
-                        $"/chapters/{bookAbbr + "." + (chapterIndex + 1).ToString()}");
+                        $"/chapters/{chapters[chapterIndex].Id}" + 
+                        "?content-type=json&include-titles=true&" +
+                        "include-verse-numbers=true");
 
-
+                    var _test = 0;
+                    string jsonString = JsonSerializer.Serialize(response.Data);
                 }
             }
         }

@@ -18,10 +18,17 @@ builder.Services
 
 builder.Services.AddAuthorization(o =>
 {
-    o.AddPolicy("Admin", policy => policy.RequireClaim("role", Enums.UserRole.Admin.ToString(), Enums.UserRole.SuperAdmin.ToString()));
-    o.AddPolicy("SuperAdmin", policy => policy.RequireClaim("role", Enums.UserRole.SuperAdmin.ToString()));
-    o.AddPolicy("UserOnly", policy => policy.RequireClaim("role", Enums.UserRole.User.ToString()));
-    o.AddPolicy("UserOrAdmin", policy => policy.RequireClaim("role", Enums.UserRole.User.ToString(), Enums.UserRole.Admin.ToString(), Enums.UserRole.SuperAdmin.ToString()));
+    o.AddPolicy("Admin", policy => policy.RequireClaim(
+        "role", Enums.UserRole.Admin.ToString(), Enums.UserRole.SuperAdmin.ToString()));
+    o.AddPolicy("SuperAdmin", policy => policy.RequireClaim(
+        "role", Enums.UserRole.SuperAdmin.ToString()));
+    o.AddPolicy("UserOnly", policy => policy.RequireClaim(
+        "role", Enums.UserRole.User.ToString()));
+    o.AddPolicy("UserOrAdmin", policy => policy.RequireClaim(
+        "role", 
+        Enums.UserRole.User.ToString(), 
+        Enums.UserRole.Admin.ToString(), 
+        Enums.UserRole.SuperAdmin.ToString()));
 }); 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -31,7 +38,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         o.RequireHttpsMetadata = false;
         o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
-            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)),
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ClockSkew = TimeSpan.Zero
@@ -56,11 +64,11 @@ var app = builder.Build();
 app.UseMiddleware()
     .UseEndpoints();
 
-//using var scope = app.Services.CreateScope();
-//{
-//    var service = scope.ServiceProvider.GetRequiredService<BibleApi>();
-//    await service.UpdateBiblesInDatabase(app.Logger, app.Configuration);
-//}
+using var scope = app.Services.CreateScope();
+{
+    var service = scope.ServiceProvider.GetRequiredService<BibleApi>();
+    await service.SyncDatabaseWithApiBible(app.Logger, app.Configuration);
+}
 
 app.Run();
 

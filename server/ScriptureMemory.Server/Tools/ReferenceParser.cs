@@ -119,7 +119,10 @@ public static class ReferenceParser
         }
 
         returnReference.Verses = GetIndividualVerses(verses, false);
-        returnReference.ReadableReference = ConvertToReadableReference(returnReference.Book, returnReference.Chapter, returnReference.Verses);
+        returnReference.ReadableReference = ConvertToReadableReference(
+            returnReference.Book, 
+            returnReference.Chapter, 
+            returnReference.Verses);
 
         return returnReference;
     }
@@ -397,7 +400,8 @@ public static class ReferenceParser
                 if (int.TryParse(chapterPart, out int chapter))
                     return chapter;
                 else
-                    throw new Exception($"Failed to parse chapter number from reference: {reference} | parts[1]: {parts[1]}");
+                    throw new Exception($"Failed to parse chapter number from reference: {reference}" +
+                                        $" | parts[1]: {parts[1]}");
             }
             else
             {
@@ -409,11 +413,13 @@ public static class ReferenceParser
                     if (int.TryParse(chapterPart, out int chapter))
                         return chapter;
                     else
-                        throw new Exception($"Failed to parse chapter number from reference: {reference} | parts[3]: {parts[3]}");
+                        throw new Exception($"Failed to parse chapter number from reference: {reference} " +
+                                            $"| parts[3]: {parts[3]}");
                 }
                 else
                 {
-                    throw new Exception($"Failed to parse chapter number from reference: {reference} | parts[1]: {parts[1]}");
+                    throw new Exception($"Failed to parse chapter number from reference: {reference} " +
+                                        $"| parts[1]: {parts[1]}");
                 }
             }
         }

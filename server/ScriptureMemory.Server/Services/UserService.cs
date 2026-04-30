@@ -111,41 +111,41 @@ public sealed class UserService
         });
     }
 
-    //public async Task<IResult> Login(LoginRequest request)
-    //{
-    //    var hasher = new PasswordHasher<string>();
-
-    //    var user = await _userContext.GetUserByUsername(request.Username.Trim().ToLower()); 
-    //        // Usernames are not case sensitive
-
-    //    if (user is null)
-    //        return Results.Unauthorized();
-
-    //    if (hasher.VerifyHashedPassword(
-    //        null!, 
-    //        user?.HashedPassword ?? throw new ArgumentNullException(nameof(user.HashedPassword)), 
-    //        request.Password.Trim())
-    //        == PasswordVerificationResult.Failed)
-    //    {
-    //        return Results.Unauthorized();
-    //    }
-
-    //    request.Session.RefreshTokenHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
-
-    //    if (request.Session.DeviceId.Trim() != await _sessionContext.GetDeviceId(request.Session.RefreshTokenHash))
-    //    {
-    //        await _sessionContext.CreateSession(user.Id, request.Session);
-    //    }
-    //    else
-    //    {
-    //        await _sessionContext.UpdateRefreshToken(user.Id, request.Session);
-    //    }
-
-    //    return Results.Ok(new
-    //    {
-    //        User = user,
-    //        RefreshTokenHash = request.Session.RefreshTokenHash,
-    //        Jwt = _tokenProvider.Create(user)
-    //    });
-    //}
+    // public async Task<IResult> Login(LoginRequest request)
+    // {
+    //     var hasher = new PasswordHasher<string>();
+    //
+    //     var user = await _userContext.GetUserByUsername(request.Username.Trim().ToLower()); 
+    //         // Usernames are not case sensitive
+    //
+    //     if (user is null)
+    //         return Results.Unauthorized();
+    //
+    //     if (hasher.VerifyHashedPassword(
+    //         null!, 
+    //         user?.HashedPassword ?? throw new ArgumentNullException(nameof(user.HashedPassword)), 
+    //         request.Password.Trim())
+    //         == PasswordVerificationResult.Failed)
+    //     {
+    //         return Results.Unauthorized();
+    //     }
+    //
+    //     request.Session.RefreshTokenHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
+    //
+    //     if (request.Session.DeviceId.Trim() != await _sessionContext.GetDeviceId(request.Session.RefreshTokenHash))
+    //     {
+    //         await _sessionContext.CreateSession(user.Id, request.Session);
+    //     }
+    //     else
+    //     {
+    //         await _sessionContext.UpdateRefreshToken(user.Id, request.Session);
+    //     }
+    //
+    //     return Results.Ok(new
+    //     {
+    //         User = user,
+    //         RefreshTokenHash = request.Session.RefreshTokenHash,
+    //         Jwt = _tokenProvider.Create(user)
+    //     });
+    // }
 }

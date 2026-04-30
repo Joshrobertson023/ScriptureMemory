@@ -11,6 +11,8 @@ public class Data
     {
         "Joshrobertson023",
     };
+    
+    // Todo: move to config file
 
     public static string emailFromAddress = "therealjoshrobertson@gmail.com";
 
