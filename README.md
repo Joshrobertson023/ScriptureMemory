@@ -1,5 +1,5 @@
 <img width="2160" height="2340" alt="Group 144" src="https://github.com/user-attachments/assets/f3c9c40d-f4b9-43bb-baec-f573b794d942" />
-*An image of the passage bottom sheet -- some features still in development*
+<i>An image of the passage bottom sheet -- some features still in development</i><br><br>
 
 This is a Bible app currently in development. It has many planned features and I'm expecting to release the beta for Android and iOS in 2027 or 2028.
 
