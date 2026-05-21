@@ -1,5 +1,6 @@
 using BenchmarkDotNet.Running;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpLogging;
 using Npgsql;
 using ScriptureMemory.Server.Startup;
 using ScriptureMemory.Server.Tools;
@@ -11,6 +12,12 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets<Program>();
 }
+
+
+builder.Services.AddHttpLogging(o =>
+{
+    o.LoggingFields = HttpLoggingFields.RequestProperties;
+});
 
 builder.Services
     .AddServices()

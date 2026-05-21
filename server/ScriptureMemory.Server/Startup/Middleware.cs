@@ -11,9 +11,9 @@ public static class Middleware
     {
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
             app.UseSwagger();
             app.UseSwaggerUI();
+            
         }
         else
         {
@@ -22,7 +22,6 @@ public static class Middleware
         }
         //app.UseHttpsRedirection();
         app.UseStaticFiles();
-        app.UseRouting();
         app.MapControllers();
         app.UseAuthentication();
         app.UseAuthorization();
@@ -35,22 +34,8 @@ public static class Middleware
         app.ConfigureVerseOfDayEndpoints();
         app.ConfigureVerseEndpoints();
         app.ConfigureSearchEndpoints();
-        //app.ConfigureUserPassageEndpoints();
-        //app.ConfigureCollectionEndpoints();
-        //app.ConfigurePracticeLogEndpoints();
-        //app.ConfigurePracticeSessionEndpoints();
-        //app.ConfigureNotificationEndpoints();
         app.ConfigureAdminEndpoints();
         app.ConfigureCategoriesEndpoints();
-        //app.ConfigureRelationshipEndpoints();
-        //app.ConfigurePopularSearchEndpoints();
-        //app.ConfigureReportEndpoints();
-        //app.ConfigureCategoryEndpoints();
-        //app.ConfigureActivityEndpoints();
-        //app.ConfigurePushTokenEndpoints();
-        //app.ConfigureHighlightEndpoints();
-        //app.ConfigureVerseNoteEndpoints();
-        //app.ConfigureBanEndpoints();
         return app;
     }
 }

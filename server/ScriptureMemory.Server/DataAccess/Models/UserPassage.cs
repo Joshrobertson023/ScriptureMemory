@@ -18,6 +18,4 @@ public class UserPassage : Passage
     public DateTime? LastPracticed { get; set; }
     public DateTime? DueDate { get; set; }
     public bool NotifyMemorized { get; set; } = true;
-
-    public UserPassage() { }
 }

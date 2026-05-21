@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DataAccess.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpLogging;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
 using ScriptureMemory.Server.DataAccess.Data;

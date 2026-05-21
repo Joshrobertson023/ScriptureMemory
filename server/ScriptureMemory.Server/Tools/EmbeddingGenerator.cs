@@ -44,6 +44,11 @@ public class EmbeddingGenerator
     public async Task<Vector> GenerateVerseEmbedding(Verse verse)
     {
         return await GenerateEmbedding(verse.GetEmbeddingText());
+        //app.ConfigureUserPassageEndpoints();
+        //app.ConfigureCollectionEndpoints();
+        //app.ConfigurePracticeLogEndpoints();
+        //app.ConfigurePracticeSessionEndpoints();
+        //app.ConfigureNotificationEndpoints();
     }
 
     public async Task GenerateAllVerseEmbeddings()
