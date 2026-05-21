@@ -13,18 +13,25 @@ public static class Middleware
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+            
             app.UseDeveloperExceptionPage();
         }
         else
         {
-            app.UseExceptionHandler("/error");
+            // All errors 
+            app.UseExceptionHandler(); 
+            
+            //
             app.UseHsts();
         }
+        
         //app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.MapControllers();
+        
         app.UseAuthentication();
         app.UseAuthorization();
+        
         return app;
     }
 
@@ -36,7 +43,6 @@ public static class Middleware
         app.ConfigureSearchEndpoints();
         app.ConfigureAdminEndpoints();
         app.ConfigureCategoriesEndpoints();
-        app.MapGet("/error", () => "Sorry, an error has occurred."); // Production error message
         return app;
     }
 }
