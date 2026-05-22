@@ -30,26 +30,32 @@ public static class VerseEndpoint
             return Results.Ok(results);
         });//.RequireAuthorization("User");
 
-        app.MapGet("/verses/book/exists", async (
-            [FromBody] string book) =>
+        // TODO: Client: update to use new endpoint without body and using route parameter
+        app.MapGet("/verses/{book}/exists", async (
+            string book) =>
         {
             bool exists = Books.TryGetBook(book, out string displayName);
             return Results.Ok(displayName);
         });//.RequireAuthorization("User");
-
-        app.MapPost("/verses/chapter", async (
-            [FromBody] GetChapterRequest request,
+        
+        // Todo: Client: Update to use route params
+        // Gets a full chapter's content to display on the client
+        app.MapGet("/{book}/{chapter}", async (
+            string book,
+            int chapter,
             [FromServices] VerseData data) =>
         {
-            bool bookExists = Books.TryGetBook(request.Book, out string displayName);
+            bool bookExists = Books.TryGetBook(book, out string displayName);
             if (!bookExists)
                 return Results.NotFound();
-            var results = await data.GetChapterVerses(displayName, request.Chapter);
+            var results = await data.GetChapterVerses(displayName, chapter);
             return Results.Ok(results);
         });//.RequireAuthorization("User");
 
-        app.MapPost("/verses/reference", async (
-            [FromBody] string query) =>
+        // Todo: old route: "/verses/reference"
+        // Try to get the Reference object from a user query
+        app.MapPost("/reference/{query}", async (
+            string query) =>
         {
             return Results.Ok(ReferenceParser.Parse(query));
         });//.RequireAuthorization("User");
@@ -69,21 +75,32 @@ public static class VerseEndpoint
                 references.Select(r => ReferenceParser.Parse(r)).ToList()));
         });//.RequireAuthorization("User");
 
-        app.MapGet("/verses/cross-reference/reference/{reference}", async (
+        // Todo: old route: "/verses/cross-reference/reference/{reference}"
+        // Gets all cross-references for a reference
+        app.MapGet("/verses/cross-reference/{reference}", async (
             string reference,
             [FromServices] CrossReferenceData crossReferenceData) =>
         {
-            return Results.Ok(await crossReferenceData.GetCrossReferences(
-                new List<Reference> { ReferenceParser.Parse(reference) }));
+            Reference? parsedReference = ReferenceParser.Parse(reference);
+            
+            if (parsedReference is null) 
+                return Results.NotFound();
+            
+            return Results.Ok(await crossReferenceData.GetCrossReferences( new List<Reference> { parsedReference }));
         });//.RequireAuthorization("User");
 
-        app.MapPost("/verses/verse-card", async (
+        // Todo: old route: "verses/verse-card"
+        // Gets content for the passage bottom sheet card on the client
+        app.MapPost("/passage-card", async (
             [FromBody] GetVerseCardRequest request,
             [FromServices] VerseData data) =>
         {
             return Results.Ok(await data.GetVerseCardResponse(request.UserId, request.VerseIds));
         });//.RequireAuthorization("User");
 
+        // Todo: refactor to receive List<string> since that's all that's required
+        // Makes it easier for client to know what to send
+        // Gets semantically similar verses to a passage
         app.MapPost("/verses/similar", async(
             [FromBody] Passage passage,
             [FromServices] VerseData data,

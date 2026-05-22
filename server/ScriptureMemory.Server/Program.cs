@@ -68,8 +68,11 @@ builder.Services.AddSingleton(dataSource);
 
 var app = builder.Build();
 
-app.UseMiddleware()
-    .UseEndpoints();
+app.UseMiddleware()  // Method that registers middleware
+    .UseEndpoints(); // Method that registers endpoints
+
+// Convert all errors into Problem Details responses
+app.UseStatusCodePages();
 
 using var scope = app.Services.CreateScope();
 {

@@ -18,7 +18,7 @@ public static class Middleware
         }
         else
         {
-            // All errors 
+            // Use middleware exceptions with Problem Details web standard
             app.UseExceptionHandler(); 
             
             //
@@ -43,6 +43,7 @@ public static class Middleware
         app.ConfigureSearchEndpoints();
         app.ConfigureAdminEndpoints();
         app.ConfigureCategoriesEndpoints();
+        
         return app;
     }
 }
