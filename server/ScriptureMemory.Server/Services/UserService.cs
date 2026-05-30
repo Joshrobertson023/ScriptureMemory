@@ -1,14 +1,3 @@
-using Azure.Core;
-using DataAccess.Data;
-using DataAccess.Models;
-using DataAccess.Requests;
-using DataAccess.Requests.UpdateRequests;
-using Microsoft.AspNetCore.Identity;
-using ScriptureMemory.Server.DataAccess.Data;
-using ScriptureMemory.Server.DataAccess.Models;
-using ScriptureMemory.Server.Tools;
-using System.Text.Json;
-using static ScriptureMemory.Server.Tools.Enums;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VerseAppNew.Server.Services;

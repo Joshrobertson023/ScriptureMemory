@@ -12,7 +12,6 @@ using System.Text;
 using VerseAppNew.Server.Bogus;
 using VerseAppNew.Server.Services;
 using Pgvector;
-using Pgvector.Dapper;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -62,7 +61,42 @@ public static class Services
         return services;
     }
 
-    public static IServiceCollection AddServices(this IServiceCollection services)
+    public static IServiceCollection AddSecurity(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAuthorization(o =>
+        {
+            o.AddPolicy("Admin", policy => policy.RequireClaim(
+                "role", Enums.UserRole.Admin.ToString(), Enums.UserRole.SuperAdmin.ToString()));
+            o.AddPolicy("SuperAdmin", policy => policy.RequireClaim(
+                "role", Enums.UserRole.SuperAdmin.ToString()));
+            o.AddPolicy("UserOnly", policy => policy.RequireClaim(
+                "role", Enums.UserRole.User.ToString()));
+            o.AddPolicy("UserOrAdmin", policy => policy.RequireClaim(
+                "role", 
+                Enums.UserRole.User.ToString(), 
+                Enums.UserRole.Admin.ToString(), 
+                Enums.UserRole.SuperAdmin.ToString()));
+        }); 
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(o =>
+            {
+                o.MapInboundClaims = false;
+                o.RequireHttpsMetadata = false;
+                o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(configuration["Jwt:Secret"]!)),
+                    ValidIssuer = configuration["Jwt:Issuer"],
+                    ValidAudience = configuration["Jwt:Audience"],
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+        
+        return services;
+    }
+
+    public static IServiceCollection AddServices(this IServiceCollection services, IConfiguration configuration)
     {
         //
         services.AddEndpointsApiExplorer();
@@ -74,8 +108,15 @@ public static class Services
         services.AddProblemDetails();
 
         //
-        SqlMapper.AddTypeHandler(new VectorTypeHandler());
+        //SqlMapper.AddTypeHandler(new VectorTypeHandler());
+        
+        var connectionString = configuration.GetConnectionString("PostgresConnection")
+            ?? throw new Exception("Connection string not found in configuration");
 
+        // Add DbContext
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseNpgsql(connectionString, o => o.UseVector()));
+        
         //
         services.AddHttpClient("ExpoPush", client =>
         {

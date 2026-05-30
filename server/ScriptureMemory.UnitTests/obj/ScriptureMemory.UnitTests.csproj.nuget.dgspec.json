@@ -64,6 +64,10 @@
               "target": "Package",
               "version": "[7.0.0-preview1.25257.1, )"
             },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.27, )"
+            },
             "Microsoft.Extensions.Configuration.Abstractions": {
               "target": "Package",
               "version": "[10.0.0-rc.2.25502.107, )"
@@ -76,9 +80,17 @@
               "target": "Package",
               "version": "[10.0.0-rc.2.25502.107, )"
             },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
             "Oracle.ManagedDataAccess.Core": {
               "target": "Package",
               "version": "[23.26.0, )"
+            },
+            "Pgvector.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[0.2.2, )"
             },
             "System.Data.SqlClient": {
               "target": "Package",
@@ -199,6 +211,10 @@
               "target": "Package",
               "version": "[10.0.5, )"
             },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.27, )"
+            },
             "Microsoft.Extensions.AI.OpenAI": {
               "target": "Package",
               "version": "[10.4.1, )"
@@ -235,6 +251,10 @@
               "target": "Package",
               "version": "[9.0.5, )"
             },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
             "Oracle.ManagedDataAccess.Core": {
               "target": "Package",
               "version": "[23.26.0, )"
@@ -243,9 +263,9 @@
               "target": "Package",
               "version": "[0.3.2, )"
             },
-            "Pgvector.Dapper": {
+            "Pgvector.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[0.3.1, )"
+              "version": "[0.2.2, )"
             },
             "RestSharp": {
               "target": "Package",
@@ -618,9 +638,21 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.27, )"
+            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[17.14.1, )"
+            },
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
+            "Pgvector.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[0.2.2, )"
             },
             "Testcontainers": {
               "target": "Package",

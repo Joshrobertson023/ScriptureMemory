@@ -693,7 +693,7 @@
           "Microsoft.AspNetCore.App"
         ]
       },
-      "Microsoft.AspNetCore.SpaProxy/8.0.26": {
+      "Microsoft.AspNetCore.SpaProxy/8.0.27": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.AspNetCore.SpaProxy.dll": {}
@@ -1088,6 +1088,67 @@
           }
         }
       },
+      "Microsoft.EntityFrameworkCore/8.0.27": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Abstractions": "8.0.27",
+          "Microsoft.EntityFrameworkCore.Analyzers": "8.0.27",
+          "Microsoft.Extensions.Caching.Memory": "8.0.1",
+          "Microsoft.Extensions.Logging": "8.0.1"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/Microsoft.EntityFrameworkCore.props": {}
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Abstractions/8.0.27": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Analyzers/8.0.27": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/_._": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/_._": {}
+        }
+      },
+      "Microsoft.EntityFrameworkCore.Relational/8.0.11": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "8.0.11",
+          "Microsoft.Extensions.Configuration.Abstractions": "8.0.0"
+        },
+        "compile": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Extensions.AI.Abstractions/10.4.1": {
         "type": "package",
         "compile": {
@@ -1133,7 +1194,7 @@
           "Microsoft.Extensions.Primitives": "9.0.5"
         },
         "compile": {
-          "lib/net9.0/_._": {
+          "lib/net9.0/Microsoft.Extensions.Caching.Abstractions.dll": {
             "related": ".xml"
           }
         },
@@ -1156,7 +1217,7 @@
           "Microsoft.Extensions.Primitives": "9.0.5"
         },
         "compile": {
-          "lib/net9.0/_._": {
+          "lib/net9.0/Microsoft.Extensions.Caching.Memory.dll": {
             "related": ".xml"
           }
         },
@@ -2314,6 +2375,25 @@
           }
         }
       },
+      "Npgsql.EntityFrameworkCore.PostgreSQL/8.0.11": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "8.0.11",
+          "Microsoft.EntityFrameworkCore.Abstractions": "8.0.11",
+          "Microsoft.EntityFrameworkCore.Relational": "8.0.11",
+          "Npgsql": "8.0.6"
+        },
+        "compile": {
+          "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "OpenAI/2.9.1": {
         "type": "package",
         "dependencies": {
@@ -2368,18 +2448,20 @@
           "lib/net6.0/Pgvector.dll": {}
         }
       },
-      "Pgvector.Dapper/0.3.1": {
+      "Pgvector.EntityFrameworkCore/0.2.2": {
         "type": "package",
         "dependencies": {
-          "Dapper": "2.0.4",
-          "Pgvector": "0.3.1",
-          "System.Data.SqlClient": "4.8.6"
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.0",
+          "Pgvector": "0.3.1"
         },
         "compile": {
-          "lib/net6.0/Pgvector.Dapper.dll": {}
+          "lib/net8.0/Pgvector.EntityFrameworkCore.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Pgvector.Dapper.dll": {}
+          "lib/net8.0/Pgvector.EntityFrameworkCore.dll": {}
+        },
+        "build": {
+          "build/netstandard2.0/Pgvector.EntityFrameworkCore.targets": {}
         }
       },
       "Pipelines.Sockets.Unofficial/2.2.8": {
@@ -3205,10 +3287,13 @@
           "Lucene.Net.Analysis.Common": "4.8.0-beta00017",
           "Lucene.Net.QueryParser": "4.8.0-beta00017",
           "Microsoft.Data.SqlClient": "7.0.0-preview1.25257.1",
+          "Microsoft.EntityFrameworkCore": "8.0.27",
           "Microsoft.Extensions.Configuration.Abstractions": "10.0.0-rc.2.25502.107",
           "Microsoft.Extensions.Configuration.Binder": "10.0.0-rc.2.25502.107",
           "Microsoft.Extensions.Configuration.UserSecrets": "10.0.0-rc.2.25502.107",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
           "Oracle.ManagedDataAccess.Core": "23.26.0",
+          "Pgvector.EntityFrameworkCore": "0.2.2",
           "System.Data.SqlClient": "4.9.0"
         },
         "compile": {
@@ -3234,6 +3319,7 @@
           "Microsoft.AspNetCore.OpenApi": "8.0.19",
           "Microsoft.AspNetCore.SpaProxy": "8.0.0-0",
           "Microsoft.Data.Sqlite.Core": "10.0.5",
+          "Microsoft.EntityFrameworkCore": "8.0.27",
           "Microsoft.Extensions.AI.OpenAI": "10.4.1",
           "Microsoft.Extensions.Configuration": "10.0.5",
           "Microsoft.Extensions.Configuration.Json": "10.0.5",
@@ -3243,9 +3329,10 @@
           "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.23.0",
           "Newtonsoft.Json": "13.0.5-beta1",
           "Npgsql": "9.0.5",
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
           "Oracle.ManagedDataAccess.Core": "23.26.0",
           "Pgvector": "0.3.2",
-          "Pgvector.Dapper": "0.3.1",
+          "Pgvector.EntityFrameworkCore": "0.2.2",
           "RestSharp": "113.1.0",
           "SQLitePCLRaw.bundle_e_sqlite3": "3.0.2",
           "StackExchange.Redis": "2.7.33",
@@ -4043,10 +4130,10 @@
         "microsoft.aspnetcore.openapi.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.SpaProxy/8.0.26": {
-      "sha512": "W/G2DtEUCuXKMgy/OtWhxhmfWe0c087zUk+f4riOttIJzvyrc0X0U2Sf1sPWiN3Nu0n5EW3rX9ANhF94XgPPdQ==",
+    "Microsoft.AspNetCore.SpaProxy/8.0.27": {
+      "sha512": "xE0GUhCU31MOiFHEqqubuuZyFNRh1Fmv47/p6TC2L4cuzvnFEnJ20E6kNnVPKZl+kVGPbXzUEZDos1X1SK62WA==",
       "type": "package",
-      "path": "microsoft.aspnetcore.spaproxy/8.0.26",
+      "path": "microsoft.aspnetcore.spaproxy/8.0.27",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -4054,7 +4141,7 @@
         "THIRD-PARTY-NOTICES.TXT",
         "build/Microsoft.AspNetCore.SpaProxy.targets",
         "lib/net8.0/Microsoft.AspNetCore.SpaProxy.dll",
-        "microsoft.aspnetcore.spaproxy.8.0.26.nupkg.sha512",
+        "microsoft.aspnetcore.spaproxy.8.0.27.nupkg.sha512",
         "microsoft.aspnetcore.spaproxy.nuspec"
       ]
     },
@@ -5212,6 +5299,67 @@
         "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.xml",
         "microsoft.dotnet.platformabstractions.3.1.6.nupkg.sha512",
         "microsoft.dotnet.platformabstractions.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore/8.0.27": {
+      "sha512": "fe3vhlibOcspurgPucQQW4KGC3Z2aj3hafb68AKxFVFawzT5+x6FA4NGzLrWMDs682A3uTodd0hOHX0ZUDwdzA==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore/8.0.27",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "buildTransitive/net8.0/Microsoft.EntityFrameworkCore.props",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.dll",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.xml",
+        "microsoft.entityframeworkcore.8.0.27.nupkg.sha512",
+        "microsoft.entityframeworkcore.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Abstractions/8.0.27": {
+      "sha512": "/pqkVwmVsMOePo58AlmpXCQOOsGTqMahgbANhmP7WZMd9PiXLnzVxU06R+HbW0u+YdZ4w4aBDvVg+vUpGKydJg==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.abstractions/8.0.27",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.Abstractions.xml",
+        "microsoft.entityframeworkcore.abstractions.8.0.27.nupkg.sha512",
+        "microsoft.entityframeworkcore.abstractions.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Analyzers/8.0.27": {
+      "sha512": "9hl8QNHrgOtidE7I5aom9ABcXCIjv1fnRxgNNC4PaA043zPte28ifvkW2KK91OoAYF7trZSmU1qYScTra3N7HA==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.analyzers/8.0.27",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "analyzers/dotnet/cs/Microsoft.EntityFrameworkCore.Analyzers.dll",
+        "docs/PACKAGE.md",
+        "lib/netstandard2.0/_._",
+        "microsoft.entityframeworkcore.analyzers.8.0.27.nupkg.sha512",
+        "microsoft.entityframeworkcore.analyzers.nuspec"
+      ]
+    },
+    "Microsoft.EntityFrameworkCore.Relational/8.0.11": {
+      "sha512": "3TuuW3i5I4Ro0yoaHmi2MqEDGObOVuhLaMEnd/heaLB1fcvm4fu4PevmC4BOWnI0vo176AIlV5o4rEQciLoohw==",
+      "type": "package",
+      "path": "microsoft.entityframeworkcore.relational/8.0.11",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll",
+        "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.xml",
+        "microsoft.entityframeworkcore.relational.8.0.11.nupkg.sha512",
+        "microsoft.entityframeworkcore.relational.nuspec"
       ]
     },
     "Microsoft.Extensions.AI.Abstractions/10.4.1": {
@@ -7117,6 +7265,21 @@
         "postgresql.png"
       ]
     },
+    "Npgsql.EntityFrameworkCore.PostgreSQL/8.0.11": {
+      "sha512": "leShR/O/nSIS3Jpj8yUBmkzaXzBbtlV326+MYkX2BwAj2qSNrUv/H6m8G9Hnv2zUkQYccTpmV5jIVq5vdciEUA==",
+      "type": "package",
+      "path": "npgsql.entityframeworkcore.postgresql/8.0.11",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll",
+        "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.xml",
+        "npgsql.entityframeworkcore.postgresql.8.0.11.nupkg.sha512",
+        "npgsql.entityframeworkcore.postgresql.nuspec",
+        "postgresql.png"
+      ]
+    },
     "OpenAI/2.9.1": {
       "sha512": "KPTFYEt1EhrPeIZXGBE+DlutFEpMo/RspqSdUJ3p6pMqsw3NeGJcIja/K0He1j9KyRq8ASfzBgp2biWbNUGnFA==",
       "type": "package",
@@ -7187,21 +7350,20 @@
         "pgvector.nuspec"
       ]
     },
-    "Pgvector.Dapper/0.3.1": {
-      "sha512": "0/nlQgrvERwX9jWUiPbxFbZl6uZI2Ny1sCwrbb1uEuqx5bfwQGxpsIrPBVyY9fzr8eJnrYCgy1XqPfIfn4w3Nw==",
+    "Pgvector.EntityFrameworkCore/0.2.2": {
+      "sha512": "U4C48O+f31y7lWlUY+fsZrOZAvzI8rCsQb/sEWF3MfGYX/153uQingO2/8YoXeLGx00Wl9na8zl89gehXtMbFg==",
       "type": "package",
-      "path": "pgvector.dapper/0.3.1",
+      "path": "pgvector.entityframeworkcore/0.2.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.txt",
         "README.md",
+        "build/netstandard2.0/Pgvector.EntityFrameworkCore.targets",
         "icon.png",
-        "lib/net462/Pgvector.Dapper.dll",
-        "lib/net6.0/Pgvector.Dapper.dll",
-        "lib/netstandard2.0/Pgvector.Dapper.dll",
-        "pgvector.dapper.0.3.1.nupkg.sha512",
-        "pgvector.dapper.nuspec"
+        "lib/net8.0/Pgvector.EntityFrameworkCore.dll",
+        "pgvector.entityframeworkcore.0.2.2.nupkg.sha512",
+        "pgvector.entityframeworkcore.nuspec"
       ]
     },
     "Pipelines.Sockets.Unofficial/2.2.8": {
@@ -8380,7 +8542,10 @@
   "projectFileDependencyGroups": {
     "net10.0": [
       "Microsoft.AspNetCore.Mvc.Testing >= 10.0.3",
+      "Microsoft.EntityFrameworkCore >= 8.0.27",
       "Microsoft.NET.Test.Sdk >= 17.14.1",
+      "Npgsql.EntityFrameworkCore.PostgreSQL >= 8.0.11",
+      "Pgvector.EntityFrameworkCore >= 0.2.2",
       "ScriptureMemory.Server >= 1.0.0",
       "Testcontainers >= 4.10.0",
       "Testcontainers.Oracle >= 4.10.0",
@@ -8440,9 +8605,21 @@
             "target": "Package",
             "version": "[10.0.3, )"
           },
+          "Microsoft.EntityFrameworkCore": {
+            "target": "Package",
+            "version": "[8.0.27, )"
+          },
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",
             "version": "[17.14.1, )"
+          },
+          "Npgsql.EntityFrameworkCore.PostgreSQL": {
+            "target": "Package",
+            "version": "[8.0.11, )"
+          },
+          "Pgvector.EntityFrameworkCore": {
+            "target": "Package",
+            "version": "[0.2.2, )"
           },
           "Testcontainers": {
             "target": "Package",

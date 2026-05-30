@@ -26,7 +26,7 @@ public static class Middleware
         }
         
         //app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        //app.UseStaticFiles();
         app.MapControllers();
         
         app.UseAuthentication();
