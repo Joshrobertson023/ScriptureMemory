@@ -33,10 +33,10 @@ public class Content
 
 // Todo
 // - Refactor codebase to use new verse / chapter paradigm
-// - Use recursion to flatten items to store plain verse text and json content
+// - Flatten items to store plain verse text and json content
 // - Store chapter content as-is in database
 // - Create models for chapter content, accounting for all possible styles / indentation
-// - Method that uses recursion to extract chapter content into a class to display in React Native
+// - Method to extract chapter content into a class to display in React Native
 
 public class ChaptersData
 {
@@ -46,6 +46,12 @@ public class ChaptersData
 
 public class BibleApi
 {
+    readonly string _baseUrl = "https://rest.api.bible/v1";
+    
+    // TODO: Refactor each step into its own function, then in background service job have it run through
+    // each Bible and version to handle errors and logging
+    // Have a dedicated table for logging Bible syncing
+    // Have logging and error handling send me emails, and also on admin portal show alerts and logs
     /// <summary>
     /// Sync Postgres bible data with API.Bible data (at least every 30 days) as it says in their Terms & Conditions
     /// </summary>
@@ -56,7 +62,6 @@ public class BibleApi
     {
         using HttpClient http = new();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
-        string baseUrl = "https://rest.api.bible/v1";
 
         // For each translation
         for (int bibleIndex = 0; bibleIndex < BibleData.Bibles.Count; bibleIndex++)
@@ -71,7 +76,7 @@ public class BibleApi
                 try
                 {
                     var chaptersResponse = await http.GetFromJsonAsync<ApiResponse<List<ChaptersData>>>
-                        ($"{baseUrl}/bibles/{bibleId}" 
+                        ($"{_baseUrl}/bibles/{bibleId}" 
                         + $"/books/{bookAbbr}"
                         + $"/chapters");
                     chapters = chaptersResponse?.Data;
@@ -95,7 +100,7 @@ public class BibleApi
                 {
                     // Get the chapter content
                     var response = await http.GetFromJsonAsync<ApiResponse<DataRoot>>(
-                        $"{baseUrl}/bibles/{bibleId}" +
+                        $"{_baseUrl}/bibles/{bibleId}" +
                         $"/chapters/{chapters[chapterIndex].Id}" + 
                         "?content-type=json&include-titles=true&" +
                         "include-verse-numbers=true");

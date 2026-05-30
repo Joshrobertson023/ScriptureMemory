@@ -20,4 +20,6 @@ public sealed class UserPreferences
     public bool FriendsActivityNotificationsEnabled { get; set; } = true;   // Get notified of your friend's activity
     public bool OverdueRemindersEnabled { get; set; } = true;                     // Get reminders for overdue tasks
     public bool TypeOutReference { get; set; } = false;                     // Type out reference in practice
+
+    public User UserNavigation { get; set; } = null!; // Reference navigation
 }

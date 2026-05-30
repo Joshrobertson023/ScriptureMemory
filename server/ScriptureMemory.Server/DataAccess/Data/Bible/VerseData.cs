@@ -13,13 +13,14 @@ using ScriptureMemory.Server.DataAccess.Data;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using ScriptureMemory.Server.DataAccess.Models;
 using Pgvector;
+using ScriptureMemory.Server;
 using static ScriptureMemory.Server.Tools.Enums;
 
 namespace DataAccess.Data;
 
 public class VerseData
 {
-    private readonly IRequestDbConnection _requestDbConnection;
+    private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
     private string selectSql = """
         select
@@ -33,9 +34,18 @@ public class VerseData
         embedding as Embedding
         """;
 
-    public VerseData(IRequestDbConnection requestDbConnection)
+    public VerseData(IDbContextFactory<ApplicationDbContext> contextFactory)
     {
-        _requestDbConnection = requestDbConnection;
+        _contextFactory = contextFactory;
+        
+        // To use this:
+        // public async Task DoSomething()
+        // {
+        //     using (var context = _contextFactory.CreateDbContext())
+        //     {
+        //         // ...
+        //     }
+        // }
     }
 
     public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)

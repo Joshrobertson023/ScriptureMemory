@@ -1,23 +1,45 @@
 using ScriptureMemory.Server.DataAccess.Models;
+using System.ComponentModel;
 using static ScriptureMemory.Server.Tools.Enums;
 
 namespace DataAccess.Models;
 
+/// <summary>
+/// The end-user who will be using the mobile app
+/// </summary>
 public class User : Account
 {
-    public int Id { get; set; }
+    [MaxLength(20)]
     public string Username { get; set; } = string.Empty;
+    
+    [MaxLength(20)]
     public string FirstName { get; set; } = string.Empty;
+    
+    [MaxLength(20)]
     public string LastName { get; set; } = string.Empty;
+    
+    [MaxLength(30)]
     public string Email { get; set; } = string.Empty;
-    public DateTime? DateRegistered { get; set; }
-    public UserPreferences Preferences { get; set; } = new();
+    
+    public DateTime? DateRegistered { get; set; } // User doesn't have to register an account
+    
+    [MaxLength(100)]
     public string? ProfileDescription { get; set; }
+    
     public string? ProfilePictureUrl { get; set; }
-    public int VersesMemorizedCount { get; set; } = 0;
+    
+    [DefaultValue(0)]
+    public int VersesMemorizedCount { get; set; }
 
+    [DefaultValue(0)]
     public int Points { get; set; } = 0;
-
-    public Paid? Paid { get; set; }
-    public byte CollectionsCount { get; set; } = 0;
+    
+    [DefaultValue(0)]
+    public byte CollectionsCount { get; set; }
+    
+    [InverseProperty(nameof(UserPreferences.UserNavigation))]
+    public UserPreferences Preferences { get; set; } = new();
+    
+    [InverseProperty(nameof(PaidInfo.UserNavigation))]
+    public PaidInfo? Paid { get; set; } // User's payment information
 }

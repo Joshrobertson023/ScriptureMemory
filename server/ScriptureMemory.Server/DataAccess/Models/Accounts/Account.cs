@@ -4,7 +4,13 @@ namespace ScriptureMemory.Server.DataAccess.Models;
 
 public class Account
 {
-    public string? HashedPassword { get; set; }
+    [Key]
+    public int UserId { get; set; }
+
+    public string HashedPassword { get; set; }
+
     public UserRole? Role { get; set; }
-    public List<Session> Sessions { get; set; } = new();
+    
+    [InverseProperty(nameof(Session.Account))]
+    public List<Session> Sessions { get; set; } = new(); // One-to-many
 }

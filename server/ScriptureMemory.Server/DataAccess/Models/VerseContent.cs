@@ -5,6 +5,7 @@ namespace ScriptureMemory.Server.DataAccess.Models;
 
 public class VerseContent : Verse
 {
+    [MaxLength(5)]
     public string Version { get; set; } = string.Empty;
     public string PlainText { get; set; } = string.Empty;
     public object? ContentJson { get; set; }

@@ -1,14 +1,31 @@
-﻿namespace ScriptureMemory.Server.DataAccess.Models;
+﻿using System.ComponentModel;
+
+namespace ScriptureMemory.Server.DataAccess.Models;
 
 public class Session
 {
     public int Id { get; set; }
-    public int UserId { get; set; }
+
+    public Account Account { get; set; } = null!;
+    
+    [MaxLength(50)]
     public string DeviceId { get; set; } = string.Empty;
+    
+    [MaxLength(50)]
     public string DeviceName { get; set; } = string.Empty;
+    
+    [MaxLength(50)]
     public string Model { get; set; } = string.Empty;
-    public string? RefreshTokenHash { get; set; }
-    public string? PushNotificationToken { get; set; }
+    
+    [MaxLength(100)]
+    public string? RefreshTokenHash { get; set; } // Token that allows automatic logging in
+    
+    [MaxLength(100)]
+    public string? PushNotificationToken { get; set; } // Mobile push notification token
+    
+    [DefaultValue("CURRENT_TIMESTAMP")]
     public DateTime CreatedAt { get; set; }
+    
+    [DefaultValue("CURRENT_TIMESTAMP")]
     public DateTime LastSeenAt { get; set; }
 }

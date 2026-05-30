@@ -61,6 +61,12 @@ public static class Services
         return services;
     }
 
+    /// <summary>
+    /// Add authentication & authorization
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
     public static IServiceCollection AddSecurity(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAuthorization(o =>
@@ -112,10 +118,10 @@ public static class Services
         
         var connectionString = configuration.GetConnectionString("PostgresConnection")
             ?? throw new Exception("Connection string not found in configuration");
-
+        
         // Add DbContext
-        services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(connectionString, o => o.UseVector()));
+        services.AddDbContextFactory<ApplicationDbContext>(
+            options => options.UseNpgsql(connectionString, o => o.UseVector()));
         
         //
         services.AddHttpClient("ExpoPush", client =>

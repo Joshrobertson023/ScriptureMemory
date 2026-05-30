@@ -5,7 +5,9 @@ namespace DataAccess.Models;
 
 public class Admin : Account
 {
-    public int Id { get; set; }
+    [MaxLength(50)]
     public string? AdminEmail { get; set; }
+    
+    [MaxLength(50)]
     public string? PersonalEmail { get; set; }
 }
