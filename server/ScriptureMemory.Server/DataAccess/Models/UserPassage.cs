@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 namespace DataAccess.Models;
 public class UserPassage : Passage
 {
+    [Key]
     public int Id { get; set; }
     public int UserId { get; set; }
     public int CollectionId { get; set; }

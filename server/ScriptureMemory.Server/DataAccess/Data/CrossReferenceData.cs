@@ -146,7 +146,7 @@ public class CrossReferenceData
             { 
                 Books = references.Select(r => r.Book.Trim()).ToArray(), 
                 Chapters = references.Select(r => r.Chapter).ToArray(), 
-                Verses = references.Select(r => r.Verses.First()).ToArray()
+                Verses = references.Select(r => r.VerseNumbers.First()).ToArray()
             });
 
         return results

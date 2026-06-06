@@ -136,7 +136,7 @@ public class VerseOfDayData
                     {
                         Book = v.Book,
                         Chapter = v.Chapter,
-                        Verses = new List<int> { v.VerseNum },
+                        VerseNumbers = new List<int> { v.VerseNum },
                         ReadableReference = $"{v.Book} {v.Chapter}:{v.VerseNum}"
                     },
                     Text = v.Text,
@@ -251,7 +251,7 @@ public class VerseOfDayData
                     {
                         Book = v.Book,
                         Chapter = v.Chapter,
-                        Verses = new List<int> { v.VerseNum },
+                        VerseNumbers = new List<int> { v.VerseNum },
                         ReadableReference = $"{v.Book} {v.Chapter}:{v.VerseNum}"
                     },
                     Text = v.Text

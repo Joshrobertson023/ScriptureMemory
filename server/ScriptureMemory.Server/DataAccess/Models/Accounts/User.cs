@@ -21,18 +21,17 @@ public class User : Account
     [MaxLength(30)]
     public string Email { get; set; } = string.Empty;
     
-    public DateTime? DateRegistered { get; set; } // User doesn't have to register an account
-    
     [MaxLength(100)]
     public string? ProfileDescription { get; set; }
     
+    [MaxLength(100)]
     public string? ProfilePictureUrl { get; set; }
     
     [DefaultValue(0)]
     public int VersesMemorizedCount { get; set; }
 
     [DefaultValue(0)]
-    public int Points { get; set; } = 0;
+    public int Points { get; set; }
     
     [DefaultValue(0)]
     public byte CollectionsCount { get; set; }

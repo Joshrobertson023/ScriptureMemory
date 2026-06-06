@@ -2,10 +2,11 @@
 
 namespace ScriptureMemory.Server.Tools;
 
-public class Books
+public static class Books
 {
-    // Get official book display name from user input
-
+    /// <summary>
+    /// Assigns the display names for each book of the Bible
+    /// </summary>
     public static class BookNames
     {
         public const string Genesis = "Genesis";
@@ -75,6 +76,9 @@ public class Books
         public const string Jude = "Jude";
         public const string Revelation = "Revelation";
 
+        /// <summary>
+        /// All books of the Bible
+        /// </summary>
         public static readonly IReadOnlyList<string> All = new[]
         {
             Genesis, Exodus, Leviticus, Numbers, Deuteronomy,
@@ -95,127 +99,153 @@ public class Books
         public static bool IsValid(string book) => All.Contains(book);
     }
 
-    private sealed record Book(string[] Abbreviations, string[] FuzzyMatches);
-
-    private static readonly Dictionary<string, Book> BookNamesOfBible = new(StringComparer.OrdinalIgnoreCase)
+    /// <summary>
+    /// 
+    /// </summary>
+    private sealed class Book
     {
-        [BookNames.Genesis] = new(["gen"], ["genesis", "gen", "geneses", "genisis"]),
-        [BookNames.Exodus] = new(["exo"], ["exodus", "exodous", "exodis"]),
-        [BookNames.Leviticus] = new(["lev"], ["leviticus", "liviticus", "levitikus", "leviticis", "levitikis"]),
-        [BookNames.Numbers] = new(["num"], ["numbers", "number"]),
-        [BookNames.Deuteronomy] = new(["deu"], ["deuteronomy", "duteronomy", "dutironomy"]),
-        [BookNames.Joshua] = new(["jos"], ["joshua"]),
-        [BookNames.Judges] = new(["jdg"], ["judges", "judge", "judeges"]),
-        [BookNames.Ruth] = new([], ["rut", "rut", "ruths"]),
-        [BookNames.FirstSamuel] = new(["1sa"], ["1 samuel", "1 samul", "1 samuels", "i samuel", "1samuel", "isamuel", "1sam"]),
-        [BookNames.SecondSamuel] = new(["2sa"], ["2 samuel", "2 samul", "2 samuels", "ii samuel", "2samuel", "iisamuel", "2sam"]),
-        [BookNames.FirstKings] = new(["1ki"], ["1 kings", "1 king", "i kings", "1kings", "ikings", "1kgs"]),
-        [BookNames.SecondKings] = new(["2ki"], ["2 kings", "2 king", "ii kings", "iikings", "2kings", "2kgs"]),
-        [BookNames.FirstChronicles] = new(["1ch"], ["1 chronicles", "1 chronicle", "1 cronicles", "i chronicles", "i cronicles", "1chronicles", "1chr"]),
-        [BookNames.SecondChronicles] = new(["2ch"], ["2 chronicles", "2 chronicle", "2 cronicles", "ii chronicles", "ii cronicles", "2chronicles", "2chr"]),
-        [BookNames.Ezra] = new(["ezr"], ["ezra"]),
-        [BookNames.Nehemiah] = new(["neh"], ["nehemiah", "neimiah", "nehimiah"]),
-        [BookNames.Esther] = new(["est"], ["esther", "ester"]),
-        [BookNames.Job] = new(["job"], ["job"]),
-        [BookNames.Psalms] = new(["psa"], ["psalms", "psalm", "salm", "salms"]),
-        [BookNames.Proverbs] = new(["pro"], ["proverbs", "proverb"]),
-        [BookNames.Ecclesiastes] = new(["ecc"], ["ecclesiastes", "eclesiastes"]),
-        [BookNames.SongOfSolomon] = new(["sng"], ["song of solomon", "song of songs", "songs of solomon", "song of soloman"]),
-        [BookNames.Isaiah] = new(["isa"], ["isaiah", "isaiahs", "isaia", "isaih"]),
-        [BookNames.Jeremiah] = new(["jer"], ["jeremiah", "jeremias", "jerimiah"]),
-        [BookNames.Lamentations] = new(["lam"], ["lamentations", "lamentation", "lamintation", "lamintations"]),
-        [BookNames.Ezekiel] = new(["ezk"], ["ezekiel", "ezikiel", "ezekial"]),
-        [BookNames.Daniel] = new(["dan"], ["daniel"]),
-        [BookNames.Hosea] = new(["hos"], ["hosea", "hosiah", "hoseah"]),
-        [BookNames.Joel] = new(["jol"], ["jol"]),
-        [BookNames.Amos] = new(["amo"], ["amo", "amis"]),
-        [BookNames.Obadiah] = new(["oba"], ["obadiah", "obadia", "obadias"]),
-        [BookNames.Jonah] = new(["jon"], ["jon", "jonas", "jona"]),
-        [BookNames.Micah] = new(["mic"], ["micah", "micha", "mica"]),
-        [BookNames.Nahum] = new(["nam"], ["nahum", "nahums", "nahu"]),
-        [BookNames.Habakkuk] = new(["hab"], ["habakkuk", "habakuk", "habakik", "habakkik"]),
-        [BookNames.Zephaniah] = new(["zep"], ["zephaniah", "zephaniahs", "zephania", "zephiniah"]),
-        [BookNames.Haggai] = new(["hag"], ["haggai", "hagai", "haggiai", "hagiai", "hagaia"]),
-        [BookNames.Zechariah] = new(["zec"], ["zechariah", "zecharaiah", "zecharaiahs", "zachariah"]),
-        [BookNames.Malachi] = new(["mal"], ["malachi", "malachai", "malichai", "malichi"]),
-        [BookNames.Matthew] = new(["mat"], ["matthew", "matthews", "mathew"]),
-        [BookNames.Mark] = new(["mrk"], ["mrk", "marks", "marc"]),
-        [BookNames.Luke] = new(["luk"], ["luk", "lukes"]),
-        [BookNames.John] = new(["jhn"], ["john", "johns", "jon"]),
-        [BookNames.Acts] = new(["act"], ["acts", "act"]),
-        [BookNames.Romans] = new(["rom"], ["romans", "roman"]),
-        [BookNames.FirstCorinthians] = new(["1co"], ["1 corinthians", "1 corinthian", "1corinthians", "1 chorinthians", "i corinthians", "1cor"]),
-        [BookNames.SecondCorinthians] = new(["2co"], ["2 corinthians", "2 corinthian", "2corinthians", "2 chorinthians", "ii corinthians", "2cor"]),
-        [BookNames.Galatians] = new(["gal"], ["galatians", "galatian", "galat", "galations"]),
-        [BookNames.Ephesians] = new(["eph"], ["ephesians", "ephesian"]),
-        [BookNames.Philippians] = new(["php"], ["philippians", "philippian", "phillippians", "phillipians"]),
-        [BookNames.Colossians] = new(["col"], ["colossians", "colossian", "collossians", "collosians"]),
-        [BookNames.FirstThessalonians] = new(["1th"], ["1 thessalonians", "1 thessalonian", "1thessalonians", "i thessalonians", "1 thessallonian", "1thess"]),
-        [BookNames.SecondThessalonians] = new(["2th"], ["2 thessalonians", "2 thessalonian", "2thessalonians", "ii thessalonians", "2 thessalonain", "2thess"]),
-        [BookNames.FirstTimothy] = new(["1ti"], ["1 timothy", "1 timothys", "1timothy", "1tim"]),
-        [BookNames.SecondTimothy] = new(["2ti"], ["2 timothy", "2 timothys", "2timothy", "2tim"]),
-        [BookNames.Titus] = new(["tit"], ["titus"]),
-        [BookNames.Philemon] = new(["phm"], ["philemon", "philemons", "phillemon", "philimon", "philemin"]),
-        [BookNames.Hebrews] = new(["heb"], ["hebrews", "hebrew"]),
-        [BookNames.James] = new(["jas"], ["james"]),
-        [BookNames.FirstPeter] = new(["1pe"], ["1 peter", "1peter", "1pet"]),
-        [BookNames.SecondPeter] = new(["2pe"], ["2 peter", "2peter", "2pet"]),
-        [BookNames.FirstJohn] = new(["1jn"], ["1 john", "1john", "1jn"]),
-        [BookNames.SecondJohn] = new(["2jn"], ["2 john", "2john", "2jn"]),
-        [BookNames.ThirdJohn] = new(["3jn"], ["3 john", "3john", "3jn"]),
-        [BookNames.Jude] = new(["jud"], ["jude"]),
-        [BookNames.Revelation] = new(["rev"], ["revelation", "revelations", "revelation of john",
-                                          "revalation", "revalations", "revilations", "revilation"]),
-    };
+        public string DisplayName { get; init; } = string.Empty;
+        public string Abbreviation { get; init; }
+        public List<string> FuzzyMatches { get; init; }
 
-    private static readonly Dictionary<string, string> lookup = BuildLookup();
-
-    private static Dictionary<string, string> BuildLookup()
-    {
-        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (var (displayName, book) in BookNamesOfBible)
+        public Book(string bookName, string abbreviation, List<string> fuzzyMatches)
         {
-            map[displayName] = displayName;
-
-            foreach (var abbreviation in book.Abbreviations)
-            {
-                map.TryAdd(abbreviation, displayName);
-            }
-
-            foreach (var variant in book.FuzzyMatches)
-            {
-                map.TryAdd(variant, displayName);
-            }
+            DisplayName = bookName;
+            Abbreviation = abbreviation;
+            FuzzyMatches = fuzzyMatches;
         }
-
-        return map;
     }
 
     /// <summary>
-    /// Tries to get a book name from user input
+    /// Assigns each book's display name with abbreviation and fuzzy matches
+    /// </summary>
+    private static readonly List<Book> BooksOfBible = new()
+    {
+        new Book(BookNames.Genesis, "gen", ["genesis", "gen", "geneses", "genisis"]),
+        new Book(BookNames.Exodus, "exo", ["exodus", "exodous", "exodis"]),
+        new Book(BookNames.Leviticus, "lev", ["leviticus", "liviticus", "levitikus", "leviticis", "levitikis"]),
+        new Book(BookNames.Numbers, "num", ["numbers", "number"]),
+        new Book(BookNames.Deuteronomy, "deu", ["deuteronomy", "duteronomy", "dutironomy"]),
+        new Book(BookNames.Joshua, "jos", ["joshua"]),
+        new Book(BookNames.Judges, "jdg", ["judges", "judge", "judeges"]),
+        new Book(BookNames.Ruth, "rut", ["rut", "rut", "ruths"]),
+        new Book(BookNames.FirstSamuel, "1sa", ["1 samuel", "1 samul", "1 samuels", "i samuel", "1samuel", "isamuel", "1sam"]),
+        new Book(BookNames.SecondSamuel, "2sa", ["2 samuel", "2 samul", "2 samuels", "ii samuel", "2samuel", "iisamuel", "2sam"]),
+        new Book(BookNames.FirstKings, "1ki", ["1 kings", "1 king", "i kings", "1kings", "ikings", "1kgs"]),
+        new Book(BookNames.SecondKings, "2ki", ["2 kings", "2 king", "ii kings", "iikings", "2kings", "2kgs"]),
+        new Book(BookNames.FirstChronicles, "1ch", ["1 chronicles", "1 chronicle", "1 cronicles", "i chronicles", "i cronicles", "1chronicles", "1chr"]),
+        new Book(BookNames.SecondChronicles, "2ch", ["2 chronicles", "2 chronicle", "2 cronicles", "ii chronicles", "ii cronicles", "2chronicles", "2chr"]),
+        new Book(BookNames.Ezra, "ezr", ["ezra"]),
+        new Book(BookNames.Nehemiah, "neh", ["nehemiah", "neimiah", "nehimiah"]),
+        new Book(BookNames.Esther, "est", ["esther", "ester"]),
+        new Book(BookNames.Job, "job", ["job"]),
+        new Book(BookNames.Psalms, "psa", ["psalms", "psalm", "salm", "salms"]),
+        new Book(BookNames.Proverbs, "pro", ["proverbs", "proverb"]),
+        new Book(BookNames.Ecclesiastes, "ecc", ["ecclesiastes", "eclesiastes"]),
+        new Book(BookNames.SongOfSolomon, "sng", ["song of solomon", "song of songs", "songs of solomon", "song of soloman"]),
+        new Book(BookNames.Isaiah, "isa", ["isaiah", "isaiahs", "isaia", "isaih"]),
+        new Book(BookNames.Jeremiah, "jer", ["jeremiah", "jeremias", "jerimiah"]),
+        new Book(BookNames.Lamentations, "lam", ["lamentations", "lamentation", "lamintation", "lamintations"]),
+        new Book(BookNames.Ezekiel, "ezk", ["ezekiel", "ezikiel", "ezekial"]),
+        new Book(BookNames.Daniel, "dan", ["daniel"]),
+        new Book(BookNames.Hosea, "hos", ["hosea", "hosiah", "hoseah"]),
+        new Book(BookNames.Joel, "jol", ["jol"]),
+        new Book(BookNames.Amos, "amo", ["amo", "amis"]),
+        new Book(BookNames.Obadiah, "oba", ["obadiah", "obadia", "obadias"]),
+        new Book(BookNames.Jonah, "jon", ["jon", "jonas", "jona"]),
+        new Book(BookNames.Micah, "mic", ["micah", "micha", "mica"]),
+        new Book(BookNames.Nahum, "nam", ["nahum", "nahums", "nahu"]),
+        new Book(BookNames.Habakkuk, "hab", ["habakkuk", "habakuk", "habakik", "habakkik"]),
+        new Book(BookNames.Zephaniah, "zep", ["zephaniah", "zephaniahs", "zephania", "zephiniah"]),
+        new Book(BookNames.Haggai, "hag", ["haggai", "hagai", "haggiai", "hagiai", "hagaia"]),
+        new Book(BookNames.Zechariah, "zec", ["zechariah", "zecharaiah", "zecharaiahs", "zachariah"]),
+        new Book(BookNames.Malachi, "mal", ["malachi", "malachai", "malichai", "malichi"]),
+        new Book(BookNames.Matthew, "mat", ["matthew", "matthews", "mathew"]),
+        new Book(BookNames.Mark, "mrk", ["mrk", "marks", "marc"]),
+        new Book(BookNames.Luke, "luk", ["luk", "lukes"]),
+        new Book(BookNames.John, "jhn", ["john", "johns", "jon"]),
+        new Book(BookNames.Acts, "act", ["acts", "act"]),
+        new Book(BookNames.Romans, "rom", ["romans", "roman"]),
+        new Book(BookNames.FirstCorinthians, "1co", ["1 corinthians", "1 corinthian", "1corinthians", "1 chorinthians", "i corinthians", "1cor"]),
+        new Book(BookNames.SecondCorinthians, "2co", ["2 corinthians", "2 corinthian", "2corinthians", "2 chorinthians", "ii corinthians", "2cor"]),
+        new Book(BookNames.Galatians, "gal", ["galatians", "galatian", "galat", "galations"]),
+        new Book(BookNames.Ephesians, "eph", ["ephesians", "ephesian"]),
+        new Book(BookNames.Philippians, "php", ["philippians", "philippian", "phillippians", "phillipians"]),
+        new Book(BookNames.Colossians, "col", ["colossians", "colossian", "collossians", "collosians"]),
+        new Book(BookNames.FirstThessalonians, "1th", ["1 thessalonians", "1 thessalonian", "1thessalonians", "i thessalonians", "1 thessallonian", "1thess"]),
+        new Book(BookNames.SecondThessalonians, "2th", ["2 thessalonians", "2 thessalonian", "2thessalonians", "ii thessalonians", "2 thessalonain", "2thess"]),
+        new Book(BookNames.FirstTimothy, "1ti", ["1 timothy", "1 timothys", "1timothy", "1tim"]),
+        new Book(BookNames.SecondTimothy, "2ti", ["2 timothy", "2 timothys", "2timothy", "2tim"]),
+        new Book(BookNames.Titus, "tit", ["titus"]),
+        new Book(BookNames.Philemon, "phm", ["philemon", "philemons", "phillemon", "philimon", "philemin"]),
+        new Book(BookNames.Hebrews, "heb", ["hebrews", "hebrew"]),
+        new Book(BookNames.James, "jas", ["james"]),
+        new Book(BookNames.FirstPeter, "1pe", ["1 peter", "1peter", "1pet"]),
+        new Book(BookNames.SecondPeter, "2pe", ["2 peter", "2peter", "2pet"]),
+        new Book(BookNames.FirstJohn, "1jn", ["1 john", "1john", "1jn"]),
+        new Book(BookNames.SecondJohn, "2jn", ["2 john", "2john", "2jn"]),
+        new Book(BookNames.ThirdJohn, "3jn", ["3 john", "3john", "3jn"]),
+        new Book(BookNames.Jude, "jud", ["jude"]),
+        new Book(BookNames.Revelation, "rev", ["revelation", "revelations", "revelation of john",
+                                          "revalation", "revalations", "revilations", "revilation"]),
+    };
+
+    /// <summary>
+    /// Maps each abbreviation and fuzzy match to a display name
+    /// </summary>
+    private static readonly Dictionary<string, string> displayNameLookup = BuildLookup(); // Dictionary<abbrev or fuzzy match, displayName>
+
+    /// <summary>
+    /// Build the lookup with every abbreviation and fuzzy match associated with a display name
+    /// </summary>
+    /// <returns></returns>
+    private static Dictionary<string, string> BuildLookup()
+    {
+        // Dictionary<abbrev or fuzzy match, displayName>
+        var mapToReturn = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var book in BooksOfBible)
+        {
+            // Map the display name to itself
+            mapToReturn.Add(book.DisplayName, book.DisplayName);
+            
+            // Map the abbreviation to a display name
+            mapToReturn.Add(book.Abbreviation, book.DisplayName);
+            
+            // Map each fuzzy match to a display name
+            foreach (var fuzzyMatch in book.FuzzyMatches)
+            {
+                mapToReturn.Add(fuzzyMatch, book.DisplayName);
+            }
+        }
+
+        return mapToReturn;
+    }
+
+    /// <summary>
+    /// Gets a book's abbreviation from the book name
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
+    public static string? GetAbbreviation(string input)
+    {
+        return BooksOfBible.FirstOrDefault(book => book.DisplayName == input)?.Abbreviation;
+    }
+    
+    /// <summary>
+    /// Gets a book's display name from an input (abbreviation or fuzzy match)
     /// </summary>
     /// <param name="input"></param>
     /// <returns></returns>
     public static string? GetBookName(string input)
     {
-        if (string.IsNullOrEmpty(input)) return null;
-        return lookup.TryGetValue(input.Trim(), out var bookName) ? bookName : null;
+        return displayNameLookup.TryGetValue(input.Trim(), out var bookName) 
+            ? bookName 
+            : null;
     }
-
-    public static string? GetAbbreviation(string bookName)
-    {
-        if (string.IsNullOrWhiteSpace(bookName))
-            return null;
-
-        if (!BookNamesOfBible.TryGetValue(bookName, out var book))
-            return null;
-
-        return book.Abbreviations.FirstOrDefault().ToUpper();
-    }
-
+    
     /// <summary>
-    /// Returns true if book is found and the display name
+    /// Tries to get the display name from an input by abbreviation or fuzzy match
     /// </summary>
     /// <param name="input"></param>
     /// <param name="displayName"></param>

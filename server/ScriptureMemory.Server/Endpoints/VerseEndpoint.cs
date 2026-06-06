@@ -24,7 +24,7 @@ public static class VerseEndpoint
             var results = await data.GetVerses(
                 _reference.Book,
                 _reference.Chapter,
-                _reference.Verses);
+                _reference.VerseNumbers);
             if (results == null)
                 return Results.NotFound();
             return Results.Ok(results);

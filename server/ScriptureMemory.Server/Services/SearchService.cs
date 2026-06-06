@@ -170,7 +170,7 @@ public sealed class SearchService
                         {
                             Book = _passage.Reference.Book,
                             Chapter = _passage.Reference.Chapter,
-                            Verses = _passage.Reference.Verses,
+                            VerseNumbers = _passage.Reference.Verses,
                             ReadableReference = ReferenceParser.ConvertToReadableReference(
                                 _passage.Reference.Book,
                                 _passage.Reference.Chapter,
@@ -201,7 +201,7 @@ public sealed class SearchService
                         {
                             Book = verse.Reference.Book,
                             Chapter = verse.Reference.Chapter,
-                            Verses = verse.Reference.Verses,
+                            VerseNumbers = verse.Reference.Verses,
                             ReadableReference = ReferenceParser.ConvertToReadableReference(
                                 verse.Reference.Book,
                                 verse.Reference.Chapter,

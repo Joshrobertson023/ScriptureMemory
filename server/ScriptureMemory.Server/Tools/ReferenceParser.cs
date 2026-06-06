@@ -118,11 +118,11 @@ public static class ReferenceParser
             verses = versesPartSpan.ToString();
         }
 
-        returnReference.Verses = GetIndividualVerses(verses, false);
+        returnReference.VerseNumbers = GetIndividualVerses(verses, false);
         returnReference.ReadableReference = ConvertToReadableReference(
             returnReference.Book, 
             returnReference.Chapter, 
-            returnReference.Verses);
+            returnReference.VerseNumbers);
 
         return returnReference;
     }
@@ -141,7 +141,7 @@ public static class ReferenceParser
         {
             Book = book,
             Chapter = chapter,
-            Verses = verses,
+            VerseNumbers = verses,
             ReadableReference = ConvertToReadableReference(book, chapter, verses)
         };
     }
@@ -319,7 +319,7 @@ public static class ReferenceParser
 
         Reference reference = Parse(referenceString);
 
-        foreach (var verseNumber in reference.Verses)
+        foreach (var verseNumber in reference.VerseNumbers)
         {
             references.Add(ConvertToReferenceString(reference.Book, reference.Chapter, verseNumber));
         }
@@ -342,12 +342,14 @@ public static class ReferenceParser
     }
 
     /// <summary>
-    /// Get the book from a full reference
+    /// Get the book from a full readable reference or verse id
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>"Psalms"</returns>
-    public static string? GetBook(string reference)
+    public static string? GetBook(string input)
     {
+        Books.TryGetBook(input);
+        
         string[] parts = new string[1];
         if (reference.Contains(' '))
             parts = reference.Split(' ');

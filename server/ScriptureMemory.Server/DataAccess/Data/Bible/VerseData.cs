@@ -70,7 +70,7 @@ public class VerseData
             {
                 Book = r.Book,
                 Chapter = r.Chapter,
-                Verses = new List<int> { r.VerseNum },
+                VerseNumbers = new List<int> { r.VerseNum },
             },
             Text = r.Text,
             UsersSavedCount = r.UsersSavedCount,
@@ -144,7 +144,7 @@ public class VerseData
                 {
                     Book = r.Book,
                     Chapter = r.Chapter,
-                    Verses = new List<int> { r.VerseNum }
+                    VerseNumbers = new List<int> { r.VerseNum }
                 },
                 Text = r.Text,
                 UsersSavedCount = r.UsersSavedCount,
@@ -190,7 +190,7 @@ public class VerseData
             {
                 Book = r.Book,
                 Chapter = r.Chapter,
-                Verses = new List<int> { r.VerseNum },
+                VerseNumbers = new List<int> { r.VerseNum },
             },
             Text = r.Text,
             UsersSavedCount = r.UsersSavedCount,
@@ -232,7 +232,7 @@ public class VerseData
             {
                 Book = result.Book,
                 Chapter = result.Chapter,
-                Verses = new List<int> { result.VerseNum },
+                VerseNumbers = new List<int> { result.VerseNum },
             },
             Text = result.Text,
             UsersSavedCount = result.UsersSavedCount,
@@ -302,7 +302,7 @@ public class VerseData
             {
                 Book = verses.First().Book,
                 Chapter = verses.First().Chapter,
-                Verses = new List<int> { verses.First().VerseNum },
+                VerseNumbers = new List<int> { verses.First().VerseNum },
             },
             Text = verses.First().Text,
             UsersSavedCount = verses.First().UsersSavedCount,
@@ -337,7 +337,7 @@ public class VerseData
             {
                 Book = reference.Book,
                 Chapter = reference.Chapter,
-                VerseNums = reference.Verses
+                VerseNums = reference.VerseNumbers
             });
         return new Passage
         {
@@ -349,7 +349,7 @@ public class VerseData
                 {
                     Book = reference.Book,
                     Chapter = reference.Chapter,
-                    Verses = new List<int> { v.VerseNum }
+                    VerseNumbers = new List<int> { v.VerseNum }
                 },
                 Text = v.Text,
                 UsersSavedCount = v.UsersSavedCount,
@@ -393,7 +393,7 @@ public class VerseData
                 {
                     Book = g.First().Book,
                     Chapter = g.First().Chapter,
-                    Verses = new List<int> { g.First().VerseNum }
+                    VerseNumbers = new List<int> { g.First().VerseNum }
                 },
                 Text = g.First().Text,
                 Distance = g.First().Distance,

@@ -13,7 +13,7 @@ public class ConvertStringToReference
 
         Assert.Equal("Psalms", reference.Book);
         Assert.Equal(119, reference.Chapter);
-        Assert.Equal(new List<int> { 12, 13, 14, 17 }, reference.Verses);
+        Assert.Equal(new List<int> { 12, 13, 14, 17 }, reference.VerseNumbers);
     }
 
     [Fact]
@@ -23,7 +23,7 @@ public class ConvertStringToReference
 
         Assert.Equal("John", reference.Book);
         Assert.Equal(3, reference.Chapter);
-        Assert.Equal(new List<int> { 16 }, reference.Verses);
+        Assert.Equal(new List<int> { 16 }, reference.VerseNumbers);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class ConvertStringToReference
 
         Assert.Equal("1 John", reference.Book);
         Assert.Equal(4, reference.Chapter);
-        Assert.Equal(new List<int> { 8 }, reference.Verses);
+        Assert.Equal(new List<int> { 8 }, reference.VerseNumbers);
     }
 
     [Fact]

@@ -192,7 +192,7 @@ public sealed class VerseManagement
                 cmd.Parameters.AddWithValue("$Reference", crossReference.ReadableReference);
                 long newPassageId = (long)(await cmd.ExecuteScalarAsync())!;
 
-                foreach (int verseNum in crossReference.Verses)
+                foreach (int verseNum in crossReference.VerseNumbers)
                 {
                     if (!versesByKey.TryGetValue((crossReference.Book, crossReference.Chapter, verseNum), out var crossVerse))
                     {
@@ -211,9 +211,9 @@ public sealed class VerseManagement
                     await cmd.ExecuteNonQueryAsync();
                 }
 
-                if (!versesByKey.TryGetValue((reference.Book, reference.Chapter, reference.Verses.First()), out var fromVerse))
+                if (!versesByKey.TryGetValue((reference.Book, reference.Chapter, reference.VerseNumbers.First()), out var fromVerse))
                 {
-                    _logger.LogDebug("From verse not found: {Book} {Chapter}:{Verse}", reference.Book, reference.Chapter, reference.Verses.First());
+                    _logger.LogDebug("From verse not found: {Book} {Chapter}:{Verse}", reference.Book, reference.Chapter, reference.VerseNumbers.First());
                     continue;
                 }
 

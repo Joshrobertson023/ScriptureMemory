@@ -14,8 +14,10 @@ public class Bible
     [MaxLength(30)]
     public string VersionFull { get; set; } = string.Empty;
     
+    [MaxLength(300)]
     public string Copyright { get; set; } = string.Empty;
     
+    [MaxLength(300)]
     public string Source { get; set; } = string.Empty;
     
     [DefaultValue("CURRENT_DATE")]

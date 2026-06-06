@@ -29,7 +29,7 @@ public class VerseOfDayService
 
         int newId = await _vodData.InsertPassage(reference.ReadableReference, adminId);
 
-        List<Verse> verses = await _verseData.GetVerses(reference.Book, reference.Chapter, reference.Verses);
+        List<Verse> verses = await _verseData.GetVerses(reference.Book, reference.Chapter, reference.VerseNumbers);
 
         await _vodData.InsertVerses(verses, newId);
 

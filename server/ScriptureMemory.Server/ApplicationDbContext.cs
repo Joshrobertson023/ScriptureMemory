@@ -11,9 +11,47 @@ public class ApplicationDbContext : DbContext
     public DbSet<Admin> Admins { get; set; }
     public DbSet<UserPreferences> UserPreferences { get; set; }
     public DbSet<PaidInfo> PaidInfo { get; set; }
+    public DbSet<Bible> Bibles { get; set; }
+    public DbSet<Chapter> Chapters { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Set ids to generate always by default as identity fields
+        modelBuilder.Entity<User>()
+            .Property(u => u.UserId)
+            .UseIdentityByDefaultColumn();
+        modelBuilder.Entity<Admin>()
+            .Property(u => u.UserId)
+            .UseIdentityByDefaultColumn();
+        modelBuilder.Entity<Collection>()
+            .Property(c => c.Id)
+            .UseIdentityByDefaultColumn();
+        modelBuilder.Entity<
         
+        // Conversions from enums to strings
+        modelBuilder.Entity<User>()
+            .Property(u => u.Role)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+        modelBuilder.Entity<Admin>()
+            .Property(u => u.Role)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(p => p.ThemePreference)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(p => p.BibleVersion)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(p => p.CollectionsSort)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+        modelBuilder.Entity<Collection>()
+            .Property(c => c.Visibility)
+            .HasConversion<string>()
+            .HasMaxLength(20);
     }
 }
