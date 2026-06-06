@@ -9,7 +9,6 @@ namespace DataAccess.Models;
 
 public sealed class Reference
 {
-    [Key]
     public string ReadableReference { get; set; } = string.Empty;
     
     [MaxLength(50)]
@@ -19,21 +18,14 @@ public sealed class Reference
     
     public List<int> VerseNumbers { get; set; } = new();
 
-    public override string ToString()
-    {
-        return ReferenceParser.ConvertToReadableReference(Book, Chapter, VerseNumbers);
-    }
-
-    public Reference() { }
-
     public Reference(string readableReference)
     {
-        ReadableReference = readableReference;
-        
         string? book = ReferenceParser.GetBook(readableReference);
         Book = book is null
             ? throw new ArgumentNullException(nameof(book))
             : book;
+        
+        ReadableReference = readableReference;
         
         Chapter = ReferenceParser.GetChapter(readableReference);
         
@@ -49,5 +41,10 @@ public sealed class Reference
         Book = book;
         Chapter = chapter;
         VerseNumbers = verseNumbers;
+    }
+
+    public override string ToString()
+    {
+        return ReferenceParser.ConvertToReadableReference(Book, Chapter, VerseNumbers);
     }
 }

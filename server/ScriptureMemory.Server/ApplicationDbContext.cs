@@ -13,6 +13,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<PaidInfo> PaidInfo { get; set; }
     public DbSet<Bible> Bibles { get; set; }
     public DbSet<Chapter> Chapters { get; set; }
+    public DbSet<Verse> Verses { get; set; }
+    public DbSet<Collection> Collections { get; set; }
+    public DbSet<UserPassage> UserPassages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,7 +29,9 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Collection>()
             .Property(c => c.Id)
             .UseIdentityByDefaultColumn();
-        modelBuilder.Entity<
+        modelBuilder.Entity<UserPassage>()
+            .Property(u => u.Id)
+            .UseIdentityByDefaultColumn();
         
         // Conversions from enums to strings
         modelBuilder.Entity<User>()
@@ -55,7 +60,11 @@ public class ApplicationDbContext : DbContext
             .HasMaxLength(20);
         
         // Configure owned References
-        modelBuilder.Entity<Passage>()
+        // modelBuilder.Entity<Passage>()
+        //     .OwnsOne(p => p.Reference);
+        modelBuilder.Entity<UserPassage>()
+            .OwnsOne(p => p.Reference);
+        modelBuilder.Entity<Verse>()
             .OwnsOne(p => p.Reference);
     }
 }
