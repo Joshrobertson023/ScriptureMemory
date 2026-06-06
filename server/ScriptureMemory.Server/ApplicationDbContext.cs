@@ -53,5 +53,9 @@ public class ApplicationDbContext : DbContext
             .Property(c => c.Visibility)
             .HasConversion<string>()
             .HasMaxLength(20);
+        
+        // Configure owned References
+        modelBuilder.Entity<Passage>()
+            .OwnsOne(p => p.Reference);
     }
 }

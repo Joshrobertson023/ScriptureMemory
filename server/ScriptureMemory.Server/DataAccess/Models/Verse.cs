@@ -26,6 +26,8 @@ public class Verse
     public int VerseNum { get; set; }
     public int MemorizedCount { get; set; }
     public int SavedCount { get; set; }
+
+    public Passage PassageNavigation { get; set; } = null!;
     
     public Verse(string id, )
 

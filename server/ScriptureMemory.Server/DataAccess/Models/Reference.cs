@@ -9,14 +9,15 @@ namespace DataAccess.Models;
 
 public sealed class Reference
 {
-    /// <summary>
-    /// Passage reference Id ("PSA.1.1-PSA.1.3")
-    /// </summary>
-    public string Id { get; set; }
-    public string Book { get; set; } = string.Empty;
-    public int Chapter { get; set; }
-    public List<int> VerseNumbers { get; set; } = new();
+    [Key]
     public string ReadableReference { get; set; } = string.Empty;
+    
+    [MaxLength(50)]
+    public string Book { get; set; } = string.Empty;
+    
+    public int Chapter { get; set; }
+    
+    public List<int> VerseNumbers { get; set; } = new();
 
     public override string ToString()
     {
@@ -25,9 +26,28 @@ public sealed class Reference
 
     public Reference() { }
 
-    public Reference(string id)
+    public Reference(string readableReference)
     {
-        Id = id;
-        Book = ReferenceParser.GetBook(Id);
+        ReadableReference = readableReference;
+        
+        string? book = ReferenceParser.GetBook(readableReference);
+        Book = book is null
+            ? throw new ArgumentNullException(nameof(book))
+            : book;
+        
+        Chapter = ReferenceParser.GetChapter(readableReference);
+        
+        VerseNumbers = ReferenceParser.GetIndividualVerses(readableReference);
+    }
+
+    public Reference(string book, int chapter, List<int> verseNumbers)
+    {
+        if (!Books.TryGetBook(book, out _))
+            throw new ArgumentException($"Book {book} not found");
+        
+        ReadableReference = ReferenceParser.ConvertToReadableReference(Book, Chapter, verseNumbers);
+        Book = book;
+        Chapter = chapter;
+        VerseNumbers = verseNumbers;
     }
 }

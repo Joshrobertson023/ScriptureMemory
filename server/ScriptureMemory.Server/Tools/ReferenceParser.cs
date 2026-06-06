@@ -7,30 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-// *************************
-//
-// Refactor requirements
-// - GetBook returns null if not a book
-// - Reference constructor
-// - Passages can a combination from any book and any chapter
-// - Verse's IDs will container their book and chapter too "GEN.1.1",
-//      so is it possible to only store verse ids and not the full reference?
-//      Maybe I'll need the book and chapter separately
-// - Or maybe in database verse id is "GEN.1.1" but ReferenceParser methods convert to a Reference like:
-// { Book = "Genesis", BookId = "GEN", Chapter = "1", Verse = "1" }
-// with a GetVerseId method that converts to "GEN.1.1"?
-// Everything should use Passages, with Verses inside
-// Don't over-engineer this, just change things as you need as you go
-
-// Not for this class -- but for different Bible versions, store UserPassages as one version,
-// but allow changing to another version
-
-
-// REFACTOR to use verse / chapter ids like "psa.1.1", using book abbrev. from Books.cs
-//
-// *************************
-
 namespace ScriptureMemory.Server.Tools;
 public static class ReferenceParser
 {
@@ -52,16 +28,11 @@ public static class ReferenceParser
         while (i < span.Length && (char.IsLetter(span[i]) || i <= 1))
             i++;
 
-        //try
-        //{
-            returnReference.Book = GetBook(span[..i].ToString().ToLower());
-        // if returns null, return null
-        //}
-        //catch (Exception)
-        //{
-        //    returnReference.Book = "Error parsing book";
-        //    return returnReference;
-        //}
+        // Don't throw error if unable to parse book
+        string? book = GetBook(span[..i].ToString().ToLower());
+        returnReference.Book = book is null
+            ? "Error parsing book"
+            : book;
 
         if (i < span.Length && !char.IsDigit(span[i]))
             i++;
@@ -136,14 +107,7 @@ public static class ReferenceParser
     /// <returns></returns>
     public static Reference Parse(string book, int chapter, List<int> verses)
     {
-        book = GetBook(book);
-        return new Reference
-        {
-            Book = book,
-            Chapter = chapter,
-            VerseNumbers = verses,
-            ReadableReference = ConvertToReadableReference(book, chapter, verses)
-        };
+        return new Reference(book, chapter, verses);
     }
 
     /// <summary>
@@ -346,10 +310,8 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>"Psalms"</returns>
-    public static string? GetBook(string input)
+    public static string? GetBook(string reference)
     {
-        Books.TryGetBook(input);
-        
         string[] parts = new string[1];
         if (reference.Contains(' '))
             parts = reference.Split(' ');
@@ -380,8 +342,6 @@ public static class ReferenceParser
     /// <returns>A chapter int</returns>
     public static int GetChapter(string reference)
     {
-        // Refactor to use recursion?
-        // Refactor to only accept verse Ids like "GEN.1.1"?
         string[] parts = reference.Split(' ');
 
         if (parts.Length > 1 && Books.TryGetBook(parts[0], out string book))
