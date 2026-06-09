@@ -30,6 +30,6 @@ public static class Tasks
     public static async Task SyncDatabaseWithApiBible(IServiceScope scope)
     {
         var service = scope.ServiceProvider.GetRequiredService<BibleApi>();
-        await service.SyncDatabaseWithApiBible();
+        await service.SyncDatabaseWithApiBible(); 
     }
 }
