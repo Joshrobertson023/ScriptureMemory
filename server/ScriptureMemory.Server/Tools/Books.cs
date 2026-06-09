@@ -5,7 +5,7 @@ namespace ScriptureMemory.Server.Tools;
 public static class Books
 {
     /// <summary>
-    /// Assigns the display names for each book of the Bible
+    /// Assigns the display name for each book of the Bible
     /// </summary>
     public static class BookNames
     {
@@ -76,9 +76,6 @@ public static class Books
         public const string Jude = "Jude";
         public const string Revelation = "Revelation";
 
-        /// <summary>
-        /// All books of the Bible
-        /// </summary>
         public static readonly IReadOnlyList<string> All = new[]
         {
             Genesis, Exodus, Leviticus, Numbers, Deuteronomy,
@@ -95,8 +92,6 @@ public static class Books
             James, FirstPeter, SecondPeter, FirstJohn, SecondJohn,
             ThirdJohn, Jude, Revelation
         };
-
-        public static bool IsValid(string book) => All.Contains(book);
     }
 
     /// <summary>
@@ -104,7 +99,7 @@ public static class Books
     /// </summary>
     private sealed class Book
     {
-        public string DisplayName { get; init; } = string.Empty;
+        public string DisplayName { get; init; }
         public string Abbreviation { get; init; }
         public List<string> FuzzyMatches { get; init; }
 
@@ -191,35 +186,29 @@ public static class Books
     };
 
     /// <summary>
-    /// Maps each abbreviation and fuzzy match to a display name
+    /// Maps each abbreviation, fuzzy match, and display name to its book
     /// </summary>
-    private static readonly Dictionary<string, string> displayNameLookup = BuildLookup(); // Dictionary<abbrev or fuzzy match, displayName>
+    private static readonly Dictionary<string, Book> bookSearchIndex = BuildLookup(); 
+        // Key -- abbreviation, fuzzy match, or display name
+        // Value -- associated book
 
-    /// <summary>
-    /// Build the lookup with every abbreviation and fuzzy match associated with a display name
-    /// </summary>
-    /// <returns></returns>
-    private static Dictionary<string, string> BuildLookup()
+    private static Dictionary<string, Book> BuildLookup()
     {
-        // Dictionary<abbrev or fuzzy match, displayName>
-        var mapToReturn = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var returnIndex = new Dictionary<string, Book>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var book in BooksOfBible)
         {
-            // Map the display name to itself
-            mapToReturn.Add(book.DisplayName, book.DisplayName);
+            returnIndex.Add(book.DisplayName, book);
             
-            // Map the abbreviation to a display name
-            mapToReturn.Add(book.Abbreviation, book.DisplayName);
+            returnIndex.Add(book.Abbreviation, book);
             
-            // Map each fuzzy match to a display name
             foreach (var fuzzyMatch in book.FuzzyMatches)
             {
-                mapToReturn.Add(fuzzyMatch, book.DisplayName);
+                returnIndex.Add(fuzzyMatch, book);
             }
         }
 
-        return mapToReturn;
+        return returnIndex;
     }
 
     /// <summary>
@@ -233,27 +222,18 @@ public static class Books
     }
     
     /// <summary>
-    /// Gets a book's display name from an input (abbreviation or fuzzy match)
-    /// </summary>
-    /// <param name="input"></param>
-    /// <returns></returns>
-    public static string? GetBookName(string input)
-    {
-        return displayNameLookup.TryGetValue(input.Trim(), out var bookName) 
-            ? bookName 
-            : null;
-    }
-    
-    /// <summary>
-    /// Tries to get the display name from an input by abbreviation or fuzzy match
+    /// Tries to get the display name from an input by abbreviation, fuzzy match, or full book name
     /// </summary>
     /// <param name="input"></param>
     /// <param name="displayName"></param>
-    /// <returns></returns>
-    public static bool TryGetBook(string input, out string displayName)
+    /// <returns>
+    /// Bool specifying if a valid book was found, and the display name for that book.
+    /// Both return null if no valid book was found.
+    /// </returns>
+    public static bool TryGetBook(string input, out string? displayName)
     {
-        var result = GetBookName(input);
-        displayName = result ?? string.Empty;
-        return result is not null;
+        bool isValidBook = bookSearchIndex.TryGetValue(input.Trim(), out var book);
+        displayName = isValidBook ? book?.DisplayName : null;
+        return isValidBook;
     }
 }
