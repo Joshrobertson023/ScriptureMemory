@@ -13,16 +13,19 @@ public static class Tasks
         
         Console.WriteLine("\n\nSome startup tasks have been found to run: ");
         for (int i = 0; i < tasks.Count; i++)
-            Console.WriteLine($"  {i + 1}) {tasks[i].Item1}");
+            Console.WriteLine($"  {i + 1}) {tasks[i].TaskName}");
         
         Console.WriteLine("\n\nWould you like to run the startup tasks? (y/n): ");
         if (Console.ReadLine()?.ToLower() != "y")
             return app;
 
-        foreach (var task in tasks)
+        for (int i = 0; i < tasks.Count; i++)
         {
-            await task.Item2();
+            Console.WriteLine($"\n\nRunning task #{i + 1}) {tasks[i].TaskName}...");
+            await tasks[i].Task();
         }
+        
+        Console.WriteLine("\n\nAll startup tasks finished.");
         
         return app;
     }
