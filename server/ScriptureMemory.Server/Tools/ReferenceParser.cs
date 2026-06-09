@@ -98,6 +98,7 @@ public static class ReferenceParser
                     m--;
                 ReadOnlySpan<char> secondDigits = secondPart[(m + 1)..];
 
+                // Replace versesPart 
                 versesPart = string.Concat(firstDigits, "-", secondDigits);
             }
             else
@@ -224,7 +225,7 @@ public static class ReferenceParser
     /// <param name="verses"></param>
     /// <returns>"Psalms 119:2-4, 7"</returns>
     public static string ConvertToReadableReference(string book, int chapter, List<int> verses)
-    {
+    { // TODO: Refactor to use Span<T>
         if (verses == null || verses.Count == 0)
             return string.Empty;
 
@@ -265,6 +266,9 @@ public static class ReferenceParser
     ///   - 2, 3
     ///   - 2-4
     ///   - 2-4, 6, 9-12
+    /// </param>
+    /// <param name="isFullReference">
+    /// If the input reference is full ("Psalms 119:2-3") versus just the verses part ("2-3")
     /// </param>
     /// <returns>
     /// A list of all individual verses in the reference or verse part of a reference.
@@ -312,7 +316,10 @@ public static class ReferenceParser
     {
         List<string> references = new();
 
-        Reference reference = Parse(referenceString);
+        Reference? reference = Parse(referenceString);
+
+        if (reference is null)
+            throw new ArgumentException($"{referenceString} is not a valid reference.");
 
         foreach (var verseNumber in reference.VerseNumbers)
         {
@@ -341,7 +348,7 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>"Psalms"</returns>
-    public static string? GetBook(string reference)
+    public static string GetBook(string reference)
     {
         string[] parts = new string[1];
         
@@ -351,19 +358,20 @@ public static class ReferenceParser
             parts[0] = reference;
         
         if (Books.TryGetBook(parts[0], out string? bookName))
-            return bookName;
+            return bookName!;
         else
         { // Handle books with one space in its name
             string bookWithNumber = parts[0] + " " + parts[1];
             if (Books.TryGetBook(bookWithNumber, out bookName))
-                return bookName;
+                return bookName!;
             else
             { // Handle books with two spaces in its name
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
                 if (Books.TryGetBook(bookWithNumber, out bookName))
-                    return bookName;
+                    return bookName!;
                 else
-                    return null; // More than two spaces is an invalid book
+                    throw new ArgumentException(
+                        $"No valid book found in the reference {reference}"); // More than two spaces is an invalid book
             }
         }
     }
@@ -377,7 +385,7 @@ public static class ReferenceParser
     {
         string[] parts = reference.Split(' ');
 
-        if (parts.Length > 1 && Books.TryGetBook(parts[0], out string book))
+        if (parts.Length > 1 && Books.TryGetBook(parts[0], out string? book))
         {
             var chapterPart = parts[1].Split(':')[0];
 
@@ -389,7 +397,7 @@ public static class ReferenceParser
         {
             string bookWithNumber = parts[0] + " " + parts[1];
 
-            if (Books.TryGetBook(bookWithNumber, out string _book))
+            if (Books.TryGetBook(bookWithNumber, out _))
             {
                 var chapterPart = parts[2].Split(':')[0];
                 if (int.TryParse(chapterPart, out int chapter))
@@ -402,7 +410,7 @@ public static class ReferenceParser
             {
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
 
-                if (Books.TryGetBook(bookWithNumber, out string __book))
+                if (Books.TryGetBook(bookWithNumber, out _))
                 {
                     var chapterPart = parts[3].Split(':')[0];
                     if (int.TryParse(chapterPart, out int chapter))

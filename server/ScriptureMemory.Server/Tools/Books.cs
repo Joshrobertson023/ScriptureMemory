@@ -222,12 +222,12 @@ public static class Books
     }
     
     /// <summary>
-    /// Tries to get the display name from an input by abbreviation, fuzzy match, or full book name
+    /// Tries to get the display name for a book by abbreviation, fuzzy match, or the full book's name.
     /// </summary>
     /// <param name="input"></param>
     /// <param name="displayName"></param>
     /// <returns>
-    /// Bool specifying if a valid book was found, and the display name for that book.
+    /// Bool specifying if a valid book was found, and the display name for that book as the out param.
     /// Both return null if no valid book was found.
     /// </returns>
     public static bool TryGetBook(string input, out string? displayName)

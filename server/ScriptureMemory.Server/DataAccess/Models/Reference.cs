@@ -19,7 +19,15 @@ public sealed class Reference
     public List<int> VerseNumbers { get; set; } = new();
     
     public Reference() { }
-
+    
+    /// <summary>
+    /// Construct the Reference from a readableReference with every attribute filled out
+    /// TODO: Using GetBook(), GetChapter(), and GetIndividualVerses() may be more inefficient than just using Parse().
+    /// Plus, putting it through Parse() will ensure ReadableReference has been parsed/valid.
+    /// 
+    /// </summary>
+    /// <param name="readableReference"></param>
+    /// <exception cref="ArgumentNullException"></exception>
     public Reference(string readableReference)
     {
         string? book = ReferenceParser.GetBook(readableReference);
