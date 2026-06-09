@@ -48,6 +48,17 @@ public class BibleApi
 {
     readonly string _baseUrl = "https://rest.api.bible/v1";
     
+    private readonly ILogger<BibleApi> _logger;
+    private readonly IConfiguration _config;
+
+    public BibleApi(
+        IConfiguration config,
+        ILogger<BibleApi> logger)
+    {
+        _config = config;
+        _logger = logger;
+    }
+    
     // TODO: Refactor each step into its own function, then in background service job have it run through
     // each Bible and version to handle errors and logging
     // Have a dedicated table for logging Bible syncing
@@ -58,7 +69,7 @@ public class BibleApi
     /// <param name="_logger"></param>
     /// <param name="_config"></param>
     /// <returns></returns>
-    public async Task SyncDatabaseWithApiBible(ILogger _logger, IConfiguration _config)
+    public async Task SyncDatabaseWithApiBible()
     {
         using HttpClient http = new();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);

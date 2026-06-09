@@ -35,11 +35,7 @@ app.UseMiddleware()
 // Convert all errors into Problem Details responses
 app.UseStatusCodePages();
 
-using var scope = app.Services.CreateScope();
-{
-    var service = scope.ServiceProvider.GetRequiredService<BibleApi>();
-    await service.SyncDatabaseWithApiBible(app.Logger, app.Configuration);
-}
+await app.AskToRunStartupTasks();
 
 app.Run();
 
