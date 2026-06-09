@@ -6,7 +6,6 @@ public class Passage
 {
     public Reference Reference { get; set; }
     
-    [InverseProperty(nameof(Verse.PassageNavigation))]
     public List<Verse> Verses { get; set; } = new();
 
     public Passage(Reference reference)
@@ -18,4 +17,6 @@ public class Passage
     {
         Reference = new Reference(readableReference);
     }
+    
+    public Passage() { }
 }

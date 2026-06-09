@@ -11,9 +11,10 @@ public class Collection
 {
     [Key]
     public int Id { get; set; }
+    
+    public int UserId { get; set; }
 
-    [InverseProperty(nameof(User.UserId))]
-    public User User { get; set; } = new();
+    public User UserNavigation { get; set; } = null!;
     
     [MaxLength(50)]
     public string Title { get; set; } = string.Empty;
@@ -24,7 +25,10 @@ public class Collection
     [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
     public DateTime DateCreated { get; set; }
     
-    public int? OrderPosition { get; set; } // Position this collection is ordered on the user's Collections page
+    /// <summary>
+    /// Position this collection is ordered on the user's Collections page
+    /// </summary>
+    public int? OrderPosition { get; set; }
     
     [DefaultValue(false)]
     public bool IsFavorites { get; set; }
@@ -43,10 +47,8 @@ public class Collection
     /// </summary>
     public int? ProgressPercent { get; set; }
     
-    [InverseProperty(nameof(CollectionNote.CollectionNavigation))]
     public List<UserPassage> Passages { get; set; } = new();
     
-    [InverseProperty(nameof(CollectionNote.CollectionNavigation))]
     public List<CollectionNote> Notes { get; set; } = new();
 
     public Collection() { }

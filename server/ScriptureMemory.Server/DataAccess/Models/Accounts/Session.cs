@@ -4,6 +4,7 @@ namespace ScriptureMemory.Server.DataAccess.Models;
 
 public class Session
 {
+    [Key]
     public int Id { get; set; }
 
     public Account Account { get; set; } = null!;
@@ -23,9 +24,9 @@ public class Session
     [MaxLength(100)]
     public string? PushNotificationToken { get; set; } // Mobile push notification token
     
-    [DefaultValue("CURRENT_TIMESTAMP")]
+    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
     public DateTime CreatedAt { get; set; }
     
-    [DefaultValue("CURRENT_TIMESTAMP")]
+    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
     public DateTime LastSeenAt { get; set; }
 }

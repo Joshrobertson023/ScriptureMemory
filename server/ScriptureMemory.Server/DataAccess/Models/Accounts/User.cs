@@ -36,9 +36,9 @@ public class User : Account
     [DefaultValue(0)]
     public byte CollectionsCount { get; set; }
     
-    [InverseProperty(nameof(UserPreferences.UserNavigation))]
     public UserPreferences Preferences { get; set; } = new();
     
-    [InverseProperty(nameof(PaidInfo.UserNavigation))]
     public PaidInfo? Paid { get; set; } // User's payment information
+
+    public List<Collection> Collections { get; set; } = new();
 }

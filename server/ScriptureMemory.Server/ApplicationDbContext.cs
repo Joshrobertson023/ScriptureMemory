@@ -32,6 +32,9 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<UserPassage>()
             .Property(u => u.Id)
             .UseIdentityByDefaultColumn();
+        modelBuilder.Entity<Session>()
+            .Property(s => s.Id)
+            .UseIdentityByDefaultColumn();
         
         // Conversions from enums to strings
         modelBuilder.Entity<User>()

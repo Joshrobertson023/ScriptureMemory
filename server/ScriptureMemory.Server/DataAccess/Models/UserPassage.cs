@@ -11,7 +11,7 @@ public class UserPassage : Passage
     [Key]
     public int Id { get; set; }
     public int UserId { get; set; }
-    public int CollectionId { get; set; }
+    public Collection CollectionNavigation { get; set; } = null!;
     public int OrderPosition { get; set; }
     public DateTime DateAdded { get; set; }
     public float ProgressPercent { get; set; } = 0.0f;

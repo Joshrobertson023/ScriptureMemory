@@ -1,5 +1,6 @@
 using DataAccess.Models;
 using Pgvector;
+using System.ComponentModel;
 
 namespace ScriptureMemory.Server.DataAccess.Models;
 
@@ -15,6 +16,7 @@ public class VerseContent
     
     public Vector? Embedding { get; set; }
     
+    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
     public DateTime LastUpdated { get; set; }
 
     public Verse VerseNavigation { get; set; } = null!;

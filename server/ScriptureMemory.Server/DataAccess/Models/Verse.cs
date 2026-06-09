@@ -30,6 +30,7 @@ public class Verse
 
     public Passage? PassageNavigation { get; set; } = null!;
     
+    [InverseProperty(nameof(Ver))]
     public VerseContent? VerseContent { get; set; }
     
     public Verse()

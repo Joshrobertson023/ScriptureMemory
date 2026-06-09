@@ -17,6 +17,8 @@ public sealed class Reference
     public int Chapter { get; set; }
     
     public List<int> VerseNumbers { get; set; } = new();
+    
+    public Reference() { }
 
     public Reference(string readableReference)
     {
