@@ -11,62 +11,83 @@ namespace ScriptureMemory.Server.Tools;
 public static class ReferenceParser
 {
     /// <summary>
-    /// Convert an input of an unstructured reference into a reference object
+    /// Parse an input of a user-typed reference into a reference object
     /// </summary>
-    /// <param name="reference"></param>
-    /// <returns>Reference { Book = "Psalms", Chapter = 119, List<string> Verses = "2-4" }</returns>
+    /// <param name="input">
+    /// Accepted input formats:
+    ///   - Psalms 119:2
+    ///   - Psalms 119 2
+    ///   - Psalms 119:2-5, 7-8, 10
+    ///   - Minor book spelling typos
+    /// </param>
+    /// <returns>
+    /// A Reference object with all its fields populated.
+    /// Returns a null Reference if no valid reference could be parsed from the input.
+    /// </returns>
     public static Reference? Parse(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
             return null;
 
-        input = input.Trim();
-        ReadOnlySpan<char> span = input.AsSpan();
-        int i = 0;
         Reference returnReference = new();
+        ReadOnlySpan<char> inputSpan = input.Trim().AsSpan();
+        int i = 0;
 
-        while (i < span.Length && (char.IsLetter(span[i]) || i <= 1))
+        // Move up the book
+        while (i < inputSpan.Length 
+               && (char.IsLetter(inputSpan[i])
+                   || i <= 1)) // Move up for numbered books like "1 John"
+        {
             i++;
+        }
 
-        // Don't throw error if unable to parse book
-        string? book = GetBook(span[..i].ToString().ToLower());
+        // Check if a valid book
+        string? book = GetBook(inputSpan[..i].ToString().ToLower());
         returnReference.Book = book is null
-            ? "Error parsing book"
+            ? "Error parsing book" // Don't throw an error if not a valid book -- user should be able to handle it
             : book;
 
-        if (i < span.Length && !char.IsDigit(span[i]))
+        // Move up to the chapter. We know the next digits after the book are the chapter.
+        if (i < inputSpan.Length && !char.IsDigit(inputSpan[i]))
             i++;
-
         int chapterStart = i;
-        while (i < span.Length && char.IsDigit(span[i]))
+        
+        // Move up to the end of the chapter
+        while (i < inputSpan.Length && char.IsDigit(inputSpan[i]))
             i++;
 
-        returnReference.Chapter = int.Parse(span[chapterStart..i]);
+        returnReference.Chapter = int.Parse(inputSpan[chapterStart..i]);
 
-        if (i < span.Length && (!char.IsDigit(span[i]) || span[i] == ':'))
+        // Move up to the start of the verses part
+        if (i < inputSpan.Length && (!char.IsDigit(inputSpan[i]) || inputSpan[i] == ':'))
             i++;
 
-        ReadOnlySpan<char> versesPartSpan = span[i..];
+        ReadOnlySpan<char> versesPartSpan = inputSpan[i..]; // The rest of the input should be the verses part
 
-        string verses;
+        string versesPart;
         int dashIndex = versesPartSpan.IndexOf('-');
+        
         if (dashIndex >= 0)
-        {
+        { // Handle a dash in the verses part
             ReadOnlySpan<char> firstPart = versesPartSpan[..dashIndex];
             ReadOnlySpan<char> secondPart = versesPartSpan[(dashIndex + 1)..];
 
-            bool secondPartIsBook = false;
+            // Check if after the dash contains a book.
+            // Handles formats like "Psalms 119:2-Psalms 119:3" that is used by the dataset used for cross-references
+            bool secondPartContainsLetters = false;
             for (int l = 0; l < secondPart.Length; l++)
             {
-                if (char.IsLetter(secondPart[l]))
+                if (char.IsLetter(secondPart[l]) // Handle a book name being after the dash
+                    && secondPart.Length > 0)
                 {
-                    secondPartIsBook = true;
+                    secondPartContainsLetters = true;
                     break;
                 }
             }
-
-            if (secondPart.Length > 0 && secondPartIsBook)
+            
+            if (secondPart.Length > 0 && secondPartContainsLetters)
             {
+                // Move backwards, extracting the verses part and ignoring the book
                 int k = firstPart.Length - 1;
                 while (k >= 0 && char.IsDigit(firstPart[k]))
                     k--;
@@ -77,19 +98,20 @@ public static class ReferenceParser
                     m--;
                 ReadOnlySpan<char> secondDigits = secondPart[(m + 1)..];
 
-                verses = string.Concat(firstDigits, "-", secondDigits);
+                versesPart = string.Concat(firstDigits, "-", secondDigits);
             }
             else
             {
-                verses = versesPartSpan.ToString();
+                versesPart = versesPartSpan.ToString();
             }
+
         }
         else
         {
-            verses = versesPartSpan.ToString();
+            versesPart = versesPartSpan.ToString();
         }
 
-        returnReference.VerseNumbers = GetIndividualVerses(verses, false);
+        returnReference.VerseNumbers = GetIndividualVerses(versesPart, false);
         returnReference.ReadableReference = ConvertToReadableReference(
             returnReference.Book, 
             returnReference.Chapter, 
@@ -238,18 +260,27 @@ public static class ReferenceParser
     /// <summary>
     /// Get a list of verse numbers from a full reference
     /// </summary>
-    /// <param name="reference"></param>
-    /// <returns>List<int> { 2, 3, 4, 7 }/returns>
+    /// <param name="reference">
+    /// Accepts formats like:
+    ///   - 2, 3
+    ///   - 2-4
+    ///   - 2-4, 6, 9-12
+    /// </param>
+    /// <returns>
+    /// A list of all individual verses in the reference or verse part of a reference.
+    /// Example: { 2, 3, 4, 6, 9, 10, 11, 12 }
+    /// </returns>
     public static List<int> GetIndividualVerses(string reference, bool isFullReference = true)
-    {
-        List<int> returnList = new List<int>();
-        string verses;
+    { // TODO: Refactor to use Span<T>
+        List<int> returnList = new();
+        string versesPart;
+        
         if (isFullReference)
-            verses = GetVersesHalfOfReference(reference);
+            versesPart = GetVersesHalfOfReference(reference);
         else
-            verses = reference;
+            versesPart = reference;
 
-        foreach (string part in verses.Split(','))
+        foreach (string part in versesPart.Split(','))
         {
             string trimmed = part.Trim();
 
@@ -306,31 +337,33 @@ public static class ReferenceParser
     }
 
     /// <summary>
-    /// Get the book from a full readable reference or verse id
+    /// Gets a book's display name from a reference string
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>"Psalms"</returns>
     public static string? GetBook(string reference)
     {
         string[] parts = new string[1];
+        
         if (reference.Contains(' '))
             parts = reference.Split(' ');
         else
             parts[0] = reference;
-        if (Books.TryGetBook(parts[0], out string book))
-            return book;
+        
+        if (Books.TryGetBook(parts[0], out string? bookName))
+            return bookName;
         else
-        {
+        { // Handle books with one space in its name
             string bookWithNumber = parts[0] + " " + parts[1];
-            if (Books.TryGetBook(bookWithNumber, out book))
-                return book;
+            if (Books.TryGetBook(bookWithNumber, out bookName))
+                return bookName;
             else
-            {
+            { // Handle books with two spaces in its name
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
-                if (Books.TryGetBook(bookWithNumber, out book))
-                    return book;
+                if (Books.TryGetBook(bookWithNumber, out bookName))
+                    return bookName;
                 else
-                    return null;
+                    return null; // More than two spaces is an invalid book
             }
         }
     }
