@@ -10,7 +10,10 @@ public static class Tasks
         {
             ("Sync database with API.Bible", () => SyncDatabaseWithApiBible(scope))
         };
-        
+
+        if (tasks.Count == 0)
+            return app;
+            
         Console.WriteLine("\n\nSome startup tasks have been found to run: ");
         for (int i = 0; i < tasks.Count; i++)
             Console.WriteLine($"  {i + 1}) {tasks[i].TaskName}");
@@ -33,6 +36,6 @@ public static class Tasks
     public static async Task SyncDatabaseWithApiBible(IServiceScope scope)
     {
         var service = scope.ServiceProvider.GetRequiredService<BibleApi>();
-        await service.SyncDatabaseWithApiBible(); 
+        await service.SyncDatabaseWithApiBible();
     }
 }
