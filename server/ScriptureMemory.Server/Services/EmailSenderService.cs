@@ -139,7 +139,7 @@ public sealed class EmailSenderService
         if (user is null)
             return Results.Problem("Username not found");
 
-        await userContext.UpsertPasswordResetToken(user.Id, otp);
+        await userContext.UpsertPasswordResetToken(user.UserId, otp);
 
         var body = $@"Hi {request.Username.Trim()},
 

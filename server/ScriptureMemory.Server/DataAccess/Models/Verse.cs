@@ -21,24 +21,51 @@ public class Verse
     [Key]
     [MaxLength(10)]
     public string Id { get; set; } = string.Empty;
-    
-    [DefaultValue(0)]
-    public int MemorizedCount { get; set; }
-    
-    [DefaultValue(0)]
-    public int SavedCount { get; set; }
+
+    public int MemorizedCount { get; set; } = 0;
+
+    public int SavedCount { get; set; } = 0;
 
     public int PassageId { get; set; }
     
     public Passage? PassageNavigation { get; set; } = null!;
     
-    public VerseContent? VerseContent { get; set; }
-    
-    // public Verse()
+    public VerseContent? Content { get; set; }
 
-    // public string GetBook()
-    // {
-    //     string.IsNullOrEmpty(Book)
-    //         ? Books.TryGetBook()
-    // }
+    /// <summary>
+    /// Creates a new verse, giving it a new VerseId
+    /// </summary>
+    public Verse(string book, int chapter, int verseNum)
+    {
+        Reference = ReferenceParser.Parse(book, chapter, new List<int>() {verseNum});
+        Id = CreateId();
+    }
+    
+    public Verse() { }
+
+    /// <summary>
+    /// Creates a new verse, giving it a new VerseId
+    /// </summary>
+    /// <param name="readableReference"></param>
+    /// <exception cref="ArgumentException"></exception>
+    public Verse(string readableReference)
+    {
+        Reference = ReferenceParser.Parse(readableReference)
+            ?? throw new ArgumentException($"{readableReference} is not a valid reference");
+        Id = CreateId();
+        
+    }
+
+    /// <summary>
+    /// Creates an Id for this verse (example: "PSA.1.1")
+    /// </summary>
+    /// <returns></returns>
+    public string CreateId()
+    {
+        return Books.GetAbbreviation(Reference.Book)
+               + '.'
+               + Reference.Chapter
+               + '.'
+               + Reference.VerseNumbers.First();
+    }
 }

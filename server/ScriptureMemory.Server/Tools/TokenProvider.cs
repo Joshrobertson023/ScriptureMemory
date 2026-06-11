@@ -22,7 +22,7 @@ public sealed class TokenProvider(IConfiguration config)
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, admin.Id.ToString()),
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, admin.UserId.ToString()),
                 new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, admin.AdminEmail ?? throw new ArgumentNullException(nameof(admin.AdminEmail))),
                 new Claim("role", admin.Role.ToString() ?? throw new ArgumentNullException(nameof(admin.Role)))
             }),
@@ -52,7 +52,7 @@ public sealed class TokenProvider(IConfiguration config)
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
                 new Claim("refresh_token_hash", user.Sessions.First().RefreshTokenHash ?? string.Empty),
                 new Claim("role", user.Role.ToString() ?? throw new ArgumentNullException(nameof(user.Role)))
             }),

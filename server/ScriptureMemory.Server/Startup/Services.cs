@@ -158,10 +158,8 @@ public static class Services
         services.AddScoped<CollectionService>();
         services.AddScoped<TokenProvider>();
         services.AddScoped<VerseOfDayService>();
-        services.AddScoped<CategoryService>();
 
         services.AddScoped<VerseManagement>();
-        services.AddScoped<LexiconConverter>();
         services.AddScoped<BibleApi>();
 
         services.AddScoped<EmbeddingGenerator>();
@@ -185,7 +183,6 @@ public static class Services
         services.AddScoped<PublishedCollectionData>();
         services.AddScoped<VerseOfDayData>();
         services.AddScoped<SessionData>();
-        services.AddScoped<CategoryData>();
         return services;
     }
 }

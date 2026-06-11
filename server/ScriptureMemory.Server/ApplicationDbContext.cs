@@ -71,5 +71,13 @@ public class ApplicationDbContext : DbContext
             .OwnsOne(p => p.Reference);
         modelBuilder.Entity<Verse>()
             .OwnsOne(p => p.Reference);
+        
+        // Set default values
+        modelBuilder.Entity<Verse>()
+            .Property(v => v.MemorizedCount)
+            .HasDefaultValue(0);
+        modelBuilder.Entity<Verse>()
+            .Property(v => v.SavedCount)
+            .HasDefaultValue(0);
     }
 }

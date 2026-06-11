@@ -43,22 +43,18 @@ public class EmbeddingGenerator
 
     public async Task<Vector> GenerateVerseEmbedding(Verse verse)
     {
-        return await GenerateEmbedding(verse.GetEmbeddingText());
-        //app.ConfigureUserPassageEndpoints();
-        //app.ConfigureCollectionEndpoints();
-        //app.ConfigurePracticeLogEndpoints();
-        //app.ConfigurePracticeSessionEndpoints();
-        //app.ConfigureNotificationEndpoints();
+        return await GenerateEmbedding(verse.Content?.GetEmbeddingText()
+            ?? throw new Exception("verse.VerseContent is null"));
     }
 
     public async Task GenerateAllVerseEmbeddings()
     {
         var allVerses = await _verseData.GetAllVerses();
 
-        foreach (var verse in allVerses.Where(v => v.Embedding == null))
+        foreach (var verse in allVerses.Where(v => v.Content == null))
         {
             Vector embedding = await GenerateVerseEmbedding(verse);
-            verse.Embedding = embedding;
+            verse.Content.Embedding = embedding;
 
             await _verseData.InsertEmbedding(verse);
         }

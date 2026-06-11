@@ -42,7 +42,6 @@ public static class Middleware
         app.ConfigureVerseEndpoints();
         app.ConfigureSearchEndpoints();
         app.ConfigureAdminEndpoints();
-        app.ConfigureCategoriesEndpoints();
         
         return app;
     }

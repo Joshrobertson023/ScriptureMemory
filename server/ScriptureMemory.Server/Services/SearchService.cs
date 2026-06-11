@@ -170,11 +170,11 @@ public sealed class SearchService
                         {
                             Book = _passage.Reference.Book,
                             Chapter = _passage.Reference.Chapter,
-                            VerseNumbers = _passage.Reference.Verses,
+                            VerseNumbers = _passage.Reference.VerseNumbers,
                             ReadableReference = ReferenceParser.ConvertToReadableReference(
                                 _passage.Reference.Book,
                                 _passage.Reference.Chapter,
-                                _passage.Reference.Verses)
+                                _passage.Reference.VerseNumbers)
                         },
                         Verses = new List<DataAccess.Models.Verse> { _passage }
                     },
@@ -201,11 +201,11 @@ public sealed class SearchService
                         {
                             Book = verse.Reference.Book,
                             Chapter = verse.Reference.Chapter,
-                            VerseNumbers = verse.Reference.Verses,
+                            VerseNumbers = verse.Reference.VerseNumbers,
                             ReadableReference = ReferenceParser.ConvertToReadableReference(
                                 verse.Reference.Book,
                                 verse.Reference.Chapter,
-                                verse.Reference.Verses)
+                                verse.Reference.VerseNumbers)
                         },
                         Verses = new List<DataAccess.Models.Verse> { verse }
                     },
