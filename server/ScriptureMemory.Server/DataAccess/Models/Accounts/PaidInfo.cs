@@ -18,6 +18,8 @@ public sealed class PaidInfo
     public DateTime? DatePaid { get; set; }
     
     public DateTime? DateExpired { get; set; }
+    
+    public int UserId { get; set; }
 
     public User UserNavigation { get; set; } = null!;
 }

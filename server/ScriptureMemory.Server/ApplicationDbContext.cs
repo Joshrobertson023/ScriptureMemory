@@ -67,6 +67,8 @@ public class ApplicationDbContext : DbContext
         //     .OwnsOne(p => p.Reference);
         modelBuilder.Entity<UserPassage>()
             .OwnsOne(p => p.Reference);
+        modelBuilder.Entity<Passage>()
+            .OwnsOne(p => p.Reference);
         modelBuilder.Entity<Verse>()
             .OwnsOne(p => p.Reference);
     }

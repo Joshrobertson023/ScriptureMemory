@@ -13,7 +13,7 @@ namespace DataAccess.Models;
 
 public class Verse
 {
-    public Reference Reference { get; set; }
+    public Reference Reference { get; set; } = new();
     
     /// <summary>
     /// ("PSA.1.1")
@@ -28,16 +28,17 @@ public class Verse
     [DefaultValue(0)]
     public int SavedCount { get; set; }
 
+    public int PassageId { get; set; }
+    
     public Passage? PassageNavigation { get; set; } = null!;
     
-    [InverseProperty(nameof(Ver))]
     public VerseContent? VerseContent { get; set; }
     
-    public Verse()
+    // public Verse()
 
-    public string GetBook()
-    {
-        string.IsNullOrEmpty(Book)
-            ? Books.TryGetBook()
-    }
+    // public string GetBook()
+    // {
+    //     string.IsNullOrEmpty(Book)
+    //         ? Books.TryGetBook()
+    // }
 }

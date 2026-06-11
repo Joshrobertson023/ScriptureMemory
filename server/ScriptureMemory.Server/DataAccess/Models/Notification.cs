@@ -3,6 +3,7 @@ using ScriptureMemory.Server.Tools;
 
 namespace DataAccess.Models;
 
+[NotMapped]
 public class Notification
 {
     public int Id { get; set; }

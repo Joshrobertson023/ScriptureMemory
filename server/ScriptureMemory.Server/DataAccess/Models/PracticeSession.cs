@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace DataAccess.Models;
 
+[NotMapped]
 public class PracticeSession
 {
     public int SessionId { get; set; }

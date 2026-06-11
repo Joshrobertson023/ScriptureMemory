@@ -7,6 +7,7 @@ using ScriptureMemory.Server.Tools;
 
 namespace DataAccess.Models;
 
+[NotMapped]
 public sealed class Reference
 {
     public string ReadableReference { get; set; } = string.Empty;

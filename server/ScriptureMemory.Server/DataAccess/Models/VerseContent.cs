@@ -19,14 +19,21 @@ public class VerseContent
     [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
     public DateTime LastUpdated { get; set; }
 
+    public int VerseId { get; set; }
+    
     public Verse VerseNavigation { get; set; } = null!;
 
     public string? GetEmbeddingText()
     {
-        if (string.IsNullOrEmpty(PlainText) 
-            || string.IsNullOrEmpty(Verse.Reference.Book + Chapter + VerseNum))
+        if (string.IsNullOrEmpty(PlainText))
             return null;
         
-        return Book + " " + Chapter + " " + VerseNum + ": " + PlainText;
+        return VerseNavigation.Reference.Book  
+               + " "                  
+               + VerseNavigation.Reference.Chapter 
+               + " " 
+               + VerseNavigation.Reference.VerseNumbers.FirstOrDefault()
+               + ": " 
+               + PlainText;
     }
 }

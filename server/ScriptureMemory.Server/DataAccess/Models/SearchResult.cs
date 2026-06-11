@@ -9,6 +9,7 @@ using static ScriptureMemory.Server.Tools.Enums;
 
 namespace DataAccess.Models;
 
+[NotMapped]
 public sealed class SearchResult
 {
     public float Rank { get; set; }

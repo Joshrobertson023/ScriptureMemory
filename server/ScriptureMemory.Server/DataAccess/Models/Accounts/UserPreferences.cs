@@ -21,5 +21,6 @@ public sealed class UserPreferences
     public bool OverdueRemindersEnabled { get; set; } = true;                     // Get reminders for overdue tasks
     public bool TypeOutReference { get; set; } = false;                     // Type out reference in practice
 
+    public int UserId { get; set; }
     public User UserNavigation { get; set; } = null!;
 }

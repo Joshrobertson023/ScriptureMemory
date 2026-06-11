@@ -20,6 +20,6 @@ public class Bible
     [MaxLength(300)]
     public string Source { get; set; } = string.Empty;
     
-    [DefaultValue("CURRENT_DATE")]
+    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
     public DateTime LastSynced { get; set; }
 }
