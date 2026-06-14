@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Pgvector;
 using ScriptureMemory.Server.Tools;
 using System.ComponentModel;
-using static DataAccess.Data.VerseData;
+//using static DataAccess.Data.VerseData;
 
 namespace DataAccess.Models;
 

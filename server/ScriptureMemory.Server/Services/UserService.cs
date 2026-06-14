@@ -1,27 +1,32 @@
+using Microsoft.AspNet.Identity;
+using ScriptureMemory.Server.Data.DataAccess;
+using ScriptureMemory.Server.Data.Responses;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VerseAppNew.Server.Services;
 
 public sealed class UserService
 {
-    private readonly UserData _userContext;
-    private readonly SessionData _sessionContext;
+    private readonly IUserData _userContext;
+    private readonly ISessionData _sessionContext;
     private readonly UserSettingsData _settingsContext;
     private readonly TokenProvider _tokenProvider;
     //private readonly PaidData _paidContext;
     private readonly NotificationService _notificationService;
     private readonly ActivityLogger _logger;
-    private readonly EmailSenderService _emailSender;
+    //private readonly EmailSenderService _emailSender;
+    
 
     public UserService(
-        UserData userContext, 
+        IUserData userContext, 
         UserSettingsData settingsContext, 
-        SessionData sessionContext,
+        ISessionData sessionContext,
         //PaidData paidContext,
         TokenProvider tokenProvider,
         NotificationService notificationService,
-        ActivityLogger logger,
-        EmailSenderService emailSender)
+        ActivityLogger logger
+        //EmailSenderService emailSender
+        )
     {
         _userContext = userContext;
         _tokenProvider = tokenProvider;
@@ -30,75 +35,65 @@ public sealed class UserService
         //this.paidContext = paidContext;
         _notificationService = notificationService;
         _logger = logger;
-        _emailSender = emailSender;
+        //_emailSender = emailSender;
     }
 
-    public async Task<IResult> CreateUser(Session session)
+    public async Task<CreateUserResponse> CreateUser(Session session)
     {
-        var hasher = new PasswordHasher<string>();
+        var hasher = new PasswordHasher<User>();
 
-        int newUserId = await _userContext.CreateUser();
-        var newUser = await _userContext.GetUserById(newUserId);
+        var newUser = await _userContext.CreateUser();
         
         newUser.Role = UserRole.User;
 
-        //session.RefreshTokenHash = hasher.HashPassword(null!, Guid.NewGuid().ToString());
-        // move this to when user creates an account
-        // anonymous users don't get refresh token
+        session.RefreshTokenHash = hasher.HashPassword(newUser, Guid.NewGuid().ToString());
 
-        session.CreatedAt = DateTime.UtcNow;
-        session.LastSeenAt = DateTime.UtcNow;
-        var newSession = await _sessionContext.CreateSession(newUserId, session);
+        newUser.Sessions = new List<Session>() { session };
 
-        newUser.Sessions = new List<Session>
-        {
-            newSession
-        };
+        await _sessionContext.CreateSession(
+            newUser.UserId, 
+            newUser.Sessions.First());
 
-        return Results.Ok(new
-        {
-            User = newUser,
-            Jwt = _tokenProvider.Create(newUser)
-        });
+        return new CreateUserResponse { User = newUser, Jwt = _tokenProvider.Create(newUser) };
     }
-
-    public async Task<IResult> GetNewJwt(Session session)
-    {
-        session.LastSeenAt = DateTime.UtcNow;
-        await _sessionContext.LoginSession(session);
-
-        var user = await _userContext.GetUserByDeviceId(session.DeviceId);
-        user.Sessions = new List<Session>
-        {
-            session
-        };
-
-        return Results.Ok(new
-        {
-            Jwt = _tokenProvider.Create(user)
-        });
-    }
-
-    public async Task<IResult> TokenLogin(Session session)
-    {
-        if (session.RefreshTokenHash is null)
-            return Results.Unauthorized();
-
-        var hasher = new PasswordHasher<string>();
-        var user = await _userContext.GetUserByRefreshToken(session.RefreshTokenHash);
-
-        if (user is null)
-            return Results.Unauthorized();
-
-        user.Role = UserRole.User;
-
-        return Results.Ok(new
-        {
-            User = user,
-            RefreshTokenHash = hasher.HashPassword(null!, Guid.NewGuid().ToString()),
-            Jwt = _tokenProvider.Create(user)
-        });
-    }
+    //
+    // public async Task<IResult> GetNewJwt(Session session)
+    // {
+    //     session.LastSeenAt = DateTime.UtcNow;
+    //     await _sessionContext.LoginSession(session);
+    //
+    //     var user = await _userContext.GetUserByDeviceId(session.DeviceId);
+    //     user.Sessions = new List<Session>
+    //     {
+    //         session
+    //     };
+    //
+    //     return Results.Ok(new
+    //     {
+    //         Jwt = _tokenProvider.Create(user)
+    //     });
+    // }
+    //
+    // public async Task<IResult> TokenLogin(Session session)
+    // {
+    //     if (session.RefreshTokenHash is null)
+    //         return Results.Unauthorized();
+    //
+    //     var hasher = new PasswordHasher<string>();
+    //     var user = await _userContext.GetUserByRefreshToken(session.RefreshTokenHash);
+    //
+    //     if (user is null)
+    //         return Results.Unauthorized();
+    //
+    //     user.Role = UserRole.User;
+    //
+    //     return Results.Ok(new
+    //     {
+    //         User = user,
+    //         RefreshTokenHash = hasher.HashPassword(null!, Guid.NewGuid().ToString()),
+    //         Jwt = _tokenProvider.Create(user)
+    //     });
+    // }
 
     // public async Task<IResult> Login(LoginRequest request)
     // {

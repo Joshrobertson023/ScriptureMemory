@@ -7,6 +7,7 @@ public class Session
     [Key]
     public int Id { get; set; }
 
+    public int UserId { get; set; }
     public Account Account { get; set; } = null!;
     
     [MaxLength(50)]
@@ -24,9 +25,7 @@ public class Session
     [MaxLength(100)]
     public string? PushNotificationToken { get; set; } // Mobile push notification token
     
-    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
-    public DateTime LastSeenAt { get; set; }
+    public DateTime LastSeenAt { get; set; } = DateTime.UtcNow;
 }

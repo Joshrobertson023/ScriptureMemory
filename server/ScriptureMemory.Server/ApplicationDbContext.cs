@@ -8,6 +8,7 @@ public class ApplicationDbContext : DbContext
         : base(options) {}
     
     public DbSet<User> Users { get; set; }
+    public DbSet<Session> Sessions { get; set; }
     public DbSet<Admin> Admins { get; set; }
     public DbSet<UserPreferences> UserPreferences { get; set; }
     public DbSet<PaidInfo> PaidInfo { get; set; }
@@ -79,5 +80,53 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Verse>()
             .Property(v => v.SavedCount)
             .HasDefaultValue(0);
+        modelBuilder.Entity<User>()
+            .Property(u => u.VersesMemorizedCount)
+            .HasDefaultValue(0);
+        modelBuilder.Entity<User>()
+            .Property(u => u.Points)
+            .HasDefaultValue(0);
+        modelBuilder.Entity<User>()
+            .Property(u => u.CollectionsCount)
+            .HasDefaultValue(0);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.ThemePreference)
+            .HasDefaultValue(ThemePreference.SystemDefault);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.BibleVersion)
+            .HasDefaultValue(BibleVersion.Kjv);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.CollectionsSort)
+            .HasDefaultValue(CollectionsSort.Newest);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.SubscribedVerseOfDay)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.NotifyFriendsMemorizedPassage)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.NotifyFriendsPublishedCollection)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.NotifyCollectionSaved)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.NotifyNoteLikedCommented)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.FriendsActivityNotificationsEnabled)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.OverdueRemindersEnabled)
+            .HasDefaultValue(true);
+        modelBuilder.Entity<UserPreferences>()
+            .Property(u => u.TypeOutReference)
+            .HasDefaultValue(false);
+        modelBuilder.Entity<Session>()
+            .Property(s => s.CreatedAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'");
+        modelBuilder.Entity<Session>()
+            .Property(s => s.LastSeenAt)
+            .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'");
     }
 }

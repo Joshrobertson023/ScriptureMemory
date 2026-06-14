@@ -9,9 +9,9 @@ using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.Tools;
 using System.Data;
 using System.Text;
-using VerseAppNew.Server.Bogus;
 using VerseAppNew.Server.Services;
 using Pgvector;
+using ScriptureMemory.Server.Data.DataAccess;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -121,7 +121,11 @@ public static class Services
         
         // Add DbContext
         services.AddDbContextFactory<ApplicationDbContext>(
-            options => options.UseNpgsql(connectionString, o => o.UseVector()));
+            options => options.UseNpgsql(connectionString, o => o.UseVector()),
+            ServiceLifetime.Scoped);
+
+        // Add postgres data source for integration tests
+        services.AddNpgsqlDataSource(connectionString);
         
         //
         services.AddHttpClient("ExpoPush", client =>
@@ -147,22 +151,22 @@ public static class Services
 
         services.AddScoped<UserService>();
         services.AddScoped<AdminService>();
-        services.AddScoped<EmailSenderService>();
+        //services.AddScoped<EmailSenderService>();
         services.AddScoped<ActivityLogger>();
-        services.AddScoped<PasswordResetService>();
-        services.AddScoped<PopulateDatabase>();
-        services.AddScoped<SearchService>();
+        //services.AddScoped<PasswordResetService>();
+        //services.AddScoped<PopulateDatabase>();
+        //services.AddScoped<SearchService>();
         services.AddScoped<NotificationService>();
-        services.AddScoped<VerseService>();
+        //services.AddScoped<VerseService>();
         //services.AddScoped<UserPassageService>();
-        services.AddScoped<CollectionService>();
+        //services.AddScoped<CollectionService>();
         services.AddScoped<TokenProvider>();
-        services.AddScoped<VerseOfDayService>();
+        //services.AddScoped<VerseOfDayService>();
 
-        services.AddScoped<VerseManagement>();
+        //services.AddScoped<VerseManagement>();
         services.AddScoped<BibleApi>();
 
-        services.AddScoped<EmbeddingGenerator>();
+        //services.AddScoped<EmbeddingGenerator>();
 
         return services;
     }
@@ -170,19 +174,19 @@ public static class Services
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
         services.AddScoped<IRequestDbConnection, RequestDbConnection>();
-        services.AddScoped<UserData>();
+        services.AddScoped<IUserData, UserDataEFCore>();
         services.AddScoped<AdminData>();
         services.AddScoped<UserSettingsData>();
-        services.AddScoped<CrossReferenceData>();
+        //services.AddScoped<CrossReferenceData>();
         services.AddScoped<ActivityLoggingData>();
-        services.AddScoped<SearchData>();
+        //services.AddScoped<SearchData>();
         services.AddScoped<NotificationData>();
-        services.AddScoped<VerseData>();
-        services.AddScoped<UserPassageData>();
+        //services.AddScoped<VerseData>();
+        //services.AddScoped<UserPassageData>();
         services.AddScoped<CollectionData>();
-        services.AddScoped<PublishedCollectionData>();
-        services.AddScoped<VerseOfDayData>();
-        services.AddScoped<SessionData>();
+        //services.AddScoped<PublishedCollectionData>();
+        //services.AddScoped<VerseOfDayData>();
+        services.AddScoped<ISessionData, SessionDataEfCore>();
         return services;
     }
 }

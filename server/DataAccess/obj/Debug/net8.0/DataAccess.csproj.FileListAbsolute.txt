@@ -24,3 +24,4 @@ C:/Users/there/ScriptureMemory/server/DataAccess/obj/Debug/net8.0/ref/DataAccess
 /home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/obj/Debug/net8.0/refint/DataAccess.dll
 /home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/obj/Debug/net8.0/DataAccess.pdb
 /home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/obj/Debug/net8.0/ref/DataAccess.dll
+/home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/obj/Debug/net8.0/EFCoreNpgsqlPgvector.cs

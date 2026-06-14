@@ -18,6 +18,7 @@ public class SessionData
 
     public async Task<Session> CreateSession(int userId, Session session)
     {
+        // Todo: DeviceId should come from session
         string deviceId = Guid.NewGuid().ToString();
         using var conn = new NpgsqlConnection(_connectionString);
         var results = await conn.ExecuteScalarAsync<int>(

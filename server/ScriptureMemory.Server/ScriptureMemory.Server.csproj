@@ -31,7 +31,8 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.InMemory" Version="1.74.0-preview" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.5-beta1" />
-    <PackageReference Include="Npgsql" Version="9.0.5" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="Npgsql.DependencyInjection" Version="10.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.26.0" />
     <PackageReference Include="Pgvector" Version="0.3.2" />
@@ -54,7 +55,7 @@
 
 
 	<ItemGroup>
-	  <Folder Include="DataAccess\ViewModels\" />
+	  <Folder Include="Data\ViewModels\" />
 	  <Folder Include="Filters\" />
 	</ItemGroup>
 

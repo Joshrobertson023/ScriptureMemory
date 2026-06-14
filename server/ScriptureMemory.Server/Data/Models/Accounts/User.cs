@@ -26,15 +26,12 @@ public class User : Account
     
     [MaxLength(100)]
     public string? ProfilePictureUrl { get; set; }
-    
-    [DefaultValue(0)]
-    public int VersesMemorizedCount { get; set; }
 
-    [DefaultValue(0)]
-    public int Points { get; set; }
-    
-    [DefaultValue(0)]
-    public byte CollectionsCount { get; set; }
+    [DefaultValue(0)] public int VersesMemorizedCount { get; set; } = 0;
+
+    [DefaultValue(0)] public int Points { get; set; } = 0;
+
+    [DefaultValue(0)] public byte CollectionsCount { get; set; } = 0;
     
     public UserPreferences Preferences { get; set; } = new();
     
