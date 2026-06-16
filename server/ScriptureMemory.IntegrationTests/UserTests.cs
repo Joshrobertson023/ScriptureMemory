@@ -17,7 +17,7 @@ public class UserTests : BaseIntegrationTest
     private record CreateUserDto(User user, string jwt);
 
     [Fact]
-    public async Task CreateUser_ShouldCreateUserAndPreferences()
+    public async Task CreateUser_Should_Create_User_Jwt_And_Preferences()
     {
         var userContext = _scope.ServiceProvider.GetRequiredService<IUserData>();
         var userService = _scope.ServiceProvider.GetRequiredService<UserService>();
@@ -31,6 +31,7 @@ public class UserTests : BaseIntegrationTest
         
         Assert.IsType<CreateUserDto>(results);
         Assert.NotEqual(0, results.User.UserId);
+        Assert.True(results.User.Preferences.NotifyCollectionSaved);
         Assert.NotEmpty(results.Jwt);
     }
 }

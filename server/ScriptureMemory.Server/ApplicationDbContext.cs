@@ -11,7 +11,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Admin> Admins { get; set; }
     public DbSet<UserPreferences> UserPreferences { get; set; }
-    public DbSet<PaidInfo> PaidInfo { get; set; }
     public DbSet<Bible> Bibles { get; set; }
     public DbSet<Chapter> Chapters { get; set; }
     public DbSet<Verse> Verses { get; set; }
@@ -20,28 +19,7 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Set ids to generate always by default as identity fields
-        modelBuilder.Entity<User>()
-            .Property(u => u.UserId)
-            .UseIdentityByDefaultColumn();
-        modelBuilder.Entity<Admin>()
-            .Property(u => u.UserId)
-            .UseIdentityByDefaultColumn();
-        modelBuilder.Entity<Collection>()
-            .Property(c => c.Id)
-            .UseIdentityByDefaultColumn();
-        modelBuilder.Entity<UserPassage>()
-            .Property(u => u.Id)
-            .UseIdentityByDefaultColumn();
-        modelBuilder.Entity<Session>()
-            .Property(s => s.Id)
-            .UseIdentityByDefaultColumn();
-        
         // Conversions from enums to strings
-        modelBuilder.Entity<User>()
-            .Property(u => u.Role)
-            .HasConversion<string>()
-            .HasMaxLength(20);
         modelBuilder.Entity<Admin>()
             .Property(u => u.Role)
             .HasConversion<string>()

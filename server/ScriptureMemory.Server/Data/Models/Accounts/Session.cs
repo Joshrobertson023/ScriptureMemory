@@ -7,8 +7,8 @@ public class Session
     [Key]
     public int Id { get; set; }
 
-    public int UserId { get; set; }
-    public Account Account { get; set; } = null!;
+    public int? UserId { get; set; }
+    public Account? AccountNavigation { get; set; } = null!;
     
     [MaxLength(50)]
     public string DeviceId { get; set; } = string.Empty;
