@@ -8,7 +8,7 @@ public class Account
     [Key]
     public int UserId { get; set; }
 
-    public string HashedPassword { get; set; }
+    public string? HashedPassword { get; set; }
 
     public UserRole? Role { get; set; }
     

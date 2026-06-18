@@ -38,6 +38,12 @@ public sealed class UserService
         //_emailSender = emailSender;
     }
 
+    /// <summary>
+    /// Method that creates a user from the user's device session info.
+    /// This method runs when the user first opens the app.
+    /// </summary>
+    /// <param name="session"></param>
+    /// <returns></returns>
     public async Task<CreateUserResponse> CreateUser(Session session)
     {
         var hasher = new PasswordHasher<User>();

@@ -45,7 +45,7 @@
 //         var nowEastern = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, EasternZone);
 //         var nextRun = nowEastern.Date.AddHours(RUN_HOUR);
 //
-//         // If 8am has already passed today, schedule for tomorrow
+//         // Schedule for tomorrow if after the run hour
 //         if (nowEastern >= nextRun)
 //             nextRun = nextRun.AddDays(1);
 //

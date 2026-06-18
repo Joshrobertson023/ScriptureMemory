@@ -9,15 +9,14 @@ public class VerseContent
     [MaxLength(5)]
     public string Version { get; set; } = string.Empty;
     
-    [MaxLength(700)]
+    [MaxLength(100)]
     public string PlainText { get; set; } = string.Empty;
     
     public object? ContentJson { get; set; }
     
     public Vector? Embedding { get; set; }
     
-    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
-    public DateTime LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }
 
     public int VerseId { get; set; }
     

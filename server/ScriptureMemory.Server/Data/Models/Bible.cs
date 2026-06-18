@@ -5,7 +5,7 @@ namespace ScriptureMemory.Server.DataAccess.Models;
 public class Bible
 {
     [MaxLength(100)]
-    public string Id { get; set; } = string.Empty;
+    public string? Id { get; set; }
     
     [Key]
     [MaxLength(5)]
@@ -15,11 +15,10 @@ public class Bible
     public string VersionFull { get; set; } = string.Empty;
     
     [MaxLength(300)]
-    public string Copyright { get; set; } = string.Empty;
+    public string? Copyright { get; set; }
     
     [MaxLength(300)]
     public string Source { get; set; } = string.Empty;
     
-    [DefaultValue("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'")]
-    public DateTime LastSynced { get; set; }
+    public DateTime? LastSynced { get; set; }
 }

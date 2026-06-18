@@ -33,7 +33,7 @@ public class Verse
     public VerseContent? Content { get; set; }
 
     /// <summary>
-    /// Creates a new verse, giving it a new VerseId
+    /// Creates a new verse, giving it a new VerseId and also ensures a valid parsed reference
     /// </summary>
     public Verse(string book, int chapter, int verseNum)
     {
@@ -44,7 +44,7 @@ public class Verse
     public Verse() { }
 
     /// <summary>
-    /// Creates a new verse, giving it a new VerseId
+    /// Creates a new verse, giving it a new VerseId and also ensures it's a valid parsed reference
     /// </summary>
     /// <param name="readableReference"></param>
     /// <exception cref="ArgumentException"></exception>

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ScriptureMemory.Server.Data.Models.EntityConfigurations;
 
 namespace ScriptureMemory.Server;
 
@@ -14,97 +15,33 @@ public class ApplicationDbContext : DbContext
     public DbSet<Bible> Bibles { get; set; }
     public DbSet<Chapter> Chapters { get; set; }
     public DbSet<Verse> Verses { get; set; }
-    public DbSet<Collection> Collections { get; set; }
-    public DbSet<UserPassage> UserPassages { get; set; }
+    // public DbSet<Collection> Collections { get; set; }
+    // public DbSet<UserPassage> UserPassages { get; set; }
+    public DbSet<VerseContent> VerseContents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        new AccountConfiguration().Configure(modelBuilder.Entity<Account>());
+        new AdminConfiguration().Configure(modelBuilder.Entity<Admin>());
+        new BibleConfiguration().Configure(modelBuilder.Entity<Bible>());
+        new ChapterConfiguration().Configure(modelBuilder.Entity<Chapter>());
+        new SessionConfiguration().Configure(modelBuilder.Entity<Session>());
+        new UserConfiguration().Configure(modelBuilder.Entity<User>());
+        new UserPreferencesConfiguration().Configure(modelBuilder.Entity<UserPreferences>());
+        new VerseConfiguration().Configure(modelBuilder.Entity<Verse>());
+        new VerseContentConfiguration().Configure(modelBuilder.Entity<VerseContent>());
         // Conversions from enums to strings
-        modelBuilder.Entity<Admin>()
-            .Property(u => u.Role)
-            .HasConversion<string>()
-            .HasMaxLength(20);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(p => p.ThemePreference)
-            .HasConversion<string>()
-            .HasMaxLength(20);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(p => p.BibleVersion)
-            .HasConversion<string>()
-            .HasMaxLength(20);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(p => p.CollectionsSort)
-            .HasConversion<string>()
-            .HasMaxLength(20);
-        modelBuilder.Entity<Collection>()
-            .Property(c => c.Visibility)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+        // modelBuilder.Entity<Collection>()
+        //     .Property(c => c.Visibility)
+        //     .HasConversion<string>()
+        //     .HasMaxLength(20);
         
         // Configure owned References
         // modelBuilder.Entity<Passage>()
         //     .OwnsOne(p => p.Reference);
-        modelBuilder.Entity<UserPassage>()
-            .OwnsOne(p => p.Reference);
-        modelBuilder.Entity<Passage>()
-            .OwnsOne(p => p.Reference);
-        modelBuilder.Entity<Verse>()
-            .OwnsOne(p => p.Reference);
-        
-        // Set default values
-        modelBuilder.Entity<Verse>()
-            .Property(v => v.MemorizedCount)
-            .HasDefaultValue(0);
-        modelBuilder.Entity<Verse>()
-            .Property(v => v.SavedCount)
-            .HasDefaultValue(0);
-        modelBuilder.Entity<User>()
-            .Property(u => u.VersesMemorizedCount)
-            .HasDefaultValue(0);
-        modelBuilder.Entity<User>()
-            .Property(u => u.Points)
-            .HasDefaultValue(0);
-        modelBuilder.Entity<User>()
-            .Property(u => u.CollectionsCount)
-            .HasDefaultValue(0);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.ThemePreference)
-            .HasDefaultValue(ThemePreference.SystemDefault);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.BibleVersion)
-            .HasDefaultValue(BibleVersion.Kjv);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.CollectionsSort)
-            .HasDefaultValue(CollectionsSort.Newest);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.SubscribedVerseOfDay)
-            .HasDefaultValue(true);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.NotifyFriendsMemorizedPassage)
-            .HasDefaultValue(true);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.NotifyFriendsPublishedCollection)
-            .HasDefaultValue(true);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.NotifyCollectionSaved)
-            .HasDefaultValue(true);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.NotifyNoteLikedCommented)
-            .HasDefaultValue(true);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.FriendsActivityNotificationsEnabled)
-            .HasDefaultValue(true);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.OverdueRemindersEnabled)
-            .HasDefaultValue(true);
-        modelBuilder.Entity<UserPreferences>()
-            .Property(u => u.TypeOutReference)
-            .HasDefaultValue(false);
-        modelBuilder.Entity<Session>()
-            .Property(s => s.CreatedAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'");
-        modelBuilder.Entity<Session>()
-            .Property(s => s.LastSeenAt)
-            .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'");
+        // modelBuilder.Entity<UserPassage>()
+        //     .OwnsOne(p => p.Reference);
+        // modelBuilder.Entity<Passage>()
+        //     .OwnsOne(p => p.Reference);
     }
 }
