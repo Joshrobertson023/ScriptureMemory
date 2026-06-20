@@ -42,7 +42,7 @@ public static class ReferenceParser
         }
 
         // Check if a valid book
-        string? book = GetBook(inputSpan[..i].ToString().ToLower());
+        string? book = GetBookName(inputSpan[..i].ToString().ToLower());
         returnReference.Book = book is null
             ? "Error parsing book" // Don't throw an error if not a valid book -- user should be able to handle it
             : book;
@@ -142,7 +142,7 @@ public static class ReferenceParser
     {
         var parts = new List<string>();
 
-        string book = GetBook(reference);
+        string book = GetBookName(reference);
         int chapter = GetChapter(reference);
 
         parts.Add(book);
@@ -348,8 +348,10 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>"Psalms"</returns>
-    public static string GetBook(string reference)
+    public static string GetBookName(string reference)
     {
+        reference = reference.Trim();
+        
         string[] parts = new string[1];
         
         if (reference.Contains(' '))
@@ -357,17 +359,17 @@ public static class ReferenceParser
         else
             parts[0] = reference;
         
-        if (Books.TryGetBook(parts[0], out string? bookName))
+        if (AllBooksInitializer.TryGetBook(parts[0], out string? bookName))
             return bookName!;
         else
         { // Handle books with one space in its name
             string bookWithNumber = parts[0] + " " + parts[1];
-            if (Books.TryGetBook(bookWithNumber, out bookName))
+            if (AllBooksInitializer.TryGetBook(bookWithNumber, out bookName))
                 return bookName!;
             else
             { // Handle books with two spaces in its name
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
-                if (Books.TryGetBook(bookWithNumber, out bookName))
+                if (AllBooksInitializer.TryGetBook(bookWithNumber, out bookName))
                     return bookName!;
                 else
                     throw new ArgumentException(
@@ -385,7 +387,7 @@ public static class ReferenceParser
     {
         string[] parts = reference.Split(' ');
 
-        if (parts.Length > 1 && Books.TryGetBook(parts[0], out string? book))
+        if (parts.Length > 1 && AllBooksInitializer.TryGetBook(parts[0], out string? book))
         {
             var chapterPart = parts[1].Split(':')[0];
 
@@ -397,7 +399,7 @@ public static class ReferenceParser
         {
             string bookWithNumber = parts[0] + " " + parts[1];
 
-            if (Books.TryGetBook(bookWithNumber, out _))
+            if (AllBooksInitializer.TryGetBook(bookWithNumber, out _))
             {
                 var chapterPart = parts[2].Split(':')[0];
                 if (int.TryParse(chapterPart, out int chapter))
@@ -410,7 +412,7 @@ public static class ReferenceParser
             {
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
 
-                if (Books.TryGetBook(bookWithNumber, out _))
+                if (AllBooksInitializer.TryGetBook(bookWithNumber, out _))
                 {
                     var chapterPart = parts[3].Split(':')[0];
                     if (int.TryParse(chapterPart, out int chapter))

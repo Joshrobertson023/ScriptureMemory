@@ -25,7 +25,7 @@ public class VerseDataEfCore : IVerseData
 
         foreach (var verseInTranslation in verse.Translations)
         {
-            _dbContext.VerseTranslationContents
+            _dbContext.VerseTranslationContents.Add(verseInTranslation);
         }
 
         return "build";

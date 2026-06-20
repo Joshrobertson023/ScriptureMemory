@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pgvector;
+using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 using System.ComponentModel;
 //using static DataAccess.Data.VerseData;
@@ -35,9 +36,9 @@ public class Verse
     /// <summary>
     /// Creates a new verse, giving it a new VerseId and also ensures a valid parsed reference
     /// </summary>
-    public Verse(string book, int chapter, int verseNum)
+    public Verse(Book book, int chapter, int verseNum)
     {
-        Reference = ReferenceParser.Parse(book, chapter, new List<int>() {verseNum});
+        Reference = ReferenceParser.Parse(book.DisplayName, chapter, new List<int>() {verseNum});
         Id = CreateId();
     }
     
@@ -62,7 +63,7 @@ public class Verse
     /// <returns></returns>
     public string CreateId()
     {
-        return Books.GetAbbreviation(Reference.Book)
+        return Reference.Book.Abbreviation
                + '.'
                + Reference.Chapter
                + '.'

@@ -1,3 +1,4 @@
+using ScriptureMemory.Server.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ public sealed class Reference
     public string ReadableReference { get; set; } = string.Empty;
     
     [MaxLength(50)]
-    public string Book { get; set; } = string.Empty;
+    public Book Book { get; set; }
     
     public int Chapter { get; set; }
     
@@ -31,10 +32,15 @@ public sealed class Reference
     /// <exception cref="ArgumentNullException"></exception>
     public Reference(string readableReference)
     {
-        string? book = ReferenceParser.GetBook(readableReference);
-        Book = book is null
-            ? throw new ArgumentNullException(nameof(book))
-            : book;
+        Book? book;
+        
+        bool succeeded = AllBooksInitializer.TryGetBook(
+            ReferenceParser.GetBookName(readableReference), 
+            out book);
+
+        book = succeeded
+            ? book
+            : throw new InvalidOperationException($"{readableReference} is not a valid reference.");
         
         ReadableReference = readableReference;
         
@@ -43,19 +49,19 @@ public sealed class Reference
         VerseNumbers = ReferenceParser.GetIndividualVerses(readableReference);
     }
 
-    public Reference(string book, int chapter, List<int> verseNumbers)
+    public Reference(string bookName, int chapter, List<int> verseNumbers)
     {
-        if (!Books.TryGetBook(book, out _))
-            throw new ArgumentException($"Book {book} not found");
+        if (!AllBooksInitializer.TryGetBook(bookName, out Book? book))
+            throw new InvalidOperationException($"Book {bookName} not found");
         
-        ReadableReference = ReferenceParser.ConvertToReadableReference(Book, Chapter, verseNumbers);
-        Book = book;
+        ReadableReference = ReferenceParser.ConvertToReadableReference(Book!.DisplayName, Chapter, verseNumbers);
+        Book = book!;
         Chapter = chapter;
         VerseNumbers = verseNumbers;
     }
 
     public override string ToString()
     {
-        return ReferenceParser.ConvertToReadableReference(Book, Chapter, VerseNumbers);
+        return ReferenceParser.ConvertToReadableReference(Book!.DisplayName, Chapter, VerseNumbers);
     }
 }
