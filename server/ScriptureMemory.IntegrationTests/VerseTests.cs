@@ -18,10 +18,4 @@ public class VerseTests : BaseIntegrationTest
     //
     //     Verse newVerse = new Verse()
     // }
-
-    [Fact]
-    public async Task InsertVerse_Should_Create_Valid_Verse_Id()
-    {
-        
-    }
 }

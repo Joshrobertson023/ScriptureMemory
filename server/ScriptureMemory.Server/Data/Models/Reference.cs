@@ -32,13 +32,9 @@ public sealed class Reference
     /// <exception cref="ArgumentNullException"></exception>
     public Reference(string readableReference)
     {
-        Book? book;
-        
-        bool succeeded = Books.TryGetBook(
-            ReferenceParser.GetBook(readableReference).DisplayName, 
-            out book);
+        Book? book = ReferenceParser.GetBook(readableReference);
 
-        book = succeeded
+        book = book is not null
             ? book
             : throw new InvalidOperationException($"{readableReference} is not a valid reference.");
         
@@ -51,7 +47,9 @@ public sealed class Reference
 
     public Reference(string bookName, int chapter, List<int> verseNumbers)
     {
-        if (!Books.TryGetBook(bookName, out Book? book))
+        Book? book = Books.GetBook(bookName);
+        
+        if (book is null)
             throw new InvalidOperationException($"Book {bookName} not found");
         
         ReadableReference = ReferenceParser.ConvertToReadableReference(Book!.DisplayName, Chapter, verseNumbers);

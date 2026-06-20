@@ -1,3 +1,4 @@
+using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 
 namespace ScriptureMemory.UnitTests.BookTests;
@@ -7,8 +8,7 @@ public class EnsureValidBook
     [Fact]
     public void EnsureValidBook_TryGetBookReturnsValidBook()
     {
-        var results = Books.TryGetBook("Genesis", out var book);
-        Assert.True(results);
+        Book? book = Books.GetBook("Genesis");
         Assert.Equal("Genesis", book?.DisplayName);
         Assert.Equal("gen", book?.Abbreviation);
     }
@@ -16,8 +16,7 @@ public class EnsureValidBook
     [Fact]
     public void EnsureValidBook_TryGetBookReturnsValidBookFromAbbreviation()
     {
-        var results = Books.TryGetBook("gen", out var book);
-        Assert.True(results);
+        Book? book = Books.GetBook("gen");
         Assert.Equal("Genesis", book?.DisplayName);
         Assert.Equal("gen", book?.Abbreviation);
     }
@@ -25,8 +24,7 @@ public class EnsureValidBook
     [Fact]
     public void EnsureValidBook_TryGetBookReturnsValidBookFromFuzzyMatch()
     {
-        var results = Books.TryGetBook("geneses", out var book);
-        Assert.True(results);
+        Book? book = Books.GetBook("geneses");
         Assert.Equal("Genesis", book?.DisplayName);
         Assert.Equal("gen", book?.Abbreviation);
     }
@@ -34,8 +32,7 @@ public class EnsureValidBook
     [Fact]
     public void EnsureValidBook_InvalidTryGetBookReturnsNull()
     {
-        var results = Books.TryGetBook("random_book", out var book);
-        Assert.False(results);
+        Book? book = Books.GetBook("random_book");
         Assert.Null(book);
     }
 }
