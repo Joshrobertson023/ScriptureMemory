@@ -11,7 +11,7 @@ global using DataAccess.Models;
 global using DataAccess.Requests;
 global using DataAccess.Requests.UpdateRequests;
 global using Microsoft.AspNetCore.Identity;
-global using ScriptureMemory.Server.DataAccess.Data;
+// global using ScriptureMemory.Server.DataAccess.Data;
 global using ScriptureMemory.Server.DataAccess.Models;
 global using ScriptureMemory.Server.Tools;
 global using System.Text.Json;

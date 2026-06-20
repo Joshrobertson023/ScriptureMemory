@@ -8,32 +8,29 @@ public sealed class UserService
 {
     private readonly IUserData _userContext;
     private readonly ISessionData _sessionContext;
-    private readonly UserSettingsData _settingsContext;
     private readonly TokenProvider _tokenProvider;
     //private readonly PaidData _paidContext;
-    private readonly NotificationService _notificationService;
-    private readonly ActivityLogger _logger;
+    // private readonly NotificationService _notificationService;
+    // private readonly ActivityLogger _logger;
     //private readonly EmailSenderService _emailSender;
     
 
     public UserService(
         IUserData userContext, 
-        UserSettingsData settingsContext, 
         ISessionData sessionContext,
         //PaidData paidContext,
-        TokenProvider tokenProvider,
-        NotificationService notificationService,
-        ActivityLogger logger
+        TokenProvider tokenProvider
+        // NotificationService notificationService,
+        // ActivityLogger logger
         //EmailSenderService emailSender
         )
     {
         _userContext = userContext;
         _tokenProvider = tokenProvider;
         _sessionContext = sessionContext;
-        _settingsContext = settingsContext;
         //this.paidContext = paidContext;
-        _notificationService = notificationService;
-        _logger = logger;
+        // _notificationService = notificationService;
+        // _logger = logger;
         //_emailSender = emailSender;
     }
 

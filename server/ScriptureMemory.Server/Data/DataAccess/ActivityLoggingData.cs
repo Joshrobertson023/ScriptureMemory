@@ -1,205 +1,205 @@
-using Dapper;
-using DataAccess.Models;
-using Microsoft.Extensions.Configuration;
-using ScriptureMemory.Server.Tools;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Npgsql;
-
-namespace DataAccess.Data;
-
-public class PagedLogs<T>
-{
-    public List<T> Items { get; set; } = new();
-    public int Page { get; set; }
-    public int PageSize { get; set; }
-}
-
-public sealed class ActivityLoggingData
-{
-    private readonly IConfiguration _config;
-    private readonly string _connectionString;
-
-    private const string selectClause = @"ID, USER_ID as UserId, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
-                                        ENTITY_ID as EntityId, CONTEXT_DESCRIPTION as ContextDescription,
-                                        METADATA_JSON as JsonMetadata, SEVERITY_LEVEL as SeverityLevel,
-                                        IS_ADMIN_ACTION as IsAdminAction, CREATED_AT as CreatedAt";
-
-    public ActivityLoggingData(IConfiguration config)
-    {
-        _config = config;
-        _connectionString = _config.GetConnectionString("PostgresConnection")
-            ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
-    }
-
-    public async Task Create(ActivityLog log)
-    {
-        var sql = @"INSERT INTO ACTIVITY_LOGS
-                    (USER_ID, ACTION_TYPE, ENTITY_TYPE, ENTITY_ID, CONTEXT_DESCRIPTION, 
-                     METADATA_JSON, SEVERITY_LEVEL, IS_ADMIN_ACTION, CREATED_AT)
-                    VALUES
-                    (:UserId, :ActionType, :EntityType, :EntityId, :ContextDescription,
-                     :MetadataJson, :SeverityLevel, :IsAdminAction, :CreatedAt)";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        await conn.ExecuteAsync(sql,
-            new
-            {
-                UserId = log.UserId,
-                ActionType = log.ActionType,
-                EntityType = log.EntityType,
-                EntityId = log.EntityId,
-                ContextDescription = log.ContextDescription,
-                MetadataJson = log.JsonMetadata,
-                SeverityLevel = log.SeverityLevel,
-                IsAdminAction = Convert.ToInt(log.IsAdminAction),
-                CreatedAt = log.CreatedAt
-            });
-    }
-
-    public async Task<ActivityLog?> GetById(int id)
-    {
-        var sql = $@"SELECT
-                    {selectClause}
-                    FROM ACTIVITY_LOGS WHERE ID = :Id";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        return await conn.QuerySingleOrDefaultAsync<ActivityLog>(
-            sql,
-            new { Id = id });
-    }
-
-    public async Task<PagedLogs<ActivityLog>> GetByUser(int userId, int page = 1, int pageSize = 50)
-    {
-        var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
-                     WHERE USER_ID = :UserId
-                     ORDER BY CREATED_AT DESC, ID DESC
-                     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        return new PagedLogs<ActivityLog>
-        {
-            Items = (await conn.QueryAsync<ActivityLog>(
-                sql,
-                new
-                {
-                    UserId = userId,
-                    Offset = (page - 1) * pageSize,
-                    PageSize = pageSize
-                })).AsList(),
-            Page = page,
-            PageSize = pageSize
-        };
-    }
-
-    public async Task<PagedLogs<ActivityLog>> GetByEntity(Enums.EntityType entityType, int entityId, int page = 1, int pageSize = 50)
-    {
-        var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
-                     WHERE ENTITY_TYPE = :EntityType AND ENTITY_ID = :EntityId
-                     ORDER BY CREATED_AT DESC, ID DESC
-                     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        return new PagedLogs<ActivityLog>
-        {
-            Items = (await conn.QueryAsync<ActivityLog>(
-                sql,
-                new
-                {
-                    EntityType = entityType,
-                    EntityId = entityId,
-                    Offset = (page - 1) * pageSize,
-                    PageSize = pageSize
-                })).AsList(),
-            Page = page,
-            PageSize = pageSize
-        };
-    }
-
-    public async Task<PagedLogs<ActivityLog>> GetByActionType(Enums.ActionType actionType, int page = 1, int pageSize = 50)
-    {
-        var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
-                     WHERE ACTION_TYPE = :ActionType
-                     ORDER BY CREATED_AT DESC, ID DESC
-                     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        return new PagedLogs<ActivityLog>
-        {
-            Items = (await conn.QueryAsync<ActivityLog>(
-                sql,
-                new
-                {
-                    ActionType = actionType,
-                    Offset = (page - 1) * pageSize,
-                    PageSize = pageSize
-                })).AsList(),
-            Page = page,
-            PageSize = pageSize
-        };
-    }
-
-    public async Task<PagedLogs<ActivityLog>> GetByDateRange(DateTime from, DateTime to, int page = 1, int pageSize = 50)
-    {
-        var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
-                     WHERE CREATED_AT >= :p_from AND CREATED_AT <= :p_to    
-                     ORDER BY CREATED_AT DESC, ID DESC
-                     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        return new PagedLogs<ActivityLog>
-        {
-            Items = (await conn.QueryAsync<ActivityLog>(
-                sql,
-                new
-                {
-                    p_from = from,
-                    p_to = to,
-                    Offset = (page - 1) * pageSize,
-                    PageSize = pageSize
-                })).AsList(),
-            Page = page,
-            PageSize = pageSize
-        };
-    }
-
-    public async Task<PagedLogs<ActivityLog>> GetAdminActions(int page = 1, int pageSize = 50)
-    {
-        var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
-                     WHERE IS_ADMIN_ACTION = 1
-                     ORDER BY CREATED_AT DESC, ID DESC
-                     OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
-
-        using var conn = new NpgsqlConnection(_connectionString);
-        return new PagedLogs<ActivityLog>
-        {
-            Items = (await conn.QueryAsync<ActivityLog>(
-                sql,
-                new
-                {
-                    Offset = (page - 1) * pageSize,
-                    PageSize = pageSize
-                })).AsList(),
-            Page = page,
-            PageSize = pageSize
-        };
-    }
-
-    public async Task<int> DeleteOlderThan(DateTime cutoff)
-    {
-        var sql = "DELETE FROM ACTIVITY_LOGS WHERE CREATED_AT < :Cutoff";
-        using var conn = new NpgsqlConnection(_connectionString);
-        return await conn.ExecuteAsync(sql, new { Cutoff = cutoff });
-    }
-
-    public async Task<int> DeleteLogsForUser(string username)
-    {
-        var sql = "DELETE FROM ACTIVITY_LOGS WHERE USERNAME = :Username";
-        using var conn = new NpgsqlConnection(_connectionString);
-        return await conn.ExecuteAsync(sql, new { Username = username });
-    }
-}
+// using Dapper;
+// using DataAccess.Models;
+// using Microsoft.Extensions.Configuration;
+// using ScriptureMemory.Server.Tools;
+// using System;
+// using System.Collections.Generic;
+// using System.Data;
+// using System.Linq;
+// using System.Text;
+// using System.Threading.Tasks;
+// using Npgsql;
+//
+// namespace DataAccess.Data;
+//
+// public class PagedLogs<T>
+// {
+//     public List<T> Items { get; set; } = new();
+//     public int Page { get; set; }
+//     public int PageSize { get; set; }
+// }
+//
+// public sealed class ActivityLoggingData
+// {
+//     private readonly IConfiguration _config;
+//     private readonly string _connectionString;
+//
+//     private const string selectClause = @"ID, USER_ID as UserId, ACTION_TYPE as ActionType, ENTITY_TYPE as EntityType, 
+//                                         ENTITY_ID as EntityId, CONTEXT_DESCRIPTION as ContextDescription,
+//                                         METADATA_JSON as JsonMetadata, SEVERITY_LEVEL as SeverityLevel,
+//                                         IS_ADMIN_ACTION as IsAdminAction, CREATED_AT as CreatedAt";
+//
+//     public ActivityLoggingData(IConfiguration config)
+//     {
+//         _config = config;
+//         _connectionString = _config.GetConnectionString("PostgresConnection")
+//             ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
+//     }
+//
+//     public async Task Create(ActivityLog log)
+//     {
+//         var sql = @"INSERT INTO ACTIVITY_LOGS
+//                     (USER_ID, ACTION_TYPE, ENTITY_TYPE, ENTITY_ID, CONTEXT_DESCRIPTION, 
+//                      METADATA_JSON, SEVERITY_LEVEL, IS_ADMIN_ACTION, CREATED_AT)
+//                     VALUES
+//                     (:UserId, :ActionType, :EntityType, :EntityId, :ContextDescription,
+//                      :MetadataJson, :SeverityLevel, :IsAdminAction, :CreatedAt)";
+//
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         await conn.ExecuteAsync(sql,
+//             // new
+//             {
+//                 UserId = log.UserId,
+//                 ActionType = log.ActionType,
+//                 EntityType = log.EntityType,
+//                 EntityId = log.EntityId,
+//                 ContextDescription = log.ContextDescription,
+//                 MetadataJson = log.JsonMetadata,
+//                 SeverityLevel = log.SeverityLevel,
+//                 IsAdminAction = Convert.ToInt(log.IsAdminAction),
+//                 CreatedAt = log.CreatedAt
+//             });
+//     }
+//
+//     public async Task<ActivityLog?> GetById(int id)
+//     {
+//         var sql = $@"SELECT
+//                     {selectClause}
+//                     FROM ACTIVITY_LOGS WHERE ID = :Id";
+//
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return await conn.QuerySingleOrDefaultAsync<ActivityLog>(
+//             sql,
+//             new { Id = id });
+//     }
+//
+//     public async Task<PagedLogs<ActivityLog>> GetByUser(int userId, int page = 1, int pageSize = 50)
+//     {
+//         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
+//                      WHERE USER_ID = :UserId
+//                      ORDER BY CREATED_AT DESC, ID DESC
+//                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
+//
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return new PagedLogs<ActivityLog>
+//         {
+//             Items = (await conn.QueryAsync<ActivityLog>(
+//                 sql,
+//                 new
+//                 {
+//                     UserId = userId,
+//                     Offset = (page - 1) * pageSize,
+//                     PageSize = pageSize
+//                 })).AsList(),
+//             Page = page,
+//             PageSize = pageSize
+//         };
+//     }
+//
+//     public async Task<PagedLogs<ActivityLog>> GetByEntity(Enums.EntityType entityType, int entityId, int page = 1, int pageSize = 50)
+//     {
+//         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
+//                      WHERE ENTITY_TYPE = :EntityType AND ENTITY_ID = :EntityId
+//                      ORDER BY CREATED_AT DESC, ID DESC
+//                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
+//
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return new PagedLogs<ActivityLog>
+//         {
+//             Items = (await conn.QueryAsync<ActivityLog>(
+//                 sql,
+//                 new
+//                 {
+//                     EntityType = entityType,
+//                     EntityId = entityId,
+//                     Offset = (page - 1) * pageSize,
+//                     PageSize = pageSize
+//                 })).AsList(),
+//             Page = page,
+//             PageSize = pageSize
+//         };
+//     }
+//
+//     public async Task<PagedLogs<ActivityLog>> GetByActionType(Enums.ActionType actionType, int page = 1, int pageSize = 50)
+//     {
+//         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
+//                      WHERE ACTION_TYPE = :ActionType
+//                      ORDER BY CREATED_AT DESC, ID DESC
+//                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
+//
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return new PagedLogs<ActivityLog>
+//         {
+//             Items = (await conn.QueryAsync<ActivityLog>(
+//                 sql,
+//                 new
+//                 {
+//                     ActionType = actionType,
+//                     Offset = (page - 1) * pageSize,
+//                     PageSize = pageSize
+//                 })).AsList(),
+//             Page = page,
+//             PageSize = pageSize
+//         };
+//     }
+//
+//     public async Task<PagedLogs<ActivityLog>> GetByDateRange(DateTime from, DateTime to, int page = 1, int pageSize = 50)
+//     {
+//         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
+//                      WHERE CREATED_AT >= :p_from AND CREATED_AT <= :p_to    
+//                      ORDER BY CREATED_AT DESC, ID DESC
+//                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
+//
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return new PagedLogs<ActivityLog>
+//         {
+//             Items = (await conn.QueryAsync<ActivityLog>(
+//                 sql,
+//                 new
+//                 {
+//                     p_from = from,
+//                     p_to = to,
+//                     Offset = (page - 1) * pageSize,
+//                     PageSize = pageSize
+//                 })).AsList(),
+//             Page = page,
+//             PageSize = pageSize
+//         };
+//     }
+//
+//     public async Task<PagedLogs<ActivityLog>> GetAdminActions(int page = 1, int pageSize = 50)
+//     {
+//         var sql = $@"SELECT {selectClause} FROM ACTIVITY_LOGS
+//                      WHERE IS_ADMIN_ACTION = 1
+//                      ORDER BY CREATED_AT DESC, ID DESC
+//                      OFFSET :Offset ROWS FETCH NEXT :PageSize ROWS ONLY";
+//
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return new PagedLogs<ActivityLog>
+//         {
+//             Items = (await conn.QueryAsync<ActivityLog>(
+//                 sql,
+//                 new
+//                 {
+//                     Offset = (page - 1) * pageSize,
+//                     PageSize = pageSize
+//                 })).AsList(),
+//             Page = page,
+//             PageSize = pageSize
+//         };
+//     }
+//
+//     public async Task<int> DeleteOlderThan(DateTime cutoff)
+//     {
+//         var sql = "DELETE FROM ACTIVITY_LOGS WHERE CREATED_AT < :Cutoff";
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return await conn.ExecuteAsync(sql, new { Cutoff = cutoff });
+//     }
+//
+//     public async Task<int> DeleteLogsForUser(string username)
+//     {
+//         var sql = "DELETE FROM ACTIVITY_LOGS WHERE USERNAME = :Username";
+//         using var conn = new NpgsqlConnection(_connectionString);
+//         return await conn.ExecuteAsync(sql, new { Username = username });
+//     }
+// }

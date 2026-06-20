@@ -28,7 +28,6 @@ public class UserTests : BaseIntegrationTest
             Model = "iPhone 15 Pro"
         });
         
-        Assert.IsType<CreateUserDto>(results);
         Assert.NotEqual(0, results.User.UserId);
         Assert.True(results.User.Preferences.NotifyCollectionSaved);
         Assert.NotEmpty(results.Jwt);

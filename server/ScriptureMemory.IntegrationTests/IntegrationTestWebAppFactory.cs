@@ -43,6 +43,8 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
     public async Task InitializeAsync()
     {
         await _dbContainer.StartAsync();
+
+        await _dbContainer.ExecScriptAsync("CREATE EXTENSION IF NOT EXISTS vector;");
         
         using var scope = Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
