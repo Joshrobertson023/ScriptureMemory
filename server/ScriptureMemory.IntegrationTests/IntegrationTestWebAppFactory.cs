@@ -12,7 +12,7 @@ namespace ScriptureMemory.IntegrationTests;
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:latest")
+        .WithImage("pgvector/pgvector:pg16") 
         .WithDatabase("bible-app")
         .WithUsername("postgres")
         .WithPassword("postgres")
@@ -33,14 +33,24 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options
-                    .UseNpgsql(_dbContainer.GetConnectionString());
+                    .UseNpgsql(
+                        _dbContainer.GetConnectionString(),
+                        o => o.UseVector());
             });
         });
     }
 
-    public Task InitializeAsync()
-        => _dbContainer.StartAsync();
+    public async Task InitializeAsync()
+    {
+        await _dbContainer.StartAsync();
+        
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await dbContext.Database.MigrateAsync(); 
+    }
 
-    public Task DisposeAsync()
-        => _dbContainer.StopAsync();
+    public async Task DisposeAsync()
+    {
+        await _dbContainer.StopAsync();
+    }
 }

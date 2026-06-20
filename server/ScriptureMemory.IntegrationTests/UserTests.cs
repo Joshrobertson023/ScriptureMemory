@@ -1,6 +1,5 @@
 using DataAccess.Data;
 using DataAccess.Models;
-using Microsoft.AspNet.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using ScriptureMemory.Server.DataAccess.Models;
 using VerseAppNew.Server.Services;

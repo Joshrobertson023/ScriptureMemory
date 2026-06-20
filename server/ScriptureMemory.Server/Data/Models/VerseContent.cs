@@ -12,13 +12,15 @@ public class VerseContent
     [MaxLength(100)]
     public string PlainText { get; set; } = string.Empty;
     
+    [Column(TypeName = "jsonb")]
     public object? ContentJson { get; set; }
     
     public Vector? Embedding { get; set; }
     
     public DateTime? LastUpdated { get; set; }
 
-    public int VerseId { get; set; }
+    [MaxLength(20)]
+    public string VerseId { get; set; } = string.Empty;
     
     public Verse VerseNavigation { get; set; } = null!;
 

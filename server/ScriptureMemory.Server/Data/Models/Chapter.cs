@@ -10,5 +10,6 @@ public class Chapter
     
     public int ChapterNum { get; set; }
     
+    [Column(TypeName = "jsonb")]
     public object ContentJson { get; set; } = new();
 }

@@ -7,7 +7,6 @@ public class UserConfiguration : AccountConfiguration, IEntityTypeConfiguration<
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder.ToTable("Users");
-        builder.HasKey(e => e.UserId);
         builder.Property(e => e.Username)
             .HasMaxLength(20);
         builder.Property(e => e.FirstName)

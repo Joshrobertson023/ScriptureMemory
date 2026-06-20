@@ -35,7 +35,7 @@ app.UseMiddleware()
 // Convert all errors into Problem Details responses
 app.UseStatusCodePages();
 
-await app.AskToRunStartupTasks();
+//await app.AskToRunStartupTasks();
 
 app.Run();
 

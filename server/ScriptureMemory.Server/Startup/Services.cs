@@ -125,7 +125,7 @@ public static class Services
             ServiceLifetime.Scoped);
 
         // Add postgres data source for integration tests
-        services.AddNpgsqlDataSource(connectionString);
+        // services.AddNpgsqlDataSource(connectionString);
         
         //
         services.AddHttpClient("ExpoPush", client =>
@@ -173,7 +173,6 @@ public static class Services
 
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
-        services.AddScoped<IRequestDbConnection, RequestDbConnection>();
         services.AddScoped<IUserData, UserDataEFCore>();
         services.AddScoped<AdminData>();
         services.AddScoped<UserSettingsData>();

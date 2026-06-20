@@ -19,7 +19,7 @@ public class Verse
     /// ("PSA.1.1")
     /// </summary>
     [Key]
-    [MaxLength(10)]
+    [MaxLength(20)]
     public string Id { get; set; } = string.Empty;
 
     public int MemorizedCount { get; set; } = 0;

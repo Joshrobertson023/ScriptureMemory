@@ -1,4 +1,3 @@
-using Microsoft.AspNet.Identity;
 using ScriptureMemory.Server.Data.DataAccess;
 using ScriptureMemory.Server.Data.Responses;
 using static System.Runtime.InteropServices.JavaScript.JSType;

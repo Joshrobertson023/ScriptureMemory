@@ -7,6 +7,7 @@ public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPrefere
     public void Configure(EntityTypeBuilder<UserPreferences> builder)
     {
         builder.ToTable("UserPreferences");
+        builder.HasKey(e => e.UserId);
         builder.Property(e => e.ThemePreference)
             .IsRequired()
             .HasConversion<string>()
@@ -22,12 +23,6 @@ public class UserPreferencesConfiguration : IEntityTypeConfiguration<UserPrefere
             .HasConversion<string>()
             .HasMaxLength(20)
             .HasDefaultValueSql("'Newest'");
-        builder.Property(u => u.ThemePreference)
-            .HasDefaultValue(ThemePreference.SystemDefault);
-        builder.Property(u => u.BibleVersion)
-            .HasDefaultValue(BibleVersion.Kjv);
-        builder.Property(u => u.CollectionsSort)
-            .HasDefaultValue(CollectionsSort.Newest);
         builder.Property(u => u.SubscribedVerseOfDay)
             .HasDefaultValue(true);
         builder.Property(u => u.NotifyFriendsMemorizedPassage)

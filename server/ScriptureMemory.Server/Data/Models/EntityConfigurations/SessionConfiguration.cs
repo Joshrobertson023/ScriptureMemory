@@ -21,9 +21,9 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
             .HasMaxLength(100);
         builder.Property(e => e.CreatedAt)
             .IsRequired()
-            .HasDefaultValue(DateTime.UtcNow);
+            .HasDefaultValueSql("NOW()");
         builder.Property(e => e.LastSeenAt)
             .IsRequired()
-            .HasDefaultValue(DateTime.UtcNow);
+            .HasDefaultValueSql("NOW()");
     }
 }

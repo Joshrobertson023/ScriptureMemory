@@ -7,6 +7,8 @@
 using static ScriptureMemory.Server.Tools.Enums;
 
 namespace DataAccess.Models;
+
+[NotMapped]
 public class Collection
 {
     [Key]

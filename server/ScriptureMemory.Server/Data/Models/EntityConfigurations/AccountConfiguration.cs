@@ -6,6 +6,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
 {
     public void Configure(EntityTypeBuilder<Account> builder)
     {
+        builder.HasKey(e => e.UserId);
         builder.Property(u => u.Role)
             .HasConversion<string>()
             .HasMaxLength(20);
@@ -17,6 +18,6 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .OnDelete(DeleteBehavior.SetNull);
         builder.Property(e => e.DateCreated)
             .IsRequired()
-            .HasDefaultValueSql("CURRENT_TIMESTAMP AT TIME ZONE 'UTC'");
+            .HasDefaultValueSql("NOW()");
     }
 }

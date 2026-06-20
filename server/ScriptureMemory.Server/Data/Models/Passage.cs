@@ -2,6 +2,7 @@
 
 namespace ScriptureMemory.Server.DataAccess.Models;
 
+[NotMapped]
 public class Passage
 {
     public Reference Reference { get; set; }
