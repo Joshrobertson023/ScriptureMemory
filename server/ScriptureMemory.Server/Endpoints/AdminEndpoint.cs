@@ -19,7 +19,7 @@ public static class AdminEndpoint
     {
         app.MapPost("admin", async (
             [FromBody] CreateAdminRequest request,
-            [FromServices] AdminData data) =>
+            [FromServices] AdminDataDapper data) =>
         {
             var result = await data.InsertAdmin(new Admin
             {
@@ -38,7 +38,7 @@ public static class AdminEndpoint
 
         app.MapPut("admin/password", async (
             [FromBody] UpdateAdminPasswordRequest request,
-            [FromServices] AdminData data) =>
+            [FromServices] AdminDataDapper data) =>
         {
             var passwordHasher = new PasswordHasher<Admin>();
             var hashedPassword = passwordHasher.HashPassword(null, request.NewPassword);

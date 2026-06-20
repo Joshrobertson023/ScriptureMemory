@@ -14,11 +14,12 @@
 // using ScriptureMemory.Server.DataAccess.Models;
 // using Pgvector;
 // using ScriptureMemory.Server;
+// using ScriptureMemory.Server.Data.DataAccess.Bible;
 // using static ScriptureMemory.Server.Tools.Enums;
 //
 // namespace DataAccess.Data;
 //
-// public class VerseData
+// public class VerseDataDapper : IVerseData
 // {
 //     private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 //
@@ -34,7 +35,7 @@
 //         embedding as Embedding
 //         """;
 //
-//     public VerseData(IDbContextFactory<ApplicationDbContext> contextFactory)
+//     public VerseDataDapper(IDbContextFactory<ApplicationDbContext> contextFactory)
 //     {
 //         _contextFactory = contextFactory;
 //         

@@ -8,12 +8,12 @@ using ScriptureMemory.Server.Tools;
 
 namespace DataAccess.Data;
 
-public class AdminData
+public class AdminDataDapper : IAdminData
 {
     private readonly IConfiguration _config;
     private readonly string _connectionString;
 
-    public AdminData(IConfiguration config)
+    public AdminDataDapper(IConfiguration config)
     {
         _config = config;
         _connectionString = _config.GetConnectionString("PostgresConnection")

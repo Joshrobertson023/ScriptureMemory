@@ -12,8 +12,6 @@ public class UserTests : BaseIntegrationTest
         : base(factory)
     {
     }
-    
-    private record CreateUserDto(User user, string jwt);
 
     [Fact]
     public async Task CreateUser_Should_Create_User_Jwt_And_Preferences()

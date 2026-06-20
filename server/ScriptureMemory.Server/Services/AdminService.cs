@@ -9,11 +9,11 @@ namespace ScriptureMemory.Server.Services;
 
 public class AdminService
 {
-    private readonly AdminData _adminData;
+    private readonly AdminDataDapper _adminData;
     private readonly TokenProvider _tokenProvider;
 
     public AdminService(
-        AdminData adminData,
+        AdminDataDapper adminData,
         TokenProvider tokenProvider)
     {
         _adminData = adminData;

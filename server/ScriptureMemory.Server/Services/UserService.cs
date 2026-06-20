@@ -36,7 +36,7 @@ public sealed class UserService
 
     /// <summary>
     /// Method that creates a user from the user's device session info.
-    /// This method runs when the user first opens the app.
+    /// This method runs when the user first opens the app, which is determined on the client app.
     /// </summary>
     /// <param name="session"></param>
     /// <returns></returns>

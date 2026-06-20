@@ -173,7 +173,7 @@ public static class Services
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
         services.AddScoped<IUserData, UserDataEFCore>();
-        services.AddScoped<AdminData>();
+        services.AddScoped<AdminDataDapper>();
         // services.AddScoped<UserSettingsData>();
         // //services.AddScoped<CrossReferenceData>();
         // services.AddScoped<ActivityLoggingData>();

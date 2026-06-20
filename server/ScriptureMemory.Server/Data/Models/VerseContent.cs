@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace ScriptureMemory.Server.DataAccess.Models;
 
-public class VerseContent
+public class VerseTranslationContent
 {
     [MaxLength(5)]
     public string Version { get; set; } = string.Empty;

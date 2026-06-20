@@ -30,7 +30,7 @@ public class Verse
     
     public Passage? PassageNavigation { get; set; } = null!;
     
-    public VerseContent? Content { get; set; }
+    public List<VerseTranslationContent>? Translations { get; set; }
 
     /// <summary>
     /// Creates a new verse, giving it a new VerseId and also ensures a valid parsed reference

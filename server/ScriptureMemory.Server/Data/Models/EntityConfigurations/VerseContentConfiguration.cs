@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ScriptureMemory.Server.Data.Models.EntityConfigurations;
 
-public class VerseContentConfiguration : IEntityTypeConfiguration<VerseContent>
+public class VerseContentConfiguration : IEntityTypeConfiguration<VerseTranslationContent>
 {
-    public void Configure(EntityTypeBuilder<VerseContent> builder)
+    public void Configure(EntityTypeBuilder<VerseTranslationContent> builder)
     {
         builder.HasKey(c => new { c.Version, c.VerseId });
         builder.Property(e => e.Version)
