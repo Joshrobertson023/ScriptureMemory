@@ -46,15 +46,10 @@ public sealed class Reference
         VerseNumbers = ReferenceParser.GetIndividualVerses(readableReference);
     }
 
-    public Reference(string bookName, int chapter, List<int> verseNumbers)
+    public Reference(Book book, int chapter, List<int> verseNumbers)
     {
-        Book? book = Books.GetBook(bookName);
-        
-        if (book is null)
-            throw new InvalidOperationException($"Book {bookName} not found");
-        
-        ReadableReference = ReferenceParser.ConvertToReadableReference(Book!.DisplayName, Chapter, verseNumbers);
-        Book = book!;
+        ReadableReference = ReferenceParser.ConvertToReadableReference(book.DisplayName, Chapter, verseNumbers);
+        Book = book;
         Chapter = chapter;
         VerseNumbers = verseNumbers;
     }

@@ -21,7 +21,7 @@ public class Verse
     /// </summary>
     [Key]
     [MaxLength(20)]
-    public string Id { get; set; } = string.Empty;
+    public string Id { get; init; }
 
     public int MemorizedCount { get; set; } = 0;
 
@@ -38,7 +38,18 @@ public class Verse
     /// </summary>
     public Verse(Book book, int chapter, int verseNum)
     {
-        Reference = ReferenceParser.Parse(book.DisplayName, chapter, new List<int>() {verseNum});
+        Reference = ReferenceParser.Parse(book, chapter, new List<int>() {verseNum});
+        Id = CreateId();
+    }
+
+    public Verse(string bookName, int chapter, int verseNum)
+    {
+        Reference = ReferenceParser.Parse(
+            Books.GetBook(bookName)
+                ??  throw new ArgumentException($"{bookName} is not a valid book name"), 
+            chapter, 
+            new List<int>() {verseNum});
+        
         Id = CreateId();
     }
     

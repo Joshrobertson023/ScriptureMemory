@@ -137,7 +137,7 @@ public static class ReferenceParser
     /// <param name="chapter"></param>
     /// <param name="verses"></param>
     /// <returns></returns>
-    public static Reference Parse(string book, int chapter, List<int> verses)
+    public static Reference Parse(Book book, int chapter, List<int> verses)
     {
         return new Reference(book, chapter, verses);
     }
