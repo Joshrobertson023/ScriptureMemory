@@ -34,8 +34,8 @@ public sealed class Reference
     {
         Book? book;
         
-        bool succeeded = AllBooksInitializer.TryGetBook(
-            ReferenceParser.GetBook(readableReference), 
+        bool succeeded = Books.TryGetBook(
+            ReferenceParser.GetBook(readableReference).DisplayName, 
             out book);
 
         book = succeeded
@@ -51,7 +51,7 @@ public sealed class Reference
 
     public Reference(string bookName, int chapter, List<int> verseNumbers)
     {
-        if (!AllBooksInitializer.TryGetBook(bookName, out Book? book))
+        if (!Books.TryGetBook(bookName, out Book? book))
             throw new InvalidOperationException($"Book {bookName} not found");
         
         ReadableReference = ReferenceParser.ConvertToReadableReference(Book!.DisplayName, Chapter, verseNumbers);

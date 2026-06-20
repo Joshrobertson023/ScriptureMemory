@@ -78,12 +78,12 @@ public class BibleApi
         for (int bibleIndex = 0; bibleIndex < BibleData.Bibles.Count; bibleIndex++)
         {
             // For each book in the Bible
-            for (int bookIndex = 0; bookIndex < AllBooksInitializer.AllBooks.Count; bookIndex++)
+            for (int bookIndex = 0; bookIndex < Books.AllBooks.Count; bookIndex++)
             {
                 // Get all chapters in the book
                 List<ChaptersData> chapters = new();
                 string bibleId = BibleData.Bibles[bibleIndex].Id;
-                string bookAbbr = AllBooksInitializer.AllBooks[bookIndex].Abbreviation;
+                string bookAbbr = Books.AllBooks[bookIndex].Abbreviation;
                 try
                 {
                     var chaptersResponse = await http.GetFromJsonAsync<ApiResponse<List<ChaptersData>>>

@@ -3,7 +3,7 @@ using static Azure.Core.HttpHeader;
 
 namespace ScriptureMemory.Server.Tools;
 
-public static class AllBooksInitializer
+public static class Books
 {
     /// <summary>
     /// Every book of the Bible's display name, abbreviation, and fuzzy matches

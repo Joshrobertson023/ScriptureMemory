@@ -11,11 +11,11 @@ public class VerseTests : BaseIntegrationTest
     {
     }
     
-    [Fact]
-    public async Task InsertVerse_Should_Insert_Verse_And_TranslationContent()
-    {
-        var verseContext = _scope.ServiceProvider.GetRequiredService<VerseDataEfCore>();
-
-        Verse newVerse = new Verse()
-    }
+    // [Fact]
+    // public async Task InsertVerse_Should_Insert_Verse_And_TranslationContent()
+    // {
+    //     var verseContext = _scope.ServiceProvider.GetRequiredService<VerseDataEfCore>();
+    //
+    //     Verse newVerse = new Verse()
+    // }
 }
