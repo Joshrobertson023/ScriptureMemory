@@ -92,13 +92,13 @@ public static class Books
 
         foreach (var book in AllBooks)
         {
-            returnIndex.Add(book.DisplayName, book);
+            returnIndex.TryAdd(book.DisplayName, book);
             
-            returnIndex.Add(book.Abbreviation, book);
+            returnIndex.TryAdd(book.Abbreviation, book);
             
             foreach (var fuzzyMatch in book.FuzzyMatches)
             {
-                returnIndex.Add(fuzzyMatch, book);
+                returnIndex.TryAdd(fuzzyMatch, book);
             }
         }
 

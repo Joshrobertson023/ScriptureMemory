@@ -30,97 +30,104 @@ public static class ReferenceParser
         if (string.IsNullOrWhiteSpace(input))
             return null;
 
-        Reference returnReference = new();
-        ReadOnlySpan<char> inputSpan = input.Trim().AsSpan();
-        int i = 0;
-
-        // Move up the book
-        while (i < inputSpan.Length 
-               && (char.IsLetter(inputSpan[i])
-                   || i <= 1)) // Move up for numbered books like "1 John"
+        try
         {
-            i++;
-        }
+            Reference returnReference = new();
+            ReadOnlySpan<char> inputSpan = input.Trim().AsSpan();
+            int i = 0;
 
-        // Check if a valid book
-        Book? book = GetBook(inputSpan[..i].ToString().ToLower());
-        returnReference.Book = book is null
-            ? new Book("Error parsing book", "", new List<string>())
-                // Don't throw an error if not a valid book -- user should be able to handle it
-            : book;
-
-        // Move up to the chapter. We know the next digits after the book are the chapter.
-        if (i < inputSpan.Length && !char.IsDigit(inputSpan[i]))
-            i++;
-        int chapterStart = i;
-        
-        // Move up to the end of the chapter
-        while (i < inputSpan.Length && char.IsDigit(inputSpan[i]))
-            i++;
-
-        returnReference.Chapter = int.Parse(inputSpan[chapterStart..i]);
-
-        // Move up to the start of the verses part
-        if (i < inputSpan.Length && (!char.IsDigit(inputSpan[i]) || inputSpan[i] == ':'))
-            i++;
-
-        ReadOnlySpan<char> versesPartSpan = inputSpan[i..]; // The rest of the input should be the verses part
-
-        string versesPart;
-        int dashIndex = versesPartSpan.IndexOf('-');
-        
-        if (dashIndex >= 0)
-        { // Handle a dash in the verses part
-            ReadOnlySpan<char> firstPart = versesPartSpan[..dashIndex];
-            ReadOnlySpan<char> secondPart = versesPartSpan[(dashIndex + 1)..];
-
-            // Check if after the dash contains a book.
-            // Handles formats like "Psalms 119:2-Psalms 119:3" that is used by the dataset used for cross-references
-            bool secondPartContainsLetters = false;
-            for (int l = 0; l < secondPart.Length; l++)
+            // Move up the book
+            while (i < inputSpan.Length 
+                   && (char.IsLetter(inputSpan[i])
+                       || i <= 1)) // Move up for numbered books like "1 John"
             {
-                if (char.IsLetter(secondPart[l]) // Handle a book name being after the dash
-                    && secondPart.Length > 0)
-                {
-                    secondPartContainsLetters = true;
-                    break;
-                }
+                i++;
             }
+
+            // Check if a valid book
+            Book? book = GetBook(inputSpan[..i].ToString().ToLower());
+            if (book is null)
+                return null;
+            else
+                returnReference.Book = book;
+
+            // Move up to the chapter. We know the next digits after the book are the chapter.
+            if (i < inputSpan.Length && !char.IsDigit(inputSpan[i]))
+                i++;
+            int chapterStart = i;
             
-            if (secondPart.Length > 0 && secondPartContainsLetters)
-            {
-                // Move backwards, extracting the verses part and ignoring the book
-                int k = firstPart.Length - 1;
-                while (k >= 0 && char.IsDigit(firstPart[k]))
-                    k--;
-                ReadOnlySpan<char> firstDigits = firstPart[(k + 1)..];
+            // Move up to the end of the chapter
+            while (i < inputSpan.Length && char.IsDigit(inputSpan[i]))
+                i++;
 
-                int m = secondPart.Length - 1;
-                while (m >= 0 && char.IsDigit(secondPart[m]))
-                    m--;
-                ReadOnlySpan<char> secondDigits = secondPart[(m + 1)..];
+            returnReference.Chapter = int.Parse(inputSpan[chapterStart..i]);
 
-                // Replace versesPart 
-                versesPart = string.Concat(firstDigits, "-", secondDigits);
+            // Move up to the start of the verses part
+            if (i < inputSpan.Length && (!char.IsDigit(inputSpan[i]) || inputSpan[i] == ':'))
+                i++;
+
+            ReadOnlySpan<char> versesPartSpan = inputSpan[i..]; // The rest of the input should be the verses part
+
+            string versesPart;
+            int dashIndex = versesPartSpan.IndexOf('-');
+            
+            if (dashIndex >= 0)
+            { // Handle a dash in the verses part
+                ReadOnlySpan<char> firstPart = versesPartSpan[..dashIndex];
+                ReadOnlySpan<char> secondPart = versesPartSpan[(dashIndex + 1)..];
+
+                // Check if after the dash contains a book.
+                // Handles formats like "Psalms 119:2-Psalms 119:3" that is used by the dataset used for cross-references
+                bool secondPartContainsLetters = false;
+                for (int l = 0; l < secondPart.Length; l++)
+                {
+                    if (char.IsLetter(secondPart[l]) // Handle a book name being after the dash
+                        && secondPart.Length > 0)
+                    {
+                        secondPartContainsLetters = true;
+                        break;
+                    }
+                }
+                
+                if (secondPart.Length > 0 && secondPartContainsLetters)
+                {
+                    // Move backwards, extracting the verses part and ignoring the book
+                    int k = firstPart.Length - 1;
+                    while (k >= 0 && char.IsDigit(firstPart[k]))
+                        k--;
+                    ReadOnlySpan<char> firstDigits = firstPart[(k + 1)..];
+
+                    int m = secondPart.Length - 1;
+                    while (m >= 0 && char.IsDigit(secondPart[m]))
+                        m--;
+                    ReadOnlySpan<char> secondDigits = secondPart[(m + 1)..];
+
+                    // Replace versesPart 
+                    versesPart = string.Concat(firstDigits, "-", secondDigits);
+                }
+                else
+                {
+                    versesPart = versesPartSpan.ToString();
+                }
+
             }
             else
             {
                 versesPart = versesPartSpan.ToString();
             }
 
+            returnReference.VerseNumbers = GetIndividualVerses(versesPart, false);
+            returnReference.ReadableReference = ConvertToReadableReference(
+                returnReference.Book.DisplayName, 
+                returnReference.Chapter, 
+                returnReference.VerseNumbers);
+            
+            return returnReference;
         }
-        else
+        catch (Exception e)
         {
-            versesPart = versesPartSpan.ToString();
+            return null;
         }
-
-        returnReference.VerseNumbers = GetIndividualVerses(versesPart, false);
-        returnReference.ReadableReference = ConvertToReadableReference(
-            returnReference.Book.DisplayName, 
-            returnReference.Chapter, 
-            returnReference.VerseNumbers);
-
-        return returnReference;
     }
 
     /// <summary>
@@ -350,7 +357,7 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>"Psalms"</returns>
-    public static Book GetBook(string reference)
+    public static Book? GetBook(string reference)
     {
         reference = reference.Trim();
         
@@ -361,23 +368,29 @@ public static class ReferenceParser
             parts = reference.Split(' ');
         else
             parts[0] = reference;
+
+        Books.TryGetBook(parts[0], out book);
         
-        if (Books.TryGetBook(parts[0], out book))
-            return book!;
-        else
+        if (book is null)
         { // Handle books with one space in its name
             string bookWithNumber = parts[0] + " " + parts[1];
-            if (Books.TryGetBook(bookWithNumber, out book))
-                return book!;
-            else
-            { // Handle books with two spaces in its name
+            Books.TryGetBook(bookWithNumber, out book);
+            if (book is null)
+            {
+                // Handle books with two spaces in its name
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
-                if (Books.TryGetBook(bookWithNumber, out book))
-                    return book!;
-                else
-                    throw new ArgumentException(
-                        $"No valid book found in the reference {reference}"); // More than two spaces is an invalid book
+                Books.TryGetBook(bookWithNumber, out book);
+
+                return book; // There are no valid book names with three or more spaces in its name
             }
+            else
+            {
+                return book;
+            }
+        }
+        else
+        {
+            return book;
         }
     }
 

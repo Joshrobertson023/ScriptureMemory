@@ -11,7 +11,7 @@ public class ConvertStringToReference
     {
         Reference reference = ReferenceParser.Parse("Psalms 119:12-14, 17");
 
-        Assert.Equal("Psalms", reference.Book);
+        Assert.Equal("Psalms", reference.Book.DisplayName);
         Assert.Equal(119, reference.Chapter);
         Assert.Equal(new List<int> { 12, 13, 14, 17 }, reference.VerseNumbers);
     }
@@ -21,7 +21,7 @@ public class ConvertStringToReference
     {
         var reference = ReferenceParser.Parse("John 3:16");
 
-        Assert.Equal("John", reference.Book);
+        Assert.Equal("John", reference.Book.DisplayName);
         Assert.Equal(3, reference.Chapter);
         Assert.Equal(new List<int> { 16 }, reference.VerseNumbers);
     }
@@ -31,15 +31,16 @@ public class ConvertStringToReference
     {
         var reference = ReferenceParser.Parse("1 John 4:8");
 
-        Assert.Equal("1 John", reference.Book);
+        Assert.Equal("1 John", reference.Book.DisplayName);
         Assert.Equal(4, reference.Chapter);
         Assert.Equal(new List<int> { 8 }, reference.VerseNumbers);
     }
 
     [Fact]
-    public void ConvertStringToReference_InvalidBook_ThrowsException()
+    public void ConvertStringToReference_InvalidBook_ReferenceBookDisplayNameIsInvalid()
     {
-        Assert.Throws<Exception>(() =>
-            ReferenceParser.Parse("FakeBook 1:1"));
+        var reference = ReferenceParser.Parse("random_book 1:2-3");
+        
+        Assert.Null(reference);
     }
 }

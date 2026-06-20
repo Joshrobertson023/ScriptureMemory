@@ -26,6 +26,8 @@ public class GetChapterTests
     [Fact]
     public void GetChapter_InvalidReference_ThrowsException()
     {
-        Assert.Throws<Exception>(() => ReferenceParser.GetChapter("FakeBook 1:1"));
+        var result = ReferenceParser.GetChapter("FakeBook 1:1");
+        
+        Assert.Null(result);
     }
 }
