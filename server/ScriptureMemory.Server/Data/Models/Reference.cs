@@ -35,7 +35,7 @@ public sealed class Reference
         Book? book;
         
         bool succeeded = AllBooksInitializer.TryGetBook(
-            ReferenceParser.GetBookName(readableReference), 
+            ReferenceParser.GetBook(readableReference), 
             out book);
 
         book = succeeded

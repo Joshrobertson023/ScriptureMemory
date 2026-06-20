@@ -1,5 +1,6 @@
 ﻿using DataAccess.Models;
 using J2N.Text;
+using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Files.CsvRecordModels;
 using System;
 using System.Collections.Generic;
@@ -42,9 +43,10 @@ public static class ReferenceParser
         }
 
         // Check if a valid book
-        string? book = GetBookName(inputSpan[..i].ToString().ToLower());
+        Book? book = GetBook(inputSpan[..i].ToString().ToLower());
         returnReference.Book = book is null
-            ? "Error parsing book" // Don't throw an error if not a valid book -- user should be able to handle it
+            ? new Book("Error parsing book", "", new List<string>())
+                // Don't throw an error if not a valid book -- user should be able to handle it
             : book;
 
         // Move up to the chapter. We know the next digits after the book are the chapter.
@@ -114,7 +116,7 @@ public static class ReferenceParser
 
         returnReference.VerseNumbers = GetIndividualVerses(versesPart, false);
         returnReference.ReadableReference = ConvertToReadableReference(
-            returnReference.Book, 
+            returnReference.Book.DisplayName, 
             returnReference.Chapter, 
             returnReference.VerseNumbers);
 
@@ -142,7 +144,7 @@ public static class ReferenceParser
     {
         var parts = new List<string>();
 
-        string book = GetBookName(reference);
+        string book = GetBook(reference).DisplayName;
         int chapter = GetChapter(reference);
 
         parts.Add(book);
@@ -323,7 +325,7 @@ public static class ReferenceParser
 
         foreach (var verseNumber in reference.VerseNumbers)
         {
-            references.Add(ConvertToReferenceString(reference.Book, reference.Chapter, verseNumber));
+            references.Add(ConvertToReferenceString(reference.Book.DisplayName, reference.Chapter, verseNumber));
         }
 
         return references;
@@ -348,29 +350,30 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>"Psalms"</returns>
-    public static string GetBookName(string reference)
+    public static Book GetBook(string reference)
     {
         reference = reference.Trim();
         
         string[] parts = new string[1];
+        Book? book;
         
         if (reference.Contains(' '))
             parts = reference.Split(' ');
         else
             parts[0] = reference;
         
-        if (AllBooksInitializer.TryGetBook(parts[0], out string? bookName))
-            return bookName!;
+        if (AllBooksInitializer.TryGetBook(parts[0], out book))
+            return book!;
         else
         { // Handle books with one space in its name
             string bookWithNumber = parts[0] + " " + parts[1];
-            if (AllBooksInitializer.TryGetBook(bookWithNumber, out bookName))
-                return bookName!;
+            if (AllBooksInitializer.TryGetBook(bookWithNumber, out book))
+                return book!;
             else
             { // Handle books with two spaces in its name
                 bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
-                if (AllBooksInitializer.TryGetBook(bookWithNumber, out bookName))
-                    return bookName!;
+                if (AllBooksInitializer.TryGetBook(bookWithNumber, out book))
+                    return book!;
                 else
                     throw new ArgumentException(
                         $"No valid book found in the reference {reference}"); // More than two spaces is an invalid book
@@ -387,7 +390,7 @@ public static class ReferenceParser
     {
         string[] parts = reference.Split(' ');
 
-        if (parts.Length > 1 && AllBooksInitializer.TryGetBook(parts[0], out string? book))
+        if (parts.Length > 1 && AllBooksInitializer.TryGetBook(parts[0], out Book? book))
         {
             var chapterPart = parts[1].Split(':')[0];
 
