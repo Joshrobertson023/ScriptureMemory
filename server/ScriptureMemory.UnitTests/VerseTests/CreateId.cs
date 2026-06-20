@@ -9,6 +9,8 @@ public class CreateId
     [Fact]
     public async Task InsertVerse_Should_Create_Valid_Verse_Id()
     {
-        Verse newVerse = new(Books.GetBook("Genesis"))
+        Verse newVerse = new(Books.GetBook("Genesis")!, 1, 1);
+        
+        Assert.Equal("GEN.1.1", newVerse.Id);
     }
 }

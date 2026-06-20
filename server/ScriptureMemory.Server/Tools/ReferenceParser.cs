@@ -152,7 +152,8 @@ public static class ReferenceParser
         var parts = new List<string>();
 
         string book = GetBook(reference).DisplayName;
-        int chapter = GetChapter(reference);
+        int chapter = GetChapter(reference)
+            ??  throw new InvalidOperationException($"{reference} is not a valid reference.");
 
         parts.Add(book);
         parts.Add(chapter.ToString());
@@ -362,34 +363,41 @@ public static class ReferenceParser
         reference = reference.Trim();
         
         string[] parts = new string[1];
-        
-        if (reference.Contains(' '))
-            parts = reference.Split(' ');
-        else
-            parts[0] = reference;
 
-        Book? book = Books.GetBook(parts[0]);
-        
-        if (book is null)
-        { // Handle books with one space in its name
-            string bookWithNumber = parts[0] + " " + parts[1];
-            book = Books.GetBook(bookWithNumber);
+        try
+        {
+            if (reference.Contains(' '))
+                parts = reference.Split(' ');
+            else
+                parts[0] = reference;
+
+            Book? book = Books.GetBook(parts[0]);
+            
             if (book is null)
-            {
-                // Handle books with two spaces in its name
-                bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
+            { // Handle books with one space in its name
+                string bookWithNumber = parts[0] + " " + parts[1];
                 book = Books.GetBook(bookWithNumber);
+                if (book is null)
+                {
+                    // Handle books with two spaces in its name
+                    bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
+                    book = Books.GetBook(bookWithNumber);
 
-                return book; // There are no valid book names with three or more spaces in its name
+                    return book; // There are no valid book names with three or more spaces in its name
+                }
+                else
+                {
+                    return book;
+                }
             }
             else
             {
                 return book;
             }
         }
-        else
+        catch (Exception e)
         {
-            return book;
+            return null; // Unexpected characters in the book name should return null
         }
     }
 
@@ -398,52 +406,59 @@ public static class ReferenceParser
     /// </summary>
     /// <param name="reference"></param>
     /// <returns>A chapter int</returns>
-    public static int GetChapter(string reference)
-    {
-        string[] parts = reference.Split(' ');
-        
-        Book? book =  Books.GetBook(parts[0]);
-
-        if (parts.Length > 1 && book is not null)
+    public static int? GetChapter(string reference)
+    { // Todo: This method should return the chapter number regardless if the book name is valid or not
+        try
         {
-            var chapterPart = parts[1].Split(':')[0];
+            string[] parts = reference.Split(' ');
+            
+            Book? book =  Books.GetBook(parts[0]);
 
-            if (int.TryParse(chapterPart, out int chapter))
-                return chapter;
-            throw new Exception("Failed to parse chapter number.");
-        }
-        else
-        {
-            string bookWithNumber = parts[0] + " " + parts[1];
-
-            if (Books.GetBook(bookWithNumber) is not null)
+            if (parts.Length > 1 && book is not null)
             {
-                var chapterPart = parts[2].Split(':')[0];
+                var chapterPart = parts[1].Split(':')[0];
+
                 if (int.TryParse(chapterPart, out int chapter))
                     return chapter;
-                else
-                    throw new Exception($"Failed to parse chapter number from reference: {reference}" +
-                                        $" | parts[1]: {parts[1]}");
+                throw new Exception("Failed to parse chapter number.");
             }
             else
             {
-                bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
+                string bookWithNumber = parts[0] + " " + parts[1];
 
                 if (Books.GetBook(bookWithNumber) is not null)
                 {
-                    var chapterPart = parts[3].Split(':')[0];
+                    var chapterPart = parts[2].Split(':')[0];
                     if (int.TryParse(chapterPart, out int chapter))
                         return chapter;
                     else
-                        throw new Exception($"Failed to parse chapter number from reference: {reference} " +
-                                            $"| parts[3]: {parts[3]}");
+                        throw new Exception($"Failed to parse chapter number from reference: {reference}" +
+                                            $" | parts[1]: {parts[1]}");
                 }
                 else
                 {
-                    throw new Exception($"Failed to parse chapter number from reference: {reference} " +
-                                        $"| parts[1]: {parts[1]}");
+                    bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
+
+                    if (Books.GetBook(bookWithNumber) is not null)
+                    {
+                        var chapterPart = parts[3].Split(':')[0];
+                        if (int.TryParse(chapterPart, out int chapter))
+                            return chapter;
+                        else
+                            throw new Exception($"Failed to parse chapter number from reference: {reference} " +
+                                                $"| parts[3]: {parts[3]}");
+                    }
+                    else
+                    {
+                        throw new Exception($"Failed to parse chapter number from reference: {reference} " +
+                                            $"| parts[1]: {parts[1]}");
+                    }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            return null; // Unexpected characters in the book name should return null
         }
     }
 

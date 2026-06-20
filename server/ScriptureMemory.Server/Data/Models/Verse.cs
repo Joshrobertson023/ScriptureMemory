@@ -63,7 +63,7 @@ public class Verse
     /// <returns></returns>
     public string CreateId()
     {
-        return Reference.Book.Abbreviation
+        return Reference.Book.Abbreviation.ToUpper()
                + '.'
                + Reference.Chapter
                + '.'

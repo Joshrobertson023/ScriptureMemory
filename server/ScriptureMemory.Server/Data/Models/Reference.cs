@@ -40,7 +40,8 @@ public sealed class Reference
         
         ReadableReference = readableReference;
         
-        Chapter = ReferenceParser.GetChapter(readableReference);
+        Chapter = ReferenceParser.GetChapter(readableReference) 
+                  ?? throw new InvalidOperationException($"{readableReference} is not a valid reference.");
         
         VerseNumbers = ReferenceParser.GetIndividualVerses(readableReference);
     }
