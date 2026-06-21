@@ -20,7 +20,7 @@ public class ChapterConfiguration : IEntityTypeConfiguration<Chapter>
             .HasMaxLength(20);
         builder.Property(e => e.ChapterNum)
             .IsRequired();
-        builder.Property(e => e.ContentJson)
+        builder.Property(e => e.ContentUsx)
             .IsRequired();
     }
 }

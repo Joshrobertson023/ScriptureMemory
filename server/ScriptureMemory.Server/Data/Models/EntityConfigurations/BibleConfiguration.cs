@@ -13,13 +13,13 @@ public class BibleConfiguration : IEntityTypeConfiguration<Bible>
             .ValueGeneratedOnAdd()
             .IsRequired()
             .HasMaxLength(5);
-        builder.Property(e => e.VersionFull)
+        builder.Property(e => e.Name)
             .IsRequired()
-            .HasMaxLength(30);
+            .HasMaxLength(100);
         builder.Property(e => e.Copyright)
-            .HasMaxLength(300);
-        builder.Property(e => e.Source)
+            .HasMaxLength(700);
+        builder.Property(e => e.Info)
             .IsRequired()
-            .HasMaxLength(300);
+            .HasMaxLength(800);
     }
 }

@@ -12,7 +12,7 @@ public class VerseContentConfiguration : IEntityTypeConfiguration<VerseTranslati
             .HasMaxLength(5);
         builder.Property(e => e.PlainText)
             .IsRequired()
-            .HasMaxLength(200); // Longest verse in the Bible, Esther 8:9, contains 90 words
+            .HasMaxLength(500);
         builder.Property(e => e.LastUpdated);
     }
 }

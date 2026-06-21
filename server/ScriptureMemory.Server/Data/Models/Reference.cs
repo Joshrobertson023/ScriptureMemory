@@ -18,6 +18,16 @@ public sealed class Reference
     
     public int Chapter { get; set; }
     
+    public string ChapterId => Book.Abbreviation.ToUpper() 
+                               + '.' 
+                               + Chapter.ToString();
+    
+    public string VerseId => Book.Abbreviation.ToUpper() 
+                             + '.' 
+                             + Chapter.ToString() 
+                             + '.'
+                             + VerseNumbers.First().ToString();
+    
     public List<int> VerseNumbers { get; set; } = new();
     
     public Reference() { }
@@ -52,6 +62,22 @@ public sealed class Reference
         Book = book;
         Chapter = chapter;
         VerseNumbers = verseNumbers;
+    }
+
+    public Reference(Book book, int chapter, int verseNumber)
+    {
+        ReadableReference = ReferenceParser.ConvertToReadableReference(book.DisplayName, Chapter, new List<int>() {verseNumber});
+        Book = book;
+        Chapter = chapter;
+        VerseNumbers = new List<int>() {verseNumber};
+    }
+
+    public Reference(Book book, int chapter)
+    {
+        ReadableReference = ReferenceParser.ConvertToReadableReference(book.DisplayName, Chapter, new List<int>() {0});
+        Book = book;
+        Chapter = chapter;
+        VerseNumbers = new List<int>() {0};
     }
 
     public override string ToString()

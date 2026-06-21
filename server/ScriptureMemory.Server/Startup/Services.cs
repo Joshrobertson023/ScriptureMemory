@@ -10,7 +10,9 @@ using System.Data;
 using System.Text;
 using VerseAppNew.Server.Services;
 using Pgvector;
+using Quartz;
 using ScriptureMemory.Server.Data.DataAccess;
+using ScriptureMemory.Server.Services.BackgroundServices;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -57,6 +59,25 @@ public static class Services
             o.AddSecurityRequirement(securityRequirements);
         });
 
+        return services;
+    }
+
+    public static IServiceCollection AddBackgroundSyncerQuarts(this IServiceCollection services)
+    {
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("Syncer");
+            q.AddJob<SyncBibleApiService>(o => o.WithIdentity(jobKey));
+            q.AddTrigger(o =>
+            {
+                o.ForJob(jobKey)
+                    .WithIdentity("Syncer-Trigger")
+                    .WithCronSchedule("0 0 2 * * ?"); // 2am daily
+            });
+        });
+        
+        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+        
         return services;
     }
 
@@ -164,6 +185,7 @@ public static class Services
 
         //services.AddScoped<VerseManagement>();
         services.AddScoped<BibleApi>();
+        services.AddScoped<BibleSyncer>();
 
         //services.AddScoped<EmbeddingGenerator>();
 

@@ -1,3 +1,5 @@
+using ScriptureMemory.Server.Services;
+
 namespace ScriptureMemory.Server.Startup;
 
 public static class Tasks
@@ -8,7 +10,7 @@ public static class Tasks
         
         var tasks = new List<(string TaskName, Func<Task> Task)>
         {
-            ("Sync database with API.Bible", () => SyncDatabaseWithApiBible(scope))
+            
         };
 
         if (tasks.Count == 0)
@@ -33,9 +35,9 @@ public static class Tasks
         return app;
     }
 
-    public static async Task SyncDatabaseWithApiBible(IServiceScope scope)
+    public static async Task SeedBibles(IServiceScope scope)
     {
-        var service = scope.ServiceProvider.GetRequiredService<BibleApi>();
-        await service.SyncDatabaseWithApiBible();
+        var service = scope.ServiceProvider.GetRequiredService<BibleSyncer>();
+        await service.AddAuthorizedBiblesOnStartup();
     }
 }

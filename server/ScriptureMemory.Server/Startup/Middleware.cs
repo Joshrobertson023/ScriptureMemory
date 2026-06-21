@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using ScriptureMemory.Server.Endpoints;
 // using ScriptureMemory.Server.Endpoints;
 // using VerseAppNew.Server.Apis;
 using VerseAppNew.Server.Endpoints;
@@ -42,6 +43,7 @@ public static class Middleware
         // app.ConfigureVerseEndpoints();
         // app.ConfigureSearchEndpoints();
         app.ConfigureAdminEndpoints();
+        app.ConfigureBibleEndpoints();
         
         return app;
     }

@@ -10,6 +10,6 @@ public class Chapter
     
     public int ChapterNum { get; set; }
     
-    [Column(TypeName = "jsonb")]
-    public object ContentJson { get; set; } = new();
+    [Column(TypeName = "text")]
+    public string ContentUsx { get; set; } = string.Empty; // Unified Scripture XML
 }

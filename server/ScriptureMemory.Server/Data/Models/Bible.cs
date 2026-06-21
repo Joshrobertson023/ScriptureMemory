@@ -9,11 +9,11 @@ public class Bible
     [Key]
     public string Version { get; set; } = string.Empty;
     
-    public string VersionFull { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     
     public string? Copyright { get; set; }
     
-    public string Source { get; set; } = string.Empty;
+    public string Info { get; set; } = string.Empty;
     
     public DateTime? LastSynced { get; set; }
 }

@@ -658,6 +658,10 @@
               "target": "Package",
               "version": "[0.2.2, )"
             },
+            "Quartz.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[3.18.1, )"
+            },
             "RestSharp": {
               "target": "Package",
               "version": "[113.1.0, )"

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LG0rCumtDvA=",
+  "dgSpecHash": "s7FDKszhr2s=",
   "success": true,
   "projectFilePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
   "expectedPackageFiles": [
@@ -135,6 +135,9 @@
     "/home/joshr/.nuget/packages/pgvector.entityframeworkcore/0.2.2/pgvector.entityframeworkcore.0.2.2.nupkg.sha512",
     "/home/joshr/.nuget/packages/pipelines.sockets.unofficial/2.2.8/pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
     "/home/joshr/.nuget/packages/pragmastat/3.2.4/pragmastat.3.2.4.nupkg.sha512",
+    "/home/joshr/.nuget/packages/quartz/3.18.1/quartz.3.18.1.nupkg.sha512",
+    "/home/joshr/.nuget/packages/quartz.extensions.dependencyinjection/3.18.1/quartz.extensions.dependencyinjection.3.18.1.nupkg.sha512",
+    "/home/joshr/.nuget/packages/quartz.extensions.hosting/3.18.1/quartz.extensions.hosting.3.18.1.nupkg.sha512",
     "/home/joshr/.nuget/packages/restsharp/113.1.0/restsharp.113.1.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/runtime.native.system.data.sqlclient.sni/4.4.0/runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/runtime.win-arm64.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",

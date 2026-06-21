@@ -21,6 +21,7 @@ builder.Services.AddHttpLogging(o =>
 builder.Services
     .AddServices(builder.Configuration) 
     .AddSecurity(builder.Configuration) // Add authentication & authorization
+    .AddBackgroundSyncerQuarts()
     .AddDataAccess();
 
 builder.Logging.ClearProviders();
@@ -35,7 +36,7 @@ app.UseMiddleware()
 // Convert all errors into Problem Details responses
 app.UseStatusCodePages();
 
-//await app.AskToRunStartupTasks();
+await app.AskToRunStartupTasks();
 
 app.Run();
 

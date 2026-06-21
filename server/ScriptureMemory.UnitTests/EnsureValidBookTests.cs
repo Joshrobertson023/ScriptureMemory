@@ -3,7 +3,7 @@ using ScriptureMemory.Server.Tools;
 
 namespace ScriptureMemory.UnitTests.BookTests;
 
-public class EnsureValidBook
+public class EnsureValidBookTests
 {
     [Fact]
     public void EnsureValidBook_TryGetBookReturnsValidBook()
