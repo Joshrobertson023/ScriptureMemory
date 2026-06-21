@@ -20,9 +20,6 @@ public class ChapterDataEfCore
 
         var existingChapters = _dbContext.Chapters.ToList();
         
-        if (existingChapters.Any(x => x.Version == chapter.Version && x.Book == chapter.Book))
-            throw new InvalidOperationException("Chapter already exists.");
-        
         _dbContext.Chapters.Add(chapter);
         await _dbContext.SaveChangesAsync();
     }

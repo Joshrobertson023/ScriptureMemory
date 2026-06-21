@@ -11,7 +11,7 @@ public class VerseConfiguration : IEntityTypeConfiguration<Verse>
             .HasDefaultValue(0);
         builder.Property(v => v.SavedCount)
             .HasDefaultValue(0);
-        builder.HasMany(v => v.Translations)
+        builder.HasMany(v => v.TranslationContents)
             .WithOne(v => v.VerseNavigation)
             .HasForeignKey(v => v.VerseId);
     }

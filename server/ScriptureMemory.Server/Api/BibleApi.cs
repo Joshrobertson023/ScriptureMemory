@@ -43,7 +43,7 @@ public class BibleApi
         return response;
     }
 
-    public async Task<string> GetFullVerse(Bible bible, Reference verseReference)
+    public async Task<string> GetVerseUsx(Bible bible, Reference verseReference)
     {
         using HttpClient http = new();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);

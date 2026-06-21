@@ -14,14 +14,24 @@ namespace DataAccess.Models;
 
 public class Verse
 {
-    public Reference Reference { get; set; } = new();
+    private Reference _reference;
+    
+    public Reference Reference 
+    { 
+        get => _reference;
+        set
+        {
+            _reference = value;
+            CreateId();
+        }
+    }
     
     /// <summary>
     /// ("PSA.1.1")
     /// </summary>
     [Key]
     [MaxLength(20)]
-    public string Id { get; init; }
+    public string Id { get; set; }
 
     public int MemorizedCount { get; set; } = 0;
 
@@ -31,7 +41,7 @@ public class Verse
     
     public Passage? PassageNavigation { get; set; } = null!;
     
-    public List<VerseTranslationContent>? Translations { get; set; }
+    public List<VerseTranslationContent>? TranslationContents { get; set; }
 
     /// <summary>
     /// Creates a new verse, giving it a new VerseId and also ensures a valid parsed reference
@@ -39,7 +49,6 @@ public class Verse
     public Verse(Book book, int chapter, int verseNum)
     {
         Reference = ReferenceParser.Parse(book, chapter, new List<int>() {verseNum});
-        Id = CreateId();
     }
 
     public Verse(string bookName, int chapter, int verseNum)
@@ -49,8 +58,6 @@ public class Verse
                 ??  throw new ArgumentException($"{bookName} is not a valid book name"), 
             chapter, 
             new List<int>() {verseNum});
-        
-        Id = CreateId();
     }
     
     public Verse() { }
@@ -64,17 +71,15 @@ public class Verse
     {
         Reference = ReferenceParser.Parse(readableReference)
             ?? throw new ArgumentException($"{readableReference} is not a valid reference");
-        Id = CreateId();
-        
     }
 
     /// <summary>
     /// Creates an Id for this verse (example: "PSA.1.1")
     /// </summary>
     /// <returns></returns>
-    public string CreateId()
+    public void CreateId()
     {
-        return Reference.Book.Abbreviation.ToUpper()
+        this.Id = Reference.Book.Abbreviation.ToUpper()
                + '.'
                + Reference.Chapter
                + '.'

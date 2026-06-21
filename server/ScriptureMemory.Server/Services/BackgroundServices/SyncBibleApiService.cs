@@ -20,16 +20,6 @@ public class SyncBibleApiService : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var bibles = _dbContext.Bibles.ToList();
-        
-        var now = DateTime.UtcNow;
-
-        foreach (var bible in bibles)
-        {
-            if (now - bible.LastSynced < TimeSpan.FromDays(29)) // If it's been 29 days
-            {
-                await _syncer.Sync(bible);
-            }
-        }
+        // Sync chapter content, verse content, Bible metadata every 29 days
     }
 }

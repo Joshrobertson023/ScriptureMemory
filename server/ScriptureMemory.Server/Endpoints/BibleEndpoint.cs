@@ -31,7 +31,7 @@ public static class BibleEndpoint
             int verse,
             BibleApi bibleApi) =>
         {
-            return Results.Ok(await bibleApi.GetFullVerse(
+            return Results.Ok(await bibleApi.GetVerseUsx(
                 Tools.Data.GetBible(bible),
                 new Reference(Books.GetBook(book), chapter, verse)));
         });

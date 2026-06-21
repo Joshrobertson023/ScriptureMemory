@@ -38,6 +38,5 @@ public static class Tasks
     public static async Task SeedBibles(IServiceScope scope)
     {
         var service = scope.ServiceProvider.GetRequiredService<BibleSyncer>();
-        await service.AddAuthorizedBiblesOnStartup();
     }
 }
