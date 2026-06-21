@@ -23,18 +23,6 @@ public class BibleSyncer
         
     }
 
-    [Obsolete("Only used once to seed database with Bibles")]
-    public async Task AddAuthorizedBiblesOnStartup()
-    {
-        foreach (var bible in Tools.Data.authorizedBibles)
-        {
-            _db.Bibles.Add(bible);
-        }
-        
-        await _db.SaveChangesAsync();
-        _logger.LogInformation($"{string.Join(", ", Tools.Data.authorizedBibles.Select(b => b.Version))} have been added/replaced.");
-    }
-
     public async Task<string> GetChapterContentExample()
     {
         return await _bibleContext.GetFullChapter(

@@ -12,4 +12,6 @@ public class Chapter
     
     [Column(TypeName = "text")]
     public string ContentUsx { get; set; } = string.Empty; // Unified Scripture XML
+    
+    public DateTime? LastUpdated { get; set; }
 }

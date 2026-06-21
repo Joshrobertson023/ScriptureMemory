@@ -11,15 +11,40 @@ public class VerseDataEfCore : IVerseData
         _dbContext = dbContext;
     }
 
+    public async Task InsertContentForVerse(string verseId, VerseTranslationContent content)
+    {
+        if (string.IsNullOrWhiteSpace(content.VerseId) || string.IsNullOrWhiteSpace(verseId))
+            throw new InvalidOperationException("Content must reference a verse by Id");
+        if (verseId != content.VerseId)
+            throw new InvalidOperationException("Content is not referencing correct verse Id");
+
+        if (_dbContext.VerseTranslationContents.Any(c =>
+                c.VerseId == verseId && c.Version == content.Version.Trim()))
+        {
+            throw new InvalidOperationException("Content already exists for verse in this version");
+        }
+        
+        content.LastUpdated = DateTime.UtcNow;
+        
+        _dbContext.VerseTranslationContents.Add(content);
+        
+        await _dbContext.SaveChangesAsync();
+    }
+
     /// <summary>
-    /// Inserts a brand new verse and all the translation's contents.
+    /// Inserts a brand new verse and all its translation's contents.
     /// </summary>
     /// <param name="verse"></param>
     /// <returns></returns>
-    public async Task<string> InsertVerse(Verse verse)
+    public async Task InsertVerse(Verse verse)
     {
         if (_dbContext.Verses.Any(v => v.Id == verse.Id.Trim()))
             throw new InvalidOperationException("Verse already exists");
+
+        foreach (var translation in verse.Translations)
+        {
+            translation.LastUpdated = DateTime.UtcNow;
+        }
         
         _dbContext.Verses.Add(verse);
 
@@ -27,22 +52,7 @@ public class VerseDataEfCore : IVerseData
         {
             _dbContext.VerseTranslationContents.Add(verseInTranslation);
         }
-
-        return "build";
-    }
-
-    /// <summary>
-    /// Adds a new translation for a verse.
-    /// </summary>
-    /// <param name="verse"></param>
-    /// <param name="newTranslation"></param>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task AddTranslationContent(Verse verse, VerseTranslationContent newTranslation)
-    {
-        if (_dbContext.VerseTranslationContents.Any(t => t.VerseId == verse.Id)
-            && _dbContext.VerseTranslationContents.Any(t => t.Version == newTranslation.Version))
-        {
-            throw new InvalidOperationException($"Translation already exists for {verse.Reference.ReadableReference}");
-        }
+        
+        await _dbContext.SaveChangesAsync();
     }
 }
