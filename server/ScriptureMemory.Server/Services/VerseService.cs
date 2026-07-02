@@ -9,34 +9,50 @@ public sealed class VerseService
 {
     private readonly VerseDataEfCore _verseContext;
     private readonly BibleApi _bibleApi;
+    private readonly EmbeddingGenerator _embeddingGenerator;
 
     public VerseService(
         VerseDataEfCore verseContext,
-        BibleApi bibleApi)
+        BibleApi bibleApi,
+        EmbeddingGenerator embeddingGenerator)
     {
         _verseContext = verseContext;
         _bibleApi = bibleApi;
+        _embeddingGenerator = embeddingGenerator;
     }
 
-    public async Task<List<VerseTranslationContent>> GetVerseContents(List<Bible> bibles, Verse verse)
+    public async Task<VerseTranslationContent> GetVerseTranslationContent(Verse verse, string version)
     {
-        List<VerseTranslationContent> contentToReturn = new();
+        string plainText = string.Empty;
+        string contentUsx = string.Empty;
+
+        (plainText, contentUsx) = await _bibleApi.GetVerseUsxAndPlaintext(version, verse.Id);
         
-        foreach (var bible in bibles)
+        var newTranslationContent = new VerseTranslationContent
         {
-            contentToReturn.Add(new VerseTranslationContent
-            {
-                Version = bible.Version,
-                ContentUsx = await _bibleApi.GetVerseUsx(bible, verse.Reference),
-                LastUpdated = DateTime.UtcNow,
-                VerseId = verse.Id,
-                VerseNavigation = verse
-            });
-        }
+            Version = version,
+            PlainText = plainText,
+            ContentUsx = contentUsx,
+            LastUpdated = DateTime.UtcNow
+        };
+
+        newTranslationContent.Embedding = await _embeddingGenerator.GetVerseContentEmbedding(newTranslationContent);
+
+        return newTranslationContent;
+    }
+
+    /// <summary>
+    /// Adds a verse and its content for a Bible version into the database 
+    /// </summary>
+    public async Task AddNewVerse(string bookName, int chapter, int verse, string version)
+    {
+        Verse newVerse = new(bookName, chapter, verse);
+
+        newVerse.TranslationContents = new List<VerseTranslationContent>()
+        {
+            await GetVerseTranslationContent(newVerse, version)
+        };
         
-        return contentToReturn;
-        
-        // Where left off. Create tests for this method and others.
-        // Will have to add methods to add plain text and embeddings for verse translation contents
+        await _verseContext.InsertVerse(newVerse);
     }
 }

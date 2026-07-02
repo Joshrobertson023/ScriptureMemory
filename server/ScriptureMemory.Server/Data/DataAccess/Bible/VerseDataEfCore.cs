@@ -11,6 +11,12 @@ public class VerseDataEfCore : IVerseData
         _dbContext = dbContext;
     }
 
+    /// <summary>
+    /// Inserts verse translation content for a verse id
+    /// </summary>
+    /// <param name="verseId"></param>
+    /// <param name="content"></param>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task InsertContentForVerse(string verseId, VerseTranslationContent content)
     {
         if (verseId != content.VerseId)
@@ -24,7 +30,7 @@ public class VerseDataEfCore : IVerseData
     }
 
     /// <summary>
-    /// Inserts a brand new verse and all its translation's contents.
+    /// Inserts a new verse and its translation contents
     /// </summary>
     /// <param name="verse"></param>
     /// <returns></returns>
@@ -36,11 +42,6 @@ public class VerseDataEfCore : IVerseData
         }
         
         _dbContext.Verses.Add(verse);
-
-        foreach (var verseInTranslation in verse.TranslationContents)
-        {
-            _dbContext.VerseTranslationContents.Add(verseInTranslation);
-        }
         
         await _dbContext.SaveChangesAsync();
     }

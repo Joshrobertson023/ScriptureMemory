@@ -43,15 +43,43 @@ public class BibleApi
         return response;
     }
 
-    public async Task<string> GetVerseUsx(Bible bible, Reference verseReference)
+    public async Task<(string, string)> GetVerseUsxAndPlaintext(string bibleId, string verseId)
     {
         using HttpClient http = new();
+        http.DefaultRequestHeaders.Clear();
+        http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
+        
+        Task<string> getUsx = http.GetStringAsync(
+            $"{_baseUrl}/bibles/{bibleId}" +
+            $"/verses/{verseId}" + 
+            "?content-type=html&" +
+            "include-titles=true&" +
+            "include-verse-numbers=true&" +
+            "include-verse-spans=true");
+        
+        Task<string> getPlaintext = http.GetStringAsync(
+            $"{_baseUrl}/bibles/{bibleId}" +
+            $"/verses/{verseId}" + 
+            "?content-type=text&" +
+            "include-titles=false&" +
+            "include-verse-numbers=true&" +
+            "include-verse-spans=false");
+
+        await Task.WhenAll(getUsx, getPlaintext);
+
+        return (await getUsx, await getPlaintext);
+    }
+
+    public async Task<string> GetVerseUsx(string bibleId, string verseId)
+    {
+        using HttpClient http = new();
+        http.DefaultRequestHeaders.Clear();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
         
         var response = await http.GetStringAsync(
-            $"{_baseUrl}/bibles/{bible.Id}" +
+            $"{_baseUrl}/bibles/{bibleId}" +
             // $"/chapters/{chapterReference.ChapterId}" + 
-            $"/verses/{verseReference.VerseId}" + 
+            $"/verses/{verseId}" + 
             "?content-type=html&" +
             "include-titles=true&" +
             "include-verse-numbers=true&" +

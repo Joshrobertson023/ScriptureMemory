@@ -11,7 +11,7 @@ public class VerseTranslationContent
     public string PlainText { get; set; } = string.Empty;
     
     [Column(TypeName = "text")]
-    public string ContentUsx { get; set; } = string.Empty; // Unified Scripture XML
+    public string ContentUsx { get; set; } = string.Empty; // USX format (Unified Scripture XML)
     
     public Vector? Embedding { get; set; }
     

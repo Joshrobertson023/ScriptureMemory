@@ -8,12 +8,12 @@ namespace ScriptureMemory.IntegrationTests;
 public class BaseIntegrationTest : IClassFixture<IntegrationTestWebAppFactory>
 {
     protected readonly IServiceScope _scope;
-    protected readonly ApplicationDbContext DbContext;
+    protected readonly ApplicationDbContext _dbContext;
 
     protected BaseIntegrationTest(IntegrationTestWebAppFactory factory)
     {
         _scope = factory.Services.CreateScope();
         
-        DbContext = _scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        _dbContext = _scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     }
 }
