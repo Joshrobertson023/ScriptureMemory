@@ -18,7 +18,7 @@ public class BibleData
     {
         var existingBibles = _dbContext.Bibles.ToList();
         
-        foreach (var bible in Tools.Data.authorizedBibles)
+        foreach (var bible in Tools.Bibles.authorizedBibles)
         {
             if (existingBibles.Any(b => b.Version == bible.Version))
                 continue;
@@ -30,6 +30,6 @@ public class BibleData
         
         await _dbContext.SaveChangesAsync();
         
-        _logger.LogInformation($"{string.Join(", ", Tools.Data.authorizedBibles.Select(b => b.Version))} have been added/replaced.");
+        _logger.LogInformation($"{string.Join(", ", Tools.Bibles.authorizedBibles.Select(b => b.Version))} have been added/replaced.");
     }
 }

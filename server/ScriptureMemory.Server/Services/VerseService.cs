@@ -21,7 +21,13 @@ public sealed class VerseService
         _embeddingGenerator = embeddingGenerator;
     }
 
-    public async Task<VerseTranslationContent> GetVerseTranslationContent(Verse verse, string version)
+    /// <summary>
+    /// Gets a verse's translation content (usx and plaintext) from the external API and embedding generator
+    /// </summary>
+    /// <param name="verse"></param>
+    /// <param name="version"></param>
+    /// <returns></returns>
+    public async Task<VerseTranslationContent> GetVerseTranslationContentFromApi(Verse verse, string version)
     {
         string plainText = string.Empty;
         string contentUsx = string.Empty;
@@ -50,7 +56,7 @@ public sealed class VerseService
 
         newVerse.TranslationContents = new List<VerseTranslationContent>()
         {
-            await GetVerseTranslationContent(newVerse, version)
+            await GetVerseTranslationContentFromApi(newVerse, version)
         };
         
         await _verseContext.InsertVerse(newVerse);

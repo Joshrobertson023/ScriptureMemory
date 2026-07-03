@@ -19,7 +19,7 @@ public static class BibleEndpoint
             BibleApi bibleApi) =>
         {
             return Results.Ok(await bibleApi.GetFullChapter(
-                Tools.Data.GetBible(bible),
+                Tools.Bibles.GetBible(bible),
                 new Reference(Books.GetBook(book)
                     ?? throw new InvalidOperationException($"{book} is not a valid book"), chapter)));
         });
@@ -32,7 +32,7 @@ public static class BibleEndpoint
             BibleApi bibleApi) =>
         {
             return Results.Ok(await bibleApi.GetVerseUsx(
-                Tools.Data.GetBible(bible),
+                Tools.Bibles.GetBible(bible),
                 new Reference(Books.GetBook(book), chapter, verse)));
         });
     }
