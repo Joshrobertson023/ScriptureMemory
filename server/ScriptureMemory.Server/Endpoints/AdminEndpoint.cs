@@ -17,9 +17,10 @@ public static class AdminEndpoint
 {
     public static void ConfigureAdminEndpoints(this WebApplication app)
     {
+        // Creates a new admin
         app.MapPost("admin", async (
             [FromBody] CreateAdminRequest request,
-            [FromServices] AdminDataDapper data) =>
+            [FromServices] IAdminData data) =>
         {
             var result = await data.InsertAdmin(new Admin
             {
@@ -27,8 +28,9 @@ public static class AdminEndpoint
                 Role = request.Role,
             });
             return Results.Ok(result);
-        }).RequireAuthorization("SuperAdmin");
+        });
 
+        // Admin login endpoint
         app.MapPost("admin/login", async (
             [FromBody] AdminLoginRequest request,
             [FromServices] AdminService service) =>
@@ -36,9 +38,10 @@ public static class AdminEndpoint
             return await service.Login(request.Username, request.Password!);
         });
 
+        // Updates an admin's password
         app.MapPut("admin/password", async (
             [FromBody] UpdateAdminPasswordRequest request,
-            [FromServices] AdminDataDapper data) =>
+            [FromServices] IAdminData data) =>
         {
             var passwordHasher = new PasswordHasher<Admin>();
             var hashedPassword = passwordHasher.HashPassword(null, request.NewPassword);

@@ -9,11 +9,11 @@ namespace ScriptureMemory.Server.Services;
 
 public class AdminService
 {
-    private readonly AdminDataDapper _adminData;
+    private readonly IAdminData _adminData;
     private readonly TokenProvider _tokenProvider;
 
     public AdminService(
-        AdminDataDapper adminData,
+        IAdminData adminData,
         TokenProvider tokenProvider)
     {
         _adminData = adminData;
@@ -24,7 +24,7 @@ public class AdminService
     {
         var admin = await _adminData.GetAdminByUsername(username);
         if (admin is null)
-            return Results.NotFound("Admin not found");
+            return Results.Unauthorized();
 
         var passwordHasher = new PasswordHasher<Admin>();
         if (string.IsNullOrEmpty(admin?.HashedPassword))
@@ -35,7 +35,8 @@ public class AdminService
         }
         else
         {
-            PasswordVerificationResult result = passwordHasher.VerifyHashedPassword(admin, admin.HashedPassword, password);
+            PasswordVerificationResult result 
+                = passwordHasher.VerifyHashedPassword(admin, admin.HashedPassword, password);
 
             if (result == PasswordVerificationResult.Success
                 || result == PasswordVerificationResult.SuccessRehashNeeded)

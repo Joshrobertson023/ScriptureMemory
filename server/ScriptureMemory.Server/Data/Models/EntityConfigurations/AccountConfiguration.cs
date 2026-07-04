@@ -6,6 +6,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
 {
     public void Configure(EntityTypeBuilder<Account> builder)
     {
+        builder.ToTable("Accounts");
         builder.HasKey(e => e.UserId);
         builder.Property(u => u.Role)
             .HasConversion<string>()

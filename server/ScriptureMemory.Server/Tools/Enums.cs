@@ -106,42 +106,64 @@ namespace ScriptureMemory.Server.Tools
             Critical = 3
         }
 
-        public enum ActionType // Don't update these after using real user data
+        public enum SecurityLogType
         {
             Register,
             Login,
             Logout,
-            Forgot,
-
-            Create,
-            Edit,
-            Delete,
-            Publish,
-            Update,
-            Save,
-
-            View,
-            Like,
-            Report,
-
-            PracticeSession,
-            ReadChapter,
-            Search,
+            PasswordReset,
+            EmailChange,
+            TokenIssued,
+            TokenLogin,
+            
+            RoleChange,
+            
+            View
         }
 
-        public enum EntityType // Entity being acted upon
+        public enum AdminLogType
         {
-            User = 0,
-            Collection = 1,
-            Passage = 2,
-            Note = 3,
-            PublishedCollection = 4,
-            PublishedPassage = 5,
-            PublishedNote = 6,
-            Verse = 7,
-            Like = 8,
-            Book = 9,
-            Page = 10
+            Delete,
+            Add,
+            SuspendPublicNote,
+            StartSync,
+            StopSync,
+        }
+
+        public enum ActivityLogType
+        {
+            Create,
+            View,
+            Edit,
+            Delete,
+            Update,
+            Save,
+            Search,
+            LeaveNote,
+            Like,
+            ReportUser,
+            ReportBug,
+            Highlight,
+            Bookmark,
+            
+            SendFriendRequest,
+            AcceptFriendRequest,
+        }
+
+        public enum EntityType // Entity being acted upon for logs
+        {
+            User,
+            Collection,
+            Passage,
+            Note,
+            PublicNote,
+            Verse,
+            Like,
+            Book,
+            Page,
+            Banner,
+            Notification,
+            Email
         }
     }
 }

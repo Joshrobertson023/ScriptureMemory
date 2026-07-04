@@ -12,6 +12,7 @@ using VerseAppNew.Server.Services;
 using Pgvector;
 using Quartz;
 using ScriptureMemory.Server.Data.DataAccess;
+using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Services.BackgroundServices;
 
 namespace ScriptureMemory.Server.Startup;
@@ -195,7 +196,8 @@ public static class Services
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
         services.AddScoped<IUserData, UserDataEFCore>();
-        services.AddScoped<AdminDataDapper>();
+        services.AddScoped<IAdminData, AdminDataEfCore>();
+        services.AddScoped<IVerseData, VerseDataEfCore>();
         // services.AddScoped<UserSettingsData>();
         // //services.AddScoped<CrossReferenceData>();
         // services.AddScoped<ActivityLoggingData>();

@@ -22,8 +22,8 @@ public sealed class TokenProvider(IConfiguration config)
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Sub, admin.UserId.ToString()),
-                new Claim(Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email, admin.AdminEmail ?? throw new ArgumentNullException(nameof(admin.AdminEmail))),
+                new Claim("id", admin.UserId.ToString()),
+                new Claim("email", admin.AdminEmail ?? throw new ArgumentNullException(nameof(admin.AdminEmail))),
                 new Claim("role", admin.Role.ToString() ?? throw new ArgumentNullException(nameof(admin.Role)))
             }),
             Expires = DateTime.UtcNow.AddMinutes(config.GetValue<int>("Jwt:ExpireMinutes")),

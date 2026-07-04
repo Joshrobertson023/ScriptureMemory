@@ -14,16 +14,23 @@ public class VerseTests : BaseIntegrationTest
     {
     }
     
+    string book = "Genesis";
+    int chapter = 1;
+    int verseNumber = 1;
+    string version = "kjv";
+    
+    /// <summary>
+    /// Test adding a new verse into the database
+    /// Gets verse content from API.Bible
+    /// </summary>
     [Fact]
-    public async Task GetVerse_Should_Insert_Verse_And_TranslationContent()
+    public async Task InsertVerse_And_GetVerseById_Should_Insert_Verse_And_TranslationContent()
     {
         var verseService = _scope.ServiceProvider.GetRequiredService<VerseService>();
+        var verseContext = _scope.ServiceProvider.GetRequiredService<VerseDataEfCore>();
         
-        await verseService.AddNewVerse("Genesis", 1, 1, "kjv");
-        
-        // Left off here. Add data access for getting verse by reference and version(s),
-        // then complete this test.
-        var newVerse = _dbContext.Verses.Where(v => v.Reference.Book == "Genesis" && )
+        // Depends on API.Bible
+        var newVerse = await verseService.AddNewVerse(book, chapter, verseNumber, version);
         
         Assert.NotNull(newVerse);
         Assert.NotNull(newVerse.TranslationContents.First());
@@ -31,12 +38,55 @@ public class VerseTests : BaseIntegrationTest
         Assert.NotEmpty(newVerse.TranslationContents.First().ContentUsx);
         Assert.NotEmpty(newVerse.TranslationContents.First().PlainText);
         Assert.NotNull(newVerse.TranslationContents.First().Embedding);
-        Assert.NotEmpty(newVerse.TranslationContents.First().VerseId);
     }
 
+    /// <summary>
+    /// Test getting a verse by reference
+    /// </summary>
+    [Fact]
+    public async Task GetVerseByReference_Should_Return_Verse()
+    {
+        var verseService = _scope.ServiceProvider.GetRequiredService<VerseService>();
+        var verseContext = _scope.ServiceProvider.GetRequiredService<VerseDataEfCore>();
+        
+        var verse = await verseContext.GetVerse(book, chapter, verseNumber);
+        
+        Assert.NotNull(verse);
+        Assert.NotNull(verse.TranslationContents.First());
+        Assert.Equal("kjv", verse.TranslationContents.First().Version);
+        Assert.NotEmpty(verse.TranslationContents.First().ContentUsx);
+        Assert.NotEmpty(verse.TranslationContents.First().PlainText);
+        Assert.NotNull(verse.TranslationContents.First().Embedding);
+        Assert.NotEmpty(verse.TranslationContents.First().VerseId);
+    }
+
+    /// <summary>
+    /// Test getting a verse by id
+    /// </summary>
+    [Fact]
+    public async Task GetVerseById_Should_Return_Verse()
+    {
+        var verseService = _scope.ServiceProvider.GetRequiredService<VerseService>();
+        var verseContext = _scope.ServiceProvider.GetRequiredService<VerseDataEfCore>();
+        
+        var verse = await verseContext.GetVerse("GEN.1.1");
+        
+        Assert.NotNull(verse);
+        Assert.NotNull(verse.TranslationContents.First());
+        Assert.Equal("kjv", verse.TranslationContents.First().Version);
+        Assert.NotEmpty(verse.TranslationContents.First().ContentUsx);
+        Assert.NotEmpty(verse.TranslationContents.First().PlainText);
+        Assert.NotNull(verse.TranslationContents.First().Embedding);
+        Assert.NotEmpty(verse.TranslationContents.First().VerseId);
+    }
+
+    /// <summary>
+    /// Test adding a new Bible version content for a verse
+    /// </summary>
     [Fact]
     public async Task InsertNewTranslation_Should_Insert_New_TranslationContent_For_Verse()
     {
-        
+        var verseService = _scope.ServiceProvider.GetRequiredService<VerseService>();
+        var verseContext = _scope.ServiceProvider.GetRequiredService<VerseDataEfCore>();
     }
 }

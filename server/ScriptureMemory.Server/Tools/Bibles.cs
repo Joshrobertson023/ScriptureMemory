@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 namespace ScriptureMemory.Server.Tools;
 public class Bibles
 {
+    /// <summary>
+    /// Bibles authorized to use from API.Bible
+    /// Add a new one here and run the startup tasks to add the new Bible to my database
+    /// </summary>
     public static Bible[] authorizedBibles =
     {
         new Bible()
@@ -45,6 +49,6 @@ public class Bibles
 
     public static Bible? GetBible(string version)
     {
-        return authorizedBibles.Where(b => b.Version == version).FirstOrDefault();
+        return authorizedBibles.FirstOrDefault(b => b.Version == version);
     }
 }

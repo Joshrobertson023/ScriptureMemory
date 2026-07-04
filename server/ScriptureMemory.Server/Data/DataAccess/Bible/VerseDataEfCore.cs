@@ -34,7 +34,7 @@ public class VerseDataEfCore : IVerseData
     /// </summary>
     /// <param name="verse"></param>
     /// <returns></returns>
-    public async Task InsertVerse(Verse verse)
+    public async Task<Verse> InsertVerse(Verse verse)
     {
         foreach (var translation in verse.TranslationContents)
         {
@@ -44,6 +44,8 @@ public class VerseDataEfCore : IVerseData
         _dbContext.Verses.Add(verse);
         
         await _dbContext.SaveChangesAsync();
+
+        return verse;
     }
 
     /// <summary>
@@ -62,10 +64,22 @@ public class VerseDataEfCore : IVerseData
             throw new InvalidOperationException($"{book} is not a valid book.");
 
         return _dbContext.Verses
-            .First(v =>
+            .Single(v =>
                 v.Reference.Book.DisplayName == bookResult.DisplayName
                 && v.Reference.Chapter == chapter
                 && v.Reference.VerseNumbers.First() == verse);
+    }
+
+    /// <summary>
+    /// Gets a verse by id
+    /// </summary>
+    /// <param name="verseId"></param>
+    /// <returns></returns>
+    public async Task<Verse> GetVerse(string verseId)
+    {
+        return _dbContext.Verses
+            .Single(v =>
+                v.Id == verseId.Trim());
     }
 
     /// <summary>

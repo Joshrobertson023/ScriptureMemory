@@ -27,12 +27,12 @@ public sealed class VerseService
     /// <param name="verse"></param>
     /// <param name="version"></param>
     /// <returns></returns>
-    public async Task<VerseTranslationContent> GetVerseTranslationContentFromApi(Verse verse, string version)
+    public async Task<VerseTranslationContent> GetVerseTranslationContentFromApi(string verseId, string version)
     {
         string plainText = string.Empty;
         string contentUsx = string.Empty;
 
-        (plainText, contentUsx) = await _bibleApi.GetVerseUsxAndPlaintext(version, verse.Id);
+        (plainText, contentUsx) = await _bibleApi.GetVerseUsxAndPlaintext(version, verseId);
         
         var newTranslationContent = new VerseTranslationContent
         {
@@ -50,15 +50,15 @@ public sealed class VerseService
     /// <summary>
     /// Adds a verse and its content for a Bible version into the database 
     /// </summary>
-    public async Task AddNewVerse(string bookName, int chapter, int verse, string version)
+    public async Task<Verse> AddNewVerse(string bookName, int chapter, int verse, string version)
     {
         Verse newVerse = new(bookName, chapter, verse);
 
         newVerse.TranslationContents = new List<VerseTranslationContent>()
         {
-            await GetVerseTranslationContentFromApi(newVerse, version)
+            await GetVerseTranslationContentFromApi(newVerse.Id, version)
         };
         
-        await _verseContext.InsertVerse(newVerse);
+        return await _verseContext.InsertVerse(newVerse);
     }
 }

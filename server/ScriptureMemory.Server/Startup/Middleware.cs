@@ -28,10 +28,13 @@ public static class Middleware
         
         //app.UseHttpsRedirection();
         //app.UseStaticFiles();
-        app.MapControllers();
+        
+        app.UseCors();
         
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.MapControllers();
         
         return app;
     }

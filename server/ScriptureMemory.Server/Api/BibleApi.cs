@@ -27,6 +27,11 @@ public class BibleApi
         _logger = logger;
     }
 
+    public async Task<List<Bible>> GetAuthorizedBibles()
+    {
+        
+    }
+
     public async Task<string> GetFullChapter(Bible bible, Reference chapterReference)
     {
         using HttpClient http = new();

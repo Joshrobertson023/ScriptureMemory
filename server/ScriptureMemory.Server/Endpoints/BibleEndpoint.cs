@@ -24,16 +24,16 @@ public static class BibleEndpoint
                     ?? throw new InvalidOperationException($"{book} is not a valid book"), chapter)));
         });
 
-        app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (
-            string bible,
-            string book,
-            int chapter,
-            int verse,
-            BibleApi bibleApi) =>
-        {
-            return Results.Ok(await bibleApi.GetVerseUsx(
-                Tools.Bibles.GetBible(bible),
-                new Reference(Books.GetBook(book), chapter, verse)));
-        });
+        // app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (
+        //     string bible,
+        //     string book,
+        //     int chapter,
+        //     int verse,
+        //     BibleApi bibleApi) =>
+        // {
+        //     return Results.Ok(await bibleApi.GetVerseUsx(
+        //         Tools.Bibles.GetBible(bible),
+        //         new Reference(Books.GetBook(book), chapter, verse)));
+        // });
     }
 }

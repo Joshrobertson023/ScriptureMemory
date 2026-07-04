@@ -16,4 +16,6 @@ public class Bible
     public string Info { get; set; } = string.Empty;
     
     public DateTime? LastUpdated { get; set; }
+    
+    public string? SyncError { get; set; } // Last sync error
 }
