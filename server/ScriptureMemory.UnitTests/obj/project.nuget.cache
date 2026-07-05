@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "s7FDKszhr2s=",
+  "dgSpecHash": "917j8xvgG90=",
   "success": true,
   "projectFilePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
   "expectedPackageFiles": [
@@ -31,6 +31,8 @@
     "/home/joshr/.nuget/packages/lucene.net.queryparser/4.8.0-beta00017/lucene.net.queryparser.4.8.0-beta00017.nupkg.sha512",
     "/home/joshr/.nuget/packages/lucene.net.sandbox/4.8.0-beta00017/lucene.net.sandbox.4.8.0-beta00017.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.applicationinsights/2.23.0/microsoft.applicationinsights.2.23.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.aspnet.signalr.client/2.2.1/microsoft.aspnet.signalr.client.2.2.1.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.aspnet.signalr.core/2.2.1/microsoft.aspnet.signalr.core.2.2.1.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.aspnetcore.authentication/2.3.0/microsoft.aspnetcore.authentication.2.3.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.aspnetcore.authentication.abstractions/2.3.0/microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.aspnetcore.authentication.cookies/2.3.0/microsoft.aspnetcore.authentication.cookies.2.3.0.nupkg.sha512",
@@ -74,7 +76,7 @@
     "/home/joshr/.nuget/packages/microsoft.extensions.caching.memory/10.0.9/microsoft.extensions.caching.memory.10.0.9.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.configuration/10.0.5/microsoft.extensions.configuration.10.0.5.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.configuration.abstractions/10.0.5/microsoft.extensions.configuration.abstractions.10.0.5.nupkg.sha512",
-    "/home/joshr/.nuget/packages/microsoft.extensions.configuration.binder/10.0.0-rc.2.25502.107/microsoft.extensions.configuration.binder.10.0.0-rc.2.25502.107.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.extensions.configuration.binder/10.0.0/microsoft.extensions.configuration.binder.10.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.configuration.commandline/8.0.0/microsoft.extensions.configuration.commandline.8.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.configuration.environmentvariables/8.0.0/microsoft.extensions.configuration.environmentvariables.8.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.configuration.fileextensions/10.0.5/microsoft.extensions.configuration.fileextensions.10.0.5.nupkg.sha512",
@@ -82,6 +84,7 @@
     "/home/joshr/.nuget/packages/microsoft.extensions.configuration.usersecrets/10.0.5/microsoft.extensions.configuration.usersecrets.10.0.5.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.dependencyinjection/10.0.9/microsoft.extensions.dependencyinjection.10.0.9.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.9/microsoft.extensions.dependencyinjection.abstractions.10.0.9.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.extensions.dependencymodel/10.0.0/microsoft.extensions.dependencymodel.10.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.diagnostics/8.0.0/microsoft.extensions.diagnostics.8.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.diagnostics.abstractions/10.0.3/microsoft.extensions.diagnostics.abstractions.10.0.3.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.fileproviders.abstractions/10.0.5/microsoft.extensions.fileproviders.abstractions.10.0.5.nupkg.sha512",
@@ -92,14 +95,14 @@
     "/home/joshr/.nuget/packages/microsoft.extensions.identity.core/2.3.0/microsoft.extensions.identity.core.2.3.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.logging/10.0.9/microsoft.extensions.logging.10.0.9.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.9/microsoft.extensions.logging.abstractions.10.0.9.nupkg.sha512",
-    "/home/joshr/.nuget/packages/microsoft.extensions.logging.configuration/8.0.0/microsoft.extensions.logging.configuration.8.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.extensions.logging.configuration/10.0.0/microsoft.extensions.logging.configuration.10.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.logging.console/8.0.0/microsoft.extensions.logging.console.8.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.logging.debug/8.0.0/microsoft.extensions.logging.debug.8.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.logging.eventlog/8.0.0/microsoft.extensions.logging.eventlog.8.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.logging.eventsource/8.0.0/microsoft.extensions.logging.eventsource.8.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.objectpool/8.0.11/microsoft.extensions.objectpool.8.0.11.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.options/10.0.9/microsoft.extensions.options.10.0.9.nupkg.sha512",
-    "/home/joshr/.nuget/packages/microsoft.extensions.options.configurationextensions/8.0.0/microsoft.extensions.options.configurationextensions.8.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.extensions.options.configurationextensions/10.0.0/microsoft.extensions.options.configurationextensions.10.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.primitives/10.0.9/microsoft.extensions.primitives.10.0.9.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.vectordata.abstractions/10.1.0/microsoft.extensions.vectordata.abstractions.10.1.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.extensions.webencoders/8.0.11/microsoft.extensions.webencoders.8.0.11.nupkg.sha512",
@@ -114,6 +117,8 @@
     "/home/joshr/.nuget/packages/microsoft.net.http.headers/2.3.0/microsoft.net.http.headers.2.3.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.net.test.sdk/17.14.1/microsoft.net.test.sdk.17.14.1.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.openapi/1.6.25/microsoft.openapi.1.6.25.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.owin/3.0.1/microsoft.owin.3.0.1.nupkg.sha512",
+    "/home/joshr/.nuget/packages/microsoft.owin.security/3.0.1/microsoft.owin.security.3.0.1.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.semantickernel.connectors.inmemory/1.74.0-preview/microsoft.semantickernel.connectors.inmemory.1.74.0-preview.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.sqlserver.server/1.0.0/microsoft.sqlserver.server.1.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/microsoft.testing.extensions.telemetry/1.9.1/microsoft.testing.extensions.telemetry.1.9.1.nupkg.sha512",
@@ -129,7 +134,15 @@
     "/home/joshr/.nuget/packages/npgsql.dependencyinjection/10.0.3/npgsql.dependencyinjection.10.0.3.nupkg.sha512",
     "/home/joshr/.nuget/packages/npgsql.entityframeworkcore.postgresql/10.0.2/npgsql.entityframeworkcore.postgresql.10.0.2.nupkg.sha512",
     "/home/joshr/.nuget/packages/openai/2.9.1/openai.2.9.1.nupkg.sha512",
+    "/home/joshr/.nuget/packages/opentelemetry/1.16.0/opentelemetry.1.16.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/opentelemetry.api/1.16.0/opentelemetry.api.1.16.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/opentelemetry.api.providerbuilderextensions/1.16.0/opentelemetry.api.providerbuilderextensions.1.16.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/opentelemetry.exporter.opentelemetryprotocol/1.16.0/opentelemetry.exporter.opentelemetryprotocol.1.16.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/opentelemetry.extensions.hosting/1.16.0/opentelemetry.extensions.hosting.1.16.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/opentelemetry.instrumentation.aspnetcore/1.16.0/opentelemetry.instrumentation.aspnetcore.1.16.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/opentelemetry.instrumentation.http/1.16.0/opentelemetry.instrumentation.http.1.16.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/oracle.manageddataaccess.core/23.26.0/oracle.manageddataaccess.core.23.26.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/owin/1.0.0/owin.1.0.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/perfolizer/0.6.1/perfolizer.0.6.1.nupkg.sha512",
     "/home/joshr/.nuget/packages/pgvector/0.3.2/pgvector.0.3.2.nupkg.sha512",
     "/home/joshr/.nuget/packages/pgvector.entityframeworkcore/0.2.2/pgvector.entityframeworkcore.0.2.2.nupkg.sha512",
@@ -143,6 +156,17 @@
     "/home/joshr/.nuget/packages/runtime.win-arm64.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/runtime.win-x64.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-x64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "/home/joshr/.nuget/packages/runtime.win-x86.runtime.native.system.data.sqlclient.sni/4.4.0/runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog/4.3.1/serilog.4.3.1.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.aspnetcore/10.0.0/serilog.aspnetcore.10.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.extensions.hosting/10.0.0/serilog.extensions.hosting.10.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.extensions.logging/10.0.0/serilog.extensions.logging.10.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.formatting.compact/3.0.0/serilog.formatting.compact.3.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.settings.configuration/10.0.0/serilog.settings.configuration.10.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.sinks.console/6.1.1/serilog.sinks.console.6.1.1.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.sinks.debug/3.0.0/serilog.sinks.debug.3.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.sinks.file/7.0.0/serilog.sinks.file.7.0.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.sinks.periodicbatching/2.1.0/serilog.sinks.periodicbatching.2.1.0.nupkg.sha512",
+    "/home/joshr/.nuget/packages/serilog.sinks.signalr/2.0.10/serilog.sinks.signalr.2.0.10.nupkg.sha512",
     "/home/joshr/.nuget/packages/sharpziplib/1.4.2/sharpziplib.1.4.2.nupkg.sha512",
     "/home/joshr/.nuget/packages/sourcegear.sqlite3/3.50.4.2/sourcegear.sqlite3.3.50.4.2.nupkg.sha512",
     "/home/joshr/.nuget/packages/sqlitepclraw.bundle_e_sqlite3/3.0.2/sqlitepclraw.bundle_e_sqlite3.3.0.2.nupkg.sha512",
@@ -188,6 +212,30 @@
     {
       "code": "NU1903",
       "level": "Warning",
+      "message": "Package 'Microsoft.Owin' 3.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-3rq8-h3gj-r5c6",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Microsoft.Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'Microsoft.Owin' 3.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-hxrm-9w7p-39cc",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Microsoft.Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
       "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx",
       "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
       "warningLevel": 1,
@@ -205,6 +253,78 @@
       "warningLevel": 1,
       "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
       "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.AspNet.SignalR.Client 2.2.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Microsoft.AspNet.SignalR.Client",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.AspNet.SignalR.Core 2.2.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Microsoft.AspNet.SignalR.Core",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.Owin 3.0.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Microsoft.Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Microsoft.Owin.Security 3.0.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Microsoft.Owin.Security",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Owin 1.0.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "message": "Package 'Serilog.Sinks.SignalR 2.0.10' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "/home/joshr/RiderProjects/ScriptureMemory/server/ScriptureMemory.UnitTests/ScriptureMemory.UnitTests.csproj",
+      "libraryId": "Serilog.Sinks.SignalR",
       "targetGraphs": [
         "net10.0"
       ]

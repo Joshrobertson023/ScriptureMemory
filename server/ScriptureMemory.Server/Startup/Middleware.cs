@@ -20,7 +20,7 @@ public static class Middleware
         else
         {
             // Use middleware exceptions with Problem Details web standard
-            app.UseExceptionHandler(); 
+            app.UseExceptionHandler("/Error"); 
             
             //
             app.UseHsts();
@@ -28,6 +28,8 @@ public static class Middleware
         
         //app.UseHttpsRedirection();
         //app.UseStaticFiles();
+
+        app.UseStatusCodePages();
         
         app.UseCors();
         

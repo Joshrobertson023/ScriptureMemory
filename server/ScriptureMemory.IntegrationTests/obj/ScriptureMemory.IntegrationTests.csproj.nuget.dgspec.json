@@ -646,6 +646,22 @@
               "target": "Package",
               "version": "[10.0.2, )"
             },
+            "OpenTelemetry.Exporter.OpenTelemetryProtocol": {
+              "target": "Package",
+              "version": "[1.16.0, )"
+            },
+            "OpenTelemetry.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[1.16.0, )"
+            },
+            "OpenTelemetry.Instrumentation.AspNetCore": {
+              "target": "Package",
+              "version": "[1.16.0, )"
+            },
+            "OpenTelemetry.Instrumentation.Http": {
+              "target": "Package",
+              "version": "[1.16.0, )"
+            },
             "Oracle.ManagedDataAccess.Core": {
               "target": "Package",
               "version": "[23.26.0, )"
@@ -669,6 +685,18 @@
             "SQLitePCLRaw.bundle_e_sqlite3": {
               "target": "Package",
               "version": "[3.0.2, )"
+            },
+            "Serilog": {
+              "target": "Package",
+              "version": "[4.3.1, )"
+            },
+            "Serilog.AspNetCore": {
+              "target": "Package",
+              "version": "[10.0.0, )"
+            },
+            "Serilog.Sinks.SignalR": {
+              "target": "Package",
+              "version": "[2.0.10, )"
             },
             "StackExchange.Redis": {
               "target": "Package",

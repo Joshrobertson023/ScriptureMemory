@@ -457,6 +457,41 @@
           }
         }
       },
+      "Microsoft.AspNet.SignalR.Client/2.2.1": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "6.0.4"
+        },
+        "compile": {
+          "lib/net45/Microsoft.AspNet.SignalR.Client.dll": {
+            "related": ".XML"
+          }
+        },
+        "runtime": {
+          "lib/net45/Microsoft.AspNet.SignalR.Client.dll": {
+            "related": ".XML"
+          }
+        }
+      },
+      "Microsoft.AspNet.SignalR.Core/2.2.1": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Owin": "2.1.0",
+          "Microsoft.Owin.Security": "2.1.0",
+          "Newtonsoft.Json": "6.0.4",
+          "Owin": "1.0.0"
+        },
+        "compile": {
+          "lib/net45/Microsoft.AspNet.SignalR.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Microsoft.AspNet.SignalR.Core.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.AspNetCore.Authentication/2.3.0": {
         "type": "package",
         "dependencies": {
@@ -2145,6 +2180,39 @@
           }
         }
       },
+      "Microsoft.Owin/3.0.1": {
+        "type": "package",
+        "dependencies": {
+          "Owin": "1.0.0"
+        },
+        "compile": {
+          "lib/net45/Microsoft.Owin.dll": {
+            "related": ".XML"
+          }
+        },
+        "runtime": {
+          "lib/net45/Microsoft.Owin.dll": {
+            "related": ".XML"
+          }
+        }
+      },
+      "Microsoft.Owin.Security/3.0.1": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Owin": "3.0.1",
+          "Owin": "1.0.0"
+        },
+        "compile": {
+          "lib/net45/Microsoft.Owin.Security.dll": {
+            "related": ".XML"
+          }
+        },
+        "runtime": {
+          "lib/net45/Microsoft.Owin.Security.dll": {
+            "related": ".XML"
+          }
+        }
+      },
       "Microsoft.SemanticKernel.Connectors.InMemory/1.74.0-preview": {
         "type": "package",
         "dependencies": {
@@ -2510,6 +2578,124 @@
           }
         }
       },
+      "OpenTelemetry/1.16.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Diagnostics.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Logging.Configuration": "10.0.0",
+          "OpenTelemetry.Api.ProviderBuilderExtensions": "1.16.0"
+        },
+        "compile": {
+          "lib/net10.0/OpenTelemetry.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/OpenTelemetry.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        }
+      },
+      "OpenTelemetry.Api/1.16.0": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/OpenTelemetry.Api.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/OpenTelemetry.Api.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        }
+      },
+      "OpenTelemetry.Api.ProviderBuilderExtensions/1.16.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "OpenTelemetry.Api": "1.16.0"
+        },
+        "compile": {
+          "lib/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        }
+      },
+      "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.16.0": {
+        "type": "package",
+        "dependencies": {
+          "OpenTelemetry": "1.16.0"
+        },
+        "compile": {
+          "lib/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        }
+      },
+      "OpenTelemetry.Extensions.Hosting/1.16.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0",
+          "OpenTelemetry": "1.16.0"
+        },
+        "compile": {
+          "lib/net10.0/OpenTelemetry.Extensions.Hosting.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/OpenTelemetry.Extensions.Hosting.dll": {
+            "related": ".dll.sigstore.json;.xml"
+          }
+        }
+      },
+      "OpenTelemetry.Instrumentation.AspNetCore/1.16.0": {
+        "type": "package",
+        "dependencies": {
+          "OpenTelemetry.Api.ProviderBuilderExtensions": "[1.16.0, 2.0.0)"
+        },
+        "compile": {
+          "lib/net10.0/OpenTelemetry.Instrumentation.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/OpenTelemetry.Instrumentation.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
+      "OpenTelemetry.Instrumentation.Http/1.16.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration": "10.0.0",
+          "Microsoft.Extensions.Options": "10.0.0",
+          "OpenTelemetry.Api.ProviderBuilderExtensions": "[1.16.0, 2.0.0)"
+        },
+        "compile": {
+          "lib/net10.0/OpenTelemetry.Instrumentation.Http.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/OpenTelemetry.Instrumentation.Http.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Oracle.ManagedDataAccess.Core/23.26.0": {
         "type": "package",
         "dependencies": {
@@ -2522,6 +2708,15 @@
         },
         "runtime": {
           "lib/net8.0/Oracle.ManagedDataAccess.dll": {}
+        }
+      },
+      "Owin/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net40/Owin.dll": {}
+        },
+        "runtime": {
+          "lib/net40/Owin.dll": {}
         }
       },
       "Perfolizer/0.6.1": {
@@ -2682,6 +2877,204 @@
           "runtimes/win-x86/native/sni.dll": {
             "assetType": "native",
             "rid": "win-x86"
+          }
+        }
+      },
+      "Serilog/4.3.1": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Serilog.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Serilog.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/Serilog.targets": {}
+        }
+      },
+      "Serilog.AspNetCore/10.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "4.3.0",
+          "Serilog.Extensions.Hosting": "10.0.0",
+          "Serilog.Formatting.Compact": "3.0.0",
+          "Serilog.Settings.Configuration": "10.0.0",
+          "Serilog.Sinks.Console": "6.1.1",
+          "Serilog.Sinks.Debug": "3.0.0",
+          "Serilog.Sinks.File": "7.0.0"
+        },
+        "compile": {
+          "lib/net10.0/Serilog.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Serilog.AspNetCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
+      "Serilog.Extensions.Hosting/10.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Hosting.Abstractions": "10.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.0",
+          "Serilog": "4.3.0",
+          "Serilog.Extensions.Logging": "10.0.0"
+        },
+        "compile": {
+          "lib/net10.0/Serilog.Extensions.Hosting.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Serilog.Extensions.Hosting.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Extensions.Logging/10.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging": "10.0.0",
+          "Serilog": "4.2.0"
+        },
+        "compile": {
+          "lib/net10.0/Serilog.Extensions.Logging.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Serilog.Extensions.Logging.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Formatting.Compact/3.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        },
+        "compile": {
+          "lib/net8.0/Serilog.Formatting.Compact.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Formatting.Compact.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Settings.Configuration/10.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Binder": "10.0.0",
+          "Microsoft.Extensions.DependencyModel": "10.0.0",
+          "Serilog": "4.3.0"
+        },
+        "compile": {
+          "lib/net10.0/Serilog.Settings.Configuration.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Serilog.Settings.Configuration.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Sinks.Console/6.1.1": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        },
+        "compile": {
+          "lib/net8.0/Serilog.Sinks.Console.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Console.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Sinks.Debug/3.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "4.0.0"
+        },
+        "compile": {
+          "lib/net8.0/Serilog.Sinks.Debug.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Serilog.Sinks.Debug.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Sinks.File/7.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "4.2.0"
+        },
+        "compile": {
+          "lib/net9.0/Serilog.Sinks.File.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Serilog.Sinks.File.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Sinks.PeriodicBatching/2.1.0": {
+        "type": "package",
+        "dependencies": {
+          "Serilog": "2.0.0"
+        },
+        "compile": {
+          "lib/netstandard1.2/Serilog.Sinks.PeriodicBatching.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard1.2/Serilog.Sinks.PeriodicBatching.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Serilog.Sinks.SignalR/2.0.10": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.AspNet.SignalR.Client": "2.2.1",
+          "Microsoft.AspNet.SignalR.Core": "2.2.1",
+          "Microsoft.Owin": "3.0.1",
+          "Microsoft.Owin.Security": "3.0.1",
+          "Newtonsoft.Json": "9.0.1",
+          "Serilog": "2.3.0",
+          "Serilog.Sinks.PeriodicBatching": "2.1.0"
+        },
+        "compile": {
+          "lib/net46/Serilog.Sinks.SignalR.dll": {
+            "related": ".XML"
+          }
+        },
+        "runtime": {
+          "lib/net46/Serilog.Sinks.SignalR.dll": {
+            "related": ".XML"
           }
         }
       },
@@ -3481,12 +3874,19 @@
           "Npgsql": "10.0.3",
           "Npgsql.DependencyInjection": "10.0.3",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "10.0.2",
+          "OpenTelemetry.Exporter.OpenTelemetryProtocol": "1.16.0",
+          "OpenTelemetry.Extensions.Hosting": "1.16.0",
+          "OpenTelemetry.Instrumentation.AspNetCore": "1.16.0",
+          "OpenTelemetry.Instrumentation.Http": "1.16.0",
           "Oracle.ManagedDataAccess.Core": "23.26.0",
           "Pgvector": "0.3.2",
           "Pgvector.EntityFrameworkCore": "0.2.2",
           "Quartz.Extensions.Hosting": "3.18.1",
           "RestSharp": "113.1.0",
           "SQLitePCLRaw.bundle_e_sqlite3": "3.0.2",
+          "Serilog": "4.3.1",
+          "Serilog.AspNetCore": "10.0.0",
+          "Serilog.Sinks.SignalR": "2.0.10",
           "StackExchange.Redis": "2.7.33",
           "Swashbuckle.AspNetCore": "9.0.6"
         },
@@ -4168,6 +4568,40 @@
         "lucene-net-icon-128x128.png",
         "lucene.net.sandbox.4.8.0-beta00017.nupkg.sha512",
         "lucene.net.sandbox.nuspec"
+      ]
+    },
+    "Microsoft.AspNet.SignalR.Client/2.2.1": {
+      "sha512": "ecup1Ztcr9DnLOZo7VQb5ViM8tfip35Bi/IzIOc62KHLdWM5xr1tefOIeQ8sV8h4jF30PIOomFsTr/mSpuw+4Q==",
+      "type": "package",
+      "path": "microsoft.aspnet.signalr.client/2.2.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net40/Microsoft.AspNet.SignalR.Client.XML",
+        "lib/net40/Microsoft.AspNet.SignalR.Client.dll",
+        "lib/net45/Microsoft.AspNet.SignalR.Client.XML",
+        "lib/net45/Microsoft.AspNet.SignalR.Client.dll",
+        "lib/netcore50/Microsoft.AspNet.SignalR.Client.XML",
+        "lib/netcore50/Microsoft.AspNet.SignalR.Client.dll",
+        "lib/portable-net45+sl50+win+wpa81+wp80/Microsoft.AspNet.SignalR.Client.XML",
+        "lib/portable-net45+sl50+win+wpa81+wp80/Microsoft.AspNet.SignalR.Client.dll",
+        "lib/portable-win81+wpa81/Microsoft.AspNet.SignalR.Client.XML",
+        "lib/portable-win81+wpa81/Microsoft.AspNet.SignalR.Client.dll",
+        "microsoft.aspnet.signalr.client.2.2.1.nupkg.sha512",
+        "microsoft.aspnet.signalr.client.nuspec"
+      ]
+    },
+    "Microsoft.AspNet.SignalR.Core/2.2.1": {
+      "sha512": "EUZlRTmUZ3di6hxCiyyhnUld/8AKTOuX1DAGhNLv+ocTfmnOJyS42AEzgxdIk1jRAlEpUEuoicVBBI07A2FU2g==",
+      "type": "package",
+      "path": "microsoft.aspnet.signalr.core/2.2.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.AspNet.SignalR.Core.dll",
+        "lib/net45/Microsoft.AspNet.SignalR.Core.xml",
+        "microsoft.aspnet.signalr.core.2.2.1.nupkg.sha512",
+        "microsoft.aspnet.signalr.core.nuspec"
       ]
     },
     "Microsoft.AspNetCore.Authentication/2.3.0": {
@@ -7214,6 +7648,32 @@
         "microsoft.openapi.nuspec"
       ]
     },
+    "Microsoft.Owin/3.0.1": {
+      "sha512": "64yZsGN9uRnXNVAyAT4F6KWmdDUJ6yX4uqzxKTdGANKH1oMt0IKZ7THRRa3mXIOo8iSu4tq/DCBUycUY9pXZzw==",
+      "type": "package",
+      "path": "microsoft.owin/3.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.Owin.XML",
+        "lib/net45/Microsoft.Owin.dll",
+        "microsoft.owin.3.0.1.nupkg.sha512",
+        "microsoft.owin.nuspec"
+      ]
+    },
+    "Microsoft.Owin.Security/3.0.1": {
+      "sha512": "LPoUxaTKzmjs97wDCTtBIoRwp30Jkq9UFnoj+EfMFJv+XxjcvHE/D573LRomA568WhvXoI2cUiwhZFvqfbLMVg==",
+      "type": "package",
+      "path": "microsoft.owin.security/3.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Microsoft.Owin.Security.XML",
+        "lib/net45/Microsoft.Owin.Security.dll",
+        "microsoft.owin.security.3.0.1.nupkg.sha512",
+        "microsoft.owin.security.nuspec"
+      ]
+    },
     "Microsoft.SemanticKernel.Connectors.InMemory/1.74.0-preview": {
       "sha512": "sDhrrF/nKO9AhMTHa7RTom9YhMQqTsTJrAfnomFtGlgl3bGU+SL+DCd9jwv8pEZ/+PCOhvU6o9lZU+g+3z4EPg==",
       "type": "package",
@@ -7602,6 +8062,204 @@
         "openai.nuspec"
       ]
     },
+    "OpenTelemetry/1.16.0": {
+      "sha512": "nE/Px3MUvQC8c0UG0DOP5OJE7vMtiMaPYi/6TkSS/o/O0s/oPq+8WaPYTVEPzb7lwu/QyLgknc+sFm2FjPXe2A==",
+      "type": "package",
+      "path": "opentelemetry/1.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0/OpenTelemetry.dll",
+        "lib/net10.0/OpenTelemetry.dll.sigstore.json",
+        "lib/net10.0/OpenTelemetry.xml",
+        "lib/net462/OpenTelemetry.dll",
+        "lib/net462/OpenTelemetry.dll.sigstore.json",
+        "lib/net462/OpenTelemetry.xml",
+        "lib/net8.0/OpenTelemetry.dll",
+        "lib/net8.0/OpenTelemetry.dll.sigstore.json",
+        "lib/net8.0/OpenTelemetry.xml",
+        "lib/net9.0/OpenTelemetry.dll",
+        "lib/net9.0/OpenTelemetry.dll.sigstore.json",
+        "lib/net9.0/OpenTelemetry.xml",
+        "lib/netstandard2.0/OpenTelemetry.dll",
+        "lib/netstandard2.0/OpenTelemetry.dll.sigstore.json",
+        "lib/netstandard2.0/OpenTelemetry.xml",
+        "lib/netstandard2.1/OpenTelemetry.dll",
+        "lib/netstandard2.1/OpenTelemetry.dll.sigstore.json",
+        "lib/netstandard2.1/OpenTelemetry.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.1.16.0.nupkg.sha512",
+        "opentelemetry.nuspec"
+      ]
+    },
+    "OpenTelemetry.Api/1.16.0": {
+      "sha512": "WZP8Eb6vZTeNqeV+fjBitc7iefBoTHIhaWorqg/h/YiQBlcQJu0bICuTqKV0XRyjiE0eWs80yLlnUtHAFSkFWA==",
+      "type": "package",
+      "path": "opentelemetry.api/1.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0/OpenTelemetry.Api.dll",
+        "lib/net10.0/OpenTelemetry.Api.dll.sigstore.json",
+        "lib/net10.0/OpenTelemetry.Api.xml",
+        "lib/net462/OpenTelemetry.Api.dll",
+        "lib/net462/OpenTelemetry.Api.dll.sigstore.json",
+        "lib/net462/OpenTelemetry.Api.xml",
+        "lib/net8.0/OpenTelemetry.Api.dll",
+        "lib/net8.0/OpenTelemetry.Api.dll.sigstore.json",
+        "lib/net8.0/OpenTelemetry.Api.xml",
+        "lib/net9.0/OpenTelemetry.Api.dll",
+        "lib/net9.0/OpenTelemetry.Api.dll.sigstore.json",
+        "lib/net9.0/OpenTelemetry.Api.xml",
+        "lib/netstandard2.0/OpenTelemetry.Api.dll",
+        "lib/netstandard2.0/OpenTelemetry.Api.dll.sigstore.json",
+        "lib/netstandard2.0/OpenTelemetry.Api.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.api.1.16.0.nupkg.sha512",
+        "opentelemetry.api.nuspec"
+      ]
+    },
+    "OpenTelemetry.Api.ProviderBuilderExtensions/1.16.0": {
+      "sha512": "hZwaHAkXvUNn9+cS+vEvYBgIrIQOQRz2cIRUODZ5gxHsDsLeNCueLgZFkybopjE0jUhLut6lm5eL3LTqbW0hMg==",
+      "type": "package",
+      "path": "opentelemetry.api.providerbuilderextensions/1.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll",
+        "lib/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll.sigstore.json",
+        "lib/net10.0/OpenTelemetry.Api.ProviderBuilderExtensions.xml",
+        "lib/net462/OpenTelemetry.Api.ProviderBuilderExtensions.dll",
+        "lib/net462/OpenTelemetry.Api.ProviderBuilderExtensions.dll.sigstore.json",
+        "lib/net462/OpenTelemetry.Api.ProviderBuilderExtensions.xml",
+        "lib/net8.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll",
+        "lib/net8.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll.sigstore.json",
+        "lib/net8.0/OpenTelemetry.Api.ProviderBuilderExtensions.xml",
+        "lib/net9.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll",
+        "lib/net9.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll.sigstore.json",
+        "lib/net9.0/OpenTelemetry.Api.ProviderBuilderExtensions.xml",
+        "lib/netstandard2.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll",
+        "lib/netstandard2.0/OpenTelemetry.Api.ProviderBuilderExtensions.dll.sigstore.json",
+        "lib/netstandard2.0/OpenTelemetry.Api.ProviderBuilderExtensions.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.api.providerbuilderextensions.1.16.0.nupkg.sha512",
+        "opentelemetry.api.providerbuilderextensions.nuspec"
+      ]
+    },
+    "OpenTelemetry.Exporter.OpenTelemetryProtocol/1.16.0": {
+      "sha512": "gzYLY8sVDY5FYtVlCYSzBYX53xslRlvBLxwFYOdNIhc76SgKdFYUoDQXOeQI3WPBCrZp51QNcP6fZHh1+HtpIQ==",
+      "type": "package",
+      "path": "opentelemetry.exporter.opentelemetryprotocol/1.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll",
+        "lib/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll.sigstore.json",
+        "lib/net10.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.xml",
+        "lib/net462/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll",
+        "lib/net462/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll.sigstore.json",
+        "lib/net462/OpenTelemetry.Exporter.OpenTelemetryProtocol.xml",
+        "lib/net8.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll",
+        "lib/net8.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll.sigstore.json",
+        "lib/net8.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.xml",
+        "lib/net9.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll",
+        "lib/net9.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll.sigstore.json",
+        "lib/net9.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.xml",
+        "lib/netstandard2.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll",
+        "lib/netstandard2.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll.sigstore.json",
+        "lib/netstandard2.0/OpenTelemetry.Exporter.OpenTelemetryProtocol.xml",
+        "lib/netstandard2.1/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll",
+        "lib/netstandard2.1/OpenTelemetry.Exporter.OpenTelemetryProtocol.dll.sigstore.json",
+        "lib/netstandard2.1/OpenTelemetry.Exporter.OpenTelemetryProtocol.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.exporter.opentelemetryprotocol.1.16.0.nupkg.sha512",
+        "opentelemetry.exporter.opentelemetryprotocol.nuspec"
+      ]
+    },
+    "OpenTelemetry.Extensions.Hosting/1.16.0": {
+      "sha512": "/YfrO5MRaA156vhNanYGPX2JjOwKUrA0+Jf7ltT2eD3VkfHqXcEJY5Oxt/nWH8lqBOTc1nJpn2soBtD5Cml8Dg==",
+      "type": "package",
+      "path": "opentelemetry.extensions.hosting/1.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0/OpenTelemetry.Extensions.Hosting.dll",
+        "lib/net10.0/OpenTelemetry.Extensions.Hosting.dll.sigstore.json",
+        "lib/net10.0/OpenTelemetry.Extensions.Hosting.xml",
+        "lib/net462/OpenTelemetry.Extensions.Hosting.dll",
+        "lib/net462/OpenTelemetry.Extensions.Hosting.dll.sigstore.json",
+        "lib/net462/OpenTelemetry.Extensions.Hosting.xml",
+        "lib/net8.0/OpenTelemetry.Extensions.Hosting.dll",
+        "lib/net8.0/OpenTelemetry.Extensions.Hosting.dll.sigstore.json",
+        "lib/net8.0/OpenTelemetry.Extensions.Hosting.xml",
+        "lib/net9.0/OpenTelemetry.Extensions.Hosting.dll",
+        "lib/net9.0/OpenTelemetry.Extensions.Hosting.dll.sigstore.json",
+        "lib/net9.0/OpenTelemetry.Extensions.Hosting.xml",
+        "lib/netstandard2.0/OpenTelemetry.Extensions.Hosting.dll",
+        "lib/netstandard2.0/OpenTelemetry.Extensions.Hosting.dll.sigstore.json",
+        "lib/netstandard2.0/OpenTelemetry.Extensions.Hosting.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.extensions.hosting.1.16.0.nupkg.sha512",
+        "opentelemetry.extensions.hosting.nuspec"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.AspNetCore/1.16.0": {
+      "sha512": "vSC5EsmBVNcqXMh9BGkkq8zkoUjrg8ghBDb9zbKR8Bqjd05utjVgVft+fqsqQVsvlV5olGj1pBliHBngcIGSIg==",
+      "type": "package",
+      "path": "opentelemetry.instrumentation.aspnetcore/1.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "README.md",
+        "lib/net10.0/OpenTelemetry.Instrumentation.AspNetCore.dll",
+        "lib/net10.0/OpenTelemetry.Instrumentation.AspNetCore.xml",
+        "lib/net8.0/OpenTelemetry.Instrumentation.AspNetCore.dll",
+        "lib/net8.0/OpenTelemetry.Instrumentation.AspNetCore.xml",
+        "lib/netstandard2.0/OpenTelemetry.Instrumentation.AspNetCore.dll",
+        "lib/netstandard2.0/OpenTelemetry.Instrumentation.AspNetCore.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.instrumentation.aspnetcore.1.16.0.nupkg.sha512",
+        "opentelemetry.instrumentation.aspnetcore.nuspec"
+      ]
+    },
+    "OpenTelemetry.Instrumentation.Http/1.16.0": {
+      "sha512": "+Sz3lfvMXwWE8s/sMruHCDlO/+cArFVc6oBg1tCb70BKlL9FCC7uK4Ar2/VP9Hhwvs+UwaW1vGzE/uiByVHXiA==",
+      "type": "package",
+      "path": "opentelemetry.instrumentation.http/1.16.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "README.md",
+        "lib/net10.0/OpenTelemetry.Instrumentation.Http.dll",
+        "lib/net10.0/OpenTelemetry.Instrumentation.Http.xml",
+        "lib/net462/OpenTelemetry.Instrumentation.Http.dll",
+        "lib/net462/OpenTelemetry.Instrumentation.Http.xml",
+        "lib/net8.0/OpenTelemetry.Instrumentation.Http.dll",
+        "lib/net8.0/OpenTelemetry.Instrumentation.Http.xml",
+        "lib/netstandard2.0/OpenTelemetry.Instrumentation.Http.dll",
+        "lib/netstandard2.0/OpenTelemetry.Instrumentation.Http.xml",
+        "opentelemetry-icon-color.png",
+        "opentelemetry.instrumentation.http.1.16.0.nupkg.sha512",
+        "opentelemetry.instrumentation.http.nuspec"
+      ]
+    },
     "Oracle.ManagedDataAccess.Core/23.26.0": {
       "sha512": "+F+d0hTbbqRll5A0T/8mPRy6erBvs3gnaBgktVTYHFZEJkjR+6wErh+4L34QMZIy9mP6osPbptcQJWweH6NrIg==",
       "type": "package",
@@ -7619,6 +8277,18 @@
         "oracle.manageddataaccess.core.23.26.0.nupkg.sha512",
         "oracle.manageddataaccess.core.nuspec",
         "oracle.png"
+      ]
+    },
+    "Owin/1.0.0": {
+      "sha512": "OseTFniKmyp76mEzOBwIKGBRS5eMoYNkMKaMXOpxx9jv88+b6mh1rSaw43vjBOItNhaLFG3d0a20PfHyibH5sw==",
+      "type": "package",
+      "path": "owin/1.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net40/Owin.dll",
+        "owin.1.0.0.nupkg.sha512",
+        "owin.nuspec"
       ]
     },
     "Perfolizer/0.6.1": {
@@ -7859,6 +8529,257 @@
         "runtimes/win-x86/native/sni.dll",
         "useSharedDesignerContext.txt",
         "version.txt"
+      ]
+    },
+    "Serilog/4.3.1": {
+      "sha512": "savYe7h5yRlkqBVOwP8cIRDOdqKiPmYCU4W87JH38sBmcKD5EBoXvQIw6bNEvZ/pTe1gsiye3VFCzBsoppGkXQ==",
+      "type": "package",
+      "path": "serilog/4.3.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "build/Serilog.targets",
+        "buildTransitive/Serilog.targets",
+        "icon.png",
+        "lib/net10.0/Serilog.dll",
+        "lib/net10.0/Serilog.xml",
+        "lib/net462/Serilog.dll",
+        "lib/net462/Serilog.xml",
+        "lib/net471/Serilog.dll",
+        "lib/net471/Serilog.xml",
+        "lib/net6.0/Serilog.dll",
+        "lib/net6.0/Serilog.xml",
+        "lib/net8.0/Serilog.dll",
+        "lib/net8.0/Serilog.xml",
+        "lib/net9.0/Serilog.dll",
+        "lib/net9.0/Serilog.xml",
+        "lib/netstandard2.0/Serilog.dll",
+        "lib/netstandard2.0/Serilog.xml",
+        "serilog.4.3.1.nupkg.sha512",
+        "serilog.nuspec"
+      ]
+    },
+    "Serilog.AspNetCore/10.0.0": {
+      "sha512": "a/cNa1mY4On1oJlfGG1wAvxjp5g7OEzk/Jf/nm7NF9cWoE7KlZw1GldrifUBWm9oKibHkR7Lg/l5jy3y7ACR8w==",
+      "type": "package",
+      "path": "serilog.aspnetcore/10.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net10.0/Serilog.AspNetCore.dll",
+        "lib/net10.0/Serilog.AspNetCore.xml",
+        "lib/net462/Serilog.AspNetCore.dll",
+        "lib/net462/Serilog.AspNetCore.xml",
+        "lib/net8.0/Serilog.AspNetCore.dll",
+        "lib/net8.0/Serilog.AspNetCore.xml",
+        "lib/net9.0/Serilog.AspNetCore.dll",
+        "lib/net9.0/Serilog.AspNetCore.xml",
+        "lib/netstandard2.0/Serilog.AspNetCore.dll",
+        "lib/netstandard2.0/Serilog.AspNetCore.xml",
+        "lib/netstandard2.1/Serilog.AspNetCore.dll",
+        "lib/netstandard2.1/Serilog.AspNetCore.xml",
+        "serilog.aspnetcore.10.0.0.nupkg.sha512",
+        "serilog.aspnetcore.nuspec"
+      ]
+    },
+    "Serilog.Extensions.Hosting/10.0.0": {
+      "sha512": "E7juuIc+gzoGxgzFooFgAV8g9BfiSXNKsUok9NmEpyAXg2odkcPsMa/Yo4axkJRlh0se7mkYQ1GXDaBemR+b6w==",
+      "type": "package",
+      "path": "serilog.extensions.hosting/10.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net10.0/Serilog.Extensions.Hosting.dll",
+        "lib/net10.0/Serilog.Extensions.Hosting.xml",
+        "lib/net462/Serilog.Extensions.Hosting.dll",
+        "lib/net462/Serilog.Extensions.Hosting.xml",
+        "lib/net8.0/Serilog.Extensions.Hosting.dll",
+        "lib/net8.0/Serilog.Extensions.Hosting.xml",
+        "lib/net9.0/Serilog.Extensions.Hosting.dll",
+        "lib/net9.0/Serilog.Extensions.Hosting.xml",
+        "lib/netstandard2.0/Serilog.Extensions.Hosting.dll",
+        "lib/netstandard2.0/Serilog.Extensions.Hosting.xml",
+        "lib/netstandard2.1/Serilog.Extensions.Hosting.dll",
+        "lib/netstandard2.1/Serilog.Extensions.Hosting.xml",
+        "serilog.extensions.hosting.10.0.0.nupkg.sha512",
+        "serilog.extensions.hosting.nuspec"
+      ]
+    },
+    "Serilog.Extensions.Logging/10.0.0": {
+      "sha512": "vx0kABKl2dWbBhhqAfTOk53/i8aV/5VaT3a6il9gn72Wqs2pM7EK2OB6No6xdqK2IaY6Zf9gdjLuK9BVa2rT+Q==",
+      "type": "package",
+      "path": "serilog.extensions.logging/10.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net10.0/Serilog.Extensions.Logging.dll",
+        "lib/net10.0/Serilog.Extensions.Logging.xml",
+        "lib/net462/Serilog.Extensions.Logging.dll",
+        "lib/net462/Serilog.Extensions.Logging.xml",
+        "lib/net8.0/Serilog.Extensions.Logging.dll",
+        "lib/net8.0/Serilog.Extensions.Logging.xml",
+        "lib/net9.0/Serilog.Extensions.Logging.dll",
+        "lib/net9.0/Serilog.Extensions.Logging.xml",
+        "lib/netstandard2.0/Serilog.Extensions.Logging.dll",
+        "lib/netstandard2.0/Serilog.Extensions.Logging.xml",
+        "lib/netstandard2.1/Serilog.Extensions.Logging.dll",
+        "lib/netstandard2.1/Serilog.Extensions.Logging.xml",
+        "serilog-extension-nuget.png",
+        "serilog.extensions.logging.10.0.0.nupkg.sha512",
+        "serilog.extensions.logging.nuspec"
+      ]
+    },
+    "Serilog.Formatting.Compact/3.0.0": {
+      "sha512": "wQsv14w9cqlfB5FX2MZpNsTawckN4a8dryuNGbebB/3Nh1pXnROHZov3swtu3Nj5oNG7Ba+xdu7Et/ulAUPanQ==",
+      "type": "package",
+      "path": "serilog.formatting.compact/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net462/Serilog.Formatting.Compact.dll",
+        "lib/net462/Serilog.Formatting.Compact.xml",
+        "lib/net471/Serilog.Formatting.Compact.dll",
+        "lib/net471/Serilog.Formatting.Compact.xml",
+        "lib/net6.0/Serilog.Formatting.Compact.dll",
+        "lib/net6.0/Serilog.Formatting.Compact.xml",
+        "lib/net8.0/Serilog.Formatting.Compact.dll",
+        "lib/net8.0/Serilog.Formatting.Compact.xml",
+        "lib/netstandard2.0/Serilog.Formatting.Compact.dll",
+        "lib/netstandard2.0/Serilog.Formatting.Compact.xml",
+        "serilog-extension-nuget.png",
+        "serilog.formatting.compact.3.0.0.nupkg.sha512",
+        "serilog.formatting.compact.nuspec"
+      ]
+    },
+    "Serilog.Settings.Configuration/10.0.0": {
+      "sha512": "LNq+ibS1sbhTqPV1FIE69/9AJJbfaOhnaqkzcjFy95o+4U+STsta9mi97f1smgXsWYKICDeGUf8xUGzd/52/uA==",
+      "type": "package",
+      "path": "serilog.settings.configuration/10.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net10.0/Serilog.Settings.Configuration.dll",
+        "lib/net10.0/Serilog.Settings.Configuration.xml",
+        "lib/net462/Serilog.Settings.Configuration.dll",
+        "lib/net462/Serilog.Settings.Configuration.xml",
+        "lib/net8.0/Serilog.Settings.Configuration.dll",
+        "lib/net8.0/Serilog.Settings.Configuration.xml",
+        "lib/net9.0/Serilog.Settings.Configuration.dll",
+        "lib/net9.0/Serilog.Settings.Configuration.xml",
+        "lib/netstandard2.0/Serilog.Settings.Configuration.dll",
+        "lib/netstandard2.0/Serilog.Settings.Configuration.xml",
+        "serilog.settings.configuration.10.0.0.nupkg.sha512",
+        "serilog.settings.configuration.nuspec"
+      ]
+    },
+    "Serilog.Sinks.Console/6.1.1": {
+      "sha512": "8jbqgjUyZlfCuSTaJk6lOca465OndqOz3KZP6Cryt/IqZYybyBu7GP0fE/AXBzrrQB3EBmQntBFAvMVz1COvAA==",
+      "type": "package",
+      "path": "serilog.sinks.console/6.1.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net462/Serilog.Sinks.Console.dll",
+        "lib/net462/Serilog.Sinks.Console.xml",
+        "lib/net471/Serilog.Sinks.Console.dll",
+        "lib/net471/Serilog.Sinks.Console.xml",
+        "lib/net6.0/Serilog.Sinks.Console.dll",
+        "lib/net6.0/Serilog.Sinks.Console.xml",
+        "lib/net8.0/Serilog.Sinks.Console.dll",
+        "lib/net8.0/Serilog.Sinks.Console.xml",
+        "lib/netstandard2.0/Serilog.Sinks.Console.dll",
+        "lib/netstandard2.0/Serilog.Sinks.Console.xml",
+        "serilog.sinks.console.6.1.1.nupkg.sha512",
+        "serilog.sinks.console.nuspec"
+      ]
+    },
+    "Serilog.Sinks.Debug/3.0.0": {
+      "sha512": "4BzXcdrgRX7wde9PmHuYd9U6YqycCC28hhpKonK7hx0wb19eiuRj16fPcPSVp0o/Y1ipJuNLYQ00R3q2Zs8FDA==",
+      "type": "package",
+      "path": "serilog.sinks.debug/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net462/Serilog.Sinks.Debug.dll",
+        "lib/net462/Serilog.Sinks.Debug.xml",
+        "lib/net471/Serilog.Sinks.Debug.dll",
+        "lib/net471/Serilog.Sinks.Debug.xml",
+        "lib/net6.0/Serilog.Sinks.Debug.dll",
+        "lib/net6.0/Serilog.Sinks.Debug.xml",
+        "lib/net8.0/Serilog.Sinks.Debug.dll",
+        "lib/net8.0/Serilog.Sinks.Debug.xml",
+        "lib/netstandard2.0/Serilog.Sinks.Debug.dll",
+        "lib/netstandard2.0/Serilog.Sinks.Debug.xml",
+        "serilog.sinks.debug.3.0.0.nupkg.sha512",
+        "serilog.sinks.debug.nuspec"
+      ]
+    },
+    "Serilog.Sinks.File/7.0.0": {
+      "sha512": "fKL7mXv7qaiNBUC71ssvn/dU0k9t0o45+qm2XgKAlSt19xF+ijjxyA3R6HmCgfKEKwfcfkwWjayuQtRueZFkYw==",
+      "type": "package",
+      "path": "serilog.sinks.file/7.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net462/Serilog.Sinks.File.dll",
+        "lib/net462/Serilog.Sinks.File.xml",
+        "lib/net471/Serilog.Sinks.File.dll",
+        "lib/net471/Serilog.Sinks.File.xml",
+        "lib/net6.0/Serilog.Sinks.File.dll",
+        "lib/net6.0/Serilog.Sinks.File.xml",
+        "lib/net8.0/Serilog.Sinks.File.dll",
+        "lib/net8.0/Serilog.Sinks.File.xml",
+        "lib/net9.0/Serilog.Sinks.File.dll",
+        "lib/net9.0/Serilog.Sinks.File.xml",
+        "lib/netstandard2.0/Serilog.Sinks.File.dll",
+        "lib/netstandard2.0/Serilog.Sinks.File.xml",
+        "serilog-sink-nuget.png",
+        "serilog.sinks.file.7.0.0.nupkg.sha512",
+        "serilog.sinks.file.nuspec"
+      ]
+    },
+    "Serilog.Sinks.PeriodicBatching/2.1.0": {
+      "sha512": "FshW9PfIdLRfFCCoyU5Z8YKg6axd0ufy9pbcgTyf/mOIZjt78zVl5lZAjUBI2YDHncS3gtH/Bf0YKqMCWh2/0Q==",
+      "type": "package",
+      "path": "serilog.sinks.periodicbatching/2.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/Serilog.Sinks.PeriodicBatching.dll",
+        "lib/net45/Serilog.Sinks.PeriodicBatching.xml",
+        "lib/netstandard1.1/Serilog.Sinks.PeriodicBatching.dll",
+        "lib/netstandard1.1/Serilog.Sinks.PeriodicBatching.xml",
+        "lib/netstandard1.2/Serilog.Sinks.PeriodicBatching.dll",
+        "lib/netstandard1.2/Serilog.Sinks.PeriodicBatching.xml",
+        "serilog.sinks.periodicbatching.2.1.0.nupkg.sha512",
+        "serilog.sinks.periodicbatching.nuspec"
+      ]
+    },
+    "Serilog.Sinks.SignalR/2.0.10": {
+      "sha512": "XUwISj64r4wsulBoqAinNfOHzmQL2R7+sVTEGRVTmaYUi13MunvHs0yHLgS3iy0LGBQ/fIkqnXy2BqHWJkT9uQ==",
+      "type": "package",
+      "path": "serilog.sinks.signalr/2.0.10",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net46/Serilog.Sinks.SignalR.XML",
+        "lib/net46/Serilog.Sinks.SignalR.dll",
+        "serilog.sinks.signalr.2.0.10.nupkg.sha512",
+        "serilog.sinks.signalr.nuspec"
       ]
     },
     "SharpZipLib/1.4.2": {
@@ -9316,6 +10237,26 @@
       "code": "NU1903",
       "level": "Warning",
       "warningLevel": 1,
+      "message": "Package 'Microsoft.Owin' 3.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-3rq8-h3gj-r5c6",
+      "libraryId": "Microsoft.Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.Owin' 3.0.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-hxrm-9w7p-39cc",
+      "libraryId": "Microsoft.Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
       "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-37gx-xxp4-5rgx",
       "libraryId": "System.Security.Cryptography.Xml",
       "targetGraphs": [
@@ -9328,6 +10269,66 @@
       "warningLevel": 1,
       "message": "Package 'System.Security.Cryptography.Xml' 8.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-w3x6-4m5h-cxqf",
       "libraryId": "System.Security.Cryptography.Xml",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.AspNet.SignalR.Client 2.2.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Microsoft.AspNet.SignalR.Client",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.AspNet.SignalR.Core 2.2.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Microsoft.AspNet.SignalR.Core",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.Owin 3.0.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Microsoft.Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.Owin.Security 3.0.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Microsoft.Owin.Security",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Owin 1.0.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Owin",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Serilog.Sinks.SignalR 2.0.10' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Serilog.Sinks.SignalR",
       "targetGraphs": [
         "net10.0"
       ]

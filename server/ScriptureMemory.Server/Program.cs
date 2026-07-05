@@ -18,10 +18,13 @@ builder.Services.AddHttpLogging(o =>
     o.LoggingFields = HttpLoggingFields.RequestProperties;
 });
 
+builder.Logging.ConfigureOpenTelemetry(builder.Configuration);
+
 builder.Services
     .AddServices(builder.Configuration) 
-    .AddSecurity(builder.Configuration) // Add authentication & authorization
-    .AddBackgroundSyncerQuarts()
+    .AddAuthenticationAndAuthorization(builder.Configuration)
+    .ConfigureTracingAndMetrics(builder.Configuration)
+    .ConfigureQuartz()
     .AddDataAccess();
 
 builder.Logging.ClearProviders();
