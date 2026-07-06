@@ -11,13 +11,22 @@ public static class BibleEndpoint
         {
             return Results.Ok(await syncer.GetChapterContentExample());
         });
+        
+        // app.MapGet("/bibles", async (
+        //     BibleSyncer syncer) =>
+        // {
+        //     return Results.Ok(await syncer.)
+        // })
 
         app.MapGet("/bible/chapter/{bible}/{book}/{chapter}", async (
             string bible,
             string book,
             int chapter,
-            BibleApi bibleApi) =>
+            BibleApi bibleApi,
+            ILogger<Program> _logger) =>
         {
+            _logger.LogInformation("Test");
+            
             return Results.Ok(await bibleApi.GetFullChapter(
                 Tools.Bibles.GetBible(bible),
                 new Reference(Books.GetBook(book)

@@ -7,58 +7,57 @@ public class BibleSyncer
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly ILogger<BibleSyncer> _logger;
-    private readonly BibleApi _bibleContext;
+    private readonly BibleApi _bibleApi;
+    private readonly BibleData _bibleContext;
     private readonly IVerseData _verseData;
 
     public BibleSyncer(
         ApplicationDbContext db,
         ILogger<BibleSyncer> logger,
-        BibleApi bibleContext,
+        BibleApi bibleApi,
+        BibleData bibleContext,
         IVerseData verseData)
     {
         _dbContext = db;
         _logger = logger;
-        _bibleContext = bibleContext;
+        _bibleApi = bibleApi;
         _verseData = verseData;
+        _bibleContext = bibleContext;
     }
 
     /// <summary>
-    /// Return any Bibles that I am authorized which have not been added to the database yet
+    /// Gets authorized Bible data, showing which Bibles are not in my database or are not authorized
     /// </summary>
     /// <returns></returns>
-    public async Task<List<Bible>> CheckForBiblesNeedingAdded()
+    public async Task<List<BibleSyncData>> GetBibleSyncData()
     {
-        List<Bible> biblesNeedingAdded = new();
+        List<BibleSyncData> dataToReturn = new();
         
-        var uniqueVersions = _dbContext.VerseTranslationContents
-            .DistinctBy(c => c.Version)
-            .ToList();
+        var biblesInDatabase = await _bibleContext.GetBibles();
+        var authorizedBibles = await _bibleApi.GetAuthorizedBibles();
 
-        foreach (var version in uniqueVersions)
+        var bibleIdsInDatabase = biblesInDatabase.Select(b => b.Id).ToHashSet();
+        var authorizedBibleIds = authorizedBibles.Select(b => b.Id).ToHashSet();
+
+        var allBibles = biblesInDatabase.Concat(authorizedBibles).DistinctBy(b => b.Id).ToList();
+
+        foreach (var bible in allBibles)
         {
-            foreach (var authorizedBible in Bibles.authorizedBibles)
+            dataToReturn.Add(new BibleSyncData
             {
-                if (version.Version != authorizedBible.Version)
-                    biblesNeedingAdded.Add(authorizedBible);
-            }
+                Bible = bible,
+                Authorized = authorizedBibleIds.Contains(bible.Id),
+                InDatabase = bibleIdsInDatabase.Contains(bible.Id),
+            });
         }
-        
-        return biblesNeedingAdded;
-    }
 
-    /// <summary>
-    /// Return any verses who's content is not fully added (broken) for any Bible version
-    /// </summary>
-    /// <returns></returns>
-    // public async Task<List<Verse>> CheckForIncompleteVerses()
-    // {
-    //     
-    // }
+        return dataToReturn;
+    }
     
     
     public async Task<string> GetChapterContentExample()
     {
-        return await _bibleContext.GetFullChapter(
+        return await _bibleApi.GetFullChapter(
             _dbContext.Bibles.Where(b => b.Version == "kjv").First(),
             new Reference(Books.GetBook("Genesis"), 1, new List<int>() { 1 }));
     }

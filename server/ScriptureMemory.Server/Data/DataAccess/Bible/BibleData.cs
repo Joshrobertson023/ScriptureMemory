@@ -11,25 +11,10 @@ public class BibleData
     {
         _dbContext = dbContext;
         _logger = logger;
-    }    
-    
-    [Obsolete("Only used once to seed database with Bibles")]
-    public async Task AddAuthorizedBiblesOnStartup()
+    }
+
+    public async Task<List<Server.DataAccess.Models.Bible>> GetBibles()
     {
-        var existingBibles = _dbContext.Bibles.ToList();
-        
-        foreach (var bible in Tools.Bibles.authorizedBibles)
-        {
-            if (existingBibles.Any(b => b.Version == bible.Version))
-                continue;
-            
-            bible.LastUpdated = DateTime.UtcNow;
-            
-            _dbContext.Bibles.Add(bible);
-        }
-        
-        await _dbContext.SaveChangesAsync();
-        
-        _logger.LogInformation($"{string.Join(", ", Tools.Bibles.authorizedBibles.Select(b => b.Version))} have been added/replaced.");
+        return await _dbContext.Bibles.ToListAsync();
     }
 }

@@ -13,31 +13,19 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-builder.Services.AddHttpLogging(o =>
-{
-    o.LoggingFields = HttpLoggingFields.RequestProperties;
-});
-
-builder.Logging.ConfigureOpenTelemetry(builder.Configuration);
+builder.Logging.ConfigureOpenTelemetrySignalRLogging(builder.Configuration);
 
 builder.Services
     .AddServices(builder.Configuration) 
     .AddAuthenticationAndAuthorization(builder.Configuration)
-    .ConfigureTracingAndMetrics(builder.Configuration)
+    .ConfigureTracingAndMetricsExporting(builder.Configuration)
     .ConfigureQuartz()
     .AddDataAccess();
-
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
 
 var app = builder.Build();
 
 app.UseMiddleware()
     .UseEndpoints();
-
-// Convert all errors into Problem Details responses
-app.UseStatusCodePages();
 
 await app.AskToRunOptionalStartupTasks();
 

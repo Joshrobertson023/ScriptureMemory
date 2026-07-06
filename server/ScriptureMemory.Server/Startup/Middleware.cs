@@ -1,5 +1,8 @@
-﻿using Npgsql;
+﻿using Microsoft.AspNetCore.SignalR;
+using Npgsql;
 using ScriptureMemory.Server.Endpoints;
+using ScriptureMemory.Server.Providers;
+using ScriptureMemory.Server.SignalR;
 // using ScriptureMemory.Server.Endpoints;
 // using VerseAppNew.Server.Apis;
 using VerseAppNew.Server.Endpoints;
@@ -30,7 +33,15 @@ public static class Middleware
         //app.UseStaticFiles();
 
         app.UseStatusCodePages();
+
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
         
+        // Add SignalR logger
+        var hubContext = app.Services.GetRequiredService<IHubContext<LogHub>>();
+        var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+        loggerFactory.AddProvider(new SignalRLoggerProvider(hubContext));
+
         app.UseCors();
         
         app.UseAuthentication();
@@ -49,6 +60,7 @@ public static class Middleware
         // app.ConfigureSearchEndpoints();
         app.ConfigureAdminEndpoints();
         app.ConfigureBibleEndpoints();
+        app.ConfigureLogEndpoints();
         
         return app;
     }

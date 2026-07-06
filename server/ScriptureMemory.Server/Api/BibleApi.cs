@@ -29,7 +29,14 @@ public class BibleApi
 
     public async Task<List<Bible>> GetAuthorizedBibles()
     {
-        
+        using HttpClient http = new();
+        http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
+
+        var response = await http.GetFromJsonAsync<GetBiblesResponse>(
+            $"{_baseUrl}/bibles");
+
+        return response?.Data 
+               ?? throw new InvalidOperationException("No content returned from getting authorized Bibles.");
     }
 
     public async Task<string> GetFullChapter(Bible bible, Reference chapterReference)

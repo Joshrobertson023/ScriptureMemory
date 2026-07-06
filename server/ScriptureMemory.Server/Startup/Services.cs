@@ -2,6 +2,8 @@
 using DataAccess.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging.Configuration;
 using Npgsql;
 using Oracle.ManagedDataAccess.Client;
 using ScriptureMemory.Server.Services;
@@ -19,6 +21,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using ScriptureMemory.Server.Providers;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -149,7 +152,7 @@ public static class Services
         services.AddDbContextFactory<ApplicationDbContext>(
             options => options.UseNpgsql(connectionString, o => o.UseVector()),
             ServiceLifetime.Scoped);
-
+        
         // Add postgres data source for integration tests
         // services.AddNpgsqlDataSource(connectionString);
         
@@ -165,15 +168,17 @@ public static class Services
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.AllowAnyOrigin()
-                      .AllowAnyHeader()
-                      .AllowAnyMethod();
+                policy.WithOrigins("http://localhost:5173")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
             });
         });
 
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        services.AddSignalR();
 
         services.AddScoped<UserService>();
         services.AddScoped<AdminService>();
@@ -203,6 +208,7 @@ public static class Services
         services.AddScoped<IUserData, UserDataEFCore>();
         services.AddScoped<IAdminData, AdminDataEfCore>();
         services.AddScoped<IVerseData, VerseDataEfCore>();
+        services.AddScoped<BibleData>();
         // services.AddScoped<UserSettingsData>();
         // //services.AddScoped<CrossReferenceData>();
         // services.AddScoped<ActivityLoggingData>();
@@ -217,26 +223,37 @@ public static class Services
         return services;
     }
 
-    public static ILoggingBuilder ConfigureOpenTelemetry(this ILoggingBuilder logger, IConfiguration configuration)
+    public static ILoggingBuilder ConfigureOpenTelemetrySignalRLogging(
+        this ILoggingBuilder logger, 
+        IConfiguration configuration)
     {
         logger.ClearProviders();
+
+        logger.AddConsole(); // temp
         
-        logger.AddOpenTelemetry(o =>
-        {
-            o.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("verse-app"));
-            o.IncludeFormattedMessage = true;
-            o.IncludeScopes = true;
-            o.AddOtlpExporter(opt =>
-            {
-                opt.Endpoint = new Uri($"{configuration["Grafana:Endpoint"]}/v1/logs");
-                opt.Headers = $"Authorization=Basic {configuration["Grafana:AuthToken"]}";
-            });
-        });
+        // Disable in development
+        // logger.AddOpenTelemetry(o =>
+        // {
+        //     o.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("verse-app"));
+        //     o.IncludeFormattedMessage = true;
+        //     o.IncludeScopes = true;
+        //     o.ParseStateValues = true;
+        //     o.AddOtlpExporter(opt =>
+        //     {
+        //         opt.Endpoint = new Uri($"{configuration["Grafana:Endpoint"]}/v1/logs");
+        //         opt.Headers = $"Authorization=Basic {configuration["Grafana:AuthToken"]}";
+        //     });
+        // });
+        
+        // Block Grafana / Loki http logs
+        logger.AddFilter("System.Net.Http.HttpClient.OtlpLogExporter", LogLevel.None);
+        logger.AddFilter("System.Net.Http.HttpClient.OtlpMetricExporter", LogLevel.None);
+        logger.AddFilter("System.Net.Http.HttpClient.OtlpTraceExporter", LogLevel.None);
 
         return logger;
     }
 
-    public static IServiceCollection ConfigureTracingAndMetrics(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection ConfigureTracingAndMetricsExporting(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOpenTelemetry()
             .WithTracing(tracing => tracing
