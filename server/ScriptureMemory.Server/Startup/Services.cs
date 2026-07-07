@@ -144,6 +144,11 @@ public static class Services
 
         //
         //SqlMapper.AddTypeHandler(new VectorTypeHandler());
+
+        
+        // Add custom exception handler that logs exceptions
+        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddProblemDetails();
         
         var connectionString = configuration.GetConnectionString("PostgresConnection")
             ?? throw new Exception("Connection string not found in configuration");
@@ -173,6 +178,24 @@ public static class Services
                     .AllowAnyMethod()
                     .AllowCredentials();
             });
+        });
+        
+        services.AddHttpLogging(options =>
+        {
+            options.LoggingFields =
+                HttpLoggingFields.RequestMethod |
+                HttpLoggingFields.RequestPath |
+                HttpLoggingFields.RequestQuery |
+                HttpLoggingFields.RequestHeaders |
+                HttpLoggingFields.RequestBody |
+                HttpLoggingFields.ResponseStatusCode |
+                HttpLoggingFields.Duration;
+
+            options.RequestHeaders.Add("Authorization");
+            options.RequestHeaders.Add("User-Agent");
+            options.RequestHeaders.Add("X-Correlation-ID");
+
+            options.CombineLogs = true;
         });
 
         services.AddControllers();

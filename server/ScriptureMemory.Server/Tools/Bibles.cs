@@ -47,7 +47,14 @@ public class Bibles
         }
     };
 
-    public static Bible? GetBible(string version)
+    // Todo: Refactor to use data access in authorized Bibles in db
+    public static Bible GetBible(string version)
+    {
+        return authorizedBibles.FirstOrDefault(b => b.Version == version)
+            ?? throw new InvalidOperationException($"Bible {version} not found.");
+    }
+
+    public static Bible? TryGetBible(string version)
     {
         return authorizedBibles.FirstOrDefault(b => b.Version == version);
     }

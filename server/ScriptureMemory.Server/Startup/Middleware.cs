@@ -36,6 +36,10 @@ public static class Middleware
 
         app.UseDefaultFiles();
         app.UseStaticFiles();
+
+        app.UseHttpLogging();
+
+        app.UseExceptionHandler();
         
         // Add SignalR logger
         var hubContext = app.Services.GetRequiredService<IHubContext<LogHub>>();

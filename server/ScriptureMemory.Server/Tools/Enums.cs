@@ -15,6 +15,21 @@ namespace ScriptureMemory.Server.Tools
             SuperAdmin = 2
         }
 
+        public enum BibleSyncAction
+        {
+            Start,
+            Stop,
+            Success,
+            Fail
+        }
+
+        public enum SyncDestination
+        {
+            Database,
+            Redis,
+            Files
+        }
+
         public enum AdminActionType
         {
             VodAdded = 3,

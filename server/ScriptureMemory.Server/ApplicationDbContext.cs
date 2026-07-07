@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ScriptureMemory.Server.Data.Models.EntityConfigurations;
+using ScriptureMemory.Server.Data.Models.Logs;
 
 namespace ScriptureMemory.Server;
 
@@ -18,6 +19,7 @@ public class ApplicationDbContext : DbContext
     // public DbSet<Collection> Collections { get; set; }
     // public DbSet<UserPassage> UserPassages { get; set; }
     public DbSet<VerseTranslationContent> VerseTranslationContents { get; set; }
+    public DbSet<SyncLog> BibleSyncLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,18 +32,6 @@ public class ApplicationDbContext : DbContext
         new UserPreferencesConfiguration().Configure(modelBuilder.Entity<UserPreferences>());
         new VerseConfiguration().Configure(modelBuilder.Entity<Verse>());
         new VerseContentConfiguration().Configure(modelBuilder.Entity<VerseTranslationContent>());
-        // Conversions from enums to strings
-        // modelBuilder.Entity<Collection>()
-        //     .Property(c => c.Visibility)
-        //     .HasConversion<string>()
-        //     .HasMaxLength(20);
-        
-        // Configure owned References
-        // modelBuilder.Entity<Passage>()
-        //     .OwnsOne(p => p.Reference);
-        // modelBuilder.Entity<UserPassage>()
-        //     .OwnsOne(p => p.Reference);
-        // modelBuilder.Entity<Passage>()
-        //     .OwnsOne(p => p.Reference);
+        new SyncLogConfiguration().Configure(modelBuilder.Entity<SyncLog>());
     }
 }

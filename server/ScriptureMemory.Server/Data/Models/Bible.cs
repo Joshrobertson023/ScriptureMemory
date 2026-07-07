@@ -14,8 +14,4 @@ public class Bible
     public string? Copyright { get; set; }
     
     public string Info { get; set; } = string.Empty;
-    
-    public DateTime? LastSynced { get; set; }
-    
-    public string? SyncError { get; set; } // Last sync error
 }

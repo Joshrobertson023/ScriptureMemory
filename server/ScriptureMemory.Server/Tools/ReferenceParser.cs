@@ -371,17 +371,17 @@ public static class ReferenceParser
             else
                 parts[0] = reference;
 
-            Book? book = Books.GetBook(parts[0]);
+            Book? book = Books.TryGetBook(parts[0]);
             
             if (book is null)
             { // Handle books with one space in its name
                 string bookWithNumber = parts[0] + " " + parts[1];
-                book = Books.GetBook(bookWithNumber);
+                book = Books.TryGetBook(bookWithNumber);
                 if (book is null)
                 {
                     // Handle books with two spaces in its name
                     bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
-                    book = Books.GetBook(bookWithNumber);
+                    book = Books.TryGetBook(bookWithNumber);
 
                     return book; // There are no valid book names with three or more spaces in its name
                 }
@@ -412,7 +412,7 @@ public static class ReferenceParser
         {
             string[] parts = reference.Split(' ');
             
-            Book? book =  Books.GetBook(parts[0]);
+            Book? book =  Books.TryGetBook(parts[0]);
 
             if (parts.Length > 1 && book is not null)
             {
@@ -426,7 +426,7 @@ public static class ReferenceParser
             {
                 string bookWithNumber = parts[0] + " " + parts[1];
 
-                if (Books.GetBook(bookWithNumber) is not null)
+                if (Books.TryGetBook(bookWithNumber) is not null)
                 {
                     var chapterPart = parts[2].Split(':')[0];
                     if (int.TryParse(chapterPart, out int chapter))
@@ -439,7 +439,7 @@ public static class ReferenceParser
                 {
                     bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
 
-                    if (Books.GetBook(bookWithNumber) is not null)
+                    if (Books.TryGetBook(bookWithNumber) is not null)
                     {
                         var chapterPart = parts[3].Split(':')[0];
                         if (int.TryParse(chapterPart, out int chapter))

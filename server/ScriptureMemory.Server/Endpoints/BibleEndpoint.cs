@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Services;
 
 namespace ScriptureMemory.Server.Endpoints;
@@ -18,19 +20,18 @@ public static class BibleEndpoint
         //     return Results.Ok(await syncer.)
         // })
 
-        app.MapGet("/bible/chapter/{bible}/{book}/{chapter}", async (
+        app.MapPost("/bible/chapter/{bible}/{book}", async (
             string bible,
             string book,
-            int chapter,
-            BibleApi bibleApi,
-            ILogger<Program> _logger) =>
+            [FromBody] int chapter,
+            [FromServices] BibleApi bibleApi,
+            [FromServices] ILogger<Program> _logger) =>
         {
-            _logger.LogInformation("Test");
+            _logger.LogInformation("Requested {Book} from {Bible} in chapter {Chapter}", book, bible, chapter);
             
             return Results.Ok(await bibleApi.GetFullChapter(
                 Tools.Bibles.GetBible(bible),
-                new Reference(Books.GetBook(book)
-                    ?? throw new InvalidOperationException($"{book} is not a valid book"), chapter)));
+                new Reference(Books.GetBook(book), chapter)));
         });
 
         // app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (

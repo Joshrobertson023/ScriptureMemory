@@ -59,6 +59,6 @@ public class BibleSyncer
     {
         return await _bibleApi.GetFullChapter(
             _dbContext.Bibles.Where(b => b.Version == "kjv").First(),
-            new Reference(Books.GetBook("Genesis"), 1, new List<int>() { 1 }));
+            new Reference(Books.TryGetBook("Genesis"), 1, new List<int>() { 1 }));
     }
 }

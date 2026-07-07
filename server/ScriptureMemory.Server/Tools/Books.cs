@@ -1,4 +1,5 @@
-﻿using ScriptureMemory.Server.Data.Models;
+﻿using ScriptureMemory.Server.CustomExceptions;
+using ScriptureMemory.Server.Data.Models;
 using static Azure.Core.HttpHeader;
 
 namespace ScriptureMemory.Server.Tools;
@@ -124,10 +125,17 @@ public static class Books
     /// Bool specifying if a valid book was found, and the display name for that book as the out param.
     /// Both return null if no valid book was found.
     /// </returns>
-    public static Book? GetBook(string input)
+    public static Book? TryGetBook(string input)
     {
         return bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out var _book) is false
                ? null
                : _book;
+    }
+
+    public static Book GetBook(string input)
+    {
+        return bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out var _book) is false
+            ? throw new BookNotFoundException($"Book {input} not found.")
+            : _book;
     }
 }

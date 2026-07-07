@@ -54,8 +54,7 @@ public class Verse
     public Verse(string bookName, int chapter, int verseNum)
     {
         Reference = ReferenceParser.Parse(
-            Books.GetBook(bookName)
-                ??  throw new ArgumentException($"{bookName} is not a valid book name"), 
+            Books.GetBook(bookName), 
             chapter, 
             new List<int>() {verseNum});
     }
@@ -69,6 +68,7 @@ public class Verse
     /// <exception cref="ArgumentException"></exception>
     public Verse(string readableReference)
     {
+        // Todo: Refactor to Prase and TryParse, give custom exception
         Reference = ReferenceParser.Parse(readableReference)
             ?? throw new ArgumentException($"{readableReference} is not a valid reference");
     }

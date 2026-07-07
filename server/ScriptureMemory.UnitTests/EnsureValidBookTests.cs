@@ -8,7 +8,7 @@ public class EnsureValidBookTests
     [Fact]
     public void EnsureValidBook_TryGetBookReturnsValidBook()
     {
-        Book? book = Books.GetBook("Genesis");
+        Book? book = Books.TryGetBook("Genesis");
         Assert.Equal("Genesis", book?.DisplayName);
         Assert.Equal("gen", book?.Abbreviation);
     }
@@ -16,7 +16,7 @@ public class EnsureValidBookTests
     [Fact]
     public void EnsureValidBook_TryGetBookReturnsValidBookFromAbbreviation()
     {
-        Book? book = Books.GetBook("gen");
+        Book? book = Books.TryGetBook("gen");
         Assert.Equal("Genesis", book?.DisplayName);
         Assert.Equal("gen", book?.Abbreviation);
     }
@@ -24,7 +24,7 @@ public class EnsureValidBookTests
     [Fact]
     public void EnsureValidBook_TryGetBookReturnsValidBookFromFuzzyMatch()
     {
-        Book? book = Books.GetBook("geneses");
+        Book? book = Books.TryGetBook("geneses");
         Assert.Equal("Genesis", book?.DisplayName);
         Assert.Equal("gen", book?.Abbreviation);
     }
@@ -32,7 +32,7 @@ public class EnsureValidBookTests
     [Fact]
     public void EnsureValidBook_InvalidTryGetBookReturnsNull()
     {
-        Book? book = Books.GetBook("random_book");
+        Book? book = Books.TryGetBook("random_book");
         Assert.Null(book);
     }
 }
