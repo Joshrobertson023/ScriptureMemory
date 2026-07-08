@@ -10,5 +10,11 @@ public class SyncLogConfiguration : IEntityTypeConfiguration<SyncLog>
         builder.ToTable("BibleSyncLogs");
         builder.Property(b => b.BibleId)
             .HasMaxLength(100);
+        builder.Property(e => e.Timestamp)
+            .HasDefaultValueSql("NOW()");
+        builder.HasOne(e => e.Exception)
+            .WithOne(ex => ex.SyncLogNavigation)
+            .HasForeignKey<ExceptionModel>(ex => ex.SyncLogId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

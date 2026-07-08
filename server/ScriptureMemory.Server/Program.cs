@@ -19,7 +19,6 @@ builder.Services
     .AddServices(builder.Configuration) 
     .AddAuthenticationAndAuthorization(builder.Configuration)
     .ConfigureTracingAndMetricsExporting(builder.Configuration)
-    .ConfigureQuartz()
     .AddDataAccess();
 
 var app = builder.Build();

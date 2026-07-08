@@ -29,16 +29,15 @@ public class BibleSyncerBackgroundTaskQueue
         
         logger.LogInformation("A work item has been queued by {Username}: {MethodName}", 
             task.MethodName,
-            task.Initializer);
+            task.Initiator);
     }
 
     public async Task<BibleSyncerTask> DequeueAsync(CancellationToken cancellationToken)
     {
         var task = await _queue.Reader.ReadAsync(cancellationToken);
         
-        logger.LogInformation("A work item has been dequeued for execution by {Username}: {MethodName}", 
-            task.MethodName,
-            task.Initializer);
+        logger.LogInformation("A work item has been dequeued for execution: {MethodName}", 
+            task.MethodName);
 
         return task;
     }

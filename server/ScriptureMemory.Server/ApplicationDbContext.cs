@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Data.Models.EntityConfigurations;
 using ScriptureMemory.Server.Data.Models.Logs;
 
@@ -20,6 +21,7 @@ public class ApplicationDbContext : DbContext
     // public DbSet<UserPassage> UserPassages { get; set; }
     public DbSet<VerseTranslationContent> VerseTranslationContents { get; set; }
     public DbSet<SyncLog> BibleSyncLogs { get; set; }
+    public DbSet<ExceptionModel> Exceptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,5 +35,13 @@ public class ApplicationDbContext : DbContext
         new VerseConfiguration().Configure(modelBuilder.Entity<Verse>());
         new VerseContentConfiguration().Configure(modelBuilder.Entity<VerseTranslationContent>());
         new SyncLogConfiguration().Configure(modelBuilder.Entity<SyncLog>());
+        new ExceptionConfiguration().Configure(modelBuilder.Entity<ExceptionModel>());
+    }
+    
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder
+            .Properties<Enum>()
+            .HaveConversion<string>();
     }
 }

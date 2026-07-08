@@ -35,4 +35,16 @@ public class BibleSyncLogData
             .Take(10)
             .ToListAsync();
     }
+
+    public async Task Log(SyncLog log)
+    {
+        await _dbContext.BibleSyncLogs.AddAsync(log);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task AddLogs(List<SyncLog> logs)
+    {
+        await _dbContext.BibleSyncLogs.AddRangeAsync(logs);
+        await _dbContext.SaveChangesAsync();
+    }
 }

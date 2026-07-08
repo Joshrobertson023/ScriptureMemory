@@ -17,8 +17,8 @@ namespace ScriptureMemory.Server.Tools
 
         public enum BibleSyncAction
         {
-            Start,
-            Stop,
+            Started,
+            Stopped,
             Completed
         }
 
