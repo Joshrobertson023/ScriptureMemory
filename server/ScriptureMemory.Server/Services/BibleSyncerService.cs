@@ -1,19 +1,23 @@
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
+using System.Collections.Concurrent;
 
 namespace ScriptureMemory.Server.Services;
 
-public class BibleSyncer
+/// <summary>
+/// Adds tasks to the Bible Syncer background task queue
+/// </summary>
+public class BibleSyncerService
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly ILogger<BibleSyncer> _logger;
+    private readonly ILogger<BibleSyncerService> _logger;
     private readonly BibleApi _bibleApi;
     private readonly BibleData _bibleContext;
     private readonly IVerseData _verseData;
 
-    public BibleSyncer(
+    public BibleSyncerService(
         ApplicationDbContext db,
-        ILogger<BibleSyncer> logger,
+        ILogger<BibleSyncerService> logger,
         BibleApi bibleApi,
         BibleData bibleContext,
         IVerseData verseData)
@@ -52,6 +56,16 @@ public class BibleSyncer
         }
 
         return dataToReturn;
+    }
+
+    public async Task<List<string>> GetSyncingBibles()
+    {
+        var scope = 
+    }
+
+    public async Task StartSync(string bibleId, int userId)
+    {
+        
     }
     
     

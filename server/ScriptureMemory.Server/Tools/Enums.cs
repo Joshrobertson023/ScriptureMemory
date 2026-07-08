@@ -19,8 +19,7 @@ namespace ScriptureMemory.Server.Tools
         {
             Start,
             Stop,
-            Success,
-            Fail
+            Completed
         }
 
         public enum SyncDestination

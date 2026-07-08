@@ -74,25 +74,6 @@ public static class Services
         return services;
     }
 
-    public static IServiceCollection ConfigureQuartz(this IServiceCollection services)
-    {
-        services.AddQuartz(q =>
-        {
-            var jobKey = new JobKey("Syncer");
-            q.AddJob<SyncBibleApiService>(o => o.WithIdentity(jobKey));
-            q.AddTrigger(o =>
-            {
-                o.ForJob(jobKey)
-                    .WithIdentity("Syncer-Trigger")
-                    .WithCronSchedule("0 0 2 * * ?"); // 2am daily
-            });
-        });
-        
-        services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-        
-        return services;
-    }
-
     /// <summary>
     /// Add authentication & authorization
     /// </summary>
@@ -219,9 +200,12 @@ public static class Services
 
         //services.AddScoped<VerseManagement>();
         services.AddScoped<BibleApi>();
-        services.AddScoped<BibleSyncer>();
+        services.AddScoped<BibleSyncerService>();
 
         //services.AddScoped<EmbeddingGenerator>();
+
+        services.AddSingleton<BibleSyncerBackgroundTaskQueue>();
+        services.AddHostedService<BibleSyncerBackgroundTaskWorker>();
 
         return services;
     }
@@ -232,6 +216,7 @@ public static class Services
         services.AddScoped<IAdminData, AdminDataEfCore>();
         services.AddScoped<IVerseData, VerseDataEfCore>();
         services.AddScoped<BibleData>();
+        services.AddScoped<BibleSyncLogData>();
         // services.AddScoped<UserSettingsData>();
         // //services.AddScoped<CrossReferenceData>();
         // services.AddScoped<ActivityLoggingData>();

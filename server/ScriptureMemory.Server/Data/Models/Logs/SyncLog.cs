@@ -6,12 +6,13 @@ public class SyncLog
     
     public string BibleId { get; set; }
     
+    public int UserId { get; set; }
+    
     public BibleSyncAction Action { get; set; }
     
-    public SyncDestination Destination { get; set; }
+    public bool UserDirected { get; set; } // Was a user-directed action and not an unwanted stop from an error
     
-    [Column(TypeName = "jsonb")]
-    public object? JsonContext { get; set; }
+    public SyncDestination Destination { get; set; }
     
     public DateTime Timestamp { get; set; }
 }
