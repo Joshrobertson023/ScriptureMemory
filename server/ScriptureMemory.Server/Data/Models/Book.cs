@@ -9,6 +9,7 @@ public sealed class Book
     public string DisplayName { get; init; }
     public string Abbreviation { get; init; }
     public List<string> FuzzyMatches { get; init; }
+    public int NumChapters { get; set; }
 
     /// <summary>
     /// Used when initializing all 66 books on app start
@@ -16,10 +17,11 @@ public sealed class Book
     /// <param name="bookName"></param>
     /// <param name="abbreviation"></param>
     /// <param name="fuzzyMatches"></param>
-    public Book(string bookName, string abbreviation, List<string> fuzzyMatches)
+    public Book(string bookName, int numChapters, string abbreviation, List<string> fuzzyMatches)
     {
         DisplayName = bookName;
         Abbreviation = abbreviation;
         FuzzyMatches = fuzzyMatches;
+        NumChapters = numChapters;
     }
 }

@@ -107,10 +107,13 @@ public class BibleSyncer
     {
         var taskCancellationToken = task.Cts.Token;
         var timeoutCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(taskCancellationToken);
-        
-        taskCancellationToken.ThrowIfCancellationRequested();
-        
-        var versesForBible = 
+
+        foreach (var book in Books.AllBooks)
+        {
+            taskCancellationToken.ThrowIfCancellationRequested();
+            
+            
+        }
     }
 
 
