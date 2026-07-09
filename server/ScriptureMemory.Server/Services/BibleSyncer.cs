@@ -1,5 +1,6 @@
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
+using ScriptureMemory.Server.Data.Models.Logs;
 using System.Collections.Concurrent;
 
 namespace ScriptureMemory.Server.Services;
@@ -7,26 +8,35 @@ namespace ScriptureMemory.Server.Services;
 /// <summary>
 /// Adds tasks to the Bible Syncer background task queue
 /// </summary>
-public class BibleSyncerService
+public class BibleSyncer
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly ILogger<BibleSyncerService> _logger;
+    private readonly ILogger<BibleSyncer> _logger;
     private readonly BibleApi _bibleApi;
     private readonly BibleData _bibleContext;
     private readonly IVerseData _verseData;
+    private readonly IServiceScopeFactory _scope;
+    private readonly BibleSyncerBackgroundTaskQueue _queue;
+    private readonly DatabaseLogger _dbLogger; 
 
-    public BibleSyncerService(
+    public BibleSyncer(
         ApplicationDbContext db,
-        ILogger<BibleSyncerService> logger,
+        ILogger<BibleSyncer> logger,
         BibleApi bibleApi,
         BibleData bibleContext,
-        IVerseData verseData)
+        IVerseData verseData,
+        IServiceScopeFactory scope,
+        BibleSyncerBackgroundTaskQueue queue,
+        DatabaseLogger dbLogger)
     {
         _dbContext = db;
         _logger = logger;
         _bibleApi = bibleApi;
         _verseData = verseData;
         _bibleContext = bibleContext;
+        _scope = scope;
+        _queue = queue;
+        _dbLogger = _dbLogger;
     }
 
     /// <summary>
@@ -58,17 +68,52 @@ public class BibleSyncerService
         return dataToReturn;
     }
 
-    public async Task<List<string>> GetSyncingBibles()
+    public async Task QueueBibleForSync(CancellationToken cancellationToken, string bibleId, string username)
     {
-        var scope = 
+        var scope = _scope.CreateScope();
+        var queue = scope.ServiceProvider.GetRequiredService<BibleSyncerBackgroundTaskQueue>();
+
+        if (cancellationToken.IsCancellationRequested)
+            return;
+        
+        await queue.EnqueueAsync(new BibleSyncerTask
+        {
+            Initiator = username,
+            BibleId = bibleId.Trim(),
+            BibleName = await _bibleContext.GetBibleNameById(bibleId)
+        });
+        
+        await _dbLogger.LogBibleSyncEvent(new SyncLog
+        {
+            BibleId = bibleId.Trim(),
+            Username = username.Trim(),
+            Action = BibleSyncAction.Queued
+        });
     }
 
-    public async Task StartSync(string bibleId, int userId)
+    public async Task CancelSync(string bibleId, string username)
     {
+        _queue.Cancel(bibleId.Trim());
         
+        await _dbLogger.LogBibleSyncEvent(new SyncLog
+        {
+            Action = BibleSyncAction.Cancelled,
+            BibleId = bibleId.Trim(),
+            Username = username.Trim()
+        });
     }
-    
-    
+
+    public async Task Sync(BibleSyncerTask task, IProgress<SyncTaskProgressReport> progress)
+    {
+        var taskCancellationToken = task.Cts.Token;
+        var timeoutCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(taskCancellationToken);
+        
+        taskCancellationToken.ThrowIfCancellationRequested();
+        
+        var versesForBible = 
+    }
+
+
     public async Task<string> GetChapterContentExample()
     {
         return await _bibleApi.GetFullChapter(

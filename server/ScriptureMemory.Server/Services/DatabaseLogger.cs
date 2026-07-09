@@ -12,4 +12,9 @@ public class DatabaseLogger(BibleSyncLogData logData)
     {
         await logData.Log(log);
     }
+
+    public async Task LogSyncTaskProgress(string methodName, int progress, string message)
+    {
+        
+    }
 }

@@ -17,9 +17,11 @@ namespace ScriptureMemory.Server.Tools
 
         public enum BibleSyncAction
         {
+            Queued,
             Started,
             Stopped,
-            Completed
+            Completed,
+            Cancelled
         }
 
         public enum SyncDestination

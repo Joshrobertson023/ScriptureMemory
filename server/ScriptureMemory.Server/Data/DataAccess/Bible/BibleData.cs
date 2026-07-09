@@ -17,4 +17,12 @@ public class BibleData
     {
         return await _dbContext.Bibles.ToListAsync();
     }
+
+    public async Task<string> GetBibleNameById(string bibleId)
+    {
+        var bible = _dbContext.Bibles
+            .SingleOrDefault(b => b.Id == bibleId.Trim());
+        ArgumentNullException.ThrowIfNull(bible);
+        return bible.Id!;
+    }
 }

@@ -9,7 +9,7 @@ public static class BibleEndpoint
     public static void ConfigureBibleEndpoints(this WebApplication app)
     {
         app.MapGet("/bible/example", async (
-            BibleSyncerService syncer) =>
+            BibleSyncer syncer) =>
         {
             return Results.Ok(await syncer.GetChapterContentExample());
         });

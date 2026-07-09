@@ -8,6 +8,7 @@ public class BibleConfiguration : IEntityTypeConfiguration<Bible>
     {
         builder.HasKey(e => e.Version);
         builder.Property(e => e.Id)
+            .IsRequired()
             .HasMaxLength(100);
         builder.Property(e => e.Version)
             .ValueGeneratedOnAdd()

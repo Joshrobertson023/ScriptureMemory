@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.SignalR;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Data.Models.Logs;
+using ScriptureMemory.Server.SignalR;
 
 namespace ScriptureMemory.Server.Services;
 
@@ -11,7 +13,9 @@ namespace ScriptureMemory.Server.Services;
 public class BibleSyncerBackgroundTaskWorker(
     BibleSyncerBackgroundTaskQueue queue,
     ILogger<BibleSyncerBackgroundTaskWorker> logger,
-    DatabaseLogger dbLogger) : BackgroundService
+    DatabaseLogger dbLogger,
+    IHubContext<LogHub> hubContext,
+    BibleSyncer bibleSyncer) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -19,42 +23,54 @@ public class BibleSyncerBackgroundTaskWorker(
 
         while (!cancellationToken.IsCancellationRequested)
         {
+            var workItem = await queue.DequeueAsync(cancellationToken);
+
             try
             {
-                var workItem = await queue.DequeueAsync(cancellationToken);
-
                 await dbLogger.LogBibleSyncEvent(new SyncLog
                 {
-                    Action = BibleSyncAction.Started, 
-                    SystemInitiated = true, 
-                    BibleId = workItem.BibleId,
-                    Username = workItem.Initiator
+                    Action = BibleSyncAction.Started,
+                    SystemInitiated = true,
+                    BibleId = workItem.BibleId
                 });
 
-                await workItem.InvokeAsync(cancellationToken);
+                var progress = new Progress<SyncTaskProgressReport>(report =>
+                {
+                    _ = hubContext.Clients.All.SendAsync("ReceiveProgress", report);
+                });
+
+                await bibleSyncer.Sync(workItem, progress);
 
                 await dbLogger.LogBibleSyncEvent(new SyncLog
                 {
-                    Action = BibleSyncAction.Completed, 
-                    SystemInitiated = true, 
-                    BibleId = workItem.BibleId,
-                    Username = workItem.Initiator
+                    Action = BibleSyncAction.Completed,
+                    SystemInitiated = true,
+                    BibleId = workItem.BibleId
                 });
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (!workItem.Cts.IsCancellationRequested)
             {
+                logger.LogError("{Name} has been cancelled unexpectedly.", workItem.BibleId);
                 await dbLogger.LogBibleSyncEvent(new SyncLog
                 {
-                    Action = BibleSyncAction.Stopped,
-                    SystemInitiated = true
+                    Action = BibleSyncAction.Cancelled, 
+                    SystemInitiated = true,
+                    BibleId = workItem.BibleId
                 });
+            }
+            catch (OperationCanceledException) when (workItem.Cts.IsCancellationRequested)
+            {
+                logger.LogInformation("{Name} has been cancelled, skipping this item...", workItem.BibleId);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error executing the last work item in the background task queue");
+                logger.LogError(e, "Error executing the last work item {Name} in the background task queue: {Error}",
+                    workItem.BibleId,
+                    e.Message);
                 await dbLogger.LogBibleSyncEvent(new SyncLog
                 {
                     Action = BibleSyncAction.Stopped, 
+                    SystemInitiated = true,
                     Exception = new ExceptionModel(e)
                 });
                 

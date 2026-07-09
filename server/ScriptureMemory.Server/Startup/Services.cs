@@ -12,7 +12,6 @@ using System.Data;
 using System.Text;
 using VerseAppNew.Server.Services;
 using Pgvector;
-using Quartz;
 using ScriptureMemory.Server.Data.DataAccess;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Services.BackgroundServices;
@@ -201,7 +200,7 @@ public static class Services
 
         //services.AddScoped<VerseManagement>();
         services.AddScoped<BibleApi>();
-        services.AddScoped<BibleSyncerService>();
+        services.AddScoped<BibleSyncer>();
 
         //services.AddScoped<EmbeddingGenerator>();
 
