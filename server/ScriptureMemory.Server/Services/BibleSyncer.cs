@@ -17,7 +17,7 @@ public class BibleSyncer
     private readonly BibleData _bibleContext;
     private readonly IVerseData _verseData;
     private readonly IServiceScopeFactory _scope;
-    private readonly BibleSyncerBackgroundTaskQueue _queue;
+    private readonly BibleSyncerQueue _queue;
     private readonly BibleSyncerProgressLogger _progressLogger;
     private readonly BibleSyncLogData _syncLogContext;
 
@@ -28,7 +28,7 @@ public class BibleSyncer
         BibleData bibleContext,
         IVerseData verseData,
         IServiceScopeFactory scope,
-        BibleSyncerBackgroundTaskQueue queue,
+        BibleSyncerQueue queue,
         BibleSyncerProgressLogger progressLogger,
         BibleSyncLogData syncLogContext)
     {
@@ -71,7 +71,7 @@ public class BibleSyncer
         return dataToReturn;
     }
 
-    public async Task QueueBibleForSync(CancellationToken cancellationToken, string bibleId, string username)
+    public async Task QueueBibleForSync(CancellationToken cancellationToken, string bibleId, string initiator)
     {
         if (cancellationToken.IsCancellationRequested)
             return;
@@ -80,7 +80,7 @@ public class BibleSyncer
         
         await _queue.EnqueueAsync(new BibleSyncerTask
         {
-            Initiator = username,
+            Initiator = initiator,
             BibleId = bibleId.Trim(),
             BibleName = bibleName
         });
@@ -89,9 +89,9 @@ public class BibleSyncer
         {
             BibleId = bibleId.Trim(),
             BibleName = bibleName,
-            Username = username.Trim(),
+            Username = initiator.Trim(),
             Action = BibleSyncAction.Queued,
-            Message = $"{username} queued {bibleName} for sync"
+            Initiator = $"{initiator} queued {bibleName} for sync"
         });
     }
 
@@ -105,7 +105,7 @@ public class BibleSyncer
             BibleId = bibleId.Trim(),
             BibleName = bibleName.Trim(),
             Username = username.Trim(),
-            Message = $"{username} cancelled sync for {bibleName}"
+            Initiator = $"{username} cancelled sync for {bibleName}"
         });
     }
 
@@ -119,7 +119,7 @@ public class BibleSyncer
         {
             Action = BibleSyncAction.Started,
             SystemInitiated = true,
-            Message = $"Sync started for {task.BibleName}",
+            Initiator = $"Sync started for {task.BibleName}",
             BibleId = task.BibleId,
             BibleName = task.BibleName,
             Percentage = 0
@@ -144,7 +144,7 @@ public class BibleSyncer
                 {
                     BibleId = task.BibleId,
                     BibleName = task.BibleName,
-                    Message = $"Completed chapter {chapterNum} for {book.DisplayName}",
+                    Initiator = $"Completed chapter {chapterNum} for {book.DisplayName}",
                     Percentage = chaptersCompleted / Books.TotalChapters,
                     Action = BibleSyncAction.Progress
                 });
@@ -160,7 +160,7 @@ public class BibleSyncer
         {
             BibleId = task.BibleId,
             BibleName = task.BibleName,
-            Message = $"Completed sync for {task.BibleName}",
+            Initiator = $"Completed sync for {task.BibleName}",
             Percentage = 100,
             Action = BibleSyncAction.Completed
         });

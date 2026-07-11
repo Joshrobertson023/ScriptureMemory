@@ -203,8 +203,8 @@ public static class Services
 
         //services.AddScoped<EmbeddingGenerator>();
 
-        services.AddSingleton<BibleSyncerBackgroundTaskQueue>();
-        services.AddHostedService<BibleSyncerBackgroundTaskWorker>();
+        services.AddSingleton<BibleSyncerQueue>();
+        services.AddHostedService<BibleSyncerBackgroundWorker>();
 
         return services;
     }

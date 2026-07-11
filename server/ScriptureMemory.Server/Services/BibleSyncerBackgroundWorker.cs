@@ -10,15 +10,15 @@ namespace ScriptureMemory.Server.Services;
 /// </summary>
 /// <param name="queue"></param>
 /// <param name="logger"></param>
-public class BibleSyncerBackgroundTaskWorker(
-    BibleSyncerBackgroundTaskQueue queue,
-    ILogger<BibleSyncerBackgroundTaskWorker> logger,
+public class BibleSyncerBackgroundWorker(
+    BibleSyncerQueue queue,
+    ILogger<BibleSyncerBackgroundWorker> logger,
     IHubContext<LogHub> hubContext,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("{Name} is running.", nameof(BibleSyncerBackgroundTaskWorker));
+        logger.LogInformation("{Name} is running.", nameof(BibleSyncerBackgroundWorker));
 
         var scope = scopeFactory.CreateScope();
         var progressLogger = scope.ServiceProvider.GetRequiredService<BibleSyncerProgressLogger>();
@@ -49,7 +49,7 @@ public class BibleSyncerBackgroundTaskWorker(
                     BibleId = workItem.BibleId,
                     BibleName = workItem.BibleName,
                     Exception = new ExceptionModel(ex),
-                    Message = $"Unexpected sync cancellation for {workItem.BibleName}"
+                    Initiator = $"Unexpected sync cancellation for {workItem.BibleName}"
                 });
             }
             catch (Exception ex)
@@ -65,7 +65,7 @@ public class BibleSyncerBackgroundTaskWorker(
                     BibleId = workItem.BibleId,
                     BibleName = workItem.BibleName,
                     Exception = new ExceptionModel(ex),
-                    Message = $"Unexpected error when syncing {workItem.BibleName}"
+                    Initiator = $"Unexpected error when syncing {workItem.BibleName}"
                 });
                 // Todo: Make sure when streaming the new content when syncing, to use a transaction, and rollback
                 // before throwing again so that the exception propagates to here to log it
@@ -79,7 +79,7 @@ public class BibleSyncerBackgroundTaskWorker(
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("{Name} has been stopped.", nameof(BibleSyncerBackgroundTaskWorker));
+        logger.LogInformation("{Name} has been stopped.", nameof(BibleSyncerBackgroundWorker));
 
         await base.StopAsync(cancellationToken);
     }

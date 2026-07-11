@@ -7,16 +7,16 @@ namespace ScriptureMemory.Server.Services;
 /// <summary>
 /// Manages the queue of background tasks to be completed for the Bible Syncer
 /// </summary>
-public class BibleSyncerBackgroundTaskQueue
+public class BibleSyncerQueue
 {
     private readonly Channel<BibleSyncerTask> _queue;
     private readonly HashSet<string> _idsInQueue;
     private string _syncingId;
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _idCancellationTokens = new();
     
-    private ILogger<BibleSyncerBackgroundTaskQueue> logger;
+    private ILogger<BibleSyncerQueue> logger;
 
-    public BibleSyncerBackgroundTaskQueue(ILogger<BibleSyncerBackgroundTaskQueue> logger)
+    public BibleSyncerQueue(ILogger<BibleSyncerQueue> logger)
     {
         this.logger = logger;
         
