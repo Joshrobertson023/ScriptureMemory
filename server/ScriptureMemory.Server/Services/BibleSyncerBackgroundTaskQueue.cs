@@ -10,7 +10,9 @@ namespace ScriptureMemory.Server.Services;
 public class BibleSyncerBackgroundTaskQueue
 {
     private readonly Channel<BibleSyncerTask> _queue;
-    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellations = new();
+    private readonly HashSet<string> _idsInQueue;
+    private string _syncingId;
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _idCancellationTokens = new();
     
     private ILogger<BibleSyncerBackgroundTaskQueue> logger;
 
@@ -21,6 +23,8 @@ public class BibleSyncerBackgroundTaskQueue
         var options = new BoundedChannelOptions(10) { FullMode = BoundedChannelFullMode.Wait };
         
         _queue = Channel.CreateBounded<BibleSyncerTask>(options);
+        _idsInQueue = new();
+        _syncingId = string.Empty;
     }
 
     public async Task EnqueueAsync(BibleSyncerTask task)
@@ -29,10 +33,11 @@ public class BibleSyncerBackgroundTaskQueue
 
         var cts = new CancellationTokenSource();
         
-        _cancellations[task.BibleId] = cts;
+        _idCancellationTokens[task.BibleId] = cts;
         task.Cts = cts;
         
         await _queue.Writer.WriteAsync(task);
+        _idsInQueue.Add(task.BibleId);
         
         logger.LogInformation("A Bible sync has been queued by {Username}: {BibleName}", 
             task.Initiator,
@@ -42,6 +47,8 @@ public class BibleSyncerBackgroundTaskQueue
     public async Task<BibleSyncerTask> DequeueAsync(CancellationToken cancellationToken)
     {
         var task = await _queue.Reader.ReadAsync(cancellationToken);
+        _idsInQueue.Remove(task.BibleId);
+        _syncingId = task.BibleId;
         
         logger.LogInformation("A Bible sync has been dequeued for execution by the background worker: {MethodName}", 
             task.BibleName);
@@ -49,9 +56,16 @@ public class BibleSyncerBackgroundTaskQueue
         return task;
     }
 
+    public List<string> GetQueuedBibleIds()
+    {
+        return _idsInQueue.ToList();
+    }
+
     public void Cancel(string bibleId)
     {
-        if (!_cancellations.TryRemove(bibleId, out var removedCts))
+        RemoveIdFromHelpers(bibleId);
+
+        if (!_idCancellationTokens.TryRemove(bibleId, out var removedCts))
             return;
         
         removedCts.Cancel();
@@ -60,9 +74,20 @@ public class BibleSyncerBackgroundTaskQueue
 
     public void Complete(string bibleId)
     {
-        if (!_cancellations.TryRemove(bibleId, out var cts))
+        RemoveIdFromHelpers(bibleId);
+
+        if (!_idCancellationTokens.TryRemove(bibleId, out var removedCts))
             return;
         
-        cts.Dispose();
+        removedCts.Dispose();
+    }
+
+    public void RemoveIdFromHelpers(string bibleId)
+    {
+        if (_idsInQueue.Remove(bibleId))
+            return;
+        
+        if (_syncingId == bibleId)
+            _syncingId = string.Empty;
     }
 }

@@ -17,7 +17,7 @@ public class BibleSyncer
     private readonly IVerseData _verseData;
     private readonly IServiceScopeFactory _scope;
     private readonly BibleSyncerBackgroundTaskQueue _queue;
-    private readonly DatabaseLogger _dbLogger; 
+    private readonly BibleSyncerProgressLogger _progressLogger; 
 
     public BibleSyncer(
         ApplicationDbContext db,
@@ -27,7 +27,7 @@ public class BibleSyncer
         IVerseData verseData,
         IServiceScopeFactory scope,
         BibleSyncerBackgroundTaskQueue queue,
-        DatabaseLogger dbLogger)
+        BibleSyncerProgressLogger progressLogger)
     {
         _dbContext = db;
         _logger = logger;
@@ -36,32 +36,24 @@ public class BibleSyncer
         _bibleContext = bibleContext;
         _scope = scope;
         _queue = queue;
-        _dbLogger = _dbLogger;
+        _progressLogger = progressLogger;
     }
 
     /// <summary>
-    /// Gets authorized Bible data, showing which Bibles are not in my database or are not authorized
+    /// Gets initial load-in information
     /// </summary>
     /// <returns></returns>
     public async Task<List<BibleSyncData>> GetBibleSyncData()
     {
         List<BibleSyncData> dataToReturn = new();
         
-        var biblesInDatabase = await _bibleContext.GetBibles();
         var authorizedBibles = await _bibleApi.GetAuthorizedBibles();
 
-        var bibleIdsInDatabase = biblesInDatabase.Select(b => b.Id).ToHashSet();
-        var authorizedBibleIds = authorizedBibles.Select(b => b.Id).ToHashSet();
-
-        var allBibles = biblesInDatabase.Concat(authorizedBibles).DistinctBy(b => b.Id).ToList();
-
-        foreach (var bible in allBibles)
+        foreach (var bible in authorizedBibles)
         {
             dataToReturn.Add(new BibleSyncData
             {
                 Bible = bible,
-                Authorized = authorizedBibleIds.Contains(bible.Id),
-                InDatabase = bibleIdsInDatabase.Contains(bible.Id),
             });
         }
 
@@ -75,52 +67,102 @@ public class BibleSyncer
 
         if (cancellationToken.IsCancellationRequested)
             return;
+
+        var bibleName = await _bibleContext.GetBibleNameById(bibleId);
         
         await queue.EnqueueAsync(new BibleSyncerTask
         {
             Initiator = username,
             BibleId = bibleId.Trim(),
-            BibleName = await _bibleContext.GetBibleNameById(bibleId)
+            BibleName = bibleName
         });
         
-        await _dbLogger.LogBibleSyncEvent(new SyncLog
+        await _progressLogger.Update(new SyncProgressReport
         {
             BibleId = bibleId.Trim(),
+            BibleName = bibleName,
             Username = username.Trim(),
-            Action = BibleSyncAction.Queued
+            Action = BibleSyncAction.Queued,
+            Message = $"{username} queued {bibleName} for sync"
         });
     }
 
-    public async Task CancelSync(string bibleId, string username)
+    public async Task CancelSync(string bibleId, string bibleName, string username)
     {
         _queue.Cancel(bibleId.Trim());
         
-        await _dbLogger.LogBibleSyncEvent(new SyncLog
+        await _progressLogger.Update(new SyncProgressReport
         {
             Action = BibleSyncAction.Cancelled,
             BibleId = bibleId.Trim(),
-            Username = username.Trim()
+            BibleName = bibleName.Trim(),
+            Username = username.Trim(),
+            Message = $"{username} cancelled sync for {bibleName}"
         });
     }
 
-    public async Task Sync(BibleSyncerTask task, IProgress<SyncTaskProgressReport> progress)
+    public async Task Sync(BibleSyncerTask task)
     {
         var taskCancellationToken = task.Cts.Token;
-        var timeoutCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(taskCancellationToken);
+        int chaptersCompleted = 0;
+        Random random = new();
+
+        await _progressLogger.Update(new SyncProgressReport
+        {
+            Action = BibleSyncAction.Started,
+            SystemInitiated = true,
+            Message = $"Sync started for {task.BibleName}",
+            BibleId = task.BibleId,
+            BibleName = task.BibleName,
+            Percentage = 0
+        });
 
         foreach (var book in Books.AllBooks)
         {
-            taskCancellationToken.ThrowIfCancellationRequested();
-            
-            
+            foreach (var chapterNum in Enumerable.Range(0, book.NumChapters))
+            {
+                if (taskCancellationToken.IsCancellationRequested)
+                {
+                    // Log where left off, rollback verse content
+                    return;
+                }
+
+                // Simulate syncing for testing
+                await Task.Delay(random.Next(100, 300));
+
+                chaptersCompleted++;
+                
+                _progressLogger.Update(new SyncProgressReport
+                {
+                    BibleId = task.BibleId,
+                    BibleName = task.BibleName,
+                    Message = $"Completed chapter {chapterNum} for {book.DisplayName}",
+                    Percentage = chaptersCompleted / Books.TotalChapters,
+                    Action = BibleSyncAction.Progress
+                });
+
+                // Get chapter usx and plaintext from API.Bible
+                // Push to database
+                // Then do same for each individual verse
+                // Update IProgress progress every chapter
+            }
         }
+                
+        await _progressLogger.Update(new SyncProgressReport
+        {
+            BibleId = task.BibleId,
+            BibleName = task.BibleName,
+            Message = $"Completed sync for {task.BibleName}",
+            Percentage = 100,
+            Action = BibleSyncAction.Completed
+        });
     }
 
 
     public async Task<string> GetChapterContentExample()
     {
         return await _bibleApi.GetFullChapter(
-            _dbContext.Bibles.Where(b => b.Version == "kjv").First(),
+            _dbContext.Bibles.Where(b => b.Abbreviation == "kjv").First(),
             new Reference(Books.TryGetBook("Genesis"), 1, new List<int>() { 1 }));
     }
 }

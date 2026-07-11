@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Services;
+using ScriptureMemory.Server.SignalR;
+using System.Security.Claims;
 
 namespace ScriptureMemory.Server.Endpoints;
 
@@ -13,12 +15,56 @@ public static class BibleEndpoint
         {
             return Results.Ok(await syncer.GetChapterContentExample());
         });
-        
-        // app.MapGet("/bibles", async (
-        //     BibleSyncer syncer) =>
-        // {
-        //     return Results.Ok(await syncer.)
-        // })
+
+        app.MapGet("/bible/syncer/data", async (
+            [FromServices] BibleSyncer syncer) =>
+        {
+            return Results.Ok(await syncer.GetBibleSyncData());
+        }).RequireAuthorization("Admin");
+
+        app.MapPost("/bible/syncer/{bibleId}/set-visible", async (
+            string bibleId,
+            [FromServices] BibleSyncer syncer) =>
+        {
+            
+        }).RequireAuthorization("SuperAdmin");
+
+        app.MapPost("/bible/syncer/{bibleId}/set-not-visible", async (
+            string bibleId,
+            [FromServices] BibleSyncer syncer) =>
+        {
+            
+        }).RequireAuthorization("SuperAdmin");
+
+        app.MapPost("/bible/syncer/{bibleId}/queue-sync", async (
+            string bibleId,
+            [FromServices] BibleSyncer syncer,
+            CancellationToken cancellationToken,
+            ClaimsPrincipal user) =>
+        {
+            if (user.Identity?.Name is null)
+                return Results.Unauthorized();
+
+            await syncer.QueueBibleForSync(cancellationToken, bibleId, user.Identity.Name);
+
+            return Results.Ok();
+        }).RequireAuthorization("Admin");
+
+        app.MapPost("/bible/syncer/{bibleId}/{bibleName}/dequeue-sync", async (
+            string bibleId,
+            string bibleName,
+            [FromServices] BibleSyncer syncer,
+            ClaimsPrincipal user) =>
+        {
+            if (user.Identity?.Name is null)
+                return Results.Unauthorized();
+            
+            await syncer.CancelSync(bibleId, bibleName, user.Identity.Name);
+
+            return Results.Ok();
+        }).RequireAuthorization("Admin");
+
+        app.MapHub<SyncHub>("/bible/syncer/stream");
 
         app.MapPost("/bible/chapter/{bible}/{book}", async (
             string bible,

@@ -8,13 +8,15 @@ public class SyncLog
     
     public int? UserId { get; set; }
     
+    public string? SyncingId { get; set; } // Current bible id being synced
+    
     public string? Username { get; set; }
     
     public BibleSyncAction Action { get; set; }
 
     public bool SystemInitiated { get; set; } = false;
     
-    public SyncDestination? Destination { get; set; }
+    public string? Progress { get; set; }
 
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 

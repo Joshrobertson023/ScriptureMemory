@@ -195,7 +195,6 @@ public static class Services
         //services.AddScoped<UserPassageService>();
         //services.AddScoped<CollectionService>();
         services.AddScoped<TokenProvider>();
-        services.AddScoped<DatabaseLogger>();
         //services.AddScoped<VerseOfDayService>();
 
         //services.AddScoped<VerseManagement>();

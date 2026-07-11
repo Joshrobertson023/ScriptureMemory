@@ -25,4 +25,24 @@ public class BibleData
         ArgumentNullException.ThrowIfNull(bible);
         return bible.Id!;
     }
+
+    public async Task InsertBible(Server.DataAccess.Models.Bible bible)
+    {
+        await _dbContext.Bibles.AddAsync(bible);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task SetBibleActive(Server.DataAccess.Models.Bible bible)
+    {
+        var resultBible = await _dbContext.Bibles.SingleOrDefaultAsync(b => b.Id == bible.Id);
+        resultBible?.Active = true;
+        await _dbContext.SaveChangesAsync();
+    }
+    
+    public async Task SetBibleInactive(Server.DataAccess.Models.Bible bible)
+    {
+        var resultBible = await _dbContext.Bibles.SingleOrDefaultAsync(b => b.Id == bible.Id);
+        resultBible?.Active = false;
+        await _dbContext.SaveChangesAsync();
+    }
 }

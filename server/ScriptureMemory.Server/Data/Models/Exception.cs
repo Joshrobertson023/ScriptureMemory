@@ -22,4 +22,6 @@ public class ExceptionModel
         Source = ex.Source;
         Timestamp = DateTime.UtcNow;
     }
+    
+    public ExceptionModel() { }
 }

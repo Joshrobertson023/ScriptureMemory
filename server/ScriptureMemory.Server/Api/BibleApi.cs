@@ -33,10 +33,10 @@ public class BibleApi
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
 
         var response = await http.GetFromJsonAsync<GetBiblesResponse>(
-            $"{_baseUrl}/bibles");
+            $"{_baseUrl}/bibles?language=eng");
 
-        return response?.Data 
-               ?? throw new InvalidOperationException("No content returned from getting authorized Bibles.");
+        return response?.Data.ToList()
+               ?? new List<Bible>();
     }
 
     public async Task<string> GetFullChapter(Bible bible, Reference chapterReference)

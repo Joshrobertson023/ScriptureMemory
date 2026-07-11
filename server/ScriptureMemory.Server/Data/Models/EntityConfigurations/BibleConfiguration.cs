@@ -6,11 +6,11 @@ public class BibleConfiguration : IEntityTypeConfiguration<Bible>
 {
     public void Configure(EntityTypeBuilder<Bible> builder)
     {
-        builder.HasKey(e => e.Version);
+        builder.HasKey(e => e.Id);
         builder.Property(e => e.Id)
             .IsRequired()
             .HasMaxLength(100);
-        builder.Property(e => e.Version)
+        builder.Property(e => e.Abbreviation)
             .ValueGeneratedOnAdd()
             .IsRequired()
             .HasMaxLength(5);
