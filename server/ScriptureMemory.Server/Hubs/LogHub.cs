@@ -10,9 +10,4 @@ public class LogHub : Hub
     {
         await Clients.All.SendAsync("ReceiveLog", log);
     }
-
-    public async Task SendProgress(SyncProgressReport progress)
-    {
-        await Clients.All.SendAsync("ReceiveProgress", progress);
-    }
 }

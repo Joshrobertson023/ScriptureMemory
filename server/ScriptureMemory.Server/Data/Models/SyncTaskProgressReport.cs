@@ -11,4 +11,5 @@ public class SyncProgressReport
     public string? Message { get; set; }
     public bool SystemInitiated { get; set; } = false;
     public ExceptionModel? Exception { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }

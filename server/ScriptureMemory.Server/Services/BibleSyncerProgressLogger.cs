@@ -8,11 +8,11 @@ namespace ScriptureMemory.Server.Services;
 
 public class BibleSyncerProgressLogger
 {
-    private readonly IHubContext<LogHub> _hubContext;
+    private readonly IHubContext<SyncHub> _hubContext;
     private readonly BibleSyncLogData _logContext;
 
     public BibleSyncerProgressLogger(
-        IHubContext<LogHub> hubContext,
+        IHubContext<SyncHub> hubContext,
         BibleSyncLogData logData)
     {
         _hubContext = hubContext;

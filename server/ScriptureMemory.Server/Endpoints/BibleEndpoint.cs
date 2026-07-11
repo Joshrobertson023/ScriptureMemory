@@ -22,6 +22,8 @@ public static class BibleEndpoint
             return Results.Ok(await syncer.GetBibleSyncData());
         }).RequireAuthorization("Admin");
 
+        app.MapHub<SyncHub>("/bible/syncer/stream");
+
         app.MapPost("/bible/syncer/{bibleId}/set-visible", async (
             string bibleId,
             [FromServices] BibleSyncer syncer) =>
@@ -63,8 +65,6 @@ public static class BibleEndpoint
 
             return Results.Ok();
         }).RequireAuthorization("Admin");
-
-        app.MapHub<SyncHub>("/bible/syncer/stream");
 
         app.MapPost("/bible/chapter/{bible}/{book}", async (
             string bible,

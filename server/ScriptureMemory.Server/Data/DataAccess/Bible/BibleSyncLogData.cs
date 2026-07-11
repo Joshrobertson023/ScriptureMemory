@@ -14,13 +14,13 @@ public class BibleSyncLogData
 
     public async Task InsertLog(SyncProgressReport log)
     {
-        await _dbContext.BibleSyncLogs.AddAsync(log);
+        await _dbContext.SyncProgressReports.AddAsync(log);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task<List<SyncProgressReport>> GetSyncLogs(int position = 0)
     {
-        return await _dbContext.BibleSyncLogs
+        return await _dbContext.SyncProgressReports
             .AsNoTracking()
             .OrderBy(l => l.Id)
             .Skip(position)
@@ -30,7 +30,7 @@ public class BibleSyncLogData
 
     public async Task<List<SyncProgressReport>> GetSyncLogsForBible(string bibleId, int position = 0)
     {
-        return await _dbContext.BibleSyncLogs
+        return await _dbContext.SyncProgressReports
             .AsNoTracking()
             .OrderBy(l => l.Id)
             .Where(l => l.BibleId == bibleId.Trim())
@@ -41,13 +41,32 @@ public class BibleSyncLogData
 
     public async Task Log(SyncProgressReport log)
     {
-        await _dbContext.BibleSyncLogs.AddAsync(log);
+        await _dbContext.SyncProgressReports.AddAsync(log);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task AddLogs(List<SyncProgressReport> logs)
     {
-        await _dbContext.BibleSyncLogs.AddRangeAsync(logs);
+        await _dbContext.SyncProgressReports.AddRangeAsync(logs);
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<Dictionary<string, SyncProgressReport>> GetLastSyncProgressForBibles()
+    {
+        var reports = await _dbContext.SyncProgressReports
+            .FromSql($@"
+                select distinct on (BibleId) *
+                from SyncProgressReports
+            ")
+            .ToListAsync();
+
+        var returnDictionary = new Dictionary<string, SyncProgressReport>();
+
+        foreach (var report in reports)
+        {
+            returnDictionary[report.BibleId] = report;
+        }
+
+        return returnDictionary;
     }
 }

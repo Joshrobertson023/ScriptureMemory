@@ -1,6 +1,7 @@
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Data.Models.Logs;
+using ScriptureMemory.Server.Migrations;
 using System.Collections.Concurrent;
 
 namespace ScriptureMemory.Server.Services;
@@ -17,7 +18,8 @@ public class BibleSyncer
     private readonly IVerseData _verseData;
     private readonly IServiceScopeFactory _scope;
     private readonly BibleSyncerBackgroundTaskQueue _queue;
-    private readonly BibleSyncerProgressLogger _progressLogger; 
+    private readonly BibleSyncerProgressLogger _progressLogger;
+    private readonly BibleSyncLogData _syncLogContext;
 
     public BibleSyncer(
         ApplicationDbContext db,
@@ -27,7 +29,8 @@ public class BibleSyncer
         IVerseData verseData,
         IServiceScopeFactory scope,
         BibleSyncerBackgroundTaskQueue queue,
-        BibleSyncerProgressLogger progressLogger)
+        BibleSyncerProgressLogger progressLogger,
+        BibleSyncLogData syncLogContext)
     {
         _dbContext = db;
         _logger = logger;
@@ -37,6 +40,7 @@ public class BibleSyncer
         _scope = scope;
         _queue = queue;
         _progressLogger = progressLogger;
+        _syncLogContext = syncLogContext;
     }
 
     /// <summary>
@@ -47,13 +51,20 @@ public class BibleSyncer
     {
         List<BibleSyncData> dataToReturn = new();
         
-        var authorizedBibles = await _bibleApi.GetAuthorizedBibles();
+        var authorizedBiblesTask = _bibleApi.GetAuthorizedBibles();
+        var lastSyncReportsTask = _syncLogContext.GetLastSyncProgressForBibles();
+
+        await Task.WhenAll(authorizedBiblesTask, lastSyncReportsTask);
+
+        var authorizedBibles = authorizedBiblesTask.Result;
+        var lastSyncReports = lastSyncReportsTask.Result;
 
         foreach (var bible in authorizedBibles)
         {
             dataToReturn.Add(new BibleSyncData
             {
                 Bible = bible,
+                LastSyncReport = lastSyncReports.GetValueOrDefault(bible.Id)
             });
         }
 
@@ -62,15 +73,12 @@ public class BibleSyncer
 
     public async Task QueueBibleForSync(CancellationToken cancellationToken, string bibleId, string username)
     {
-        var scope = _scope.CreateScope();
-        var queue = scope.ServiceProvider.GetRequiredService<BibleSyncerBackgroundTaskQueue>();
-
         if (cancellationToken.IsCancellationRequested)
             return;
 
         var bibleName = await _bibleContext.GetBibleNameById(bibleId);
         
-        await queue.EnqueueAsync(new BibleSyncerTask
+        await _queue.EnqueueAsync(new BibleSyncerTask
         {
             Initiator = username,
             BibleId = bibleId.Trim(),
@@ -132,7 +140,7 @@ public class BibleSyncer
 
                 chaptersCompleted++;
                 
-                _progressLogger.Update(new SyncProgressReport
+                await _progressLogger.Update(new SyncProgressReport
                 {
                     BibleId = task.BibleId,
                     BibleName = task.BibleName,

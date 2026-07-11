@@ -20,7 +20,7 @@ public class ApplicationDbContext : DbContext
     // public DbSet<Collection> Collections { get; set; }
     // public DbSet<UserPassage> UserPassages { get; set; }
     public DbSet<VerseTranslationContent> VerseTranslationContents { get; set; }
-    public DbSet<SyncProgressReport> BibleSyncLogs { get; set; }
+    public DbSet<SyncProgressReport> SyncProgressReports { get; set; }
     public DbSet<ExceptionModel> Exceptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
