@@ -11,8 +11,8 @@ public class ExceptionModel
     public string? Source { get; set; }
     public DateTime Timestamp { get; set; }
     
-    public int? SyncLogId { get; set; }
-    public SyncLog? SyncLogNavigation { get; set; }
+    public int? SyncReportId { get; set; }
+    public SyncEvent? SyncLogNavigation { get; set; }
 
     public ExceptionModel(Exception ex)
     {

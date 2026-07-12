@@ -20,20 +20,20 @@ public class BibleSyncerBackgroundWorker(
     {
         logger.LogInformation("{Name} is running.", nameof(BibleSyncerBackgroundWorker));
 
-        var scope = scopeFactory.CreateScope();
-        var progressLogger = scope.ServiceProvider.GetRequiredService<BibleSyncerProgressLogger>();
-        var bibleSyncer = scope.ServiceProvider.GetRequiredService<BibleSyncer>();
-
         while (!cancellationToken.IsCancellationRequested)
         {
             var workItem = await queue.DequeueAsync(cancellationToken);
+            
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var eventDispatcher = scope.ServiceProvider.GetRequiredService<BibleSyncerEventDispatcher>();
+            var bibleSyncer = scope.ServiceProvider.GetRequiredService<BibleSyncer>();
 
             try
             {
                 if (workItem.Cts.IsCancellationRequested)
                 {
-                    logger.LogInformation("{Name} has been cancelled, skipping this item...", workItem.BibleId);
-                    return;
+                    logger.LogInformation("{Name} has been cancelled, Background Worker has skipped this item...", workItem.BibleId);
+                    continue;
                 }
 
                 await bibleSyncer.Sync(workItem);
@@ -41,15 +41,15 @@ public class BibleSyncerBackgroundWorker(
             catch (OperationCanceledException ex) when (!workItem.Cts.IsCancellationRequested)
             {
                 logger.LogError("{Name} has been cancelled unexpectedly.", workItem.BibleId);
-                await progressLogger.Update(new SyncProgressReport
+                await eventDispatcher.Send(new SyncEvent
                 {
-                    Action = BibleSyncAction.Cancelled,
-                    SystemInitiated = true,
+                    Event = BibleSyncEvent.Cancelled,
+                    Initiator = "Background worker",
                     Percentage = 0,
                     BibleId = workItem.BibleId,
                     BibleName = workItem.BibleName,
                     Exception = new ExceptionModel(ex),
-                    Initiator = $"Unexpected sync cancellation for {workItem.BibleName}"
+                    Message = $"Unexpected sync cancellation for {workItem.BibleName}"
                 });
             }
             catch (Exception ex)
@@ -57,15 +57,15 @@ public class BibleSyncerBackgroundWorker(
                 logger.LogError(ex, "Error executing the last work item {Name} in the background task queue: {Error}",
                     workItem.BibleId,
                     ex.Message);
-                await progressLogger.Update(new SyncProgressReport
+                await eventDispatcher.Send(new SyncEvent
                 {
-                    Action = BibleSyncAction.Stopped,
-                    SystemInitiated = true,
+                    Event = BibleSyncEvent.Stopped,
+                    Initiator = "Background worker",
                     Percentage = 0,
                     BibleId = workItem.BibleId,
                     BibleName = workItem.BibleName,
                     Exception = new ExceptionModel(ex),
-                    Initiator = $"Unexpected error when syncing {workItem.BibleName}"
+                    Message = $"Unexpected error when syncing {workItem.BibleName}"
                 });
                 // Todo: Make sure when streaming the new content when syncing, to use a transaction, and rollback
                 // before throwing again so that the exception propagates to here to log it

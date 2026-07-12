@@ -15,15 +15,21 @@ public class BibleData
 
     public async Task<List<Server.DataAccess.Models.Bible>> GetBibles()
     {
-        return await _dbContext.Bibles.ToListAsync();
+        return await _dbContext.Bibles.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<List<Server.DataAccess.Models.Bible>> GetActiveBibles()
+    {
+        return await _dbContext.Bibles.AsNoTracking().Where(b => b.Active).ToListAsync();
     }
 
     public async Task<string> GetBibleNameById(string bibleId)
     {
-        var bible = _dbContext.Bibles
+        var bible = _dbContext.Bibles.AsNoTracking()
             .SingleOrDefault(b => b.Id == bibleId.Trim());
-        ArgumentNullException.ThrowIfNull(bible);
-        return bible.Id!;
+        if (bible is null)
+            _logger.LogWarning("Bible is not in database. Restrict syncing bibles not active, or figure something else out.");
+        return bible?.AbbreviationLocal ?? "";
     }
 
     public async Task InsertBible(Server.DataAccess.Models.Bible bible)

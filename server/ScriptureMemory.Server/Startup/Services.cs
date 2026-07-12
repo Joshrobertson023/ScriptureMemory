@@ -21,6 +21,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using ScriptureMemory.Server.Providers;
+using System.Text.Json.Serialization;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -148,6 +149,12 @@ public static class Services
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         });
+        
+        // Convert all enums to strings before sending via http
+        services.ConfigureHttpJsonOptions(o =>
+        {
+            o.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        });
 
         services.AddCors(options =>
         {
@@ -181,7 +188,10 @@ public static class Services
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-        services.AddSignalR();
+        services.AddSignalR()    .AddJsonProtocol(options =>
+        {
+            options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
 
         services.AddScoped<UserService>();
         services.AddScoped<AdminService>();
@@ -205,6 +215,7 @@ public static class Services
 
         services.AddSingleton<BibleSyncerQueue>();
         services.AddHostedService<BibleSyncerBackgroundWorker>();
+        services.AddScoped<BibleSyncerEventDispatcher>();
 
         return services;
     }

@@ -20,7 +20,7 @@ public class ApplicationDbContext : DbContext
     // public DbSet<Collection> Collections { get; set; }
     // public DbSet<UserPassage> UserPassages { get; set; }
     public DbSet<VerseTranslationContent> VerseTranslationContents { get; set; }
-    public DbSet<SyncProgressReport> SyncProgressReports { get; set; }
+    public DbSet<SyncEvent> SyncProgressReports { get; set; }
     public DbSet<ExceptionModel> Exceptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -34,7 +34,7 @@ public class ApplicationDbContext : DbContext
         new UserPreferencesConfiguration().Configure(modelBuilder.Entity<UserPreferences>());
         new VerseConfiguration().Configure(modelBuilder.Entity<Verse>());
         new VerseContentConfiguration().Configure(modelBuilder.Entity<VerseTranslationContent>());
-        new SyncLogConfiguration().Configure(modelBuilder.Entity<SyncLog>());
+        new SyncProgressReportConfiguration().Configure(modelBuilder.Entity<SyncEvent>());
         new ExceptionConfiguration().Configure(modelBuilder.Entity<ExceptionModel>());
     }
     

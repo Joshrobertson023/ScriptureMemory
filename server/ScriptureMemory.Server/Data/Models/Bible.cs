@@ -20,4 +20,6 @@ public class Bible
     public string Info { get; set; } = string.Empty;
 
     public bool Active { get; set; } = false; // Is this authorized Bible visible to app users?
+    
+    public DateTime? NextScheduledAutoSync { get; set; }
 }

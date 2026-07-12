@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ScriptureMemory.Server.CustomExceptions;
+using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.SignalR;
 using System.Security.Claims;
@@ -22,6 +23,12 @@ public static class BibleEndpoint
             return Results.Ok(await syncer.GetBibleSyncData());
         }).RequireAuthorization("Admin");
 
+        app.MapGet("/bible/syncer/logs", async (
+            [FromServices] BibleSyncLogData logData) =>
+        {
+            return Results.Ok(await logData.GetSyncLogs());
+        }).RequireAuthorization("Admin");
+
         app.MapHub<SyncHub>("/bible/syncer/stream");
 
         app.MapPost("/bible/syncer/{bibleId}/set-visible", async (
@@ -41,27 +48,26 @@ public static class BibleEndpoint
         app.MapPost("/bible/syncer/{bibleId}/queue-sync", async (
             string bibleId,
             [FromServices] BibleSyncer syncer,
-            CancellationToken cancellationToken,
-            ClaimsPrincipal user) =>
+            [FromBody] string username) =>
         {
-            if (user.Identity?.Name is null)
+            if (string.IsNullOrEmpty(username))
                 return Results.Unauthorized();
 
-            await syncer.QueueBibleForSync(cancellationToken, bibleId, user.Identity.Name);
+            await syncer.QueueBibleForSync(bibleId, username);
 
             return Results.Ok();
         }).RequireAuthorization("Admin");
 
-        app.MapPost("/bible/syncer/{bibleId}/{bibleName}/dequeue-sync", async (
+        app.MapPost("/bible/syncer/{bibleId}/{bibleName}/cancel-sync", async (
             string bibleId,
             string bibleName,
             [FromServices] BibleSyncer syncer,
-            ClaimsPrincipal user) =>
+            [FromBody] string username) =>
         {
-            if (user.Identity?.Name is null)
+            if (string.IsNullOrEmpty(username))
                 return Results.Unauthorized();
             
-            await syncer.CancelSync(bibleId, bibleName, user.Identity.Name);
+            await syncer.CancelSync(bibleId, bibleName, username);
 
             return Results.Ok();
         }).RequireAuthorization("Admin");

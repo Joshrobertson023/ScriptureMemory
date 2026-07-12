@@ -18,7 +18,7 @@ public class BibleSyncer
     private readonly IVerseData _verseData;
     private readonly IServiceScopeFactory _scope;
     private readonly BibleSyncerQueue _queue;
-    private readonly BibleSyncerProgressLogger _progressLogger;
+    private readonly BibleSyncerEventDispatcher _eventDispatcher;
     private readonly BibleSyncLogData _syncLogContext;
 
     public BibleSyncer(
@@ -29,7 +29,7 @@ public class BibleSyncer
         IVerseData verseData,
         IServiceScopeFactory scope,
         BibleSyncerQueue queue,
-        BibleSyncerProgressLogger progressLogger,
+        BibleSyncerEventDispatcher eventDispatcher,
         BibleSyncLogData syncLogContext)
     {
         _dbContext = db;
@@ -39,7 +39,7 @@ public class BibleSyncer
         _bibleContext = bibleContext;
         _scope = scope;
         _queue = queue;
-        _progressLogger = progressLogger;
+        _eventDispatcher = eventDispatcher;
         _syncLogContext = syncLogContext;
     }
 
@@ -51,31 +51,43 @@ public class BibleSyncer
     {
         List<BibleSyncData> dataToReturn = new();
         
-        var authorizedBiblesTask = _bibleApi.GetAuthorizedBibles();
-        var lastSyncReportsTask = _syncLogContext.GetLastSyncProgressForBibles();
+        var lastSyncReports = await _syncLogContext.GetLastSyncProgressForBibles();
+        var activeBibles = await _bibleContext.GetActiveBibles();
+        var authorizedBibles = await _bibleApi.GetAuthorizedBibles();
+        
+        HashSet<string> activeBibleIds = activeBibles.Select(b => b.Id).ToHashSet();
 
-        await Task.WhenAll(authorizedBiblesTask, lastSyncReportsTask);
-
-        var authorizedBibles = authorizedBiblesTask.Result;
-        var lastSyncReports = lastSyncReportsTask.Result;
-
-        foreach (var bible in authorizedBibles)
+        for (int i = 0; i < authorizedBibles.Count; i++)
         {
-            dataToReturn.Add(new BibleSyncData
+            var data = new BibleSyncData
             {
-                Bible = bible,
-                LastSyncReport = lastSyncReports.GetValueOrDefault(bible.Id)
-            });
+                Bible = authorizedBibles[i],
+                LastSyncReport = lastSyncReports.GetValueOrDefault(authorizedBibles[i].Id)
+            };
+            if (activeBibleIds.Contains(authorizedBibles[i].Id))
+                data.Bible.Active = true;
+            
+            dataToReturn.Add(data);
         }
+        
+        // Sync authorized Bibles with my database on a background task every day
+        // On admin dashboard use my database Bibles, but have a button to start the sync with API.Bible
+        
+        // LastSynced, etc are optional
+        // Once sync is completed, update LastSynced, NextScheduled, etc.
+        // For updating the client, on Completion event, fetch the specific Bible that just synced from the server,
+        // then update the last synced and next scheduled on the UI. Show a spinner in those fields until updated.
+        
+        // Server is source of truth for sync events and state
+        // When clicking sync or cancel, show spinner until get confirmation from server
+            // Add to array of waitingForSync or waitingForCancel
+            // When event is received, check in there to remove
 
         return dataToReturn;
     }
 
-    public async Task QueueBibleForSync(CancellationToken cancellationToken, string bibleId, string initiator)
+    public async Task QueueBibleForSync(string bibleId, string initiator)
     {
-        if (cancellationToken.IsCancellationRequested)
-            return;
-
         var bibleName = await _bibleContext.GetBibleNameById(bibleId);
         
         await _queue.EnqueueAsync(new BibleSyncerTask
@@ -85,41 +97,49 @@ public class BibleSyncer
             BibleName = bibleName
         });
         
-        await _progressLogger.Update(new SyncProgressReport
+        await _eventDispatcher.Send(new SyncEvent
         {
             BibleId = bibleId.Trim(),
             BibleName = bibleName,
-            Username = initiator.Trim(),
-            Action = BibleSyncAction.Queued,
-            Initiator = $"{initiator} queued {bibleName} for sync"
+            Initiator = initiator.Trim(),
+            Event = BibleSyncEvent.Queued,
+            Message = $"{initiator} queued {bibleName} for sync"
         });
     }
 
     public async Task CancelSync(string bibleId, string bibleName, string username)
     {
-        _queue.Cancel(bibleId.Trim());
-        
-        await _progressLogger.Update(new SyncProgressReport
+        try
         {
-            Action = BibleSyncAction.Cancelled,
-            BibleId = bibleId.Trim(),
-            BibleName = bibleName.Trim(),
-            Username = username.Trim(),
-            Initiator = $"{username} cancelled sync for {bibleName}"
-        });
+            _queue.Cancel(bibleId.Trim());
+            
+            await _eventDispatcher.Send(new SyncEvent
+            {
+                Event = BibleSyncEvent.Cancelled,
+                BibleId = bibleId.Trim(),
+                BibleName = bibleName.Trim(),
+                Initiator = username.Trim(),
+                Message = $"{username} cancelled sync for {bibleName}"
+            });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            throw;
+        }
     }
 
     public async Task Sync(BibleSyncerTask task)
     {
         var taskCancellationToken = task.Cts.Token;
-        int chaptersCompleted = 0;
+        int booksCompleted = 0;
         Random random = new();
 
-        await _progressLogger.Update(new SyncProgressReport
+        await _eventDispatcher.Send(new SyncEvent
         {
-            Action = BibleSyncAction.Started,
-            SystemInitiated = true,
-            Initiator = $"Sync started for {task.BibleName}",
+            Event = BibleSyncEvent.Started,
+            Initiator = "Background worker",
+            Message = $"Sync started for {task.BibleName}",
             BibleId = task.BibleId,
             BibleName = task.BibleName,
             Percentage = 0
@@ -137,32 +157,35 @@ public class BibleSyncer
 
                 // Simulate syncing for testing
                 await Task.Delay(random.Next(100, 300));
-
-                chaptersCompleted++;
                 
-                await _progressLogger.Update(new SyncProgressReport
-                {
-                    BibleId = task.BibleId,
-                    BibleName = task.BibleName,
-                    Initiator = $"Completed chapter {chapterNum} for {book.DisplayName}",
-                    Percentage = chaptersCompleted / Books.TotalChapters,
-                    Action = BibleSyncAction.Progress
-                });
 
                 // Get chapter usx and plaintext from API.Bible
                 // Push to database
                 // Then do same for each individual verse
                 // Update IProgress progress every chapter
             }
+
+            booksCompleted++;
+            
+            var percentage = (int)Math.Round((booksCompleted / (double)Books.TotalBooks) * 100);
+
+            await _eventDispatcher.Send(new SyncEvent
+            {
+                BibleId = task.BibleId,
+                BibleName = task.BibleName,
+                Message = $"Completed book {book}",
+                Percentage = percentage,
+                Event = BibleSyncEvent.Progress
+            });
         }
                 
-        await _progressLogger.Update(new SyncProgressReport
+        await _eventDispatcher.Send(new SyncEvent
         {
             BibleId = task.BibleId,
             BibleName = task.BibleName,
-            Initiator = $"Completed sync for {task.BibleName}",
+            Message = $"Completed sync for {task.BibleName}",
             Percentage = 100,
-            Action = BibleSyncAction.Completed
+            Event = BibleSyncEvent.Completed
         });
     }
 

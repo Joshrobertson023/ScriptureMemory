@@ -3,18 +3,18 @@ using ScriptureMemory.Server.Data.Models.Logs;
 
 namespace ScriptureMemory.Server.Data.Models.EntityConfigurations;
 
-public class SyncLogConfiguration : IEntityTypeConfiguration<SyncLog>
+public class SyncProgressReportConfiguration : IEntityTypeConfiguration<SyncEvent>
 {
-    public void Configure(EntityTypeBuilder<SyncLog> builder)
+    public void Configure(EntityTypeBuilder<SyncEvent> builder)
     {
-        builder.ToTable("BibleSyncLogs");
+        builder.ToTable("SyncProgressReports");
         builder.Property(b => b.BibleId)
             .HasMaxLength(100);
         builder.Property(e => e.Timestamp)
             .HasDefaultValueSql("NOW()");
         builder.HasOne(e => e.Exception)
             .WithOne(ex => ex.SyncLogNavigation)
-            .HasForeignKey<ExceptionModel>(ex => ex.SyncLogId)
+            .HasForeignKey<ExceptionModel>(ex => ex.SyncReportId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

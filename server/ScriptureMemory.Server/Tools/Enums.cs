@@ -15,7 +15,7 @@ namespace ScriptureMemory.Server.Tools
             SuperAdmin = 2
         }
 
-        public enum BibleSyncAction
+        public enum BibleSyncEvent
         {
             Queued,
             Started,

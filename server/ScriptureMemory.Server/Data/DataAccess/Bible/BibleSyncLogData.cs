@@ -12,23 +12,23 @@ public class BibleSyncLogData
         _dbContext = dbContext;
     }
 
-    public async Task InsertLog(SyncProgressReport log)
+    public async Task InsertLog(SyncEvent log)
     {
         await _dbContext.SyncProgressReports.AddAsync(log);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<SyncProgressReport>> GetSyncLogs(int position = 0)
+    public async Task<List<SyncEvent>> GetSyncLogs(int position = 0)
     {
         return await _dbContext.SyncProgressReports
             .AsNoTracking()
-            .OrderBy(l => l.Id)
+            .OrderByDescending(l => l.Timestamp)
             .Skip(position)
             .Take(10)
             .ToListAsync();
     }
 
-    public async Task<List<SyncProgressReport>> GetSyncLogsForBible(string bibleId, int position = 0)
+    public async Task<List<SyncEvent>> GetSyncLogsForBible(string bibleId, int position = 0)
     {
         return await _dbContext.SyncProgressReports
             .AsNoTracking()
@@ -39,28 +39,30 @@ public class BibleSyncLogData
             .ToListAsync();
     }
 
-    public async Task Log(SyncProgressReport log)
+    public void Log(SyncEvent log)
     {
-        await _dbContext.SyncProgressReports.AddAsync(log);
-        await _dbContext.SaveChangesAsync();
+        _dbContext.SyncProgressReports.Add(log);
+        _dbContext.SaveChanges();
     }
 
-    public async Task AddLogs(List<SyncProgressReport> logs)
+    public async Task AddLogs(List<SyncEvent> logs)
     {
         await _dbContext.SyncProgressReports.AddRangeAsync(logs);
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<Dictionary<string, SyncProgressReport>> GetLastSyncProgressForBibles()
+    public async Task<Dictionary<string, SyncEvent>> GetLastSyncProgressForBibles()
     {
         var reports = await _dbContext.SyncProgressReports
             .FromSql($@"
-                select distinct on (BibleId) *
-                from SyncProgressReports
+                select distinct on (""BibleId"") *
+                from ""SyncProgressReports""
+                where ""Event"" != 'Progress'
+                order by ""BibleId"", ""Timestamp"" desc
             ")
             .ToListAsync();
 
-        var returnDictionary = new Dictionary<string, SyncProgressReport>();
+        var returnDictionary = new Dictionary<string, SyncEvent>();
 
         foreach (var report in reports)
         {

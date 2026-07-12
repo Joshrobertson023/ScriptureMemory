@@ -4,5 +4,5 @@ namespace ScriptureMemory.Server.Data.Models;
 public class BibleSyncData
 {
     public Bible Bible { get; set; } = new();
-    public SyncProgressReport? LastSyncReport { get; set; }
+    public SyncEvent? LastSyncReport { get; set; }
 }

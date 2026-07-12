@@ -6,12 +6,12 @@ namespace ScriptureMemory.Server.SignalR;
 
 public class SyncHub : Hub
 {
-    public async Task SendLog(SyncLog log)
+    public async Task SendLog(SyncEvent log)
     {
         await Clients.All.SendAsync("ReceiveSyncLog", log);
     }
 
-    public async Task SendProgress(SyncProgressReport progress)
+    public async Task SendProgress(SyncEvent progress)
     {
         await Clients.All.SendAsync("ReceiveProgress", progress);
     }
