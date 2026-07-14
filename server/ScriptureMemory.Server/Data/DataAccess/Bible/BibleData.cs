@@ -21,13 +21,19 @@ public class BibleData
     public async Task UpdateAuthorizedBibles(List<Server.DataAccess.Models.Bible> biblesToSet)
     {
         var biblesInDb = _dbContext.Bibles.AsNoTracking().ToList();
-        HashSet<string> bibleIdsToSet = biblesToSet.Select(b => b.Id).ToHashSet();
         HashSet<string> bibleIdsInDb = biblesInDb.Select(b => b.Id).ToHashSet();
+        HashSet<string> bibleIdsToSet = biblesToSet.Select(b => b.Id).ToHashSet();
         
-        foreach (var bible in biblesInDb)
+        foreach (var bible in biblesToSet)
         {
-            if (bibleIdsToSet.Contains(bible.Id) && !bibleIdsInDb.Contains(bible.Id))
+            if (!bibleIdsInDb.Contains(bible.Id))
                 _dbContext.Bibles.Add(bible);
+            else
+            {
+                var bibleToUpdate = _dbContext.Bibles.Single(b => b.Id == bible.Id);
+                bibleToUpdate.Active = bible.Active;
+                bibleToUpdate.Authorized = bible.Authorized;
+            }
         }
         
         await _dbContext.SaveChangesAsync();

@@ -21,6 +21,7 @@ public static class BibleHelper
             if (!allBibleIds.Contains(bible.Id))
             {
                 allBibles.Add(bible);
+                allBibleIds.Add(bible.Id);
             }
         }
                 
