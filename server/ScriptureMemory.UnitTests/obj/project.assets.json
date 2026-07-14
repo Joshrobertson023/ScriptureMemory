@@ -127,6 +127,22 @@
           }
         }
       },
+      "Castle.Core/5.1.1": {
+        "type": "package",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "6.0.0"
+        },
+        "compile": {
+          "lib/net6.0/Castle.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Castle.Core.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "CommandLineParser/2.9.1": {
         "type": "package",
         "compile": {
@@ -2677,6 +2693,22 @@
           }
         }
       },
+      "NSubstitute/6.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Castle.Core": "5.1.1"
+        },
+        "compile": {
+          "lib/net8.0/NSubstitute.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/NSubstitute.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "OpenAI/2.9.1": {
         "type": "package",
         "dependencies": {
@@ -3930,6 +3962,30 @@
         "lib/netstandard2.0/BouncyCastle.Cryptography.dll",
         "lib/netstandard2.0/BouncyCastle.Cryptography.xml",
         "packageIcon.png"
+      ]
+    },
+    "Castle.Core/5.1.1": {
+      "sha512": "rpYtIczkzGpf+EkZgDr9CClTdemhsrwA/W5hMoPjLkRFnXzH44zDLoovXeKtmxb1ykXK9aJVODSpiJml8CTw2g==",
+      "type": "package",
+      "path": "castle.core/5.1.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ASL - Apache Software Foundation License.txt",
+        "CHANGELOG.md",
+        "LICENSE",
+        "castle-logo.png",
+        "castle.core.5.1.1.nupkg.sha512",
+        "castle.core.nuspec",
+        "lib/net462/Castle.Core.dll",
+        "lib/net462/Castle.Core.xml",
+        "lib/net6.0/Castle.Core.dll",
+        "lib/net6.0/Castle.Core.xml",
+        "lib/netstandard2.0/Castle.Core.dll",
+        "lib/netstandard2.0/Castle.Core.xml",
+        "lib/netstandard2.1/Castle.Core.dll",
+        "lib/netstandard2.1/Castle.Core.xml",
+        "readme.txt"
       ]
     },
     "CommandLineParser/2.9.1": {
@@ -8234,6 +8290,23 @@
         "postgresql.png"
       ]
     },
+    "NSubstitute/6.0.0": {
+      "sha512": "0gvKMbiJ+/WrfbcfBfqRZZrvfLJcd3rqkqVMjjlY5dtmLRVzMY+o/K/rJUStofQ2haSr9Vd04YDfvZtVVGS3/A==",
+      "type": "package",
+      "path": "nsubstitute/6.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "icon.png",
+        "lib/net8.0/NSubstitute.dll",
+        "lib/net8.0/NSubstitute.xml",
+        "lib/netstandard2.0/NSubstitute.dll",
+        "lib/netstandard2.0/NSubstitute.xml",
+        "nsubstitute.6.0.0.nupkg.sha512",
+        "nsubstitute.nuspec"
+      ]
+    },
     "OpenAI/2.9.1": {
       "sha512": "KPTFYEt1EhrPeIZXGBE+DlutFEpMo/RspqSdUJ3p6pMqsw3NeGJcIja/K0He1j9KyRq8ASfzBgp2biWbNUGnFA==",
       "type": "package",
@@ -9701,6 +9774,7 @@
       "DataAccess >= 1.0.0",
       "Microsoft.EntityFrameworkCore >= 10.0.9",
       "Microsoft.NET.Test.Sdk >= 17.14.1",
+      "NSubstitute >= 6.0.0",
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 10.0.2",
       "ScriptureMemory.Server >= 1.0.0",
       "Testcontainers >= 4.12.0",
@@ -9766,6 +9840,10 @@
           "Microsoft.NET.Test.Sdk": {
             "target": "Package",
             "version": "[17.14.1, )"
+          },
+          "NSubstitute": {
+            "target": "Package",
+            "version": "[6.0.0, )"
           },
           "Npgsql.EntityFrameworkCore.PostgreSQL": {
             "target": "Package",

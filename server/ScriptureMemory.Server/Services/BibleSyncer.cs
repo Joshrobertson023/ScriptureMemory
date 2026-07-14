@@ -1,7 +1,6 @@
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Data.Models.Logs;
-using ScriptureMemory.Server.Migrations;
 using System.Collections.Concurrent;
 
 namespace ScriptureMemory.Server.Services;
@@ -52,10 +51,11 @@ public class BibleSyncer
         List<BibleSyncData> dataToReturn = new();
         
         var lastSyncReports = await _syncLogContext.GetLastSyncProgressForBibles();
-        var activeBibles = await _bibleContext.GetActiveBibles();
+        var biblesInDb = await _bibleContext.GetBibles();
         var authorizedBibles = await _bibleApi.GetAuthorizedBibles();
         
-        HashSet<string> activeBibleIds = activeBibles.Select(b => b.Id).ToHashSet();
+        // Put all authorized bibles in db
+        // Update ones that don't have authorization for anymore
 
         for (int i = 0; i < authorizedBibles.Count; i++)
         {
@@ -64,11 +64,24 @@ public class BibleSyncer
                 Bible = authorizedBibles[i],
                 LastSyncReport = lastSyncReports.GetValueOrDefault(authorizedBibles[i].Id)
             };
-            if (activeBibleIds.Contains(authorizedBibles[i].Id))
-                data.Bible.Active = true;
             
             dataToReturn.Add(data);
         }
+        
+        // List<BibleSyncData> dataToReturn = new();
+        //
+        // var lastSyncReports = await _syncLogContext.GetLastSyncProgressForBibles();
+        // var biblesInDb = await _bibleContext.GetBibles();
+        //
+        // foreach (var bible in biblesInDb)
+        // {
+        //     var data = new BibleSyncData
+        //     {
+        //         Bible = bible,
+        //         LastSyncReport = lastSyncReports.GetValueOrDefault(bible.Id)
+        //     };
+        //     dataToReturn.Add(data);
+        // }
         
         // Sync authorized Bibles with my database on a background task every day
         // On admin dashboard use my database Bibles, but have a button to start the sync with API.Bible
@@ -84,6 +97,21 @@ public class BibleSyncer
             // When event is received, check in there to remove
 
         return dataToReturn;
+    }
+
+    public List<Bible> GetMergedBibles(List<Bible> dbBibles, List<Bible> authorizedBibles)
+    {
+        (var mergedBibles, var needingLogged) = BibleHelper.MergeBiblesToSet(dbBibles, authorizedBibles);
+
+        if (needingLogged.Count > 0)
+        {
+            foreach (var needed in needingLogged)
+            {
+                _logger.LogWarning("{Name} is not authorized but is active.", needed.AbbreviationLocal);
+            }
+        }
+
+        return mergedBibles;
     }
 
     public async Task QueueBibleForSync(string bibleId, string initiator)
@@ -169,6 +197,7 @@ public class BibleSyncer
             
             var percentage = (int)Math.Round((booksCompleted / (double)Books.TotalBooks) * 100);
 
+            _logger.LogInformation("Syncing {Name}: {Progress}", task.BibleName, percentage);
             await _eventDispatcher.Send(new SyncEvent
             {
                 BibleId = task.BibleId,

@@ -1,4 +1,5 @@
 using DataAccess.Models;
+using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 
@@ -17,6 +18,6 @@ public class VerseTests
     [Fact]
     public async Task InsertVerse_InvalidBookThrowsException()
     {
-        Assert.Throws<ArgumentException>(() => new Verse("FakeBook", 1, 1));
+        Assert.Throws<BookNotFoundException>(() => new Verse("FakeBook", 1, 1));
     }
 }

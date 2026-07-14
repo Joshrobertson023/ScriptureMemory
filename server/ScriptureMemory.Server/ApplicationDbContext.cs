@@ -10,6 +10,8 @@ public class ApplicationDbContext : DbContext
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
         : base(options) {}
     
+    protected ApplicationDbContext() { }
+    
     public DbSet<User> Users { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Admin> Admins { get; set; }

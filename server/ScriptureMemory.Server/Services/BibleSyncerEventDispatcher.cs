@@ -28,8 +28,6 @@ public class BibleSyncerEventDispatcher
 
         if (progress.Event == BibleSyncEvent.Progress)
             return;
-        
-        _logger.LogInformation("Event on Bible sync for {Name}: {Action}", progress.BibleName, progress.Event.ToString());
 
         _logContext.Log(progress);
     }

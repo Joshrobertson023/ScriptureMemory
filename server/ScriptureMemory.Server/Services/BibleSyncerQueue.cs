@@ -54,7 +54,7 @@ public class BibleSyncerQueue
         _idsInQueue.Remove(task.BibleId);
         _syncingId = task.BibleId;
         
-        logger.LogInformation("Dequeued for syncing by the background worker: {MethodName}", 
+        logger.LogInformation("Dequeued Bible sync by the background worker: {MethodName}", 
             task.BibleName);
 
         return task;

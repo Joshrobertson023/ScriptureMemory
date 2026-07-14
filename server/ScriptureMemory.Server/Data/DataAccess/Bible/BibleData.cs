@@ -18,6 +18,12 @@ public class BibleData
         return await _dbContext.Bibles.AsNoTracking().ToListAsync();
     }
 
+    public async Task SetBibles(List<Server.DataAccess.Models.Bible> bibles)
+    {
+        await _dbContext.Bibles.AddRangeAsync(bibles);
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task<List<Server.DataAccess.Models.Bible>> GetActiveBibles()
     {
         return await _dbContext.Bibles.AsNoTracking().Where(b => b.Active).ToListAsync();

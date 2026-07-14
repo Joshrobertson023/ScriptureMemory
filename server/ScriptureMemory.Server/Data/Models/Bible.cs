@@ -20,6 +20,8 @@ public class Bible
     public string Info { get; set; } = string.Empty;
 
     public bool Active { get; set; } = false; // Is this authorized Bible visible to app users?
+
+    public bool Authorized { get; set; } = false; // Authorized by API.Bible to use
     
     public DateTime? NextScheduledAutoSync { get; set; }
 }
