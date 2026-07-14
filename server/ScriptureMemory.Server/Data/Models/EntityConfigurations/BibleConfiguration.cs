@@ -13,7 +13,7 @@ public class BibleConfiguration : IEntityTypeConfiguration<Bible>
         builder.Property(e => e.Abbreviation)
             .ValueGeneratedOnAdd()
             .IsRequired()
-            .HasMaxLength(5);
+            .HasMaxLength(15);
         builder.Property(e => e.Name)
             .IsRequired()
             .HasMaxLength(100);

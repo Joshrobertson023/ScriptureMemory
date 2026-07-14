@@ -99,8 +99,13 @@ public class BibleSyncer
         return dataToReturn;
     }
 
-    public List<Bible> GetMergedBibles(List<Bible> dbBibles, List<Bible> authorizedBibles)
+    public async Task<List<Bible>> SyncBibleAuthorization(List<Bible>? authorizedBibles = null)
     {
+        var dbBibles = await _bibleContext.GetBibles();
+        
+        if (authorizedBibles is null)
+            authorizedBibles = await _bibleApi.GetAuthorizedBibles();
+        
         (var mergedBibles, var needingLogged) = BibleHelper.MergeBiblesToSet(dbBibles, authorizedBibles);
 
         if (needingLogged.Count > 0)
@@ -110,6 +115,8 @@ public class BibleSyncer
                 _logger.LogWarning("{Name} is not authorized but is active.", needed.AbbreviationLocal);
             }
         }
+
+        await _bibleContext.UpdateAuthorizedBibles(mergedBibles);
 
         return mergedBibles;
     }

@@ -15,4 +15,9 @@ public class SyncHub : Hub
     {
         await Clients.All.SendAsync("ReceiveProgress", progress);
     }
+
+    public async Task SendAuthorizationSyncCompleted()
+    {
+        await Clients.All.SendAsync("AuthorizationSyncCompleted");
+    }
 }

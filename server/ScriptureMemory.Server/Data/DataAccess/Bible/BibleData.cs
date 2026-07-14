@@ -18,9 +18,18 @@ public class BibleData
         return await _dbContext.Bibles.AsNoTracking().ToListAsync();
     }
 
-    public async Task SetBibles(List<Server.DataAccess.Models.Bible> bibles)
+    public async Task UpdateAuthorizedBibles(List<Server.DataAccess.Models.Bible> biblesToSet)
     {
-        await _dbContext.Bibles.AddRangeAsync(bibles);
+        var biblesInDb = _dbContext.Bibles.AsNoTracking().ToList();
+        HashSet<string> bibleIdsToSet = biblesToSet.Select(b => b.Id).ToHashSet();
+        HashSet<string> bibleIdsInDb = biblesInDb.Select(b => b.Id).ToHashSet();
+        
+        foreach (var bible in biblesInDb)
+        {
+            if (bibleIdsToSet.Contains(bible.Id) && !bibleIdsInDb.Contains(bible.Id))
+                _dbContext.Bibles.Add(bible);
+        }
+        
         await _dbContext.SaveChangesAsync();
     }
 

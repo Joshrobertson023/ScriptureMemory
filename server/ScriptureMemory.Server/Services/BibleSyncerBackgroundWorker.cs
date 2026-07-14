@@ -6,7 +6,7 @@ using ScriptureMemory.Server.SignalR;
 namespace ScriptureMemory.Server.Services;
 
 /// <summary>
-/// Assigned with dequeuing and executing the Bible syncer background tasks
+/// Automatically dequeues and executes the Bible syncer background tasks
 /// </summary>
 /// <param name="queue"></param>
 /// <param name="logger"></param>
