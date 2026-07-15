@@ -49,52 +49,27 @@ public class BibleSyncer
     public async Task<List<BibleSyncData>> GetBibleSyncData()
     {
         List<BibleSyncData> dataToReturn = new();
+
+        await SyncBibleAuthorization(); // Todo: Temporary until set up auto syncer
         
         var lastSyncReports = await _syncLogContext.GetLastSyncProgressForBibles();
         var biblesInDb = await _bibleContext.GetBibles();
-        var authorizedBibles = await _bibleApi.GetAuthorizedBibles();
-        
-        // Put all authorized bibles in db
-        // Update ones that don't have authorization for anymore
 
-        for (int i = 0; i < authorizedBibles.Count; i++)
+        foreach (var bible in biblesInDb)
         {
             var data = new BibleSyncData
             {
-                Bible = authorizedBibles[i],
-                LastSyncReport = lastSyncReports.GetValueOrDefault(authorizedBibles[i].Id)
+                Bible = bible,
+                LastSyncReport = lastSyncReports.GetValueOrDefault(bible.Id)
             };
             
             dataToReturn.Add(data);
         }
         
-        // List<BibleSyncData> dataToReturn = new();
-        //
-        // var lastSyncReports = await _syncLogContext.GetLastSyncProgressForBibles();
-        // var biblesInDb = await _bibleContext.GetBibles();
-        //
-        // foreach (var bible in biblesInDb)
-        // {
-        //     var data = new BibleSyncData
-        //     {
-        //         Bible = bible,
-        //         LastSyncReport = lastSyncReports.GetValueOrDefault(bible.Id)
-        //     };
-        //     dataToReturn.Add(data);
-        // }
-        
-        // Sync authorized Bibles with my database on a background task every day
-        // On admin dashboard use my database Bibles, but have a button to start the sync with API.Bible
-        
         // LastSynced, etc are optional
         // Once sync is completed, update LastSynced, NextScheduled, etc.
         // For updating the client, on Completion event, fetch the specific Bible that just synced from the server,
         // then update the last synced and next scheduled on the UI. Show a spinner in those fields until updated.
-        
-        // Server is source of truth for sync events and state
-        // When clicking sync or cancel, show spinner until get confirmation from server
-            // Add to array of waitingForSync or waitingForCancel
-            // When event is received, check in there to remove
 
         return dataToReturn;
     }
@@ -170,6 +145,9 @@ public class BibleSyncer
         int booksCompleted = 0;
         Random random = new();
 
+        // Todo: delegate to background auto syncer when implemented
+        DateTime nextScheduledAutoSync = DateTime.UtcNow.AddDays(29);
+
         await _eventDispatcher.Send(new SyncEvent
         {
             Event = BibleSyncEvent.Started,
@@ -191,7 +169,7 @@ public class BibleSyncer
                 }
 
                 // Simulate syncing for testing
-                await Task.Delay(random.Next(100, 300));
+                await Task.Delay(random.Next(1, 3));
                 
 
                 // Get chapter usx and plaintext from API.Bible
@@ -214,6 +192,8 @@ public class BibleSyncer
                 Event = BibleSyncEvent.Progress
             });
         }
+
+        await _bibleContext.UpdateBibleSync(task.BibleId, DateTime.UtcNow, nextScheduledAutoSync);
                 
         await _eventDispatcher.Send(new SyncEvent
         {

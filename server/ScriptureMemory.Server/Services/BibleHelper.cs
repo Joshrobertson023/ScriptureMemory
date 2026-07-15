@@ -39,6 +39,10 @@ public static class BibleHelper
                     biblesNotAuthorizedButActive.Add(bible);
                 
                 bible.Authorized = authorized;
+
+                // Filter out duplicate Bibles
+                if (bible.Id[^1] != '1')
+                    continue;
                         
                 biblesToSet.Add(bible);
                 biblesToSetIds.Add(bible.Id);

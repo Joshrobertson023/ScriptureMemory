@@ -17,6 +17,21 @@ public static class BibleEndpoint
             return Results.Ok(await syncer.GetChapterContentExample());
         });
 
+        app.MapGet("/bible/{bibleId}", async (
+            string bibleId,
+            [FromServices] BibleData bibleContext) =>
+        {
+            return Results.Ok(await bibleContext.GetBibleById(bibleId));
+        }).RequireAuthorization("Admin");
+
+        app.MapPost("/bible/authorization-sync", async (
+            [FromServices] BibleSyncer bibleSyncer,
+            [FromServices] BibleData bibleData) =>
+        {
+            await bibleSyncer.SyncBibleAuthorization();
+            return Results.Ok(bibleData.GetBibles());
+        }).RequireAuthorization("Admin");
+
         app.MapGet("/bible/syncer/data", async (
             [FromServices] BibleSyncer syncer) =>
         {

@@ -23,5 +23,7 @@ public class Bible
 
     public bool Authorized { get; set; } = false; // Authorized by API.Bible to use
     
+    public DateTime? LastSync { get; set; }
+    
     public DateTime? NextScheduledAutoSync { get; set; }
 }
