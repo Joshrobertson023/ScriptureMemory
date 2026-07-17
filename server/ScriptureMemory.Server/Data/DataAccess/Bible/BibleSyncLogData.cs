@@ -71,4 +71,12 @@ public class BibleSyncLogData
 
         return returnDictionary;
     }
+
+    public async Task<DateTime?> GetLastAuthorizationSync()
+    {
+        var result = await _dbContext.SyncProgressReports
+            .FirstOrDefaultAsync(r 
+                => r.AuthorizationSync == true && r.Event == BibleSyncEvent.Completed);
+        return result?.Timestamp;
+    }
 }

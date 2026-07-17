@@ -68,8 +68,7 @@ public class BibleSyncer
         }
 
         response.CurrentlySyncing = _authorizationSyncerActive.IsCurrentlySyncing();
-        response.LastSync = lastSyncReports.Values.First(r => 
-            r.AuthorizationSync = true && r.Event == BibleSyncEvent.Completed).Timestamp;
+        response.LastSync = await _syncLogContext.GetLastAuthorizationSync();
         
         return response;
     }
