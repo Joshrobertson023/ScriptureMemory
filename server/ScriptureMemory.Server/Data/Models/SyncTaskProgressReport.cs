@@ -3,10 +3,11 @@ namespace ScriptureMemory.Server.Data.Models;
 public class SyncEvent
 {
     public int Id { get; set; }
+    public bool AuthorizationSync { get; set; } = false;
     public string? Initiator { get; set; }
-    public string BibleId { get; set; }
+    public string? BibleId { get; set; }
     public string? BibleName { get; set; }
-    public int Percentage { get; set; }
+    public int? Percentage { get; set; }
     public BibleSyncEvent? Event { get; set; }
     public string? Message { get; set; }
     public bool SystemInitiated { get; set; } = false;

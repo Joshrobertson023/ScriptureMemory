@@ -118,9 +118,13 @@ public class BibleSyncerTests : BaseIntegrationTest
         Assert.Single(resultingBiblesInDb, resultBible => resultBible.AbbreviationLocal == "F35");
         Assert.Single(resultingBiblesInDb, resultBible => resultBible.AbbreviationLocal == "RV");
         Assert.Single(resultingBiblesInDb, resultBible => resultBible.AbbreviationLocal == "OKE");
+        
+        // If new authorized Bible appears, add to db
         Assert.Single(resultingBiblesInDb, resultBible => resultBible.AbbreviationLocal == "ASV");
         
+        // If unauthorized appears, start removal process
         Assert.False(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "F35").Authorized);
+        
         Assert.True(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "F35").Active);
         Assert.False(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "ASV").Active);
         Assert.True(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "ASV").Authorized);

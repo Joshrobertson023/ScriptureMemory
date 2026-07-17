@@ -22,7 +22,9 @@ namespace ScriptureMemory.Server.Tools
             Stopped,
             Completed,
             Cancelled,
-            Progress
+            Progress,
+            StartedRemoval,
+            CompletedRemoval
         }
 
         public enum SyncDestination

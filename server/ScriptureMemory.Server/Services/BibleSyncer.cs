@@ -19,6 +19,7 @@ public class BibleSyncer
     private readonly BibleSyncerQueue _queue;
     private readonly BibleSyncerEventDispatcher _eventDispatcher;
     private readonly BibleSyncLogData _syncLogContext;
+    private readonly AuthorizationSyncerActive _authorizationSyncerActive;
 
     public BibleSyncer(
         ApplicationDbContext db,
@@ -29,7 +30,8 @@ public class BibleSyncer
         IServiceScopeFactory scope,
         BibleSyncerQueue queue,
         BibleSyncerEventDispatcher eventDispatcher,
-        BibleSyncLogData syncLogContext)
+        BibleSyncLogData syncLogContext,
+        AuthorizationSyncerActive authorizationSyncerActive)
     {
         _dbContext = db;
         _logger = logger;
@@ -40,17 +42,16 @@ public class BibleSyncer
         _queue = queue;
         _eventDispatcher = eventDispatcher;
         _syncLogContext = syncLogContext;
+        _authorizationSyncerActive = authorizationSyncerActive;
     }
 
     /// <summary>
     /// Gets initial load-in information
     /// </summary>
     /// <returns></returns>
-    public async Task<List<BibleSyncData>> GetBibleSyncData()
+    public async Task<GetBibleSyncDataResponse> GetBibleSyncData()
     {
-        List<BibleSyncData> dataToReturn = new();
-
-        await SyncBibleAuthorization(); // Todo: Temporary until set up auto syncer
+        GetBibleSyncDataResponse response = new();
         
         var lastSyncReports = await _syncLogContext.GetLastSyncProgressForBibles();
         var biblesInDb = await _bibleContext.GetBibles();
@@ -60,39 +61,104 @@ public class BibleSyncer
             var data = new BibleSyncData
             {
                 Bible = bible,
-                LastSyncReport = lastSyncReports.GetValueOrDefault(bible.Id)
+                LastSyncReport = lastSyncReports.GetValueOrDefault(bible.Id),
             };
             
-            dataToReturn.Add(data);
+            response.SyncData.Add(data);
         }
-        
-        // LastSynced, etc are optional
-        // Once sync is completed, update LastSynced, NextScheduled, etc.
-        // For updating the client, on Completion event, fetch the specific Bible that just synced from the server,
-        // then update the last synced and next scheduled on the UI. Show a spinner in those fields until updated.
 
-        return dataToReturn;
+        response.CurrentlySyncing = _authorizationSyncerActive.IsCurrentlySyncing();
+        response.LastSync = lastSyncReports.Values.First(r => 
+            r.AuthorizationSync = true && r.Event == BibleSyncEvent.Completed).Timestamp;
+        
+        return response;
     }
 
-    public async Task<List<Bible>> SyncBibleAuthorization(List<Bible>? authorizedBibles = null)
+    public async Task<List<Bible>> SyncBibleAuthorization(string initiator, List<Bible>? authorizedBibles = null)
     {
-        var dbBibles = await _bibleContext.GetBibles();
-        
-        if (authorizedBibles is null)
-            authorizedBibles = await _bibleApi.GetAuthorizedBibles();
-        
-        (var mergedBibles, var needingLogged) = BibleHelper.MergeBiblesToSet(dbBibles, authorizedBibles);
+        List<Bible> mergedBibles = new();
+        int retries = 0;
+        int maxRetries = 3;
 
-        if (needingLogged.Count > 0)
+        while (retries <= maxRetries)
         {
-            foreach (var needed in needingLogged)
+
+            try
             {
-                _logger.LogWarning("{Name} is not authorized but is active.", needed.AbbreviationLocal);
+                if (!_authorizationSyncerActive.SetActive())
+                    throw new InvalidOperationException("Syncer already active.");
+
+                await _eventDispatcher.Send(new SyncEvent
+                {
+                    AuthorizationSync = true, Initiator = initiator, Event = BibleSyncEvent.Started
+                });
+
+                var dbBibles = await _bibleContext.GetBibles();
+
+                if (authorizedBibles is null)
+                    authorizedBibles = await _bibleApi.GetAuthorizedBibles();
+
+                (mergedBibles, var unauthorizedAndActive)
+                    = BibleHelper.MergeBiblesToSet(dbBibles, authorizedBibles);
+
+                if (unauthorizedAndActive.Count > 0)
+                {
+                    _logger.LogCritical("Found {Count} Bibles needing removal because unauthorized",
+                        unauthorizedAndActive.Count);
+
+                    // Send emails
+
+                    foreach (var settingInactive in unauthorizedAndActive)
+                    {
+                        await _eventDispatcher.Send(new SyncEvent
+                        {
+                            AuthorizationSync = true,
+                            Event = BibleSyncEvent.StartedRemoval,
+                            BibleId = settingInactive.Id,
+                            BibleName = settingInactive.Abbreviation
+                        });
+
+                        await SetInvisible(settingInactive.Id, initiator);
+
+                        await _eventDispatcher.Send(new SyncEvent
+                        {
+                            AuthorizationSync = true,
+                            Event = BibleSyncEvent.CompletedRemoval,
+                            BibleId = settingInactive.Id,
+                            BibleName = settingInactive.Abbreviation
+                        });
+                    }
+                }
+
+                await _bibleContext.UpdateAuthorizedBibles(mergedBibles);
+
             }
+            catch (Exception ex)
+            {
+                _logger.LogCritical("Error syncing Bible authorization: {Message}", ex.Message);
+                await _eventDispatcher.Send(new SyncEvent
+                {
+                    AuthorizationSync = true, Event = BibleSyncEvent.Stopped, Exception = new ExceptionModel(ex)
+                });
+                _logger.LogCritical("Retrying authorization sync {Retry}/{MaxRetries}", retries += 1, maxRetries);
+                retries++;
+                await Task.Delay(1000*(retries*retries));
+
+                // Send emails
+            }
+            finally
+            {
+                _authorizationSyncerActive.SetInactive();
+            }
+            
         }
 
-        await _bibleContext.UpdateAuthorizedBibles(mergedBibles);
-
+        await _eventDispatcher.Send(new SyncEvent
+        {
+            AuthorizationSync = true,
+            Event = BibleSyncEvent.Completed,
+        });
+        
         return mergedBibles;
     }
 
@@ -205,6 +271,15 @@ public class BibleSyncer
         });
     }
 
+    public async Task SetVisible(string bibleId, string username)
+    {
+        await Task.Delay(2000);
+    }
+
+    public async Task SetInvisible(string bibleId, string username)
+    {
+        await Task.Delay(3000);
+    }
 
     public async Task<string> GetChapterContentExample()
     {

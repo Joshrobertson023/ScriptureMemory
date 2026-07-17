@@ -25,10 +25,11 @@ public static class BibleEndpoint
         }).RequireAuthorization("Admin");
 
         app.MapPost("/bible/authorization-sync", async (
+            [FromBody] string initiator,
             [FromServices] BibleSyncer bibleSyncer,
             [FromServices] BibleData bibleData) =>
         {
-            await bibleSyncer.SyncBibleAuthorization();
+            await bibleSyncer.SyncBibleAuthorization(initiator);
             return Results.Ok(bibleData.GetBibles());
         }).RequireAuthorization("Admin");
 
@@ -48,16 +49,22 @@ public static class BibleEndpoint
 
         app.MapPost("/bible/syncer/{bibleId}/set-visible", async (
             string bibleId,
+            [FromBody] string username,
             [FromServices] BibleSyncer syncer) =>
         {
+            await syncer.SetVisible(bibleId, username);
             
+            return Results.Ok();
         }).RequireAuthorization("SuperAdmin");
 
         app.MapPost("/bible/syncer/{bibleId}/set-not-visible", async (
             string bibleId,
+            [FromBody] string username,
             [FromServices] BibleSyncer syncer) =>
         {
-            
+            await syncer.SetInvisible(bibleId, username);
+
+            return Results.Ok();
         }).RequireAuthorization("SuperAdmin");
 
         app.MapPost("/bible/syncer/{bibleId}/queue-sync", async (

@@ -34,9 +34,12 @@ public static class BibleHelper
             if (!biblesToSetIds.Contains(bible.Id))
             {
                 bool authorized = authorizedBibleIds.Contains(bible.Id);
-                
+
                 if (!authorized && bible.Active)
+                {
+                    bible.Active = false;
                     biblesNotAuthorizedButActive.Add(bible);
+                }
                 
                 bible.Authorized = authorized;
 

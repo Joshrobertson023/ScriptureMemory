@@ -214,6 +214,7 @@ public static class Services
         //services.AddScoped<EmbeddingGenerator>();
 
         services.AddSingleton<BibleSyncerQueue>();
+        services.AddSingleton<AuthorizationSyncerActive>();
         services.AddHostedService<BibleSyncerBackgroundWorker>();
         services.AddScoped<BibleSyncerEventDispatcher>();
 
