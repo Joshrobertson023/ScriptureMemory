@@ -4,12 +4,8 @@ public class AuthorizationSyncerActive
 {
     private int _isCurrentlySyncing = 0;
 
-    private readonly BibleSyncer _syncer;
-
-    public AuthorizationSyncerActive(
-        BibleSyncer syncer)
+    public AuthorizationSyncerActive()
     {
-        _syncer = syncer;
     }
 
     public bool SetActive()

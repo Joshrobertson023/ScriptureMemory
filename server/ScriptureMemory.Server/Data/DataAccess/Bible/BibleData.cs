@@ -50,17 +50,19 @@ public class BibleData
 
     public async Task UpdateAuthorizedBibles(List<Server.DataAccess.Models.Bible> biblesToSet)
     {
-        var biblesInDb = _dbContext.Bibles.AsNoTracking().ToList();
+        var biblesInDb = await _dbContext.Bibles.AsNoTracking().ToListAsync();
         HashSet<string> bibleIdsInDb = biblesInDb.Select(b => b.Id).ToHashSet();
         HashSet<string> bibleIdsToSet = biblesToSet.Select(b => b.Id).ToHashSet();
+
+        var biblesToUpdate = await _dbContext.Bibles.Where(b => bibleIdsToSet.Contains(b.Id)).ToListAsync();
         
         foreach (var bible in biblesToSet)
         {
             if (!bibleIdsInDb.Contains(bible.Id))
-                _dbContext.Bibles.Add(bible);
+                await _dbContext.Bibles.AddAsync(bible);
             else
             {
-                var bibleToUpdate = _dbContext.Bibles.Single(b => b.Id == bible.Id);
+                var bibleToUpdate = biblesToUpdate.Single(b => b.Id == bible.Id);
                 bibleToUpdate.Active = bible.Active;
                 bibleToUpdate.Authorized = bible.Authorized;
             }
@@ -89,17 +91,19 @@ public class BibleData
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task SetBibleActive(Server.DataAccess.Models.Bible bible)
+    public async Task<string> SetBibleActive(string bibleId)
     {
-        var resultBible = await _dbContext.Bibles.SingleOrDefaultAsync(b => b.Id == bible.Id);
+        var resultBible = await _dbContext.Bibles.SingleOrDefaultAsync(b => b.Id == bibleId);
         resultBible?.Active = true;
         await _dbContext.SaveChangesAsync();
+        return resultBible?.AbbreviationLocal ?? "";
     }
     
-    public async Task SetBibleInactive(Server.DataAccess.Models.Bible bible)
+    public async Task<string> SetBibleInactive(string bibleId)
     {
-        var resultBible = await _dbContext.Bibles.SingleOrDefaultAsync(b => b.Id == bible.Id);
+        var resultBible = await _dbContext.Bibles.SingleOrDefaultAsync(b => b.Id == bibleId);
         resultBible?.Active = false;
         await _dbContext.SaveChangesAsync();
+        return resultBible?.AbbreviationLocal ?? "";
     }
 }

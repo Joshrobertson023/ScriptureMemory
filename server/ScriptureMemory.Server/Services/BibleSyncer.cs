@@ -78,15 +78,15 @@ public class BibleSyncer
         List<Bible> mergedBibles = new();
         int retries = 0;
         int maxRetries = 3;
+        
+        if (!_authorizationSyncerActive.SetActive())
+            throw new InvalidOperationException("Syncer already active.");
 
         while (retries <= maxRetries)
         {
 
             try
             {
-                if (!_authorizationSyncerActive.SetActive())
-                    throw new InvalidOperationException("Syncer already active.");
-
                 await _eventDispatcher.Send(new SyncEvent
                 {
                     AuthorizationSync = true, Initiator = initiator, Event = BibleSyncEvent.Started
@@ -107,30 +107,31 @@ public class BibleSyncer
 
                     // Send emails
 
-                    foreach (var settingInactive in unauthorizedAndActive)
+                    foreach (var purging in unauthorizedAndActive)
                     {
                         await _eventDispatcher.Send(new SyncEvent
                         {
                             AuthorizationSync = true,
                             Event = BibleSyncEvent.StartedRemoval,
-                            BibleId = settingInactive.Id,
-                            BibleName = settingInactive.Abbreviation
+                            BibleId = purging.Id,
+                            BibleName = purging.Abbreviation
                         });
 
-                        await SetInvisible(settingInactive.Id, initiator);
+                        await PurgeBible(purging.Id);
 
                         await _eventDispatcher.Send(new SyncEvent
                         {
                             AuthorizationSync = true,
                             Event = BibleSyncEvent.CompletedRemoval,
-                            BibleId = settingInactive.Id,
-                            BibleName = settingInactive.Abbreviation
+                            BibleId = purging.Id,
+                            BibleName = purging.Abbreviation
                         });
                     }
                 }
 
                 await _bibleContext.UpdateAuthorizedBibles(mergedBibles);
 
+                break;
             }
             catch (Exception ex)
             {
@@ -147,10 +148,11 @@ public class BibleSyncer
             }
             finally
             {
-                _authorizationSyncerActive.SetInactive();
             }
             
         }
+        
+        _authorizationSyncerActive.SetInactive();
 
         await _eventDispatcher.Send(new SyncEvent
         {
@@ -272,10 +274,31 @@ public class BibleSyncer
 
     public async Task SetVisible(string bibleId, string username)
     {
-        await Task.Delay(2000);
+        var bibleAbbr = await _bibleContext.SetBibleActive(bibleId);
+        
+        await _eventDispatcher.Send(new SyncEvent
+        {
+            BibleId = bibleId,
+            BibleName = bibleAbbr,
+            Event = BibleSyncEvent.SetActive,
+            Initiator = username
+        });
     }
 
     public async Task SetInvisible(string bibleId, string username)
+    {
+        var bibleAbbr = await _bibleContext.SetBibleInactive(bibleId);
+        
+        await _eventDispatcher.Send(new SyncEvent
+        {
+            BibleId = bibleId,
+            BibleName = bibleAbbr,
+            Event = BibleSyncEvent.SetInactive,
+            Initiator = username
+        });
+    }
+
+    public async Task PurgeBible(string bibleId)
     {
         await Task.Delay(3000);
     }

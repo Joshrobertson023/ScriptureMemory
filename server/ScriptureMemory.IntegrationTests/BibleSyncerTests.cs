@@ -111,7 +111,7 @@ public class BibleSyncerTests : BaseIntegrationTest
             await _bibleContext.InsertBible(bible);
         }
 
-        await _bibleSyncer.SyncBibleAuthorization(authorizedBibles);
+        await _bibleSyncer.SyncBibleAuthorization("", authorizedBibles);
 
         var resultingBiblesInDb = await _bibleContext.GetBibles();
         
@@ -124,8 +124,8 @@ public class BibleSyncerTests : BaseIntegrationTest
         
         // If unauthorized appears, start removal process
         Assert.False(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "F35").Authorized);
+        Assert.False(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "F35").Active);
         
-        Assert.True(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "F35").Active);
         Assert.False(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "ASV").Active);
         Assert.True(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "ASV").Authorized);
         Assert.True(resultingBiblesInDb.Single(b => b.AbbreviationLocal == "RV").Authorized);

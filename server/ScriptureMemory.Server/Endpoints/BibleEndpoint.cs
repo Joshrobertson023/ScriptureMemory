@@ -30,7 +30,7 @@ public static class BibleEndpoint
             [FromServices] BibleData bibleData) =>
         {
             await bibleSyncer.SyncBibleAuthorization(initiator);
-            return Results.Ok(bibleData.GetBibles());
+            return Results.Ok(await bibleData.GetBibles());
         }).RequireAuthorization("Admin");
 
         app.MapGet("/bible/syncer/data", async (
@@ -67,32 +67,32 @@ public static class BibleEndpoint
             return Results.Ok();
         }).RequireAuthorization("SuperAdmin");
 
-        app.MapPost("/bible/syncer/{bibleId}/queue-sync", async (
-            string bibleId,
-            [FromServices] BibleSyncer syncer,
-            [FromBody] string username) =>
-        {
-            if (string.IsNullOrEmpty(username))
-                return Results.Unauthorized();
-
-            await syncer.QueueBibleForSync(bibleId, username);
-
-            return Results.Ok();
-        }).RequireAuthorization("Admin");
-
-        app.MapPost("/bible/syncer/{bibleId}/{bibleName}/cancel-sync", async (
-            string bibleId,
-            string bibleName,
-            [FromServices] BibleSyncer syncer,
-            [FromBody] string username) =>
-        {
-            if (string.IsNullOrEmpty(username))
-                return Results.Unauthorized();
-            
-            await syncer.CancelSync(bibleId, bibleName, username);
-
-            return Results.Ok();
-        }).RequireAuthorization("Admin");
+        // app.MapPost("/bible/syncer/{bibleId}/queue-sync", async (
+        //     string bibleId,
+        //     [FromServices] BibleSyncer syncer,
+        //     [FromBody] string username) =>
+        // {
+        //     if (string.IsNullOrEmpty(username))
+        //         return Results.Unauthorized();
+        //
+        //     await syncer.QueueBibleForSync(bibleId, username);
+        //
+        //     return Results.Ok();
+        // }).RequireAuthorization("Admin");
+        //
+        // app.MapPost("/bible/syncer/{bibleId}/{bibleName}/cancel-sync", async (
+        //     string bibleId,
+        //     string bibleName,
+        //     [FromServices] BibleSyncer syncer,
+        //     [FromBody] string username) =>
+        // {
+        //     if (string.IsNullOrEmpty(username))
+        //         return Results.Unauthorized();
+        //     
+        //     await syncer.CancelSync(bibleId, bibleName, username);
+        //
+        //     return Results.Ok();
+        // }).RequireAuthorization("Admin");
 
         app.MapPost("/bible/chapter/{bible}/{book}", async (
             string bible,

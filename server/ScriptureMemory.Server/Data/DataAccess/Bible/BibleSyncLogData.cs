@@ -66,6 +66,9 @@ public class BibleSyncLogData
 
         foreach (var report in reports)
         {
+            if (string.IsNullOrEmpty(report.BibleId))
+                continue;
+            
             returnDictionary[report.BibleId] = report;
         }
 
