@@ -3,6 +3,7 @@ using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.SignalR;
+using StackExchange.Redis;
 using System.Security.Claims;
 
 namespace ScriptureMemory.Server.Endpoints;
@@ -94,18 +95,14 @@ public static class BibleEndpoint
         //     return Results.Ok();
         // }).RequireAuthorization("Admin");
 
-        app.MapPost("/bible/chapter/{bible}/{book}", async (
+        app.MapPost("/bible/chapter/{bible}/{book}/{chapter}", async (
             string bible,
             string book,
-            [FromBody] int chapter,
-            [FromServices] BibleApi bibleApi,
-            [FromServices] ILogger<Program> _logger) =>
+            int chapter,
+            [FromBody] int userId,
+            [FromServices] BibleService bibleService) =>
         {
-            _logger.LogInformation("Requested {Book} from {Bible} in chapter {Chapter}", book, bible, chapter);
-            
-            return Results.Ok(await bibleApi.GetFullChapter(
-                Tools.Bibles.GetBible(bible),
-                new Reference(Books.GetBook(book), chapter)));
+            return Results.Ok(bibleService.GetFullChapter(bible, book, chapter, userId));
         });
 
         // app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (

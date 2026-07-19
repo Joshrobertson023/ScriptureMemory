@@ -24,4 +24,13 @@ public sealed class Book
         FuzzyMatches = fuzzyMatches;
         NumChapters = numChapters;
     }
+
+    public Book(string requestedBook)
+    {
+        var result = Books.GetBook(requestedBook);
+        DisplayName = result.DisplayName;
+        Abbreviation = result.Abbreviation;
+        FuzzyMatches = result.FuzzyMatches;
+        NumChapters = result.NumChapters;
+    }
 }

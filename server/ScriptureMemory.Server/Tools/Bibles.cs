@@ -47,7 +47,7 @@ public class Bibles
         }
     };
 
-    // Todo: Refactor to use data access in authorized Bibles in db
+    // Todo: Refactor to use data access in authorized Bibles in db, checking cache first
     public static Bible GetBible(string version)
     {
         return authorizedBibles.FirstOrDefault(b => b.Abbreviation == version)

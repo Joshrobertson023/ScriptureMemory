@@ -21,6 +21,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using ScriptureMemory.Server.Providers;
+using StackExchange.Redis;
 using System.Text.Json.Serialization;
 
 namespace ScriptureMemory.Server.Startup;
@@ -188,9 +189,17 @@ public static class Services
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-        services.AddSignalR()    .AddJsonProtocol(options =>
+        services.AddSignalR()
+            .AddJsonProtocol(options =>
         {
             options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        });
+        
+        // Add Redis distributed cache
+        services.AddStackExchangeRedisCache(o =>
+        {
+            o.Configuration = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+            o.InstanceName = "BibleApp_";
         });
 
         services.AddScoped<UserService>();

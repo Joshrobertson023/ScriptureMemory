@@ -32,7 +32,6 @@ public static class ReferenceParser
 
         try
         {
-            Reference returnReference = new();
             ReadOnlySpan<char> inputSpan = input.Trim().AsSpan();
             int i = 0;
 
@@ -48,8 +47,6 @@ public static class ReferenceParser
             Book? book = GetBook(inputSpan[..i].ToString().ToLower());
             if (book is null)
                 return null;
-            else
-                returnReference.Book = book;
 
             // Move up to the chapter. We know the next digits after the book are the chapter.
             if (i < inputSpan.Length && !char.IsDigit(inputSpan[i]))
@@ -60,7 +57,7 @@ public static class ReferenceParser
             while (i < inputSpan.Length && char.IsDigit(inputSpan[i]))
                 i++;
 
-            returnReference.Chapter = int.Parse(inputSpan[chapterStart..i]);
+            int chapter = int.Parse(inputSpan[chapterStart..i]);
 
             // Move up to the start of the verses part
             if (i < inputSpan.Length && (!char.IsDigit(inputSpan[i]) || inputSpan[i] == ':'))
@@ -116,13 +113,10 @@ public static class ReferenceParser
                 versesPart = versesPartSpan.ToString();
             }
 
-            returnReference.VerseNumbers = GetIndividualVerses(versesPart, false);
-            returnReference.ReadableReference = ConvertToReadableReference(
-                returnReference.Book.DisplayName, 
-                returnReference.Chapter, 
-                returnReference.VerseNumbers);
             
-            return returnReference;
+            var verses = GetIndividualVerses(versesPart, false);
+
+            return new Reference(book, chapter, verses);
         }
         catch (Exception e)
         {
@@ -236,6 +230,7 @@ public static class ReferenceParser
     /// <returns>"Psalms 119:2-4, 7"</returns>
     public static string ConvertToReadableReference(string book, int chapter, List<int> verses)
     { // TODO: Refactor to use Span<T>
+        // Todo: FIX: handle case where List<int> verses is empty. When Reference is initialized without any verses
         if (verses == null || verses.Count == 0)
             return string.Empty;
 
@@ -381,9 +376,10 @@ public static class ReferenceParser
                 {
                     // Handle books with two spaces in its name
                     bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
-                    book = Books.TryGetBook(bookWithNumber);
-
-                    return book; // There are no valid book names with three or more spaces in its name
+                    
+                    // There are no valid book names with three or more spaces in its name
+                    book = Books.GetBook(bookWithNumber);
+                    return book;
                 }
                 else
                 {

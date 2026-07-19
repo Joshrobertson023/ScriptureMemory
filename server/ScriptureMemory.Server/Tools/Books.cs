@@ -138,7 +138,15 @@ public static class Books
     public static Book GetBook(string input)
     {
         return bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out var _book) is false
-            ? throw new BookNotFoundException($"Book {input} not found.")
+            ? throw new BookNotFoundException($"Book not found.", input)
             : _book;
+    }
+
+    public static Book EnsureValidChapter(this Book book, int chapter)
+    {
+        if (chapter > book.NumChapters || chapter <= 0)
+            throw new InvalidChapterException("Invalid chapter for book", chapter, book.DisplayName);
+
+        return book;
     }
 }

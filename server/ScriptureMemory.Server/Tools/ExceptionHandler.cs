@@ -22,11 +22,26 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             BookNotFoundException bookNotFoundException => new ProblemDetails
             {
-                Status = StatusCodes.Status400BadRequest,
+                Status = StatusCodes.Status404NotFound,
                 Title = "Invalid book",
                 Detail = bookNotFoundException.Message,
                 Instance = httpContext.Request.Path,
-                Extensions = { ["book"] = bookNotFoundException.Book }
+                Extensions = new Dictionary<string, object?>()
+                {
+                    ["book"] = bookNotFoundException.Book
+                }
+            },
+            InvalidChapterException invalidChapterException => new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Invalid chapter number",
+                Detail = invalidChapterException.Message,
+                Instance = httpContext.Request.Path,
+                Extensions = new Dictionary<string, object?>()
+                {
+                    ["book"] = invalidChapterException.Book,
+                    ["chapter"] = invalidChapterException.Chapter
+                }
             },
             
             _ => new ProblemDetails
