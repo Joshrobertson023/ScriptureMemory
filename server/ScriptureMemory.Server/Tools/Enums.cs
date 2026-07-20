@@ -20,9 +20,11 @@ namespace ScriptureMemory.Server.Tools
             public static readonly string AvailableBibles = nameof(AvailableBibles);
         }
 
-        public static class MemoryCacheExpirations
+        public static class CacheExpirations
         {
             public static TimeSpan AvailableBiblesExpiration = TimeSpan.FromHours(12);
+            public static TimeSpan ChapterContentExpiration = TimeSpan.FromDays(29);
+            public static TimeSpan VerseContentExpiration = TimeSpan.FromDays(29);
         }
 
         public enum BibleSyncEvent

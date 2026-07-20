@@ -19,6 +19,8 @@ public class VerseTranslationContent
 
     [MaxLength(20)]
     public string VerseId { get; set; } = string.Empty;
+
+    public string CacheKey => Version + '.' + VerseId;
     
     public Verse VerseNavigation { get; set; } = null!;
 

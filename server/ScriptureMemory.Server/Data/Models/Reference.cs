@@ -146,6 +146,8 @@ public sealed class Reference
         Chapter = chapter;
     }
 
+    // TODO: Update so readable reference can be made if just a chapter reference
+    // Todo: Also make sure it can't change to a verse reference if already a chapter reference
     public Reference(string requestedBook, int chapter)
     {
         Book = new Book(requestedBook);

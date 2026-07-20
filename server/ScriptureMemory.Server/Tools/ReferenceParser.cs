@@ -230,14 +230,16 @@ public static class ReferenceParser
     /// <returns>"Psalms 119:2-4, 7"</returns>
     public static string ConvertToReadableReference(string book, int chapter, List<int> verses)
     { // TODO: Refactor to use Span<T>
-        // Todo: FIX: handle case where List<int> verses is empty. When Reference is initialized without any verses
-        if (verses == null || verses.Count == 0)
-            return string.Empty;
+        var returnString = new StringBuilder();
+        returnString.Append(book).Append(' ').Append(chapter);
+
+        // If this is a chapter reference
+        if (verses is null || verses.Count == 0)
+            return returnString.ToString();
 
         verses.Sort();
-        var returnString = new StringBuilder();
-        returnString.Append(book).Append(' ').Append(chapter).Append(':');
-
+        returnString.Append(':');
+        
         int i = 0;
         while (i < verses.Count)
         {

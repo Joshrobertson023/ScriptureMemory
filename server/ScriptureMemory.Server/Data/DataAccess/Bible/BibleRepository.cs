@@ -26,11 +26,25 @@ public class BibleRepository(
         {
             chapterToReturn = JsonSerializer.Deserialize<ChapterCacheEntry>(cachedChapter)
                 ?? throw new Exception($"Error deserializing {nameof(ChapterCacheEntry)}");
+            
+            _logger.LogInformation("Chapter found in cache: {Reference}", reference.ReadableReference);
         }
         else
         {
             chapter.ContentUsx = await _bibleApi.GetFullChapter(bible, reference);
             chapter.Book = reference.Book.DisplayName;
+            chapter.ChapterNum = reference.Chapter;
+
+            var serializedChapter = JsonSerializer.Serialize(chapter);
+
+            var cacheOptions = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(CacheExpirations.ChapterContentExpiration);
+
+            await _distributedCache.SetStringAsync(reference.CacheKey, serializedChapter, cacheOptions);
+            
+            _logger.LogInformation("Cached chapter: {Reference}", reference.ReadableReference);
         }
+
+        return chapter;
     }
 }

@@ -47,7 +47,7 @@ public class BibleService(
             availableBibles = await _bibleData.GetAvailableBibles();
 
             var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(MemoryCacheExpirations.AvailableBiblesExpiration);
+                .SetAbsoluteExpiration(CacheExpirations.AvailableBiblesExpiration);
 
             _memoryCache.Set(MemoryCacheKeys.AvailableBibles, availableBibles, cacheEntryOptions);
         }
