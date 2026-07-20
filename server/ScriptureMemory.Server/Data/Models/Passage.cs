@@ -9,6 +9,8 @@ public class Passage
     
     public List<Verse> Verses { get; set; } = new();
 
+    public string CacheKey => Reference.CacheKey;
+
     public Passage(Reference reference)
     {
         Reference = reference;

@@ -33,4 +33,6 @@ public sealed class Book
         FuzzyMatches = result.FuzzyMatches;
         NumChapters = result.NumChapters;
     }
+    
+    public Book() { }
 }

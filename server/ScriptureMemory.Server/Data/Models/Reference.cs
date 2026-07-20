@@ -63,6 +63,11 @@ public sealed class Reference
                    + '.' 
                    + Chapter.ToString();
 
+    public string CacheKey => 
+        VerseNumbers is null || VerseNumbers.Count == 0
+            ? ChapterId
+            : VerseId;
+
 
     public string VerseId
     {

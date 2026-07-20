@@ -19,10 +19,15 @@ public class Verse
     public Reference Reference 
     { 
         get => _reference;
-        set
+        private set
         {
             _reference = value;
-            CreateId();
+            
+            this.Id = Reference.Book.Abbreviation.ToUpper()
+                      + '.'
+                      + Reference.Chapter
+                      + '.'
+                      + Reference.VerseNumbers.First();
         }
     }
     
@@ -37,52 +42,26 @@ public class Verse
 
     public int SavedCount { get; set; } = 0;
 
-    public int PassageId { get; set; }
+    public int? PassageId { get; set; }
     
     public Passage? PassageNavigation { get; set; } = null!;
     
     public List<VerseTranslationContent>? TranslationContents { get; set; }
 
-    /// <summary>
-    /// Creates a new verse, giving it a new VerseId and also ensures a valid parsed reference
-    /// </summary>
     public Verse(Book book, int chapter, int verseNum)
     {
-        Reference = ReferenceParser.Parse(book, chapter, new List<int>() {verseNum});
+        Reference = new Reference(book, chapter, verseNum);
     }
 
     public Verse(string bookName, int chapter, int verseNum)
     {
-        Reference = ReferenceParser.Parse(
-            Books.GetBook(bookName), 
-            chapter, 
-            new List<int>() {verseNum});
+        Reference = new Reference(bookName, chapter, verseNum);
     }
     
     public Verse() { }
 
-    /// <summary>
-    /// Creates a new verse, giving it a new VerseId and also ensures it's a valid parsed reference
-    /// </summary>
-    /// <param name="readableReference"></param>
-    /// <exception cref="ArgumentException"></exception>
     public Verse(string readableReference)
     {
-        // Todo: Refactor to Prase and TryParse, give custom exception
-        Reference = ReferenceParser.Parse(readableReference)
-            ?? throw new ArgumentException($"{readableReference} is not a valid reference");
-    }
-
-    /// <summary>
-    /// Creates an Id for this verse (example: "PSA.1.1")
-    /// </summary>
-    /// <returns></returns>
-    public void CreateId()
-    {
-        this.Id = Reference.Book.Abbreviation.ToUpper()
-               + '.'
-               + Reference.Chapter
-               + '.'
-               + Reference.VerseNumbers.First();
+        Reference = new Reference(readableReference);
     }
 }

@@ -2,6 +2,8 @@ namespace ScriptureMemory.Server.DataAccess.Models;
 
 public class Chapter
 {
+    public Reference Reference { get; set; }
+    
     public string Id { get; set; } = string.Empty;
     
     public string Version { get; set; } = string.Empty;
