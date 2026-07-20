@@ -71,9 +71,24 @@ public class BibleData
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<Server.DataAccess.Models.Bible>> GetActiveBibles()
+    public async Task<List<Server.DataAccess.Models.Bible>> GetAvailableBibles()
     {
-        return await _dbContext.Bibles.AsNoTracking().Where(b => b.Active).ToListAsync();
+        var result = await _dbContext.Bibles
+            .AsNoTracking()
+            .Where(b => b.Active && b.Authorized)
+            .ToListAsync();
+        
+        return result.Select(bible =>
+            {
+                bible.AbbreviationLocal = string.IsNullOrEmpty(bible.AbbreviationLocal)
+                    ? bible.Abbreviation
+                    : bible.AbbreviationLocal;
+
+                return bible;
+            })
+            .OrderBy(b => b.Abbreviation)
+            .ThenBy(b => b.Id)
+            .ToList();
     }
 
     public async Task<string> GetBibleNameById(string bibleId)

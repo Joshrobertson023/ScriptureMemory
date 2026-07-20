@@ -1,10 +1,10 @@
 namespace ScriptureMemory.Server.Services;
 
-public class AuthorizationSyncerActive
+public class AuthorizationSyncerData
 {
     private int _isCurrentlySyncing = 0;
 
-    public AuthorizationSyncerActive()
+    public AuthorizationSyncerData()
     {
     }
 

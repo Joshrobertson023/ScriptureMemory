@@ -15,6 +15,16 @@ namespace ScriptureMemory.Server.Tools
             SuperAdmin = 2
         }
 
+        public static class MemoryCacheKeys
+        {
+            public static readonly string AvailableBibles = nameof(AvailableBibles);
+        }
+
+        public static class MemoryCacheExpirations
+        {
+            public static TimeSpan AvailableBiblesExpiration = TimeSpan.FromHours(12);
+        }
+
         public enum BibleSyncEvent
         {
             Queued,

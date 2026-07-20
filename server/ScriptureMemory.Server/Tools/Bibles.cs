@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ScriptureMemory.Server.Tools;
-public class Bibles
+public static class Bibles
 {
     /// <summary>
     /// Bibles authorized to use from API.Bible
@@ -57,5 +57,12 @@ public class Bibles
     public static Bible? TryGetBible(string version)
     {
         return authorizedBibles.FirstOrDefault(b => b.Abbreviation == version);
+    }
+
+    public static bool Contains(this Bible bible, List<Bible> bibles)
+    {
+        HashSet<string> bibleIds = bibles.Select(b => b.Id).ToHashSet();
+
+        return bibleIds.Contains(bible.Id);
     }
 }

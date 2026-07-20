@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Data.Models.Logs;
@@ -19,7 +20,8 @@ public class BibleSyncer
     private readonly BibleSyncerQueue _queue;
     private readonly BibleSyncerEventDispatcher _eventDispatcher;
     private readonly BibleSyncLogData _syncLogContext;
-    private readonly AuthorizationSyncerActive _authorizationSyncerActive;
+    private readonly AuthorizationSyncerData _authorizationSyncerActive;
+    private readonly IMemoryCache _memoryCache;
 
     public BibleSyncer(
         ApplicationDbContext db,
@@ -31,7 +33,8 @@ public class BibleSyncer
         BibleSyncerQueue queue,
         BibleSyncerEventDispatcher eventDispatcher,
         BibleSyncLogData syncLogContext,
-        AuthorizationSyncerActive authorizationSyncerActive)
+        AuthorizationSyncerData authorizationSyncerActive,
+        IMemoryCache memoryCache)
     {
         _dbContext = db;
         _logger = logger;
@@ -43,6 +46,7 @@ public class BibleSyncer
         _eventDispatcher = eventDispatcher;
         _syncLogContext = syncLogContext;
         _authorizationSyncerActive = authorizationSyncerActive;
+        _memoryCache = memoryCache;
     }
 
     /// <summary>
@@ -73,7 +77,7 @@ public class BibleSyncer
         return response;
     }
 
-    public async Task<List<Bible>> SyncBibleAuthorization(string initiator, List<Bible>? authorizedBibles = null)
+    public async Task SyncBibleAuthorization(string initiator, List<Bible>? authorizedBibles = null)
     {
         List<Bible> mergedBibles = new();
         int retries = 0;
@@ -151,6 +155,10 @@ public class BibleSyncer
             }
             
         }
+
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(MemoryCacheExpirations.AvailableBiblesExpiration);
+        _memoryCache.Set(MemoryCacheKeys.AvailableBibles, await _bibleContext.GetAvailableBibles(), cacheEntryOptions);
         
         _authorizationSyncerActive.SetInactive();
 
@@ -159,8 +167,6 @@ public class BibleSyncer
             AuthorizationSync = true,
             Event = BibleSyncEvent.Completed,
         });
-        
-        return mergedBibles;
     }
 
     public async Task QueueBibleForSync(string bibleId, string initiator)

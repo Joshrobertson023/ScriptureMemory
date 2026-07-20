@@ -12,14 +12,6 @@ namespace DataAccess.Models;
 [NotMapped]
 public sealed class Reference
 {
-    private Bible _bible;
-
-    public Bible Bible
-    {
-        get => _bible;
-        set => _bible = value;
-    }
-    
     private string _readableReference;
 
     public string ReadableReference

@@ -202,6 +202,8 @@ public static class Services
             o.InstanceName = "BibleApp_";
         });
 
+        services.AddMemoryCache();
+
         services.AddScoped<UserService>();
         services.AddScoped<AdminService>();
         //services.AddScoped<EmailSenderService>();
@@ -223,7 +225,7 @@ public static class Services
         //services.AddScoped<EmbeddingGenerator>();
 
         services.AddSingleton<BibleSyncerQueue>();
-        services.AddSingleton<AuthorizationSyncerActive>();
+        services.AddSingleton<AuthorizationSyncerData>();
         services.AddHostedService<BibleSyncerBackgroundWorker>();
         services.AddScoped<BibleSyncerEventDispatcher>();
 

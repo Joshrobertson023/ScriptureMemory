@@ -43,11 +43,22 @@ public class GlobalExceptionHandler : IExceptionHandler
                     ["chapter"] = invalidChapterException.Chapter
                 }
             },
+            BibleUnavailableException bibleUnavailableException => new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = "Bible unavailable",
+                Detail = bibleUnavailableException.Message,
+                Instance = httpContext.Request.Path,
+                Extensions = new Dictionary<string, object?>()
+                {
+                    ["bible"] = bibleUnavailableException.Bible
+                }
+            },
             
             _ => new ProblemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,
-                Title = "Internal server errror",
+                Title = "Internal server error",
                 Detail = "An unexpected error occurred.",
                 Instance = httpContext.Request.Path
             }
@@ -65,7 +76,8 @@ public class GlobalExceptionHandler : IExceptionHandler
         else
             _logger.LogWarning(
                 exception,
-                "Request failed with client error {StatusCode}: {Message} {Path}. TraceId: {TraceId}, User: {User}",
+                "Request failed ({Title}) with client error {StatusCode}: {Message} {Path}. TraceId: {TraceId}, User: {User}",
+                problemDetails.Title,
                 problemDetails.Status,
                 exception.Message,
                 httpContext.Request.Path,
