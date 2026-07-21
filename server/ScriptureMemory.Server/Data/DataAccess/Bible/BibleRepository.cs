@@ -13,9 +13,8 @@ public class BibleRepository(
     ILogger<BibleRepository> _logger,
     BibleService _bibleService)
 {
-    public async Task<Chapter> GetChapter(Server.DataAccess.Models.Bible bible, Reference reference)
+    public async Task<Chapter> GetChapter(Server.DataAccess.Models.Bible bible, string book, int chapterNum)
     {
-        ChapterCacheEntry chapterToReturn = new();
         Chapter chapter = new();
         
         await _bibleService.EnsureBibleAvailable(bible);
@@ -24,16 +23,18 @@ public class BibleRepository(
 
         if (cachedChapter is not null)
         {
-            chapterToReturn = JsonSerializer.Deserialize<ChapterCacheEntry>(cachedChapter)
-                ?? throw new Exception($"Error deserializing {nameof(ChapterCacheEntry)}");
+            chapter = JsonSerializer.Deserialize<Chapter>(cachedChapter)
+                ?? throw new Exception($"Error deserializing {nameof(Chapter)}");
             
             _logger.LogInformation("Chapter found in cache: {Reference}", reference.ReadableReference);
         }
         else
         {
             chapter.ContentUsx = await _bibleApi.GetFullChapter(bible, reference);
-            chapter.Book = reference.Book.DisplayName;
+            chapter.Book = reference.Book;
             chapter.ChapterNum = reference.Chapter;
+            chapter.Version = bible.Abbreviation;
+            chapter.Id = chapter.GetId();
 
             var serializedChapter = JsonSerializer.Serialize(chapter);
 

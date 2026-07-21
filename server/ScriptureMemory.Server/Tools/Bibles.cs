@@ -54,9 +54,10 @@ public static class Bibles
             ?? throw new InvalidOperationException($"Bible {version} not found.");
     }
 
-    public static Bible? TryGetBible(string version)
+    public static bool TryGetBible(string version, out Bible? bible)
     {
-        return authorizedBibles.FirstOrDefault(b => b.Abbreviation == version);
+        bible = authorizedBibles.FirstOrDefault(b => b.Abbreviation == version);
+        return bible is not null;
     }
 
     public static bool Contains(this Bible bible, List<Bible> bibles)

@@ -1,3 +1,5 @@
+using ScriptureMemory.Server.Data.Models;
+
 namespace ScriptureMemory.Server.DataAccess.Models;
 
 public class Chapter
@@ -8,7 +10,7 @@ public class Chapter
     
     public string Version { get; set; } = string.Empty;
     
-    public string Book { get; set; } = string.Empty;
+    public Book Book { get; set; }
     
     public int ChapterNum { get; set; }
     
@@ -16,4 +18,9 @@ public class Chapter
     public string ContentUsx { get; set; } = string.Empty; // Unified Scripture XML
     
     public DateTime? LastUpdated { get; set; }
+
+    public string GetId()
+    {
+        return Book.Abbreviation + '.' + ChapterNum;
+    }
 }

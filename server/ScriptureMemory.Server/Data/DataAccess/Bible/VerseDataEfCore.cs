@@ -98,9 +98,7 @@ public class VerseDataEfCore : IVerseData
         if (bookResult is null)
             throw new InvalidOperationException($"{book} is not a valid book.");
 
-        var bibleResult = Tools.Bibles.TryGetBible(version);
-        
-        if (bibleResult is null)
+        if (!Tools.Bibles.TryGetBible(version, out var bibleResult))
             throw new InvalidOperationException($"{version} Bible not found.");
 
         return _dbContext.VerseTranslationContents

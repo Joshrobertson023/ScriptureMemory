@@ -128,11 +128,9 @@ public static class Books
     /// Bool specifying if a valid book was found, and the display name for that book as the out param.
     /// Both return null if no valid book was found.
     /// </returns>
-    public static Book? TryGetBook(string input)
+    public static bool TryGetBook(string input, out Book? book)
     {
-        return bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out var _book) is false
-               ? null
-               : _book;
+        return bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out book);
     }
 
     public static Book GetBook(string input)

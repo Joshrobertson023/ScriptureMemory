@@ -12,7 +12,7 @@ public class ChapterDataEfCore
     public async Task InsertNewChapter(Chapter chapter)
     {
         if (string.IsNullOrEmpty(chapter.Version)
-            || string.IsNullOrEmpty(chapter.Book)
+            || chapter.Book is null
             || string.IsNullOrEmpty(chapter.Id))
         {
             throw new InvalidOperationException("Chapter is missing one or more required properties.");

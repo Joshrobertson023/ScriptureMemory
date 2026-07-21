@@ -16,7 +16,17 @@ public sealed class Reference
 
     public string ReadableReference
     {
-        get => _readableReference;
+        get
+        {
+            if (Book is null || Chapter == 0)
+                throw new InvalidOperationException(
+                    "Requested readable reference when Book or Chapter were not initialized.");
+            
+            if (string.IsNullOrEmpty(_readableReference))
+                _readableReference = ReferenceParser.ConvertToReadableReference(Book.DisplayName, Chapter, VerseNumbers);
+
+            return _readableReference;
+        }
         private set
         {
             if (!string.IsNullOrEmpty(_readableReference))
@@ -91,13 +101,6 @@ public sealed class Reference
         get => _verseNumbers;
         set
         {
-            // If Reference was initiated without any verse numbers
-            // Only set ReadableReference when the Reference has book, chapter, and verse number
-            if (string.IsNullOrEmpty(_readableReference) && value.Count > 0 && Book is not null && Chapter != 0)
-            {
-                ReadableReference = ReferenceParser.ConvertToReadableReference(Book.DisplayName, Chapter, VerseNumbers);
-            }
-
             _verseNumbers = new List<int>(value);
         }
     }
@@ -117,8 +120,6 @@ public sealed class Reference
         Book = book is not null
             ? book
             : throw new BookNotFoundException($"Not a valid book inside reference.");
-        
-        ReadableReference = readableReference;
         
         Chapter = ReferenceParser.GetChapter(readableReference) 
                   ?? throw new InvalidOperationException($"{readableReference} is not a valid reference.");

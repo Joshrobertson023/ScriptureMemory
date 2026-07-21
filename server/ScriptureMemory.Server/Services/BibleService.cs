@@ -9,21 +9,24 @@ namespace ScriptureMemory.Server.Services;
 public class BibleService(
     BibleApi _bibleApi,
     BibleData _bibleData,
+    BibleRepository _bibleRepository,
     IDistributedCache _cache,
     ILogger<BibleService> _logger,
     IDistributedCache _distributedCache,
     IMemoryCache _memoryCache)
 {
-    public async Task<string> GetFullChapter(string translation, string requestedBook, int chapter, int userId)
+    public async Task<Chapter> GetChapter(int userId, string requestedBible, string requestedBook,
+        int requestedChapterNum)
     {
-        Reference reference = new Reference(requestedBook.Trim(), chapter);
-        Bible bible = new Bible(translation.Trim());
-        
-        
+        if (!Bibles.TryGetBible(requestedBible, out var bible))
+            throw new BibleUnavailableException($"Invalid Bible {requestedBible}");
 
-        var result = await _bibleApi.GetFullChapter(bible, reference);
+        if (!Books.TryGetBook(requestedBook, out var book))
+            throw new BookNotFoundException($"Book {requestedBook} was not found.");
 
-        return result;
+        book!.EnsureValidChapter(requestedChapterNum);
+
+        var result = await _bibleRepository.GetChapter(bible, )
     }
 
     public async Task EnsureBibleAvailable(Server.DataAccess.Models.Bible bible)
