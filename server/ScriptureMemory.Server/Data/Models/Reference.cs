@@ -19,8 +19,7 @@ public sealed class Reference
         get
         {
             if (Book is null || Chapter == 0)
-                throw new InvalidOperationException(
-                    "Requested readable reference when Book or Chapter were not initialized.");
+                return "Requested readable reference when Book or Chapter were not initialized.";
             
             if (string.IsNullOrEmpty(_readableReference))
                 _readableReference = ReferenceParser.ConvertToReadableReference(Book.DisplayName, Chapter, VerseNumbers);

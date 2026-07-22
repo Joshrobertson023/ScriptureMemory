@@ -7,12 +7,13 @@ public class ChapterConfiguration : IEntityTypeConfiguration<Chapter>
     public void Configure(EntityTypeBuilder<Chapter> builder)
     {
         builder.HasKey(e => new { e.Id, e.Version });
-        builder.OwnsOne(e => e.Book, b =>
+        builder.OwnsOne(e => e.Reference, b =>
         {
-            b.Property(p => p.Abbreviation).HasColumnName("Book_Abbreviation");
-            b.Ignore(p => p.DisplayName);
-            b.Ignore(p => p.FuzzyMatches);
-            b.Ignore(p => p.NumChapters);
+            b.Property(p => p.Chapter).HasColumnName("Reference_Chapter");
+            b.OwnsOne(p => p.Book, r =>
+            {
+                r.Property(prop => prop.DisplayName).HasColumnName("Reference_Book_DisplayName");
+            });
         });
         builder.Property(e => e.Id)
             .IsRequired()
@@ -21,8 +22,6 @@ public class ChapterConfiguration : IEntityTypeConfiguration<Chapter>
         builder.Property(e => e.Version)
             .IsRequired()
             .HasMaxLength(5);
-        builder.Property(e => e.ChapterNum)
-            .IsRequired();
         builder.Property(e => e.ContentUsx)
             .IsRequired();
     }

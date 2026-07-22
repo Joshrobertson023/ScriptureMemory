@@ -234,7 +234,7 @@ public static class ReferenceParser
         returnString.Append(book).Append(' ').Append(chapter);
 
         // If this is a chapter reference
-        if (verses is null || verses.Count == 0)
+        if (verses.Count == 0)
             return returnString.ToString();
 
         verses.Sort();
@@ -368,13 +368,10 @@ public static class ReferenceParser
             else
                 parts[0] = reference;
 
-            Book? book = Books.TryGetBook(parts[0]);
-            
-            if (book is null)
+            if (!Books.TryGetBook(parts[0], out var book))
             { // Handle books with one space in its name
                 string bookWithNumber = parts[0] + " " + parts[1];
-                book = Books.TryGetBook(bookWithNumber);
-                if (book is null)
+                if (!Books.TryGetBook(bookWithNumber, out book))
                 {
                     // Handle books with two spaces in its name
                     bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
@@ -410,9 +407,7 @@ public static class ReferenceParser
         {
             string[] parts = reference.Split(' ');
             
-            Book? book =  Books.TryGetBook(parts[0]);
-
-            if (parts.Length > 1 && book is not null)
+            if (!Books.TryGetBook(parts[0], out var book) && parts.Length > 1)
             {
                 var chapterPart = parts[1].Split(':')[0];
 
@@ -424,7 +419,7 @@ public static class ReferenceParser
             {
                 string bookWithNumber = parts[0] + " " + parts[1];
 
-                if (Books.TryGetBook(bookWithNumber) is not null)
+                if (!Books.TryGetBook(bookWithNumber, out book))
                 {
                     var chapterPart = parts[2].Split(':')[0];
                     if (int.TryParse(chapterPart, out int chapter))
@@ -437,7 +432,7 @@ public static class ReferenceParser
                 {
                     bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
 
-                    if (Books.TryGetBook(bookWithNumber) is not null)
+                    if (!Books.TryGetBook(bookWithNumber, out book))
                     {
                         var chapterPart = parts[3].Split(':')[0];
                         if (int.TryParse(chapterPart, out int chapter))

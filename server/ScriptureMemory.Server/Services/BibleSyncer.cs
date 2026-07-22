@@ -308,11 +308,4 @@ public class BibleSyncer
     {
         await Task.Delay(3000);
     }
-
-    public async Task<string> GetChapterContentExample()
-    {
-        return await _bibleApi.GetFullChapter(
-            _dbContext.Bibles.Where(b => b.Abbreviation == "kjv").First(),
-            new Reference(Books.TryGetBook("Genesis"), 1, new List<int>() { 1 }));
-    }
 }

@@ -12,12 +12,6 @@ public static class BibleEndpoint
 {
     public static void ConfigureBibleEndpoints(this WebApplication app)
     {
-        app.MapGet("/bible/example", async (
-            BibleSyncer syncer) =>
-        {
-            return Results.Ok(await syncer.GetChapterContentExample());
-        });
-
         app.MapGet("/bible/{bibleId}", async (
             string bibleId,
             [FromServices] BibleData bibleContext) =>
@@ -102,7 +96,7 @@ public static class BibleEndpoint
             [FromBody] int userId,
             [FromServices] BibleService bibleService) =>
         {
-            return Results.Ok(bibleService.GetFullChapter(bible, book, chapter, userId));
+            return Results.Ok(await bibleService.GetChapter(userId, bible, book, chapter));
         });
 
         // app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (

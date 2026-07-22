@@ -58,9 +58,7 @@ public class VerseDataEfCore : IVerseData
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<Verse> GetVerse(string book, int chapter, int verse)
     {
-        var bookResult = Books.TryGetBook(book);
-
-        if (bookResult is null)
+        if (!Books.TryGetBook(book, out var bookResult))
             throw new InvalidOperationException($"{book} is not a valid book.");
 
         return _dbContext.Verses
@@ -93,9 +91,7 @@ public class VerseDataEfCore : IVerseData
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<VerseTranslationContent> GetVerseTranslationContent(string book, int chapter, int verse, string version)
     {
-        var bookResult = Books.TryGetBook(book);
-
-        if (bookResult is null)
+        if (!Books.TryGetBook(book, out var bookResult))
             throw new InvalidOperationException($"{book} is not a valid book.");
 
         if (!Tools.Bibles.TryGetBible(version, out var bibleResult))
