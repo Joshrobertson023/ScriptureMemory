@@ -15,3 +15,7 @@ This Bible app is a standard Bible app plus a place to store your favorite verse
   <li>PostgreSQL</li>
   <li>Hosted on Azure</li>
 </ul>
+
+<h2>Usage</h2>
+
+Right now there is currently no way to view this app live, however there will be access to a beta download on Android and iOS in the near future.
