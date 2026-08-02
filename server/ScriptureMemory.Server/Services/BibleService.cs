@@ -18,15 +18,17 @@ public class BibleService(
     public async Task<Chapter> GetChapter(int userId, string requestedBible, string requestedBook,
         int requestedChapterNum)
     {
-        if (!Bibles.TryGetBible(requestedBible, out var bible))
-            throw new BibleUnavailableException($"Invalid Bible {requestedBible}");
+        if (!AvailableBibles.TryGetBible(requestedBible, out var bible))
+            throw new BibleUnavailableException($"Unavailable Bible {requestedBible}");
 
         if (!Books.TryGetBook(requestedBook, out var book))
             throw new BookNotFoundException($"Book {requestedBook} was not found.");
 
         book!.EnsureValidChapter(requestedChapterNum);
 
-        var result = await _bibleRepository.GetChapter(bible, )
+        var result = await _bibleRepository.GetChapter(bible!, book!, requestedChapterNum);
+
+        return result;
     }
 
     public async Task EnsureBibleAvailable(Server.DataAccess.Models.Bible bible)

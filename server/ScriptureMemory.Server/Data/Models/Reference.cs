@@ -6,41 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ScriptureMemory.Server.Tools;
+using System.Text.Json.Serialization;
 
 namespace DataAccess.Models;
 
 [NotMapped]
 public sealed class Reference
 {
-    private string _readableReference;
-
-    public string ReadableReference
-    {
-        get
-        {
-            if (Book is null || Chapter == 0)
-                return "Requested readable reference when Book or Chapter were not initialized.";
-            
-            if (string.IsNullOrEmpty(_readableReference))
-                _readableReference = ReferenceParser.ConvertToReadableReference(Book.DisplayName, Chapter, VerseNumbers);
-
-            return _readableReference;
-        }
-        private set
-        {
-            if (!string.IsNullOrEmpty(_readableReference))
-                return;
-            
-            _readableReference = value;
-        }
-    }
-
     private Book _book;
 
     public Book Book
     {
         get => _book;
-        private set
+        set
         {
             // If chapter has been set before the book, now ensure the chapter is valid for this book
             if (Chapter != 0)
@@ -55,7 +33,7 @@ public sealed class Reference
     public int Chapter
     {
         get => _chapter;
-        private set
+        set
         {
             if (Book is null)
             {
@@ -68,22 +46,24 @@ public sealed class Reference
         }
     }
     
+    [JsonIgnore]
     public string ChapterId => Book.Abbreviation.ToUpper() 
                    + '.' 
                    + Chapter.ToString();
 
+    [JsonIgnore]
     public string CacheKey => 
         VerseNumbers is null || VerseNumbers.Count == 0
             ? ChapterId
-            : VerseId;
+            : VerseId ?? throw new InvalidOperationException("Unable to get CacheKey: VerseId was null");
 
 
-    public string VerseId
+    public string? VerseId
     {
         get
         {
             if (VerseNumbers is null || VerseNumbers.Count == 0)
-                throw new InvalidOperationException("Unable to get VerseId: VerseNumbers is null or empty");
+                return null;
             
             return Book.Abbreviation.ToUpper() 
                 + '.' 
@@ -93,14 +73,39 @@ public sealed class Reference
         }
     }
 
-    private List<int> _verseNumbers;
+    private List<int>? _verseNumbers;
 
-    public List<int> VerseNumbers
+    public List<int>? VerseNumbers
     {
         get => _verseNumbers;
         set
         {
-            _verseNumbers = new List<int>(value);
+            if (value is null)
+                _verseNumbers = null;
+            else
+                _verseNumbers = new List<int>(value);
+        }
+    }
+    private string _readableReference;
+
+    public string ReadableReference
+    {
+        get
+        {
+            if (Book is null || Chapter == 0)
+                return "Requested readable reference when Book or Chapter were not initialized.";
+            
+            if (string.IsNullOrEmpty(_readableReference))
+                _readableReference = ReferenceParser.ConvertToReadableReference(Book.DisplayName, Chapter, VerseNumbers);
+
+            return _readableReference;
+        }
+        set
+        {
+            if (!string.IsNullOrEmpty(_readableReference))
+                return;
+            
+            _readableReference = value;
         }
     }
     
@@ -160,6 +165,8 @@ public sealed class Reference
         Chapter = chapter;
         VerseNumbers = [verseNumber];
     }
+    
+    public Reference() { } // For json deserialization  
 
     public override string ToString()
     {

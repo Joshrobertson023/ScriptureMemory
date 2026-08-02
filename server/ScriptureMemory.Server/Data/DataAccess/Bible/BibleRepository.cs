@@ -10,40 +10,44 @@ public class BibleRepository(
     BibleApi _bibleApi,
     BibleData _bibleData,
     IDistributedCache _distributedCache,
-    ILogger<BibleRepository> _logger,
-    BibleService _bibleService)
+    ILogger<BibleRepository> _logger)
 {
-    public async Task<Chapter> GetChapter(Server.DataAccess.Models.Bible bible, string book, int chapterNum)
+    /// <summary>
+    /// Gets a chapter from either the db or cache,and caches if not found in cache
+    /// </summary>
+    /// <param name="bible"></param>
+    /// <param name="book"></param>
+    /// <param name="chapterNum"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<Chapter> GetChapter(Server.DataAccess.Models.Bible bible, Book book, int chapterNum)
     {
         Chapter chapter = new();
-        
-        await _bibleService.EnsureBibleAvailable(bible);
+        Reference referenceToFetch = new(book, chapterNum);
 
-        var cachedChapter = await _distributedCache.GetAsync(reference.CacheKey);
+        var cachedChapter = await _distributedCache.GetAsync(referenceToFetch.CacheKey);
 
         if (cachedChapter is not null)
         {
             chapter = JsonSerializer.Deserialize<Chapter>(cachedChapter)
                 ?? throw new Exception($"Error deserializing {nameof(Chapter)}");
             
-            _logger.LogInformation("Chapter found in cache: {Reference}", reference.ReadableReference);
+            _logger.LogInformation("Chapter found in cache: {Reference}", referenceToFetch.ReadableReference);
         }
         else
         {
-            chapter.ContentUsx = await _bibleApi.GetFullChapter(bible, reference);
-            chapter.Book = reference.Book;
-            chapter.ChapterNum = reference.Chapter;
+            chapter.ContentUsx = await _bibleApi.GetFullChapter(bible, referenceToFetch);
+            chapter.Reference = referenceToFetch;
             chapter.Version = bible.Abbreviation;
-            chapter.Id = chapter.GetId();
 
             var serializedChapter = JsonSerializer.Serialize(chapter);
 
             var cacheOptions = new DistributedCacheEntryOptions()
                 .SetAbsoluteExpiration(CacheExpirations.ChapterContentExpiration);
 
-            await _distributedCache.SetStringAsync(reference.CacheKey, serializedChapter, cacheOptions);
+            await _distributedCache.SetStringAsync(referenceToFetch.CacheKey, serializedChapter, cacheOptions);
             
-            _logger.LogInformation("Cached chapter: {Reference}", reference.ReadableReference);
+            _logger.LogInformation("Cached chapter: {Reference}", referenceToFetch.ReadableReference);
         }
 
         return chapter;

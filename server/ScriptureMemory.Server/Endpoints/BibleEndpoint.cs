@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
+using ScriptureMemory.Server.Data.DtoMappings;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.SignalR;
 using StackExchange.Redis;
@@ -93,11 +95,19 @@ public static class BibleEndpoint
             string bible,
             string book,
             int chapter,
-            [FromBody] int userId,
+            HttpContext httpContext,
             [FromServices] BibleService bibleService) =>
         {
-            return Results.Ok(await bibleService.GetChapter(userId, bible, book, chapter));
-        });
+            /*var userIdClaim = httpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (userIdClaim is null/* || !int.TryParse(userIdClaim, out var userId#1#)
+            {
+                return Results.Unauthorized();
+            }*/
+            Chapter chapterModel = await bibleService.GetChapter(0, bible, book, chapter);
+            
+            return Results.Ok(chapterModel.ToDto());
+        }).RequireAuthorization("UserOrAdmin");
 
         // app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (
         //     string bible,

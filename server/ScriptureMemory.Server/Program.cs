@@ -18,7 +18,7 @@ builder.Logging.ConfigureOpenTelemetrySignalRLogging(builder.Configuration);
 builder.Services
     .AddServices(builder.Configuration) 
     .AddAuthenticationAndAuthorization(builder.Configuration)
-    .ConfigureTracingAndMetricsExporting(builder.Configuration)
+    /*.ConfigureTracingAndMetricsExporting(builder.Configuration)*/
     .AddDataAccess();
 
 var app = builder.Build();

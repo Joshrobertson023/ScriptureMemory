@@ -228,13 +228,13 @@ public static class ReferenceParser
     /// <param name="chapter"></param>
     /// <param name="verses"></param>
     /// <returns>"Psalms 119:2-4, 7"</returns>
-    public static string ConvertToReadableReference(string book, int chapter, List<int> verses)
+    public static string ConvertToReadableReference(string book, int chapter, List<int>? verses)
     { // TODO: Refactor to use Span<T>
         var returnString = new StringBuilder();
         returnString.Append(book).Append(' ').Append(chapter);
 
         // If this is a chapter reference
-        if (verses.Count == 0)
+        if (verses is null || verses.Count == 0)
             return returnString.ToString();
 
         verses.Sort();

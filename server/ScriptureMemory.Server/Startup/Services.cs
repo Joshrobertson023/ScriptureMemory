@@ -216,6 +216,7 @@ public static class Services
         //services.AddScoped<UserPassageService>();
         //services.AddScoped<CollectionService>();
         services.AddScoped<TokenProvider>();
+        services.AddScoped<BibleService>();
         //services.AddScoped<VerseOfDayService>();
 
         //services.AddScoped<VerseManagement>();
@@ -239,6 +240,7 @@ public static class Services
         services.AddScoped<IVerseData, VerseDataEfCore>();
         services.AddScoped<BibleData>();
         services.AddScoped<BibleSyncLogData>();
+        services.AddScoped<BibleRepository>();
         // services.AddScoped<UserSettingsData>();
         // //services.AddScoped<CrossReferenceData>();
         // services.AddScoped<ActivityLoggingData>();
@@ -284,7 +286,8 @@ public static class Services
         return logger;
     }
 
-    public static IServiceCollection ConfigureTracingAndMetricsExporting(this IServiceCollection services, IConfiguration configuration)
+    // TODO: Add config fields to secrets
+    /*public static IServiceCollection ConfigureTracingAndMetricsExporting(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOpenTelemetry()
             .WithTracing(tracing => tracing
@@ -302,5 +305,5 @@ public static class Services
                 }));
 
         return services;
-    }
+    }*/
 }

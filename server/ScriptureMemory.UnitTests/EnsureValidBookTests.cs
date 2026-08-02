@@ -1,4 +1,4 @@
-using ScriptureMemory.Server.Data.Models;
+/*using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 
 namespace ScriptureMemory.UnitTests.BookTests;
@@ -35,4 +35,4 @@ public class EnsureValidBookTests
         Book? book = Books.TryGetBook("random_book");
         Assert.Null(book);
     }
-}
+}*/

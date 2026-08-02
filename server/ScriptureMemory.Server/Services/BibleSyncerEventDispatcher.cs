@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
-using ScriptureMemory.Server.Migrations;
 using ScriptureMemory.Server.SignalR;
 
 namespace ScriptureMemory.Server.Services;

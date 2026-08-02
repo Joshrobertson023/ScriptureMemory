@@ -31,7 +31,7 @@ public class Bible
 
     public Bible(string translation)
     { // Todo: refactor to fill all required fields once data access is set up for getting Bibles from db
-        var result = Bibles.GetBible(translation);
+        var result = AvailableBibles.GetBible(translation);
         Id = result.Id;
         Abbreviation = result.Abbreviation;
         Name = result.Name;

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ScriptureMemory.Server.Tools;
-public static class Bibles
+public static class AvailableBibles
 {
     /// <summary>
     /// Bibles authorized to use from API.Bible
