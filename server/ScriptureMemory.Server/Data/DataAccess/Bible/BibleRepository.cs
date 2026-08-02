@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using ScriptureMemory.Server.CustomExceptions;
+using ScriptureMemory.Server.Data.DtoMappings;
+using ScriptureMemory.Server.Data.Dtos;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Services;
 
@@ -20,36 +22,38 @@ public class BibleRepository(
     /// <param name="chapterNum"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public async Task<Chapter> GetChapter(Server.DataAccess.Models.Bible bible, Book book, int chapterNum)
+    public async Task<ResponseChapterDto> GetChapterDto(Server.DataAccess.Models.Bible bible, Book book, int chapterNum)
     {
-        Chapter chapter = new();
         Reference referenceToFetch = new(book, chapterNum);
 
-        var cachedChapter = await _distributedCache.GetAsync(referenceToFetch.CacheKey);
+        var cachedChapterDto = await _distributedCache.GetAsync(referenceToFetch.CacheKey);
 
-        if (cachedChapter is not null)
+        if (cachedChapterDto is not null)
         {
-            chapter = JsonSerializer.Deserialize<Chapter>(cachedChapter)
+            ResponseChapterDto cacheChapterDto = JsonSerializer.Deserialize<ResponseChapterDto>(cachedChapterDto)
                 ?? throw new Exception($"Error deserializing {nameof(Chapter)}");
             
             _logger.LogInformation("Chapter found in cache: {Reference}", referenceToFetch.ReadableReference);
-        }
-        else
-        {
-            chapter.ContentUsx = await _bibleApi.GetFullChapter(bible, referenceToFetch);
-            chapter.Reference = referenceToFetch;
-            chapter.Version = bible.Abbreviation;
 
-            var serializedChapter = JsonSerializer.Serialize(chapter);
-
-            var cacheOptions = new DistributedCacheEntryOptions()
-                .SetAbsoluteExpiration(CacheExpirations.ChapterContentExpiration);
-
-            await _distributedCache.SetStringAsync(referenceToFetch.CacheKey, serializedChapter, cacheOptions);
-            
-            _logger.LogInformation("Cached chapter: {Reference}", referenceToFetch.ReadableReference);
+            return cacheChapterDto;
         }
 
-        return chapter;
+        var apiResponse = await _bibleApi.GetFullChapter(bible, referenceToFetch);
+
+        ResponseChapterDto apiChapterDto = new ResponseChapterDto(
+            apiResponse.Data.reference,
+            apiResponse.Data.content,
+            apiResponse.Data.copyright);
+
+        var serializedChapter = JsonSerializer.Serialize(apiChapterDto);
+
+        var cacheOptions = new DistributedCacheEntryOptions()
+            .SetAbsoluteExpiration(CacheExpirations.ChapterContentExpiration);
+
+        await _distributedCache.SetStringAsync(referenceToFetch.CacheKey, serializedChapter, cacheOptions);
+        
+        _logger.LogInformation("Cached chapter: {Reference}", referenceToFetch.ReadableReference);
+        
+        return apiChapterDto;
     }
 }

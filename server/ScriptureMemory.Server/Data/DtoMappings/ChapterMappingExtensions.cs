@@ -7,7 +7,8 @@ public static class ChapterMappingExtensions
     public static ResponseChapterDto ToDto(this Chapter chapter)
     {
         return new ResponseChapterDto(
-            chapter.Reference.ToDto(),
-            chapter.ContentUsx);
+            chapter.Reference.ReadableReference,
+            chapter.ContentUsx,
+            "");
     }
 }

@@ -104,9 +104,7 @@ public static class BibleEndpoint
             {
                 return Results.Unauthorized();
             }*/
-            Chapter chapterModel = await bibleService.GetChapter(0, bible, book, chapter);
-            
-            return Results.Ok(chapterModel.ToDto());
+            return Results.Ok(await bibleService.GetChapter(0, bible, book, chapter));
         }).RequireAuthorization("UserOrAdmin");
 
         // app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (

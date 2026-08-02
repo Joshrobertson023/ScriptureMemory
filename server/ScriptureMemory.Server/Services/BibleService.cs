@@ -2,6 +2,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
+using ScriptureMemory.Server.Data.Dtos;
 using ScriptureMemory.Server.Data.Models;
 
 namespace ScriptureMemory.Server.Services;
@@ -15,7 +16,7 @@ public class BibleService(
     IDistributedCache _distributedCache,
     IMemoryCache _memoryCache)
 {
-    public async Task<Chapter> GetChapter(int userId, string requestedBible, string requestedBook,
+    public async Task<ResponseChapterDto> GetChapter(int userId, string requestedBible, string requestedBook,
         int requestedChapterNum)
     {
         if (!AvailableBibles.TryGetBible(requestedBible, out var bible))
@@ -26,7 +27,7 @@ public class BibleService(
 
         book!.EnsureValidChapter(requestedChapterNum);
 
-        var result = await _bibleRepository.GetChapter(bible!, book!, requestedChapterNum);
+        var result = await _bibleRepository.GetChapterDto(bible!, book!, requestedChapterNum);
 
         return result;
     }

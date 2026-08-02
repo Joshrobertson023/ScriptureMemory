@@ -1,4 +1,5 @@
-﻿using ScriptureMemory.Server.Data.Models;
+﻿using ScriptureMemory.Server.Data.Dtos;
+using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools.Models;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -39,7 +40,7 @@ public class BibleApi
                ?? new List<Bible>();
     }
 
-    public async Task<string> GetFullChapter(Bible bible, Reference chapterReference)
+    public async Task<ApiResponse<ChapterData>> GetFullChapter(Bible bible, Reference chapterReference)
     {
         using HttpClient http = new();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
@@ -52,7 +53,8 @@ public class BibleApi
             "include-verse-numbers=true&" +
             "include-verse-spans=true");
 
-        return response;
+        return JsonSerializer.Deserialize<ApiResponse<ChapterData>>(response)
+            ?? throw new InvalidOperationException("response was null deserializing");
     }
 
     public async Task<(string, string)> GetVerseUsxAndPlaintext(string bibleId, string verseId)
@@ -105,7 +107,7 @@ public class BibleApi
         using HttpClient http = new();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
         
-        var response = await http.GetFromJsonAsync<ApiResponse<List<ChaptersData>>>
+        var response = await http.GetFromJsonAsync<ApiResponse<List<ChaptersCountData>>>
             ($"{_baseUrl}/bibles/{bible.Id}" 
             + $"/books/{bookReference.Book.Abbreviation}"
             + $"/chapters");
@@ -120,7 +122,7 @@ public class BibleApi
         using HttpClient http = new();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
         
-        var response = await http.GetFromJsonAsync<ApiResponse<List<ChaptersData>>>
+        var response = await http.GetFromJsonAsync<ApiResponse<List<ChaptersCountData>>>
         ($"{_baseUrl}/bibles/{bible.Id}" 
          + $"/chapters/{chapterReference.ChapterId}"
          + $"/verses");

@@ -1,3 +1,6 @@
 namespace ScriptureMemory.Server.Data.Dtos;
 
-public sealed record ResponseChapterDto(ReferenceDto referenceDto, string contentUsx);
+public sealed record ResponseChapterDto(
+    string reference, 
+    string contentUsx,
+    string copyright);
