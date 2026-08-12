@@ -2,9 +2,9 @@ namespace ScriptureMemory.Server.Tools.Models;
 
 public class ChapterData
 {
-    public string id { get; set; }
-    public string bibleId { get; set; }
-    public string reference { get; set; }
-    public string copyright { get; set; }
-    public string content { get; set; }
+    public string Id { get; set; }
+    public string BibleId { get; set; }
+    public string Reference { get; set; }
+    public string Copyright { get; set; }
+    public string Content { get; set; }
 }

@@ -1,617 +1,780 @@
-// using Dapper;
-// using DataAccess.Models;
-// using System;
-// using System.Collections.Generic;
-// using System.Data;
-// using System.Diagnostics;
-// using System.Linq;
-// using System.Text;
-// using System.Text.Json;
-// using System.Threading.Tasks;
-// using ScriptureMemory.Server.Tools;
-// using ScriptureMemory.Server.DataAccess.Data;
-// using static System.Runtime.InteropServices.JavaScript.JSType;
-// using ScriptureMemory.Server.DataAccess.Models;
-// using Pgvector;
-// using ScriptureMemory.Server;
-// using ScriptureMemory.Server.Data.DataAccess.Bible;
-// using static ScriptureMemory.Server.Tools.Enums;
-//
-// namespace DataAccess.Data;
-//
-// public class VerseDataDapper : IVerseData
-// {
-//     private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
-//
-//     private string selectSql = """
-//         select
-//         id as Id,
-//         book as Book,
-//         chapter as Chapter,
-//         text as Text,
-//         memorized_count as UsersMemorizedCount,
-//         saved_count as UsersSavedCount,
-//         verse_num as VerseNum,
-//         embedding as Embedding
-//         """;
-//
-//     public VerseDataDapper(IDbContextFactory<ApplicationDbContext> contextFactory)
-//     {
-//         _contextFactory = contextFactory;
-//         
-//         // To use this:
-//         // public async Task DoSomething()
-//         // {
-//         //     using (var context = _contextFactory.CreateDbContext())
-//         //     {
-//         //         // ...
-//         //     }
-//         // }
-//     }
-//
-//     public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)
-//     {
-//         var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";
-//         var conn = _requestDbConnection.Connection;
-//         var results = await conn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });
-//
-//         return results.ToList();
-//     }
-//
-//     public async Task<List<Verse>> GetAllVerses()
-//     {
-//         var sql = $@"{selectSql} FROM VERSES";
-//         var conn = _requestDbConnection.Connection;
-//         var results = await conn.QueryAsync<GetVerseDto>(sql);
-//
-//         return results.Select(r => new Verse
-//         {
-//             Id = r.Id,
-//             Reference = new Reference
-//             {
-//                 Book = r.Book,
-//                 Chapter = r.Chapter,
-//                 VerseNumbers = new List<int> { r.VerseNum },
-//             },
-//             Text = r.Text,
-//             UsersSavedCount = r.UsersSavedCount,
-//             UsersMemorizedCount = r.UsersMemorizedCount,
-//             Embedding = r.Embedding
-//         }).ToList();
-//     }
-//
-//     public async Task InsertEmbedding(Verse verse)
-//     {
-//         var conn = _requestDbConnection.Connection;
-//         await conn.ExecuteAsync(
-//             """
-//             update verses 
-//             set embedding = @Embedding 
-//             where book = @Book 
-//             and chapter = @Chapter
-//             and verse_num = @VerseNum
-//             """, new
-//             {
-//                 Embedding = verse.Embedding,
-//                 Book = verse.Reference.Book,
-//                 Chapter = verse.Reference.Chapter,
-//                 VerseNum = verse.Reference.Verses.First()
-//             });
-//     }
-//
-//     public class GetVerseDto
-//     {
-//         public int Id { get; set; }
-//         public string Book { get; set; } = string.Empty;
-//         public int Chapter { get; set; }
-//         public string Text { get; set; } = string.Empty;
-//         public int UsersMemorizedCount { get; set; }
-//         public int UsersSavedCount { get; set; }
-//         public int VerseNum { get; set; }
-//         public Vector? Embedding { get; set; }
-//         public double? Distance { get; set; }
-//         public int CategoryId { get; set; }
-//         public string CategoryName { get; set; } = string.Empty;
-//     }
-//
-//     public async Task<IEnumerable<(Verse Verse, float Similarity)>> GetVersesBySimilarity(
-//         Vector embedding,
-//         float minSimilarity,
-//         int limit = 100)
-//     {
-//         var conn = _requestDbConnection.Connection;
-//         var results = await conn.QueryAsync<GetVerseDto>(
-//             """
-//         SELECT
-//             id AS Id,
-//             book AS Book,
-//             chapter AS Chapter,
-//             text AS Text,
-//             memorized_count AS UsersMemorizedCount,
-//             saved_count AS UsersSavedCount,
-//             verse_num AS VerseNum,
-//             (1 - (embedding <=> @embedding))::float4 AS Distance
-//         FROM verses
-//         WHERE (1 - (embedding <=> @embedding)) >= @minSimilarity
-//         ORDER BY embedding <=> @embedding
-//         LIMIT @limit
-//         """, new { embedding, minSimilarity, limit });
-//
-//         return results.Select(r => (
-//             Verse: new Verse
-//             {
-//                 Id = r.Id,
-//                 Reference = new Reference
-//                 {
-//                     Book = r.Book,
-//                     Chapter = r.Chapter,
-//                     VerseNumbers = new List<int> { r.VerseNum }
-//                 },
-//                 Text = r.Text,
-//                 UsersSavedCount = r.UsersSavedCount,
-//                 UsersMemorizedCount = r.UsersMemorizedCount,
-//                 Embedding = r.Embedding
-//             },
-//             Similarity: (float)(r.Distance ?? 0)
-//         ));
-//     }
-//
-//     public async Task<List<Verse>> GetVerses(string book, int chapter, List<int> verseNums)
-//     {
-//         var sql =
-//             """
-//             select
-//             id as Id,
-//             book as Book,
-//             chapter as Chapter,
-//             text as Text,
-//             memorized_count as UsersMemorizedCount,
-//             saved_count as UsersSavedCount,
-//             verse_num as VerseNum,
-//             embedding as Embedding
-//             from verses
-//             where book = @Book
-//             and chapter = @Chapter
-//             and verse_num = any(@VerseNums)
-//             """;
-//
-//         var conn = _requestDbConnection.Connection;
-//
-//         var results = await conn.QueryAsync<GetVerseDto>(sql, new
-//         {
-//             Book = book,
-//             Chapter = chapter,
-//             VerseNums = verseNums.ToArray()
-//         });
-//
-//         return results.Select(r => new Verse
-//         {
-//             Id = r.Id,
-//             Reference = new Reference
-//             {
-//                 Book = r.Book,
-//                 Chapter = r.Chapter,
-//                 VerseNumbers = new List<int> { r.VerseNum },
-//             },
-//             Text = r.Text,
-//             UsersSavedCount = r.UsersSavedCount,
-//             UsersMemorizedCount = r.UsersMemorizedCount,
-//             Embedding = r.Embedding
-//         }).ToList();
-//     }
-//
-//     public async Task<Verse?> GetVerses(string book, int chapter, int verseNum)
-//     {
-//         var sql =
-//             """
-//             select
-//             id as Id,
-//             book as Book,
-//             chapter as Chapter,
-//             text as Text,
-//             memorized_count as UsersMemorizedCount,
-//             saved_count as UsersSavedCount,
-//             verse_num as VerseNum
-//             from verses
-//             where book = @Book
-//             and chapter = @Chapter
-//             and verse_num = @VerseNum
-//             """;
-//
-//         var conn = _requestDbConnection.Connection;
-//         var result = await conn.QueryFirstOrDefaultAsync<GetVerseDto>(sql, new
-//         {
-//             Book = book,
-//             Chapter = chapter,
-//             VerseNum = verseNum
-//         });
-//         return result is not null
-//             ? new Verse
-//         {
-//             Id = result.Id,
-//             Reference = new Reference
-//             {
-//                 Book = result.Book,
-//                 Chapter = result.Chapter,
-//                 VerseNumbers = new List<int> { result.VerseNum },
-//             },
-//             Text = result.Text,
-//             UsersSavedCount = result.UsersSavedCount,
-//             UsersMemorizedCount = result.UsersMemorizedCount
-//         }
-//         : null;
-//     }
-//
-//     public async Task<List<Verse>> GetChapterVerses(string book, int chapter)
-//     {
-//         var sql =
-//             """
-//             select
-//             id as Id,
-//             book as Book,
-//             chapter as Chapter,
-//             text as Text,
-//             verse_num as VerseNum
-//             from verses
-//             where book = @Book
-//             and chapter = @Chapter
-//             """;
-//
-//         var conn = _requestDbConnection.Connection;
-//
-//         var results = await conn.QueryAsync<GetVerseDto>(sql, new
-//         {
-//             Book = book,
-//             Chapter = chapter
-//         });
-//
-//         return results.Select(r => new Verse
-//         {
-//             Id = r.Id,
-//             Reference = ReferenceParser.Parse($"{r.Book} {r.Chapter}:{r.VerseNum}"),
-//             Text = r.Text,
-//             UsersSavedCount = r.UsersSavedCount,
-//             UsersMemorizedCount = r.UsersMemorizedCount
-//         }).OrderBy(v => v.Reference.Verses.First()).ToList();
-//     }
-//
-//     public async Task<Verse?> GetVerseById(int id)
-//     {
-//         var sql =
-//             """
-//             select
-//             id as Id,
-//             book as Book,
-//             chapter as Chapter,
-//             text as Text,
-//             memorized_count as UsersMemorizedCount,
-//             saved_count as UsersSavedCount,
-//             verse_num as VerseNum
-//             from verses
-//             where id = @Id
-//             """;
-//
-//         var conn = _requestDbConnection.Connection;
-//
-//         var verses = await conn.QueryAsync<GetVerseDto>(sql, new { Id = id });
-//
-//         return verses.FirstOrDefault() is not null
-//             ? new Verse
-//         {
-//             Id = verses.First().Id,
-//             Reference = new Reference
-//             {
-//                 Book = verses.First().Book,
-//                 Chapter = verses.First().Chapter,
-//                 VerseNumbers = new List<int> { verses.First().VerseNum },
-//             },
-//             Text = verses.First().Text,
-//             UsersSavedCount = verses.First().UsersSavedCount,
-//             UsersMemorizedCount = verses.First().UsersMemorizedCount
-//         }
-//         : null;
-//     }
-//
-//     public class GetPassageDto
-//     {
-//
-//     }
-//
-//     public async Task<Passage> GetPassage(Reference reference)
-//     {
-//         var conn = _requestDbConnection.Connection;
-//         var results = await conn.QueryAsync<GetVerseDto>(
-//             """
-//             select
-//             id as Id,
-//             book as Book,
-//             chapter as Chapter,
-//             text as Text,
-//             memorized_count as UsersMemorizedCount,
-//             saved_count as UsersSavedCount,
-//             verse_num as VerseNum
-//             from verses
-//             where book = @Book
-//             and chapter = @Chapter
-//             and verse_num = any(@VerseNums)
-//             """, new
-//             {
-//                 Book = reference.Book,
-//                 Chapter = reference.Chapter,
-//                 VerseNums = reference.VerseNumbers
-//             });
-//         return new Passage
-//         {
-//             Reference = reference,
-//             Verses = results.Select(v => new Verse
-//             {
-//                 Id = v.Id,
-//                 Reference = new Reference
-//                 {
-//                     Book = reference.Book,
-//                     Chapter = reference.Chapter,
-//                     VerseNumbers = new List<int> { v.VerseNum }
-//                 },
-//                 Text = v.Text,
-//                 UsersSavedCount = v.UsersSavedCount,
-//                 UsersMemorizedCount = v.UsersMemorizedCount
-//             }).ToList(),
-//         };
-//     }
-//
-//     public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, Passage? similarPassage = null)
-//     {
-//         int maxResults = 50;
-//         var conn = _requestDbConnection.Connection;
-//         var results = await conn.QueryAsync<GetVerseDto>(
-//             $"""
-//             select
-//             v.id as Id,
-//             v.book as Book,
-//             v.chapter as Chapter,
-//             v.text as Text,
-//             v.memorized_count as UsersMemorizedCount,
-//             v.saved_count as UsersSavedCount,
-//             v.verse_num as VerseNum,
-//             v.embedding <-> @queryEmbedding as distance,
-//             c.id as CategoryId,
-//             c.name as CategoryName
-//             from verses v 
-//             left join verse_categories vc on v.id = vc.verse_id
-//             left join categories c on vc.category_id = c.id
-//             order by v.embedding <-> @queryEmbedding
-//             limit {maxResults}
-//             """, new
-//             {
-//                 queryEmbedding
-//             });
-//         var all = results
-//             .GroupBy(v => v.Id)
-//             .Select(g => new Verse
-//             {
-//                 Id = g.First().Id,
-//                 Reference = new Reference
-//                 {
-//                     Book = g.First().Book,
-//                     Chapter = g.First().Chapter,
-//                     VerseNumbers = new List<int> { g.First().VerseNum }
-//                 },
-//                 Text = g.First().Text,
-//                 Distance = g.First().Distance,
-//                 UsersSavedCount = g.First().UsersSavedCount,
-//                 UsersMemorizedCount = g.First().UsersMemorizedCount,
-//                 Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category
-//                 {
-//                     Id = v.CategoryId,
-//                     Name = v.CategoryName
-//                 }).ToList()
-//         }).ToList();
-//
-//         if (similarPassage is not null)
-//         {
-//             return all;//.Where(v => v.Id != similarPassage.Verses.Any(v => v.Id).ToList();
-//         }
-//         else
-//         {
-//             return all;
-//         }
-//     }
-//
-//     public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> queryEmbeddings)
-//     {
-//         var conn = _requestDbConnection.Connection;
-//         var results = await conn.QueryAsync<GetVerseDto>(
-//             """
-//             SELECT
-//                 v.id,
-//                 v.book,
-//                 v.chapter,
-//                 v.text,
-//                 v.memorized_count as UsersMemorizedCount,
-//                 v.saved_count as UsersSavedCount,
-//                 v.verse_num as VerseNum,
-//                 MIN(v.embedding <-> q.embedding) AS distance,
-//                 c.id AS CategoryId,
-//                 c.name AS CategoryName
-//             FROM verses v
-//             left join verse_categories vc on v.id = vc.verse_id
-//             left join categories c on vc.category_id = c.id
-//             CROSS JOIN UNNEST(@queryEmbeddings) AS q(embedding)
-//             GROUP BY v.id, c.id
-//             ORDER BY distance
-//             LIMIT 25;
-//             """, new
-//             {
-//                 queryEmbeddings
-//             });
-//         return results
-//             .GroupBy(v => v.Id)
-//             .Select(g => new Verse
-//         {
-//             Id = g.First().Id,
-//             Reference = ReferenceParser.Parse($"{g.First().Book} {g.First().Chapter}:{g.First().VerseNum}") 
-//                 ?? throw new Exception(),
-//             Text = g.First().Text,
-//             UsersSavedCount = g.First().UsersSavedCount,
-//             UsersMemorizedCount = g.First().UsersMemorizedCount,
-//             Categories = g
-//                 .Where(c => c.CategoryId != 0)
-//                 .Select(c => new Category
-//                 {
-//                     Id = c.CategoryId,
-//                     Name = c.CategoryName,
-//                 }).ToList()
-//         }).ToList();
-//     }
-//
-//     public async Task UpdateUsersSavedVerse(int id)
-//     {
-//         var sql = @"UPDATE VERSES SET saved_count = saved_count + 1
-//                      WHERE id = @Id";
-//         var conn = _requestDbConnection.Connection;
-//         await conn.ExecuteAsync(sql, new { Id = id });
-//     }
-//
-//     public async Task UpdateUsersMemorizedVerse(int id)
-//     {
-//         var sql = @"UPDATE VERSES SET memorized_count = memorized_count + 1
-//                      WHERE id = @Id";
-//         var conn = _requestDbConnection.Connection;
-//         await conn.ExecuteAsync(sql, new { Id = id });
-//     }
-//
-//     class VerseCardDto
-//     {
-//         public int VerseId { get; set; }
-//         public string VerseBook { get; set; } = string.Empty;
-//         public int VerseChapter { get; set; }
-//         public int VerseNum { get; set; }
-//         public int VerseTotalMemorizedCount { get; set; }
-//         public int VerseTotalSavedCount { get; set; }
-//         public Vector? VerseEmbedding { get; set; }
-//
-//         public int? CategoryId { get; set; }
-//         public string? CategoryName { get; set; }
-//
-//         public int? CrossReferenceVotes { get; set; }
-//         public string? CrossReferenceReference { get; set; }
-//         public string? CRText { get; set; }
-//         public int? CRVerseId { get; set; }
-//         public string? CRBook { get; set; }
-//         public int? CRChapter { get; set; }
-//         public int? CRVerseNum { get; set; }
-//         public int? CRMemorized { get; set; }
-//         public int? CRSaved { get; set; }
-//
-//         public int? CollectionId { get; set; }
-//         public string? CollectionTitle { get; set; }
-//         public CollectionVisibility? CollectionVisibility { get; set; }
-//     }
-//
-//     public async Task<VerseCardResponse> GetVerseCardResponse(int userId, List<int> verseIds)
-//     {
-//         var conn = _requestDbConnection.Connection;
-//
-//         var results = await conn.QueryAsync<VerseCardDto>(
-//             """
-//             select
-//             v.id as VerseId,
-//             v.book as VerseBook,
-//             v.chapter as VerseChapter,
-//             v.verse_num as VerseNum,
-//             v.memorized_count as VerseTotalMemorizedCount,
-//             v.saved_count as VerseTotalSavedCount,
-//             c.id as CategoryId,
-//             c.name as CategoryName,
-//             crp.reference as CrossReferenceReference,
-//             cr.votes as CrossReferenceVotes,
-//             crv.text as CRText,
-//             crv.id as CRVerseId,
-//             crv.book as CRBook,
-//             crv.chapter as CRChapter,
-//             crv.verse_num as CRVerseNum,
-//             crv.memorized_count as CRMemorized,
-//             crv.saved_count as CRSaved,
-//             col.id as CollectionId,
-//             col.title as CollectionTitle,
-//             col.visibility as CollectionVisibility
-//             from verses v
-//             left join verse_categories vc on vc.verse_id = v.id
-//             left join categories c on c.id = vc.category_id
-//             left join cross_references cr on cr.from_verse_id = v.id
-//             left join cross_reference_passages_verses crpv on crpv.passage_id = cr.to_passage_id
-//             left join cross_reference_passages crp on crp.id = crpv.passage_id
-//             left join verses crv on crv.id = crpv.verse_id
-//             left join passages_verses pv on pv.verse_id = v.id
-//             left join collection_passages cp on cp.id = pv.passage_id
-//             left join collections col on col.id = cp.collection_id
-//                 and col.is_deleted = false
-//                 and col.user_id = @userId
-//             where v.id = any(@verseIds)
-//             """, new
-//             {
-//                 verseIds = verseIds.ToArray(),
-//                 userId
-//             });
-//
-//         var allGroups = results.GroupBy(dto => dto.VerseId).ToList();
-//         if (!allGroups.Any())
-//             return new VerseCardResponse { };
-//
-//         return new VerseCardResponse
-//         {
-//             TotalSaved = allGroups.Sum(g => g.Max(r => r.VerseTotalSavedCount)),
-//             TotalMemorized = allGroups.Sum(g => g.Max(r => r.VerseTotalMemorizedCount)),
-//             NumPracticed = 0,
-//             NextDue = DateTime.UtcNow,
-//             CrossReferences = allGroups
-//                 .Select(g => new CrossReferenceResponse
-//                 {
-//                     FromVerse = new Verse
-//                     {
-//                         Id = g.First().VerseId,
-//                         Reference = ReferenceParser.Parse(
-//                             g.First().VerseBook,
-//                             g.First().VerseChapter,
-//                             new List<int> { g.First().VerseNum }),
-//                         Text = string.Empty,
-//                         ReadableReference = ReferenceParser.Parse(
-//                             g.First().VerseBook,
-//                             g.First().VerseChapter,
-//                             new List<int> { g.First().VerseNum })?.ReadableReference
-//                     },
-//                     CrossReferences = g
-//                         .Where(r => r.CrossReferenceReference is not null)
-//                         .GroupBy(r => r.CrossReferenceReference!)
-//                         .Select(crGroup =>
-//                         {
-//                             var reference = ReferenceParser.Parse(crGroup.Key);
-//                             if (reference == null)
-//                                 return null;
-//
-//                             return new Passage
-//                             {
-//                                 Reference = reference,
-//                                 Verses = crGroup
-//                                     .DistinctBy(r => r.CRVerseId)
-//                                     .Where(r => r.CRVerseId.HasValue && r.CRBook != null && r.CRChapter.HasValue && r.CRVerseNum.HasValue)
-//                                     .Select(r => new Verse
-//                                     {
-//                                         Id = r.CRVerseId ?? 0,
-//                                         Reference = ReferenceParser.Parse(r.CRBook ?? "", r.CRChapter ?? 0, new List<int> { r.CRVerseNum ?? 0 }),
-//                                         Text = r.CRText ?? "",
-//                                         ReadableReference = $"{r.CRBook} {r.CRChapter}:{r.CRVerseNum}"
-//                                     })
-//                                     .ToList()
-//                             };
-//                         })
-//                         .Where(p => p != null)
-//                         .Cast<Passage>()
-//                         .Where(p => p.Verses.Count > 0 && !verseIds.Contains(p.Verses.First().Id))
-//                         .ToList()
-//                 })
-//                 .Where(group => group.CrossReferences.Count > 0)
-//                 .ToList(),
-//         };
-//     }
-// }
+using Dapper;
+using Npgsql;
+using Pgvector;
+using ScriptureMemory.Server.Data.Models;
+
+namespace ScriptureMemory.Server.Data.DataAccess.Bible;
+
+/// <summary>
+/// Raw-SQL verse queries that don't fit cleanly into EF Core LINQ (pgvector similarity search,
+/// multi-verse passage lookups joining Verses to VerseTranslationContents). Simple CRUD/lookups
+/// live in <see cref="VerseDataEfCore"/> instead. Not IVerseData -- this class is injected
+/// directly wherever raw semantic-search queries are needed (see BibleRepository).
+/// </summary>
+public class VerseDataDapper
+{
+    private readonly NpgsqlDataSource _dataSource;
+
+    public VerseDataDapper(NpgsqlDataSource dataSource)
+    {
+        _dataSource = dataSource;
+    }
+
+    private sealed class VerseContentDto
+    {
+        public string VerseId { get; set; } = string.Empty;
+        public int Chapter { get; set; }
+        public int[] VerseNumbers { get; set; } = Array.Empty<int>();
+        public string BookDisplayName { get; set; } = string.Empty;
+        public int MemorizedCount { get; set; }
+        public int SavedCount { get; set; }
+        public string PlainText { get; set; } = string.Empty;
+        public string ContentUsx { get; set; } = string.Empty;
+        public DateTime? LastUpdated { get; set; }
+    }
+
+    private static Verse MapVerse(VerseContentDto dto, string translation)
+    {
+        var book = new Book(dto.BookDisplayName);
+        var verseNum = dto.VerseNumbers.FirstOrDefault();
+
+        var verse = new Verse(book, dto.Chapter, verseNum)
+        {
+            MemorizedCount = dto.MemorizedCount,
+            SavedCount = dto.SavedCount
+        };
+
+        var content = new VerseTranslationContent
+        {
+            Version = translation,
+            VerseId = verse.Id,
+            PlainText = dto.PlainText,
+            ContentUsx = dto.ContentUsx,
+            LastUpdated = dto.LastUpdated,
+            VerseNavigation = verse
+        };
+
+        verse.TranslationContents = new List<VerseTranslationContent> { content };
+
+        return verse;
+    }
+
+    public async Task<Passage> GetPassage(Reference reference, string translation)
+    {
+        var verseNumbers = reference.VerseNumbers
+            ?? throw new InvalidOperationException("Reference has no verse numbers.");
+        
+        var ids = verseNumbers
+            .Select(num => reference.Book.Abbreviation.ToUpper() + '.' + reference.Chapter + '.' + num)
+            .ToArray();
+
+        await using var connection = await _dataSource.OpenConnectionAsync();
+
+        var results = await connection.QueryAsync<VerseContentDto>(
+            """
+            select
+            v."Id" as "VerseId",
+            v."Reference_Chapter" as "Chapter",
+            v."Reference_VerseNumbers" as "VerseNumbers",
+            v."Reference_Book_DisplayName" as "BookDisplayName",
+            v."MemorizedCount" as "MemorizedCount",
+            v."SavedCount" as "SavedCount",
+            vc."PlainText" as "PlainText",
+            vc."ContentUsx" as "ContentUsx",
+            vc."LastUpdated" as "LastUpdated"
+            from "Verses" v
+            join "VerseTranslationContents" vc
+                on vc."VerseId" = v."Id"
+            where v."Id" = any(@ids)
+            and vc."Version" = @translation
+            """, new { ids, translation });
+
+        var verses = results
+            .Select(dto => MapVerse(dto, translation))
+            .OrderBy(v => v.Reference.VerseNumbers!.First())
+            .ToList();
+
+        return new Passage
+        {
+            Reference = reference,
+            Verses = verses
+        };
+    }
+
+    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, string translation, int maxResults = 50)
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+
+        var results = await connection.QueryAsync<VerseContentDto>(
+            """
+            select
+            v."Id" as "VerseId",
+            v."Reference_Chapter" as "Chapter",
+            v."Reference_VerseNumbers" as "VerseNumbers",
+            v."Reference_Book_DisplayName" as "BookDisplayName",
+            v."MemorizedCount" as "MemorizedCount",
+            v."SavedCount" as "SavedCount",
+            vc."PlainText" as "PlainText",
+            vc."ContentUsx" as "ContentUsx",
+            vc."LastUpdated" as "LastUpdated"
+            from "Verses" v
+            join "VerseTranslationContents" vc
+                on vc."VerseId" = v."Id"
+            where vc."Version" = @translation
+            and vc."Embedding" is not null
+            order by vc."Embedding" <-> @queryEmbedding
+            limit @maxResults
+            """, new { queryEmbedding, translation, maxResults });
+
+        return results.Select(dto => MapVerse(dto, translation)).ToList();
+    }
+
+    public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> queryEmbeddings, string translation, int maxResults = 25)
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+
+        var results = await connection.QueryAsync<VerseContentDto>(
+            """
+            select
+            v."Id" as "VerseId",
+            v."Reference_Chapter" as "Chapter",
+            v."Reference_VerseNumbers" as "VerseNumbers",
+            v."Reference_Book_DisplayName" as "BookDisplayName",
+            v."MemorizedCount" as "MemorizedCount",
+            v."SavedCount" as "SavedCount",
+            vc."PlainText" as "PlainText",
+            vc."ContentUsx" as "ContentUsx",
+            vc."LastUpdated" as "LastUpdated"
+            from "Verses" v
+            join "VerseTranslationContents" vc
+                on vc."VerseId" = v."Id"
+            cross join unnest(@queryEmbeddings) as q(embedding)
+            where vc."Version" = @translation
+            and vc."Embedding" is not null
+            group by v."Id", v."Reference_Chapter", v."Reference_VerseNumbers", v."Reference_Book_DisplayName",
+                v."MemorizedCount", v."SavedCount", vc."PlainText", vc."ContentUsx", vc."LastUpdated"
+            order by min(vc."Embedding" <-> q.embedding)
+            limit @maxResults
+            """, new { queryEmbeddings = queryEmbeddings.ToArray(), translation, maxResults });
+
+        return results.Select(dto => MapVerse(dto, translation)).ToList();
+    }
+}
+
+// using Dapper;                                                                                                                                                                                                                                             
+      //   2 -// using DataAccess.Models;                                                                                                                                                                                                                                  
+      //   3 -// using System;                                                                                                                                                                                                                                             
+      //   4 -// using System.Collections.Generic;                                                                                                                                                                                                                         
+      //   5 -// using System.Data;                                                                                                                                                                                                                                        
+      //   6 -// using System.Diagnostics;                                                                                                                                                                                                                                 
+      //   7 -// using System.Linq;                                                                                                                                                                                                                                        
+      //   8 -// using System.Text;                                                                                                                                                                                                                                        
+      //   9 -// using System.Text.Json;                                                                                                                                                                                                                                   
+      //  10 -// using System.Threading.Tasks;                                                                                                                                                                                                                             
+      //  11 -// using ScriptureMemory.Server.Tools;                                                                                                                                                                                                                       
+      //  12 -// using ScriptureMemory.Server.DataAccess.Data;                                                                                                                                                                                                             
+      //  13 -// using static System.Runtime.InteropServices.JavaScript.JSType;                                                                                                                                                                                            
+      //  14 -// using ScriptureMemory.Server.DataAccess.Models;                                                                                                                                                                                                           
+      //  15 -// using Pgvector;                                                                                                                                                                                                                                           
+      //  16 -// using ScriptureMemory.Server;                                                                                                                                                                                                                             
+      //  17 -// using ScriptureMemory.Server.Data.DataAccess.Bible;                                                                                                                                                                                                       
+      //  18 -// using static ScriptureMemory.Server.Tools.Enums;                                                                                                                                                                                                          
+      //  19 -//                                                                                                                                                                                                                                                           
+      //  20 -// namespace DataAccess.Data;                                                                                                                                                                                                                                
+      //  21 -//                                                                                                                                                                                                                                                           
+      //  22 -// public class VerseDataDapper : IVerseData                                                                                                                                                                                                                 
+      //  23 -// {                                                                                                                                                                                                                                                         
+      //  24 -//     private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;                                                                                                                                                                             
+      //  25 -//                                                                                                                                                                                                                                                           
+      //  26 -//     private string selectSql = """                                                                                                                                                                                                                        
+      //  27 -//         select                                                                                                                                                                                                                                            
+      //  28 -//         id as Id,                                                                                                                                                                                                                                         
+      //  29 -//         book as Book,                                                                                                                                                                                                                                     
+      //  30 -//         chapter as Chapter,                                                                                                                                                                                                                               
+      //  31 -//         text as Text,                                                                                                                                                                                                                                     
+      //  32 -//         memorized_count as UsersMemorizedCount,                                                                                                                                                                                                           
+      //  33 -//         saved_count as UsersSavedCount,                                                                                                                                                                                                                   
+      //  34 -//         verse_num as VerseNum,                                                                                                                                                                                                                            
+      //  35 -//         embedding as Embedding                                                                                                                                                                                                                            
+      //  36 -//         """;                                                                                                                                                                                                                                              
+      //  37 -//                                                                                                                                                                                                                                                           
+      //  38 -//     public VerseDataDapper(IDbContextFactory<ApplicationDbContext> contextFactory)                                                                                                                                                                        
+      //  39 -//     {                                                                                                                                                                                                                                                     
+      //  40 -//         _contextFactory = contextFactory;                                                                                                                                                                                                                 
+      //  41 -//                                                                                                                                                                                                                                                           
+      //  42 -//         // To use this:                                                                                                                                                                                                                                   
+      //  43 -//         // public async Task DoSomething()                                                                                                                                                                                                                
+      //  44 -//         // {                                                                                                                                                                                                                                              
+      //  45 -//         //     using (var context = _contextFactory.CreateDbContext())                                                                                                                                                                                    
+      //  46 -//         //     {                                                                                                                                                                                                                                          
+      //  47 -//         //         // ...                                                                                                                                                                                                                                 
+      //  48 -//         //     }                                                                                                                                                                                                                                          
+      //  49 -//         // }                                                                                                                                                                                                                                              
+      //  50 -//     }                                                                                                                                                                                                                                                     
+      //  51 -//                                                                                                                                                                                                                                                           
+      //  52 -//     public async Task<List<Verse>> GetAllVerses(int offset, int nextFetch)                                                                                                                                                                                
+      //  53 -//     {                                                                                                                                                                                                                                                     
+      //  54 -//         var sql = $@"SELECT * FROM VERSES OFFSET :offset ROWS FETCH NEXT :nextFetch ROWS ONLY";                                                                                                                                                           
+      //  55 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      //  56 -//         var results = await conn.QueryAsync<Verse>(sql, new { offset = offset, nextFetch = nextFetch });                                                                                                                                                  
+      //  57 -//                                                                                                                                                                                                                                                           
+      //  58 -//         return results.ToList();                                                                                                                                                                                                                          
+      //  59 -//     }                                                                                                                                                                                                                                                     
+      //  60 -//                                                                                                                                                                                                                                                           
+      //  61 -//     public async Task<List<Verse>> GetAllVerses()                                                                                                                                                                                                         
+      //  62 -//     {                                                                                                                                                                                                                                                     
+      //  63 -//         var sql = $@"{selectSql} FROM VERSES";                                                                                                                                                                                                            
+      //  64 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      //  65 -//         var results = await conn.QueryAsync<GetVerseDto>(sql);                                                                                                                                                                                            
+      //  66 -//                                                                                                                                                                                                                                                           
+      //  67 -//         return results.Select(r => new Verse                                                                                                                                                                                                              
+      //  68 -//         {                                                                                                                                                                                                                                                 
+      //  69 -//             Id = r.Id,                                                                                                                                                                                                                                    
+      //  70 -//             Reference = new Reference                                                                                                                                                                                                                     
+      //  71 -//             {                                                                                                                                                                                                                                             
+      //  72 -//                 Book = r.Book,                                                                                                                                                                                                                            
+      //  73 -//                 Chapter = r.Chapter,                                                                                                                                                                                                                      
+      //  74 -//                 VerseNumbers = new List<int> { r.VerseNum },                                                                                                                                                                                              
+      //  75 -//             },                                                                                                                                                                                                                                            
+      //  76 -//             Text = r.Text,                                                                                                                                                                                                                                
+      //  77 -//             UsersSavedCount = r.UsersSavedCount,                                                                                                                                                                                                          
+      //  78 -//             UsersMemorizedCount = r.UsersMemorizedCount,                                                                                                                                                                                                  
+      //  79 -//             Embedding = r.Embedding                                                                                                                                                                                                                       
+      //  80 -//         }).ToList();                                                                                                                                                                                                                                      
+      //  81 -//     }                                                                                                                                                                                                                                                     
+      //  82 -//                                                                                                                                                                                                                                                           
+      //  83 -//     public async Task InsertEmbedding(Verse verse)                                                                                                                                                                                                        
+      //  84 -//     {                                                                                                                                                                                                                                                     
+      //  85 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      //  86 -//         await conn.ExecuteAsync(                                                                                                                                                                                                                          
+      //  87 -//             """                                                                                                                                                                                                                                           
+      //  88 -//             update verses                                                                                                                                                                                                                                 
+      //  89 -//             set embedding = @Embedding                                                                                                                                                                                                                    
+      //  90 -//             where book = @Book                                                                                                                                                                                                                            
+      //  91 -//             and chapter = @Chapter                                                                                                                                                                                                                        
+      //  92 -//             and verse_num = @VerseNum                                                                                                                                                                                                                     
+      //  93 -//             """, new                                                                                                                                                                                                                                      
+      //  94 -//             {                                                                                                                                                                                                                                             
+      //  95 -//                 Embedding = verse.Embedding,                                                                                                                                                                                                              
+      //  96 -//                 Book = verse.Reference.Book,                                                                                                                                                                                                              
+      //  97 -//                 Chapter = verse.Reference.Chapter,                                                                                                                                                                                                        
+      //  98 -//                 VerseNum = verse.Reference.Verses.First()                                                                                                                                                                                                 
+      //  99 -//             });                                                                                                                                                                                                                                           
+      // 100 -//     }                                                                                                                                                                                                                                                     
+      // 101 -//                                                                                                                                                                                                                                                           
+      // 102 -//     public class GetVerseDto                                                                                                                                                                                                                              
+      // 103 -//     {                                                                                                                                                                                                                                                     
+      // 104 -//         public int Id { get; set; }                                                                                                                                                                                                                       
+      // 105 -//         public string Book { get; set; } = string.Empty;                                                                                                                                                                                                  
+      // 106 -//         public int Chapter { get; set; }                                                                                                                                                                                                                  
+      // 107 -//         public string Text { get; set; } = string.Empty;                                                                                                                                                                                                  
+      // 108 -//         public int UsersMemorizedCount { get; set; }                                                                                                                                                                                                      
+      // 109 -//         public int UsersSavedCount { get; set; }                                                                                                                                                                                                          
+      // 110 -//         public int VerseNum { get; set; }                                                                                                                                                                                                                 
+      // 111 -//         public Vector? Embedding { get; set; }                                                                                                                                                                                                            
+      // 112 -//         public double? Distance { get; set; }                                                                                                                                                                                                             
+      // 113 -//         public int CategoryId { get; set; }                                                                                                                                                                                                               
+      // 114 -//         public string CategoryName { get; set; } = string.Empty;                                                                                                                                                                                          
+      // 115 -//     }                                                                                                                                                                                                                                                     
+      // 116 -//                                                                                                                                                                                                                                                           
+      // 117 -//     public async Task<IEnumerable<(Verse Verse, float Similarity)>> GetVersesBySimilarity(                                                                                                                                                                
+      // 118 -//         Vector embedding,                                                                                                                                                                                                                                 
+      // 119 -//         float minSimilarity,                                                                                                                                                                                                                              
+      // 120 -//         int limit = 100)                                                                                                                                                                                                                                  
+      // 121 -//     {                                                                                                                                                                                                                                                     
+      // 122 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 123 -//         var results = await conn.QueryAsync<GetVerseDto>(                                                                                                                                                                                                 
+      // 124 -//             """                                                                                                                                                                                                                                           
+      // 125 -//         SELECT                                                                                                                                                                                                                                            
+      // 126 -//             id AS Id,                                                                                                                                                                                                                                     
+      // 127 -//             book AS Book,                                                                                                                                                                                                                                 
+      // 128 -//             chapter AS Chapter,                                                                                                                                                                                                                           
+      // 129 -//             text AS Text,                                                                                                                                                                                                                                 
+      // 130 -//             memorized_count AS UsersMemorizedCount,                                                                                                                                                                                                       
+      // 131 -//             saved_count AS UsersSavedCount,                                                                                                                                                                                                               
+      // 132 -//             verse_num AS VerseNum,                                                                                                                                                                                                                        
+      // 133 -//             (1 - (embedding <=> @embedding))::float4 AS Distance                                                                                                                                                                                          
+      // 134 -//         FROM verses                                                                                                                                                                                                                                       
+      // 135 -//         WHERE (1 - (embedding <=> @embedding)) >= @minSimilarity                                                                                                                                                                                          
+      // 136 -//         ORDER BY embedding <=> @embedding                                                                                                                                                                                                                 
+      // 137 -//         LIMIT @limit                                                                                                                                                                                                                                      
+      // 138 -//         """, new { embedding, minSimilarity, limit });                                                                                                                                                                                                    
+      // 139 -//                                                                                                                                                                                                                                                           
+      // 140 -//         return results.Select(r => (                                                                                                                                                                                                                      
+      // 141 -//             Verse: new Verse                                                                                                                                                                                                                              
+      // 142 -//             {                                                                                                                                                                                                                                             
+      // 143 -//                 Id = r.Id,                                                                                                                                                                                                                                
+      // 144 -//                 Reference = new Reference                                                                                                                                                                                                                 
+      // 145 -//                 {                                                                                                                                                                                                                                         
+      // 146 -//                     Book = r.Book,                                                                                                                                                                                                                        
+      // 147 -//                     Chapter = r.Chapter,                                                                                                                                                                                                                  
+      // 148 -//                     VerseNumbers = new List<int> { r.VerseNum }                                                                                                                                                                                           
+      // 149 -//                 },                                                                                                                                                                                                                                        
+      // 150 -//                 Text = r.Text,                                                                                                                                                                                                                            
+      // 151 -//                 UsersSavedCount = r.UsersSavedCount,                                                                                                                                                                                                      
+      // 152 -//                 UsersMemorizedCount = r.UsersMemorizedCount,                                                                                                                                                                                              
+      // 153 -//                 Embedding = r.Embedding                                                                                                                                                                                                                   
+      // 154 -//             },                                                                                                                                                                                                                                            
+      // 155 -//             Similarity: (float)(r.Distance ?? 0)                                                                                                                                                                                                          
+      // 156 -//         ));                                                                                                                                                                                                                                               
+      // 157 -//     }                                                                                                                                                                                                                                                     
+      // 158 -//                                                                                                                                                                                                                                                           
+      // 159 -//     public async Task<List<Verse>> GetVerses(string book, int chapter, List<int> verseNums)                                                                                                                                                               
+      // 160 -//     {                                                                                                                                                                                                                                                     
+      // 161 -//         var sql =                                                                                                                                                                                                                                         
+      // 162 -//             """                                                                                                                                                                                                                                           
+      // 163 -//             select                                                                                                                                                                                                                                        
+      // 164 -//             id as Id,                                                                                                                                                                                                                                     
+      // 165 -//             book as Book,                                                                                                                                                                                                                                 
+      // 166 -//             chapter as Chapter,                                                                                                                                                                                                                           
+      // 167 -//             text as Text,                                                                                                                                                                                                                                 
+      // 168 -//             memorized_count as UsersMemorizedCount,                                                                                                                                                                                                       
+      // 169 -//             saved_count as UsersSavedCount,                                                                                                                                                                                                               
+      // 170 -//             verse_num as VerseNum,                                                                                                                                                                                                                        
+      // 171 -//             embedding as Embedding                                                                                                                                                                                                                        
+      // 172 -//             from verses                                                                                                                                                                                                                                   
+      // 173 -//             where book = @Book                                                                                                                                                                                                                            
+      // 174 -//             and chapter = @Chapter                                                                                                                                                                                                                        
+      // 175 -//             and verse_num = any(@VerseNums)                                                                                                                                                                                                               
+      // 176 -//             """;                                                                                                                                                                                                                                          
+      // 177 -//                                                                                                                                                                                                                                                           
+      // 178 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 179 -//                                                                                                                                                                                                                                                           
+      // 180 -//         var results = await conn.QueryAsync<GetVerseDto>(sql, new                                                                                                                                                                                         
+      // 181 -//         {                                                                                                                                                                                                                                                 
+      // 182 -//             Book = book,                                                                                                                                                                                                                                  
+      // 183 -//             Chapter = chapter,                                                                                                                                                                                                                            
+      // 184 -//             VerseNums = verseNums.ToArray()                                                                                                                                                                                                               
+      // 185 -//         });                                                                                                                                                                                                                                               
+      // 186 -//                                                                                                                                                                                                                                                           
+      // 187 -//         return results.Select(r => new Verse                                                                                                                                                                                                              
+      // 188 -//         {                                                                                                                                                                                                                                                 
+      // 189 -//             Id = r.Id,                                                                                                                                                                                                                                    
+      // 190 -//             Reference = new Reference                                                                                                                                                                                                                     
+      // 191 -//             {                                                                                                                                                                                                                                             
+      // 192 -//                 Book = r.Book,                                                                                                                                                                                                                            
+      // 193 -//                 Chapter = r.Chapter,                                                                                                                                                                                                                      
+      // 194 -//                 VerseNumbers = new List<int> { r.VerseNum },                                                                                                                                                                                              
+      // 195 -//             },                                                                                                                                                                                                                                            
+      // 196 -//             Text = r.Text,                                                                                                                                                                                                                                
+      // 197 -//             UsersSavedCount = r.UsersSavedCount,                                                                                                                                                                                                          
+      // 198 -//             UsersMemorizedCount = r.UsersMemorizedCount,                                                                                                                                                                                                  
+      // 199 -//             Embedding = r.Embedding                                                                                                                                                                                                                       
+      // 200 -//         }).ToList();                                                                                                                                                                                                                                      
+      // 201 -//     }                                                                                                                                                                                                                                                     
+      // 202 -//                                                                                                                                                                                                                                                           
+      // 203 -//     public async Task<Verse?> GetVerses(string book, int chapter, int verseNum)                                                                                                                                                                           
+      // 204 -//     {                                                                                                                                                                                                                                                     
+      // 205 -//         var sql =                                                                                                                                                                                                                                         
+      // 206 -//             """                                                                                                                                                                                                                                           
+      // 207 -//             select                                                                                                                                                                                                                                        
+      // 208 -//             id as Id,                                                                                                                                                                                                                                     
+      // 209 -//             book as Book,                                                                                                                                                                                                                                 
+      // 210 -//             chapter as Chapter,                                                                                                                                                                                                                           
+      // 211 -//             text as Text,                                                                                                                                                                                                                                 
+      // 212 -//             memorized_count as UsersMemorizedCount,                                                                                                                                                                                                       
+      // 213 -//             saved_count as UsersSavedCount,                                                                                                                                                                                                               
+      // 214 -//             verse_num as VerseNum                                                                                                                                                                                                                         
+      // 215 -//             from verses                                                                                                                                                                                                                                   
+      // 216 -//             where book = @Book                                                                                                                                                                                                                            
+      // 217 -//             and chapter = @Chapter                                                                                                                                                                                                                        
+      // 218 -//             and verse_num = @VerseNum                                                                                                                                                                                                                     
+      // 219 -//             """;                                                                                                                                                                                                                                          
+      // 220 -//                                                                                                                                                                                                                                                           
+      // 221 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 222 -//         var result = await conn.QueryFirstOrDefaultAsync<GetVerseDto>(sql, new                                                                                                                                                                            
+      // 223 -//         {                                                                                                                                                                                                                                                 
+      // 224 -//             Book = book,                                                                                                                                                                                                                                  
+      // 225 -//             Chapter = chapter,                                                                                                                                                                                                                            
+      // 226 -//             VerseNum = verseNum                                                                                                                                                                                                                           
+      // 227 -//         });                                                                                                                                                                                                                                               
+      // 228 -//         return result is not null                                                                                                                                                                                                                         
+      // 229 -//             ? new Verse                                                                                                                                                                                                                                   
+      // 230 -//         {                                                                                                                                                                                                                                                 
+      // 231 -//             Id = result.Id,                                                                                                                                                                                                                               
+      // 232 -//             Reference = new Reference                                                                                                                                                                                                                     
+      // 233 -//             {                                                                                                                                                                                                                                             
+      // 234 -//                 Book = result.Book,                                                                                                                                                                                                                       
+      // 235 -//                 Chapter = result.Chapter,                                                                                                                                                                                                                 
+      // 236 -//                 VerseNumbers = new List<int> { result.VerseNum },                                                                                                                                                                                         
+      // 237 -//             },                                                                                                                                                                                                                                            
+      // 238 -//             Text = result.Text,                                                                                                                                                                                                                           
+      // 239 -//             UsersSavedCount = result.UsersSavedCount,                                                                                                                                                                                                     
+      // 240 -//             UsersMemorizedCount = result.UsersMemorizedCount                                                                                                                                                                                              
+      // 241 -//         }                                                                                                                                                                                                                                                 
+      // 242 -//         : null;                                                                                                                                                                                                                                           
+      // 243 -//     }                                                                                                                                                                                                                                                     
+      // 244 -//                                                                                                                                                                                                                                                           
+      // 245 -//     public async Task<List<Verse>> GetChapterVerses(string book, int chapter)                                                                                                                                                                             
+      // 246 -//     {                                                                                                                                                                                                                                                     
+      // 247 -//         var sql =                                                                                                                                                                                                                                         
+      // 248 -//             """                                                                                                                                                                                                                                           
+      // 249 -//             select                                                                                                                                                                                                                                        
+      // 250 -//             id as Id,                                                                                                                                                                                                                                     
+      // 251 -//             book as Book,                                                                                                                                                                                                                                 
+      // 252 -//             chapter as Chapter,                                                                                                                                                                                                                           
+      // 253 -//             text as Text,                                                                                                                                                                                                                                 
+      // 254 -//             verse_num as VerseNum                                                                                                                                                                                                                         
+      // 255 -//             from verses                                                                                                                                                                                                                                   
+      // 256 -//             where book = @Book                                                                                                                                                                                                                            
+      // 257 -//             and chapter = @Chapter                                                                                                                                                                                                                        
+      // 258 -//             """;                                                                                                                                                                                                                                          
+      // 259 -//                                                                                                                                                                                                                                                           
+      // 260 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 261 -//                                                                                                                                                                                                                                                           
+      // 262 -//         var results = await conn.QueryAsync<GetVerseDto>(sql, new                                                                                                                                                                                         
+      // 263 -//         {                                                                                                                                                                                                                                                 
+      // 264 -//             Book = book,                                                                                                                                                                                                                                  
+      // 265 -//             Chapter = chapter                                                                                                                                                                                                                             
+      // 266 -//         });                                                                                                                                                                                                                                               
+      // 267 -//                                                                                                                                                                                                                                                           
+      // 268 -//         return results.Select(r => new Verse                                                                                                                                                                                                              
+      // 269 -//         {                                                                                                                                                                                                                                                 
+      // 270 -//             Id = r.Id,                                                                                                                                                                                                                                    
+      // 271 -//             Reference = ReferenceParser.Parse($"{r.Book} {r.Chapter}:{r.VerseNum}"),                                                                                                                                                                      
+      // 272 -//             Text = r.Text,                                                                                                                                                                                                                                
+      // 273 -//             UsersSavedCount = r.UsersSavedCount,                                                                                                                                                                                                          
+      // 274 -//             UsersMemorizedCount = r.UsersMemorizedCount                                                                                                                                                                                                   
+      // 275 -//         }).OrderBy(v => v.Reference.Verses.First()).ToList();                                                                                                                                                                                             
+      // 276 -//     }                                                                                                                                                                                                                                                     
+      // 277 -//                                                                                                                                                                                                                                                           
+      // 278 -//     public async Task<Verse?> GetVerseById(int id)                                                                                                                                                                                                        
+      // 279 -//     {                                                                                                                                                                                                                                                     
+      // 280 -//         var sql =                                                                                                                                                                                                                                         
+      // 281 -//             """                                                                                                                                                                                                                                           
+      // 282 -//             select                                                                                                                                                                                                                                        
+      // 283 -//             id as Id,                                                                                                                                                                                                                                     
+      // 284 -//             book as Book,                                                                                                                                                                                                                                 
+      // 285 -//             chapter as Chapter,                                                                                                                                                                                                                           
+      // 286 -//             text as Text,                                                                                                                                                                                                                                 
+      // 287 -//             memorized_count as UsersMemorizedCount,                                                                                                                                                                                                       
+      // 288 -//             saved_count as UsersSavedCount,                                                                                                                                                                                                               
+      // 289 -//             verse_num as VerseNum                                                                                                                                                                                                                         
+      // 290 -//             from verses                                                                                                                                                                                                                                   
+      // 291 -//             where id = @Id                                                                                                                                                                                                                                
+      // 292 -//             """;                                                                                                                                                                                                                                          
+      // 293 -//                                                                                                                                                                                                                                                           
+      // 294 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 295 -//                                                                                                                                                                                                                                                           
+      // 296 -//         var verses = await conn.QueryAsync<GetVerseDto>(sql, new { Id = id });                                                                                                                                                                            
+      // 297 -//                                                                                                                                                                                                                                                           
+      // 298 -//         return verses.FirstOrDefault() is not null                                                                                                                                                                                                        
+      // 299 -//             ? new Verse                                                                                                                                                                                                                                   
+      // 300 -//         {                                                                                                                                                                                                                                                 
+      // 301 -//             Id = verses.First().Id,                                                                                                                                                                                                                       
+      // 302 -//             Reference = new Reference                                                                                                                                                                                                                     
+      // 303 -//             {                                                                                                                                                                                                                                             
+      // 304 -//                 Book = verses.First().Book,                                                                                                                                                                                                               
+      // 305 -//                 Chapter = verses.First().Chapter,                                                                                                                                                                                                         
+      // 306 -//                 VerseNumbers = new List<int> { verses.First().VerseNum },                                                                                                                                                                                 
+      // 307 -//             },                                                                                                                                                                                                                                            
+      // 308 -//             Text = verses.First().Text,                                                                                                                                                                                                                   
+      // 309 -//             UsersSavedCount = verses.First().UsersSavedCount,                                                                                                                                                                                             
+      // 310 -//             UsersMemorizedCount = verses.First().UsersMemorizedCount                                                                                                                                                                                      
+      // 311 -//         }                                                                                                                                                                                                                                                 
+      // 312 -//         : null;                                                                                                                                                                                                                                           
+      // 313 -//     }                                                                                                                                                                                                                                                     
+      // 314 -//                                                                                                                                                                                                                                                           
+      // 315 -//     public class GetPassageDto                                                                                                                                                                                                                            
+      // 316 -//     {                                                                                                                                                                                                                                                     
+      // 317 -//                                                                                                                                                                                                                                                           
+      // 318 -//     }                                                                                                                                                                                                                                                     
+      // 319 -//                                                                                                                                                                                                                                                           
+      // 320 -//     public async Task<Passage> GetPassage(Reference reference)                                                                                                                                                                                            
+      // 321 -//     {                                                                                                                                                                                                                                                     
+      // 322 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 323 -//         var results = await conn.QueryAsync<GetVerseDto>(                                                                                                                                                                                                 
+      // 324 -//             """                                                                                                                                                                                                                                           
+      // 325 -//             select                                                                                                                                                                                                                                        
+      // 326 -//             id as Id,                                                                                                                                                                                                                                     
+      // 327 -//             book as Book,                                                                                                                                                                                                                                 
+      // 328 -//             chapter as Chapter,                                                                                                                                                                                                                           
+      // 329 -//             text as Text,                                                                                                                                                                                                                                 
+      // 330 -//             memorized_count as UsersMemorizedCount,                                                                                                                                                                                                       
+      // 331 -//             saved_count as UsersSavedCount,                                                                                                                                                                                                               
+      // 332 -//             verse_num as VerseNum                                                                                                                                                                                                                         
+      // 333 -//             from verses                                                                                                                                                                                                                                   
+      // 334 -//             where book = @Book                                                                                                                                                                                                                            
+      // 335 -//             and chapter = @Chapter                                                                                                                                                                                                                        
+      // 336 -//             and verse_num = any(@VerseNums)                                                                                                                                                                                                               
+      // 337 -//             """, new                                                                                                                                                                                                                                      
+      // 338 -//             {                                                                                                                                                                                                                                             
+      // 339 -//                 Book = reference.Book,                                                                                                                                                                                                                    
+      // 340 -//                 Chapter = reference.Chapter,                                                                                                                                                                                                              
+      // 341 -//                 VerseNums = reference.VerseNumbers                                                                                                                                                                                                        
+      // 342 -//             });                                                                                                                                                                                                                                           
+      // 343 -//         return new Passage                                                                                                                                                                                                                                
+      // 344 -//         {                                                                                                                                                                                                                                                 
+      // 345 -//             Reference = reference,                                                                                                                                                                                                                        
+      // 346 -//             Verses = results.Select(v => new Verse                                                                                                                                                                                                        
+      // 347 -//             {                                                                                                                                                                                                                                             
+      // 348 -//                 Id = v.Id,                                                                                                                                                                                                                                
+      // 349 -//                 Reference = new Reference                                                                                                                                                                                                                 
+      // 350 -//                 {                                                                                                                                                                                                                                         
+      // 351 -//                     Book = reference.Book,                                                                                                                                                                                                                
+      // 352 -//                     Chapter = reference.Chapter,                                                                                                                                                                                                          
+      // 353 -//                     VerseNumbers = new List<int> { v.VerseNum }                                                                                                                                                                                           
+      // 354 -//                 },                                                                                                                                                                                                                                        
+      // 355 -//                 Text = v.Text,                                                                                                                                                                                                                            
+      // 356 -//                 UsersSavedCount = v.UsersSavedCount,                                                                                                                                                                                                      
+      // 357 -//                 UsersMemorizedCount = v.UsersMemorizedCount                                                                                                                                                                                               
+      // 358 -//             }).ToList(),                                                                                                                                                                                                                                  
+      // 359 -//         };                                                                                                                                                                                                                                                
+      // 360 -//     }                                                                                                                                                                                                                                                     
+      // 361 -//                                                                                                                                                                                                                                                           
+      // 362 -//     public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, Passage? similarPassage = null)                                                                                                                                         
+      // 363 -//     {                                                                                                                                                                                                                                                     
+      // 364 -//         int maxResults = 50;                                                                                                                                                                                                                              
+      // 365 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 366 -//         var results = await conn.QueryAsync<GetVerseDto>(                                                                                                                                                                                                 
+      // 367 -//             $"""                                                                                                                                                                                                                                          
+      // 368 -//             select                                                                                                                                                                                                                                        
+      // 369 -//             v.id as Id,                                                                                                                                                                                                                                   
+      // 370 -//             v.book as Book,                                                                                                                                                                                                                               
+      // 371 -//             v.chapter as Chapter,                                                                                                                                                                                                                         
+      // 372 -//             v.text as Text,                                                                                                                                                                                                                               
+      // 373 -//             v.memorized_count as UsersMemorizedCount,                                                                                                                                                                                                     
+      // 374 -//             v.saved_count as UsersSavedCount,                                                                                                                                                                                                             
+      // 375 -//             v.verse_num as VerseNum,                                                                                                                                                                                                                      
+      // 376 -//             v.embedding <-> @queryEmbedding as distance,                                                                                                                                                                                                  
+      // 377 -//             c.id as CategoryId,                                                                                                                                                                                                                           
+      // 378 -//             c.name as CategoryName                                                                                                                                                                                                                        
+      // 379 -//             from verses v                                                                                                                                                                                                                                 
+      // 380 -//             left join verse_categories vc on v.id = vc.verse_id                                                                                                                                                                                           
+      // 381 -//             left join categories c on vc.category_id = c.id                                                                                                                                                                                               
+      // 382 -//             order by v.embedding <-> @queryEmbedding                                                                                                                                                                                                      
+      // 383 -//             limit {maxResults}                                                                                                                                                                                                                            
+      // 384 -//             """, new                                                                                                                                                                                                                                      
+      // 385 -//             {                                                                                                                                                                                                                                             
+      // 386 -//                 queryEmbedding                                                                                                                                                                                                                            
+      // 387 -//             });                                                                                                                                                                                                                                           
+      // 388 -//         var all = results                                                                                                                                                                                                                                 
+      // 389 -//             .GroupBy(v => v.Id)                                                                                                                                                                                                                           
+      // 390 -//             .Select(g => new Verse                                                                                                                                                                                                                        
+      // 391 -//             {                                                                                                                                                                                                                                             
+      // 392 -//                 Id = g.First().Id,                                                                                                                                                                                                                        
+      // 393 -//                 Reference = new Reference                                                                                                                                                                                                                 
+      // 394 -//                 {                                                                                                                                                                                                                                         
+      // 395 -//                     Book = g.First().Book,                                                                                                                                                                                                                
+      // 396 -//                     Chapter = g.First().Chapter,                                                                                                                                                                                                          
+      // 397 -//                     VerseNumbers = new List<int> { g.First().VerseNum }                                                                                                                                                                                   
+      // 398 -//                 },                                                                                                                                                                                                                                        
+      // 399 -//                 Text = g.First().Text,                                                                                                                                                                                                                    
+      // 400 -//                 Distance = g.First().Distance,                                                                                                                                                                                                            
+      // 401 -//                 UsersSavedCount = g.First().UsersSavedCount,                                                                                                                                                                                              
+      // 402 -//                 UsersMemorizedCount = g.First().UsersMemorizedCount,                                                                                                                                                                                      
+      // 403 -//                 Categories = g.Where(v => v.CategoryId != 0).Select(v => new Category                                                                                                                                                                     
+      // 404 -//                 {                                                                                                                                                                                                                                         
+      // 405 -//                     Id = v.CategoryId,                                                                                                                                                                                                                    
+      // 406 -//                     Name = v.CategoryName                                                                                                                                                                                                                 
+      // 407 -//                 }).ToList()                                                                                                                                                                                                                               
+      // 408 -//         }).ToList();                                                                                                                                                                                                                                      
+      // 409 -//                                                                                                                                                                                                                                                           
+      // 410 -//         if (similarPassage is not null)                                                                                                                                                                                                                   
+      // 411 -//         {                                                                                                                                                                                                                                                 
+      // 412 -//             return all;//.Where(v => v.Id != similarPassage.Verses.Any(v => v.Id).ToList();                                                                                                                                                               
+      // 413 -//         }                                                                                                                                                                                                                                                 
+      // 414 -//         else                                                                                                                                                                                                                                              
+      // 415 -//         {                                                                                                                                                                                                                                                 
+      // 416 -//             return all;                                                                                                                                                                                                                                   
+      // 417 -//         }                                                                                                                                                                                                                                                 
+      // 418 -//     }                                                                                                                                                                                                                                                     
+      // 419 -//                                                                                                                                                                                                                                                           
+      // 420 -//     public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> queryEmbeddings)                                                                                                                                                                  
+      // 421 -//     {                                                                                                                                                                                                                                                     
+      // 422 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 423 -//         var results = await conn.QueryAsync<GetVerseDto>(                                                                                                                                                                                                 
+      // 424 -//             """                                                                                                                                                                                                                                           
+      // 425 -//             SELECT                                                                                                                                                                                                                                        
+      // 426 -//                 v.id,                                                                                                                                                                                                                                     
+      // 427 -//                 v.book,                                                                                                                                                                                                                                   
+      // 428 -//                 v.chapter,                                                                                                                                                                                                                                
+      // 429 -//                 v.text,                                                                                                                                                                                                                                   
+      // 430 -//                 v.memorized_count as UsersMemorizedCount,                                                                                                                                                                                                 
+      // 431 -//                 v.saved_count as UsersSavedCount,                                                                                                                                                                                                         
+      // 432 -//                 v.verse_num as VerseNum,                                                                                                                                                                                                                  
+      // 433 -//                 MIN(v.embedding <-> q.embedding) AS distance,                                                                                                                                                                                             
+      // 434 -//                 c.id AS CategoryId,                                                                                                                                                                                                                       
+      // 435 -//                 c.name AS CategoryName                                                                                                                                                                                                                    
+      // 436 -//             FROM verses v                                                                                                                                                                                                                                 
+      // 437 -//             left join verse_categories vc on v.id = vc.verse_id                                                                                                                                                                                           
+      // 438 -//             left join categories c on vc.category_id = c.id                                                                                                                                                                                               
+      // 439 -//             CROSS JOIN UNNEST(@queryEmbeddings) AS q(embedding)                                                                                                                                                                                           
+      // 440 -//             GROUP BY v.id, c.id                                                                                                                                                                                                                           
+      // 441 -//             ORDER BY distance                                                                                                                                                                                                                             
+      // 442 -//             LIMIT 25;                                                                                                                                                                                                                                     
+      // 443 -//             """, new                                                                                                                                                                                                                                      
+      // 444 -//             {                                                                                                                                                                                                                                             
+      // 445 -//                 queryEmbeddings                                                                                                                                                                                                                           
+      // 446 -//             });                                                                                                                                                                                                                                           
+      // 447 -//         return results                                                                                                                                                                                                                                    
+      // 448 -//             .GroupBy(v => v.Id)                                                                                                                                                                                                                           
+      // 449 -//             .Select(g => new Verse                                                                                                                                                                                                                        
+      // 450 -//         {                                                                                                                                                                                                                                                 
+      // 451 -//             Id = g.First().Id,                                                                                                                                                                                                                            
+      // 452 -//             Reference = ReferenceParser.Parse($"{g.First().Book} {g.First().Chapter}:{g.First().VerseNum}")                                                                                                                                               
+      // 453 -//                 ?? throw new Exception(),                                                                                                                                                                                                                 
+      // 454 -//             Text = g.First().Text,                                                                                                                                                                                                                        
+      // 455 -//             UsersSavedCount = g.First().UsersSavedCount,                                                                                                                                                                                                  
+      // 456 -//             UsersMemorizedCount = g.First().UsersMemorizedCount,                                                                                                                                                                                          
+      // 457 -//             Categories = g                                                                                                                                                                                                                                
+      // 458 -//                 .Where(c => c.CategoryId != 0)                                                                                                                                                                                                            
+      // 459 -//                 .Select(c => new Category                                                                                                                                                                                                                 
+      // 460 -//                 {                                                                                                                                                                                                                                         
+      // 461 -//                     Id = c.CategoryId,                                                                                                                                                                                                                    
+      // 462 -//                     Name = c.CategoryName,                                                                                                                                                                                                                
+      // 463 -//                 }).ToList()                                                                                                                                                                                                                               
+      // 464 -//         }).ToList();                                                                                                                                                                                                                                      
+      // 465 -//     }                                                                                                                                                                                                                                                     
+      // 466 -//                                                                                                                                                                                                                                                           
+      // 467 -//     public async Task UpdateUsersSavedVerse(int id)                                                                                                                                                                                                       
+      // 468 -//     {                                                                                                                                                                                                                                                     
+      // 469 -//         var sql = @"UPDATE VERSES SET saved_count = saved_count + 1                                                                                                                                                                                       
+      // 470 -//                      WHERE id = @Id";                                                                                                                                                                                                                     
+      // 471 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 472 -//         await conn.ExecuteAsync(sql, new { Id = id });                                                                                                                                                                                                    
+      // 473 -//     }                                                                                                                                                                                                                                                     
+      // 474 -//                                                                                                                                                                                                                                                           
+      // 475 -//     public async Task UpdateUsersMemorizedVerse(int id)                                                                                                                                                                                                   
+      // 476 -//     {                                                                                                                                                                                                                                                     
+      // 477 -//         var sql = @"UPDATE VERSES SET memorized_count = memorized_count + 1                                                                                                                                                                               
+      // 478 -//                      WHERE id = @Id";                                                                                                                                                                                                                     
+      // 479 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 480 -//         await conn.ExecuteAsync(sql, new { Id = id });                                                                                                                                                                                                    
+      // 481 -//     }                                                                                                                                                                                                                                                     
+      // 482 -//                                                                                                                                                                                                                                                           
+      // 483 -//     class VerseCardDto                                                                                                                                                                                                                                    
+      // 484 -//     {                                                                                                                                                                                                                                                     
+      // 485 -//         public int VerseId { get; set; }                                                                                                                                                                                                                  
+      // 486 -//         public string VerseBook { get; set; } = string.Empty;                                                                                                                                                                                             
+      // 487 -//         public int VerseChapter { get; set; }                                                                                                                                                                                                             
+      // 488 -//         public int VerseNum { get; set; }                                                                                                                                                                                                                 
+      // 489 -//         public int VerseTotalMemorizedCount { get; set; }                                                                                                                                                                                                 
+      // 490 -//         public int VerseTotalSavedCount { get; set; }                                                                                                                                                                                                     
+      // 491 -//         public Vector? VerseEmbedding { get; set; }                                                                                                                                                                                                       
+      // 492 -//                                                                                                                                                                                                                                                           
+      // 493 -//         public int? CategoryId { get; set; }                                                                                                                                                                                                              
+      // 494 -//         public string? CategoryName { get; set; }                                                                                                                                                                                                         
+      // 495 -//                                                                                                                                                                                                                                                           
+      // 496 -//         public int? CrossReferenceVotes { get; set; }                                                                                                                                                                                                     
+      // 497 -//         public string? CrossReferenceReference { get; set; }                                                                                                                                                                                              
+      // 498 -//         public string? CRText { get; set; }                                                                                                                                                                                                               
+      // 499 -//         public int? CRVerseId { get; set; }                                                                                                                                                                                                               
+      // 500 -//         public string? CRBook { get; set; }                                                                                                                                                                                                               
+      // 501 -//         public int? CRChapter { get; set; }                                                                                                                                                                                                               
+      // 502 -//         public int? CRVerseNum { get; set; }                                                                                                                                                                                                              
+      // 503 -//         public int? CRMemorized { get; set; }                                                                                                                                                                                                             
+      // 504 -//         public int? CRSaved { get; set; }                                                                                                                                                                                                                 
+      // 505 -//                                                                                                                                                                                                                                                           
+      // 506 -//         public int? CollectionId { get; set; }                                                                                                                                                                                                            
+      // 507 -//         public string? CollectionTitle { get; set; }                                                                                                                                                                                                      
+      // 508 -//         public CollectionVisibility? CollectionVisibility { get; set; }                                                                                                                                                                                   
+      // 509 -//     }                                                                                                                                                                                                                                                     
+      // 510 -//                                                                                                                                                                                                                                                           
+      // 511 -//     public async Task<VerseCardResponse> GetVerseCardResponse(int userId, List<int> verseIds)                                                                                                                                                             
+      // 512 -//     {                                                                                                                                                                                                                                                     
+      // 513 -//         var conn = _requestDbConnection.Connection;                                                                                                                                                                                                       
+      // 514 -//                                                                                                                                                                                                                                                           
+      // 515 -//         var results = await conn.QueryAsync<VerseCardDto>(                                                                                                                                                                                                
+      // 516 -//             """                                                                                                                                                                                                                                           
+      // 517 -//             select                                                                                                                                                                                                                                        
+      // 518 -//             v.id as VerseId,                                                                                                                                                                                                                              
+      // 519 -//             v.book as VerseBook,                                                                                                                                                                                                                          
+      // 520 -//             v.chapter as VerseChapter,                                                                                                                                                                                                                    
+      // 521 -//             v.verse_num as VerseNum,                                                                                                                                                                                                                      
+      // 522 -//             v.memorized_count as VerseTotalMemorizedCount,                                                                                                                                                                                                
+      // 523 -//             v.saved_count as VerseTotalSavedCount,                                                                                                                                                                                                        
+      // 524 -//             c.id as CategoryId,                                                                                                                                                                                                                           
+      // 525 -//             c.name as CategoryName,                                                                                                                                                                                                                       
+      // 526 -//             crp.reference as CrossReferenceReference,                                                                                                                                                                                                     
+      // 527 -//             cr.votes as CrossReferenceVotes,                                                                                                                                                                                                              
+      // 528 -//             crv.text as CRText,                                                                                                                                                                                                                           
+      // 529 -//             crv.id as CRVerseId,                                                                                                                                                                                                                          
+      // 530 -//             crv.book as CRBook,                                                                                                                                                                                                                           
+      // 531 -//             crv.chapter as CRChapter,                                                                                                                                                                                                                     
+      // 532 -//             crv.verse_num as CRVerseNum,                                                                                                                                                                                                                  
+      // 533 -//             crv.memorized_count as CRMemorized,                                                                                                                                                                                                           
+      // 534 -//             crv.saved_count as CRSaved,                                                                                                                                                                                                                   
+      // 535 -//             col.id as CollectionId,                                                                                                                                                                                                                       
+      // 536 -//             col.title as CollectionTitle,                                                                                                                                                                                                                 
+      // 537 -//             col.visibility as CollectionVisibility                                                                                                                                                                                                        
+      // 538 -//             from verses v                                                                                                                                                                                                                                 
+      // 539 -//             left join verse_categories vc on vc.verse_id = v.id                                                                                                                                                                                           
+      // 540 -//             left join categories c on c.id = vc.category_id                                                                                                                                                                                               
+      // 541 -//             left join cross_references cr on cr.from_verse_id = v.id                                                                                                                                                                                      
+      // 542 -//             left join cross_reference_passages_verses crpv on crpv.passage_id = cr.to_passage_id                                                                                                                                                          
+      // 543 -//             left join cross_reference_passages crp on crp.id = crpv.passage_id                                                                                                                                                                            
+      // 544 -//             left join verses crv on crv.id = crpv.verse_id                                                                                                                                                                                                
+      // 545 -//             left join passages_verses pv on pv.verse_id = v.id                                                                                                                                                                                            
+      // 546 -//             left join collection_passages cp on cp.id = pv.passage_id                                                                                                                                                                                     
+      // 547 -//             left join collections col on col.id = cp.collection_id                                                                                                                                                                                        
+      // 548 -//                 and col.is_deleted = false                                                                                                                                                                                                                
+      // 549 -//                 and col.user_id = @userId                                                                                                                                                                                                                 
+      // 550 -//             where v.id = any(@verseIds)                                                                                                                                                                                                                   
+      // 551 -//             """, new                                                                                                                                                                                                                                      
+      // 552 -//             {                                                                                                                                                                                                                                             
+      // 553 -//                 verseIds = verseIds.ToArray(),                                                                                                                                                                                                            
+      // 554 -//                 userId                                                                                                                                                                                                                                    
+      // 555 -//             });                                                                                                                                                                                                                                           
+      // 556 -//                                                                                                                                                                                                                                                           
+      // 557 -//         var allGroups = results.GroupBy(dto => dto.VerseId).ToList();                                                                                                                                                                                     
+      // 558 -//         if (!allGroups.Any())                                                                                                                                                                                                                             
+      // 559 -//             return new VerseCardResponse { };                                                                                                                                                                                                             
+      // 560 -//                                                                                                                                                                                                                                                           
+      // 561 -//         return new VerseCardResponse                                                                                                                                                                                                                      
+      // 562 -//         {                                                                                                                                                                                                                                                 
+      // 563 -//             TotalSaved = allGroups.Sum(g => g.Max(r => r.VerseTotalSavedCount)),                                                                                                                                                                          
+      // 564 -//             TotalMemorized = allGroups.Sum(g => g.Max(r => r.VerseTotalMemorizedCount)),                                                                                                                                                                  
+      // 565 -//             NumPracticed = 0,                                                                                                                                                                                                                             
+      // 566 -//             NextDue = DateTime.UtcNow,                                                                                                                                                                                                                    
+      // 567 -//             CrossReferences = allGroups                                                                                                                                                                                                                   
+      // 568 -//                 .Select(g => new CrossReferenceResponse                                                                                                                                                                                                   
+      // 569 -//                 {                                                                                                                                                                                                                                         
+      // 570 -//                     FromVerse = new Verse                                                                                                                                                                                                                 
+      // 571 -//                     {                                                                                                                                                                                                                                     
+      // 572 -//                         Id = g.First().VerseId,                                                                                                                                                                                                           
+      // 573 -//                         Reference = ReferenceParser.Parse(                                                                                                                                                                                                
+      // 574 -//                             g.First().VerseBook,                                                                                                                                                                                                          
+      // 575 -//                             g.First().VerseChapter,                                                                                                                                                                                                       
+      // 576 -//                             new List<int> { g.First().VerseNum }),                                                                                                                                                                                        
+      // 577 -//                         Text = string.Empty,                                                                                                                                                                                                              
+      // 578 -//                         ReadableReference = ReferenceParser.Parse(                                                                                                                                                                                        
+      // 579 -//                             g.First().VerseBook,                                                                                                                                                                                                          
+      // 580 -//                             g.First().VerseChapter,                                                                                                                                                                                                       
+      // 581 -//                             new List<int> { g.First().VerseNum })?.ReadableReference                                                                                                                                                                      
+      // 582 -//                     },                                                                                                                                                                                                                                    
+      // 583 -//                     CrossReferences = g                                                                                                                                                                                                                   
+      // 584 -//                         .Where(r => r.CrossReferenceReference is not null)                                                                                                                                                                                
+      // 585 -//                         .GroupBy(r => r.CrossReferenceReference!)                                                                                                                                                                                         
+      // 586 -//                         .Select(crGroup =>                                                                                                                                                                                                                
+      // 587 -//                         {                                                                                                                                                                                                                                 
+      // 588 -//                             var reference = ReferenceParser.Parse(crGroup.Key);                                                                                                                                                                           
+      // 589 -//                             if (reference == null)                                                                                                                                                                                                        
+      // 590 -//                                 return null;                                                                                                                                                                                                              
+      // 591 -//                                                                                                                                                                                                                                                           
+      // 592 -//                             return new Passage                                                                                                                                                                                                            
+      // 593 -//                             {                                                                                                                                                                                                                             
+      // 594 -//                                 Reference = reference,                                                                                                                                                                                                    
+      // 595 -//                                 Verses = crGroup                                                                                                                                                                                                          
+      // 596 -//                                     .DistinctBy(r => r.CRVerseId)                                                                                                                                                                                         
+      // 597 -//                                     .Where(r => r.CRVerseId.HasValue && r.CRBook != null && r.CRChapter.HasValue && r.CRVerseNum.HasValue)                                                                                                                
+      // 598 -//                                     .Select(r => new Verse                                                                                                                                                                                                
+      // 599 -//                                     {                                                                                                                                                                                                                     
+      // 600 -//                                         Id = r.CRVerseId ?? 0,                                                                                                                                                                                            
+      // 601 -//                                         Reference = ReferenceParser.Parse(r.CRBook ?? "", r.CRChapter ?? 0, new List<int> { r.CRVerseNum ?? 0 }),                                                                                                         
+      // 602 -//                                         Text = r.CRText ?? "",                                                                                                                                                                                            
+      // 603 -//                                         ReadableReference = $"{r.CRBook} {r.CRChapter}:{r.CRVerseNum}"                                                                                                                                                    
+      // 604 -//                                     })                                                                                                                                                                                                                    
+      // 605 -//                                     .ToList()                                                                                                                                                                                                             
+      // 606 -//                             };                                                                                                                                                                                                                            
+      // 607 -//                         })                                                                                                                                                                                                                                
+      // 608 -//                         .Where(p => p != null)                                                                                                                                                                                                            
+      // 609 -//                         .Cast<Passage>()                                                                                                                                                                                                                  
+      // 610 -//                         .Where(p => p.Verses.Count > 0 && !verseIds.Contains(p.Verses.First().Id))                                                                                                                                                        
+      // 611 -//                         .ToList()                                                                                                                                                                                                                         
+      // 612 -//                 })                                                                                                                                                                                                                                        
+      // 613 -//                 .Where(group => group.CrossReferences.Count > 0)                                                                                                                                                                                          
+      // 614 -//                 .ToList(),                                                                                                                                                                                                                                
+      // 615 -//         };                                                                                                                                                                                                                                                
+      // 616 -//     }                                                                                                                                                                                                                                                     
+      // 617 -// }        

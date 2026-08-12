@@ -139,9 +139,9 @@ public static class Services
         services.AddDbContextFactory<ApplicationDbContext>(
             options => options.UseNpgsql(connectionString, o => o.UseVector()),
             ServiceLifetime.Scoped);
-        
-        // Add postgres data source for integration tests
-        // services.AddNpgsqlDataSource(connectionString);
+
+        // Data source for raw Dapper queries (pgvector-aware), used by *Dapper data access classes
+        services.AddNpgsqlDataSource(connectionString, dataSourceBuilder => dataSourceBuilder.UseVector());
         
         //
         services.AddHttpClient("ExpoPush", client =>
@@ -210,7 +210,7 @@ public static class Services
         // services.AddScoped<ActivityLogger>();
         //services.AddScoped<PasswordResetService>();
         //services.AddScoped<PopulateDatabase>();
-        //services.AddScoped<SearchService>();
+        services.AddScoped<SearchService>();
         // services.AddScoped<NotificationService>();
         //services.AddScoped<VerseService>();
         //services.AddScoped<UserPassageService>();
@@ -219,11 +219,11 @@ public static class Services
         services.AddScoped<BibleService>();
         //services.AddScoped<VerseOfDayService>();
 
-        //services.AddScoped<VerseManagement>();
+        services.AddScoped<VerseManagement>();
         services.AddScoped<BibleApi>();
         services.AddScoped<BibleSyncer>();
 
-        //services.AddScoped<EmbeddingGenerator>();
+        services.AddScoped<EmbeddingGenerator>();
 
         services.AddSingleton<BibleSyncerQueue>();
         services.AddSingleton<AuthorizationSyncerData>();
@@ -236,8 +236,12 @@ public static class Services
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
         services.AddScoped<IUserData, UserDataEFCore>();
+        services.AddScoped<UserDataEFCore>();
+        services.AddScoped<UserDataDapper>();
         services.AddScoped<IAdminData, AdminDataEfCore>();
         services.AddScoped<IVerseData, VerseDataEfCore>();
+        services.AddScoped<VerseDataEfCore>();
+        services.AddScoped<VerseDataDapper>();
         services.AddScoped<BibleData>();
         services.AddScoped<BibleSyncLogData>();
         services.AddScoped<BibleRepository>();

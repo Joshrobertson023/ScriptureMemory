@@ -53,7 +53,11 @@ public class BibleApi
             "include-verse-numbers=true&" +
             "include-verse-spans=true");
 
-        return JsonSerializer.Deserialize<ApiResponse<ChapterData>>(response)
+        return JsonSerializer.Deserialize<ApiResponse<ChapterData>>(response,
+               new JsonSerializerOptions
+               {
+                   PropertyNameCaseInsensitive = true,
+               })
             ?? throw new InvalidOperationException("response was null deserializing");
     }
 

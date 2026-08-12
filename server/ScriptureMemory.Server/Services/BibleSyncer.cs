@@ -121,6 +121,7 @@ public class BibleSyncer
                             BibleName = purging.Abbreviation
                         });
 
+                        // Todo: Implement this method
                         await PurgeBible(purging.Id);
 
                         await _eventDispatcher.Send(new SyncEvent

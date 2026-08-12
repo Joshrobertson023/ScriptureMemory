@@ -3174,6 +3174,7 @@
           "BenchmarkDotNet": "0.15.8",
           "Bogus": "35.6.5",
           "CsvHelper": "33.1.0",
+          "Dapper": "2.1.66",
           "DataAccess": "1.0.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.25",
           "Microsoft.AspNetCore.OpenApi": "8.0.19",

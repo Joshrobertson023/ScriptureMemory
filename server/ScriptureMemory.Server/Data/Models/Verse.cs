@@ -19,7 +19,7 @@ public class Verse
     public Reference Reference 
     { 
         get => _reference;
-        private set
+        set
         {
             _reference = value;
             

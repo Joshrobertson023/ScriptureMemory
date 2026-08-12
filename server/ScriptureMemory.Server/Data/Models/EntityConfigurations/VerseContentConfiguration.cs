@@ -12,7 +12,7 @@ public class VerseContentConfiguration : IEntityTypeConfiguration<VerseTranslati
             .HasMaxLength(5);
         builder.Property(e => e.PlainText)
             .IsRequired()
-            .HasMaxLength(500);
+            .HasMaxLength(1000);
         builder.Property(e => e.LastUpdated);
     }
 }

@@ -13,7 +13,7 @@ public static class Tasks
         
         var tasks = new List<(string TaskName, Func<Task> Task)>
         {
-            
+            ("Upload verses from csv", () => UploadVersesFromCsv(scope))
         };
 
         if (tasks.Count == 0)
@@ -38,8 +38,9 @@ public static class Tasks
         return app;
     }
 
-    public static async Task SeedBibles(IServiceScope scope)
+    public static async Task UploadVersesFromCsv(IServiceScope scope)
     {
-        var service = scope.ServiceProvider.GetRequiredService<BibleSyncer>();
+        var service = scope.ServiceProvider.GetRequiredService<VerseManagement>();
+        await service.UploadVersesToPostgres();
     }
 }
