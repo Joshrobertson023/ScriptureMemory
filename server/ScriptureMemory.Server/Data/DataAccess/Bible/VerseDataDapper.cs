@@ -33,7 +33,7 @@ public class VerseDataDapper
         public DateTime? LastUpdated { get; set; }
     }
 
-    private static Verse MapVerse(VerseContentDto dto, string translation)
+    private static Verse MapVerse(VerseContentDto dto)
     {
         var book = new Book(dto.BookDisplayName);
         var verseNum = dto.VerseNumbers.FirstOrDefault();
@@ -46,7 +46,6 @@ public class VerseDataDapper
 
         var content = new VerseTranslationContent
         {
-            Version = translation,
             VerseId = verse.Id,
             PlainText = dto.PlainText,
             ContentUsx = dto.ContentUsx,
@@ -59,7 +58,7 @@ public class VerseDataDapper
         return verse;
     }
 
-    public async Task<Passage> GetPassage(Reference reference, string translation)
+    public async Task<Passage> GetPassage(Reference reference)
     {
         var verseNumbers = reference.VerseNumbers
             ?? throw new InvalidOperationException("Reference has no verse numbers.");
@@ -86,11 +85,11 @@ public class VerseDataDapper
             join "VerseTranslationContents" vc
                 on vc."VerseId" = v."Id"
             where v."Id" = any(@ids)
-            and vc."Version" = @translation
-            """, new { ids, translation });
+            and vc."Version" = 'kjv'
+            """, new { ids });
 
         var verses = results
-            .Select(dto => MapVerse(dto, translation))
+            .Select(dto => MapVerse(dto))
             .OrderBy(v => v.Reference.VerseNumbers!.First())
             .ToList();
 
@@ -101,7 +100,7 @@ public class VerseDataDapper
         };
     }
 
-    public async Task<List<Verse>> GetVersesSemanticSearch(Vector queryEmbedding, string translation, int maxResults = 50)
+    public async Task<List<Verse>> GetKjvContentForSemanticSearch(Vector queryEmbedding, int maxResults = 50)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
 
@@ -120,16 +119,16 @@ public class VerseDataDapper
             from "Verses" v
             join "VerseTranslationContents" vc
                 on vc."VerseId" = v."Id"
-            where vc."Version" = @translation
+            where vc."Version" = 'kjv'
             and vc."Embedding" is not null
             order by vc."Embedding" <-> @queryEmbedding
             limit @maxResults
-            """, new { queryEmbedding, translation, maxResults });
+            """, new { queryEmbedding, maxResults });
 
-        return results.Select(dto => MapVerse(dto, translation)).ToList();
+        return results.Select(dto => MapVerse(dto)).ToList();
     }
 
-    public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> queryEmbeddings, string translation, int maxResults = 25)
+    public async Task<List<Verse>> GetKjvContentForSemanticSearch(List<Vector> queryEmbeddings, int maxResults = 25)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
 
@@ -149,15 +148,15 @@ public class VerseDataDapper
             join "VerseTranslationContents" vc
                 on vc."VerseId" = v."Id"
             cross join unnest(@queryEmbeddings) as q(embedding)
-            where vc."Version" = @translation
+            where vc."Version" = 'kjv'
             and vc."Embedding" is not null
             group by v."Id", v."Reference_Chapter", v."Reference_VerseNumbers", v."Reference_Book_DisplayName",
                 v."MemorizedCount", v."SavedCount", vc."PlainText", vc."ContentUsx", vc."LastUpdated"
             order by min(vc."Embedding" <-> q.embedding)
             limit @maxResults
-            """, new { queryEmbeddings = queryEmbeddings.ToArray(), translation, maxResults });
+            """, new { queryEmbeddings = queryEmbeddings.ToArray(), maxResults });
 
-        return results.Select(dto => MapVerse(dto, translation)).ToList();
+        return results.Select(dto => MapVerse(dto)).ToList();
     }
 }
 

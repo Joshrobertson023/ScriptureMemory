@@ -64,90 +64,22 @@ public class BibleRepository(
         return apiChapterDto;
     }
 
-    /// <summary>
-    /// Gets every verse (with its translation content) making up a passage, checking the distributed
-    /// cache per-verse first and only querying the database for the verses that missed
-    /// </summary>
-    /// <param name="reference"></param>
-    /// <param name="translation"></param>
-    /// <returns></returns>
-    public async Task<Passage> GetPassage(Reference reference, string translation)
+    public async Task<Passage> GetKjvPassageForSemanticSearch(Reference reference)
     {
-        var verseNumbers = reference.VerseNumbers
-            ?? throw new InvalidOperationException("Reference has no verse numbers.");
-
-        var cachedVerses = new List<Verse>();
-        var missingVerseNumbers = new List<int>();
-
-        foreach (var verseNum in verseNumbers)
-        {
-            var cacheKey = $"{translation}.{reference.Book.Abbreviation.ToUpper()}.{reference.Chapter}.{verseNum}";
-            var cached = await _distributedCache.GetAsync(cacheKey);
-
-            if (cached is null)
-            {
-                missingVerseNumbers.Add(verseNum);
-                continue;
-            }
-
-            var content = JsonSerializer.Deserialize<VerseTranslationContent>(cached)
-                ?? throw new Exception($"Error deserializing {nameof(VerseTranslationContent)}");
-
-            var verse = new Verse(reference.Book, reference.Chapter, verseNum);
-            content.VerseId = verse.Id;
-            content.VerseNavigation = verse;
-            verse.TranslationContents = new List<VerseTranslationContent> { content };
-
-            cachedVerses.Add(verse);
-
-            _logger.LogInformation("Verse content found in cache: {CacheKey}", cacheKey);
-        }
-
-        if (missingVerseNumbers.Count == 0)
-        {
-            return new Passage
-            {
-                Reference = reference,
-                Verses = cachedVerses.OrderBy(v => v.Reference.VerseNumbers!.First()).ToList()
-            };
-        }
-
-        var missingReference = new Reference(reference.Book, reference.Chapter, missingVerseNumbers);
-        var fetchedPassage = await _verseData.GetPassage(missingReference, translation);
-
-        await CacheVerseContents(fetchedPassage.Verses, translation);
-
-        var allVerses = cachedVerses
-            .Concat(fetchedPassage.Verses)
-            .OrderBy(v => v.Reference.VerseNumbers!.First())
-            .ToList();
-
-        return new Passage
-        {
-            Reference = reference,
-            Verses = allVerses
-        };
+        
     }
 
-    /// <summary>
-    /// Finds the verses whose translation content embedding is closest to the given embedding,
-    /// caching each result's translation content for later lookups
-    /// </summary>
-    public async Task<List<Verse>> GetVersesSemanticSearch(Vector embedding, string translation)
+    public async Task<List<Verse>> GetKjvContentForSemanticSearch(Vector embedding)
     {
-        var verses = await _verseData.GetVersesSemanticSearch(embedding, translation);
-        await CacheVerseContents(verses, translation);
+        var verses = await _verseData.GetKjvContentForSemanticSearch(embedding);
+        await CacheVerseContents(verses, "kjv");
         return verses;
     }
 
-    /// <summary>
-    /// Finds the verses whose translation content embedding is closest to any of the given embeddings,
-    /// caching each result's translation content for later lookups
-    /// </summary>
-    public async Task<List<Verse>> GetVersesSemanticSearch(List<Vector> embeddings, string translation)
+    public async Task<List<Verse>> GetKjvContentForSemanticSearch(List<Vector> embeddings, string translation)
     {
-        var verses = await _verseData.GetVersesSemanticSearch(embeddings, translation);
-        await CacheVerseContents(verses, translation);
+        var verses = await _verseData.GetKjvContentForSemanticSearch(embeddings);
+        await CacheVerseContents(verses, "kjv");
         return verses;
     }
 
@@ -169,5 +101,10 @@ public class BibleRepository(
 
             _logger.LogInformation("Cached verse content: {CacheKey}", content.CacheKey);
         }
+    }
+
+    public async Task<VerseTranslationContent> GetCachedVerseContent(Verse verse)
+    {
+        
     }
 }

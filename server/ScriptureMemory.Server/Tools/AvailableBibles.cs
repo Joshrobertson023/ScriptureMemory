@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace ScriptureMemory.Server.Tools;
 public static class AvailableBibles
 {
+    public const string FALLBACK_BIBLE = "kjv";
+    
     /// <summary>
     /// Bibles authorized to use from API.Bible
     /// Add a new one here and run the startup tasks to add the new Bible to my database

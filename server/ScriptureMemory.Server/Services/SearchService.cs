@@ -1,6 +1,7 @@
 using DataAccess.Data;
 using DataAccess.Models;
 using Pgvector;
+using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Services;
@@ -59,117 +60,122 @@ public sealed class SearchService
         
         if (string.IsNullOrEmpty(userId))
             _logger.LogInformation("UserId not found.");
-        
-        // Implement Bible searching, recent searches, save user and collection searching for later
-        // Be able to return whatever search results wanted, so mix of passages and collections based on weights from semantic search
-        // If search book, return top results for passages in book
-        // Use AI/embeddings to implement semantic search
 
-        // before this:
-            // Figure out style for categories on passages
-            // Clicking on any passage loads metadata for passage (categories, cross references paginated, in your lists, num saved, etc)
-            //
-
-        return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
-    }
-
-    private async Task<List<SearchResult>> GetPassageSearchResults(string search, string translation)
-    {
-        // If single verse search, do this normal semantic search:
-        // If multiple verses / passage, get passage, then semantic results per verse
+        if (!AvailableBibles.TryGetBible(request.Translation, out var bible))
+            throw new BibleUnavailableException("The Bible {bible} is not available.", request.Translation);
 
         Reference? reference = null;
         var results = new List<SearchResult>();
 
+        // TODO: Refactor to create a method that checks if it's a valid reference instead of throwing
         try
         {
-            reference = ReferenceParser.Parse(search);
+            reference = ReferenceParser.Parse(request.Search);
         }
         catch
         {
             reference = null;
             // Don't search by reference
         }
-
+        
         if (reference is not null)
         {
-            // Searching multiple verses / a passage
-            var passage = await _bibleRepository.GetPassage(reference, translation);
-
-            results.Add(new SearchResult
-            {
-                Type = SearchResultType.ExactPassage,
-                Passage = passage,
-                Rank = 1
-            });
-
-            var embeddingTexts = passage.Verses
-                .SelectMany(v => v.TranslationContents ?? new List<VerseTranslationContent>())
-                .Select(c => c.GetEmbeddingText())
-                .Where(t => !string.IsNullOrEmpty(t))
-                .Select(t => t!)
-                .ToList();
-
-            var passageResults = embeddingTexts.Count > 0
-                ? await _bibleRepository.GetVersesSemanticSearch(
-                    await _embeddingGenerator.GenerateEmbeddings(embeddingTexts),
-                    translation)
-                : new List<Verse>();
-
-            foreach (var _passage in passageResults)
-            {
-                results.Add(new SearchResult
-                {
-                    Type = SearchResultType.SemanticVerse,
-                    Passage = new Passage
-                    {
-                        Reference = new Reference
-                        {
-                            Book = _passage.Reference.Book,
-                            Chapter = _passage.Reference.Chapter,
-                            VerseNumbers = _passage.Reference.VerseNumbers
-                            // ReadableReference is left unset -- Reference.ReadableReference lazily
-                            // computes it from Book/Chapter/VerseNumbers on first access.
-                        },
-                        Verses = new List<DataAccess.Models.Verse> { _passage }
-                    },
-                    Rank = 2
-                });
-            }
-
-            return results;
+            return Results.Ok(await GetReferenceSearchResults(request.Translation.ToLower().Trim(), reference));
         }
         else
         {
-            var embedding = await _embeddingGenerator.GenerateEmbedding(search);
-
-            var singleVerseSearchResults = await _bibleRepository.GetVersesSemanticSearch(embedding, translation);
-
-            foreach (var verse in singleVerseSearchResults)
-            {
-                results.Add(new SearchResult
-                {
-                    Type = SearchResultType.SemanticVerse,
-                    Passage = new Passage
-                    {
-                        Reference = new Reference
-                        {
-                            Book = verse.Reference.Book,
-                            Chapter = verse.Reference.Chapter,
-                            VerseNumbers = verse.Reference.VerseNumbers
-                            // ReadableReference is left unset -- Reference.ReadableReference lazily
-                            // computes it from Book/Chapter/VerseNumbers on first access.
-                        },
-                        Verses = new List<DataAccess.Models.Verse> { verse }
-                    },
-                    Rank = 1
-                });
-            }
-
-            return results
-                .OrderByDescending(r => r.Rank)
-                .ToList();
+            return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
         }
+
+        return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
+    }
+
+    private async Task<List<SearchResult>> GetReferenceSearchResults(string translation, Reference? reference)
+    {
+        var results = new List<SearchResult>();
+        
+        // Get the exact passage searched
+        var passage = await _bibleRepository.GetPassage(reference, translation);
+
+        results.Add(new SearchResult
+        {
+            Type = SearchResultType.ExactPassage,
+            Passage = passage,
+            Rank = 1
+        });
+
+        // Add the semantically similar to the searched passage to the search results
+        
+        var embeddingTexts = passage.Verses
+            .SelectMany(v => v.TranslationContents ?? new List<VerseTranslationContent>())
+            .Select(c => c.GetEmbeddingText())
+            .Where(t => !string.IsNullOrEmpty(t))
+            .Select(t => t!)
+            .ToList();
+        
+        var versesResult = embeddingTexts.Count > 0
+            ? await _bibleRepository.GetKjvContentForSemanticSearch(
+                await _embeddingGenerator.GenerateEmbeddings(embeddingTexts),
+                translation)
+            : new List<Verse>();
+
+        if (translation != "kjv")
+        {
+            // Fetch verse content from api.bible
+        }
+
+        foreach (var _passage in passageResults)
+        {
+            results.Add(new SearchResult
+            {
+                Type = SearchResultType.SemanticVerse,
+                Passage = new Passage
+                {
+                    Reference = new Reference
+                    {
+                        Book = _passage.Reference.Book,
+                        Chapter = _passage.Reference.Chapter,
+                        VerseNumbers = _passage.Reference.VerseNumbers
+                    },
+                    Verses = new List<DataAccess.Models.Verse> { _passage }
+                },
+                Rank = 2
+            });
+        }
+
+        return results;
+    }
+
+    private async Task<List<SearchResult>> GetPassageSearchResults(string search, string translation)
+    {
+        var results = new List<SearchResult>();
+
+        var searchEmbedding = await _embeddingGenerator.GenerateEmbedding(search);
+
+        var results = await _bibleRepository.GetKjvContentForSemanticSearch(search);
+
+        foreach (var _passage in passageResults)
+        {
+            results.Add(new SearchResult
+            {
+                Type = SearchResultType.SemanticVerse,
+                Passage = new Passage
+                {
+                    Reference = new Reference
+                    {
+                        Book = _passage.Reference.Book,
+                        Chapter = _passage.Reference.Chapter,
+                        VerseNumbers = _passage.Reference.VerseNumbers
+                        // ReadableReference is left unset -- Reference.ReadableReference lazily
+                        // computes it from Book/Chapter/VerseNumbers on first access.
+                    },
+                    Verses = new List<DataAccess.Models.Verse> { _passage }
+                },
+                Rank = 2
+            });
+        }
+
+        return results;
     }
 }
 
