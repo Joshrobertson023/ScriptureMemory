@@ -88,6 +88,24 @@ public class BibleApi
         return (await getUsx, await getPlaintext);
     }
 
+    public async Task<string> GetVersePlaintext(string bibleId, string verseId)
+    {
+        using HttpClient http = new();
+        http.DefaultRequestHeaders.Clear();
+        http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
+        
+        var response = await http.GetStringAsync(
+            $"{_baseUrl}/bibles/{bibleId}" +
+            // $"/chapters/{chapterReference.ChapterId}" + 
+            $"/verses/{verseId}" + 
+            "?content-type=text&" +
+            "include-titles=true&" +
+            "include-verse-numbers=true&" +
+            "include-verse-spans=true");
+
+        return response;
+    }
+
     public async Task<string> GetVerseUsx(string bibleId, string verseId)
     {
         using HttpClient http = new();

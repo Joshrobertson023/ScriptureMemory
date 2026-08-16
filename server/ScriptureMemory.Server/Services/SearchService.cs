@@ -1,5 +1,6 @@
 using DataAccess.Data;
 using DataAccess.Models;
+using Microsoft.Extensions.Caching.Memory;
 using Pgvector;
 using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
@@ -23,6 +24,7 @@ public sealed class SearchService
     private readonly BibleRepository _bibleRepository;
     private readonly EmbeddingGenerator _embeddingGenerator;
     private readonly ILogger<SearchService> _logger;
+    private readonly IMemoryCache _memoryCache;
 
     public SearchService(
         // ActivityLogger logger,
@@ -31,7 +33,8 @@ public sealed class SearchService
         UserDataEFCore userDataEfCore,
         BibleRepository bibleRepository,
         EmbeddingGenerator embeddingGenerator,
-        ILogger<SearchService> logger)
+        ILogger<SearchService> logger,
+        IMemoryCache memoryCache)
     {
         // this.logger = logger;
         _userData = userData;
@@ -40,6 +43,7 @@ public sealed class SearchService
         _bibleRepository = bibleRepository;
         _embeddingGenerator = embeddingGenerator;
         _logger = logger;
+        _memoryCache = memoryCache;
     }
 
     //public async Task TrackSearch(DataAccess.Requests.SearchRequest request)
@@ -56,10 +60,10 @@ public sealed class SearchService
     {
         var userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
         
-        _logger.LogInformation($"User #{userId} has searched for \"{request.Search}\"");
-        
         if (string.IsNullOrEmpty(userId))
             _logger.LogInformation("UserId not found.");
+        
+        _logger.LogInformation($"User #{userId} has searched for \"{request.Search}\"");
 
         if (!AvailableBibles.TryGetBible(request.Translation, out var bible))
             throw new BibleUnavailableException("The Bible {bible} is not available.", request.Translation);
@@ -90,12 +94,12 @@ public sealed class SearchService
         return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
     }
 
-    private async Task<List<SearchResult>> GetReferenceSearchResults(string translation, Reference? reference)
+    private async Task<List<SearchResult>> GetReferenceSearchResults(string translation, Reference reference)
     {
         var results = new List<SearchResult>();
         
         // Get the exact passage searched
-        var passage = await _bibleRepository.GetPassage(reference, translation);
+        var passage = await _bibleRepository.GetKjvPassageForSemanticSearch(reference);
 
         results.Add(new SearchResult
         {
@@ -122,10 +126,14 @@ public sealed class SearchService
         if (translation != "kjv")
         {
             // Fetch verse content from api.bible
+            _logger.LogInformation("Fetching from api.bible verse content.");
         }
 
-        foreach (var _passage in passageResults)
+        foreach (var verse in versesResult)
         {
+            // if (verse.Id == passage.Verses.First().Id)
+            //     continue;
+            
             results.Add(new SearchResult
             {
                 Type = SearchResultType.SemanticVerse,
@@ -133,11 +141,11 @@ public sealed class SearchService
                 {
                     Reference = new Reference
                     {
-                        Book = _passage.Reference.Book,
-                        Chapter = _passage.Reference.Chapter,
-                        VerseNumbers = _passage.Reference.VerseNumbers
+                        Book = verse.Reference.Book,
+                        Chapter = verse.Reference.Chapter,
+                        VerseNumbers = verse.Reference.VerseNumbers
                     },
-                    Verses = new List<DataAccess.Models.Verse> { _passage }
+                    Verses = new List<DataAccess.Models.Verse> { verse }
                 },
                 Rank = 2
             });
@@ -148,34 +156,32 @@ public sealed class SearchService
 
     private async Task<List<SearchResult>> GetPassageSearchResults(string search, string translation)
     {
-        var results = new List<SearchResult>();
+        var searchResults = new List<SearchResult>();
 
         var searchEmbedding = await _embeddingGenerator.GenerateEmbedding(search);
 
-        var results = await _bibleRepository.GetKjvContentForSemanticSearch(search);
+        var result = await _bibleRepository.GetKjvContentForSemanticSearch(searchEmbedding, translation);
 
-        foreach (var _passage in passageResults)
+        foreach (var _verse in result)
         {
-            results.Add(new SearchResult
+            searchResults.Add(new SearchResult
             {
                 Type = SearchResultType.SemanticVerse,
                 Passage = new Passage
                 {
                     Reference = new Reference
                     {
-                        Book = _passage.Reference.Book,
-                        Chapter = _passage.Reference.Chapter,
-                        VerseNumbers = _passage.Reference.VerseNumbers
-                        // ReadableReference is left unset -- Reference.ReadableReference lazily
-                        // computes it from Book/Chapter/VerseNumbers on first access.
+                        Book = _verse.Reference.Book,
+                        Chapter = _verse.Reference.Chapter,
+                        VerseNumbers = _verse.Reference.VerseNumbers
                     },
-                    Verses = new List<DataAccess.Models.Verse> { _passage }
+                    Verses = new List<DataAccess.Models.Verse> { _verse }
                 },
                 Rank = 2
             });
         }
 
-        return results;
+        return searchResults;
     }
 }
 

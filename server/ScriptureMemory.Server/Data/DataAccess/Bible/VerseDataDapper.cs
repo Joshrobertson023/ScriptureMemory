@@ -121,7 +121,7 @@ public class VerseDataDapper
                 on vc."VerseId" = v."Id"
             where vc."Version" = 'kjv'
             and vc."Embedding" is not null
-            order by vc."Embedding" <-> @queryEmbedding
+            order by vc."Embedding" <=> @queryEmbedding
             limit @maxResults
             """, new { queryEmbedding, maxResults });
 
@@ -152,7 +152,7 @@ public class VerseDataDapper
             and vc."Embedding" is not null
             group by v."Id", v."Reference_Chapter", v."Reference_VerseNumbers", v."Reference_Book_DisplayName",
                 v."MemorizedCount", v."SavedCount", vc."PlainText", vc."ContentUsx", vc."LastUpdated"
-            order by min(vc."Embedding" <-> q.embedding)
+            order by min(vc."Embedding" <=> q.embedding)
             limit @maxResults
             """, new { queryEmbeddings = queryEmbeddings.ToArray(), maxResults });
 

@@ -45,6 +45,17 @@ public class Verse
     public int? PassageId { get; set; }
     
     public Passage? PassageNavigation { get; set; } = null!;
+
+    public string? CacheKey
+    {
+        get
+        {
+            if (TranslationContents is null || TranslationContents.Count == 0)
+                return null;
+            
+            return TranslationContents.First().CacheKey;
+        }
+    }
     
     public List<VerseTranslationContent>? TranslationContents { get; set; }
 

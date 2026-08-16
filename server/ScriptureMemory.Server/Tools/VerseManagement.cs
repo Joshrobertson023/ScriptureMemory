@@ -8,6 +8,7 @@ using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Tools;
 using System.Data;
 using System.Globalization;
+using Pgvector;
 
 namespace ScriptureMemory.Server.Tools;
 
@@ -19,13 +20,15 @@ public sealed class VerseManagement
     private readonly string _connectionString;
     private readonly ILogger<VerseManagement> _logger;
     private readonly ApplicationDbContext _dbContext;
+    private readonly EmbeddingGenerator _embeddingGenerator;
 
     public VerseManagement(
         VerseDataEfCore verseData,
         ApplicationDbContext context,
         IConfiguration config,
         ILogger<VerseManagement> logger,
-        ApplicationDbContext dbContext)
+        ApplicationDbContext dbContext,
+        EmbeddingGenerator embeddingGenerator)
     {
         _verseData = verseData;
         _context = context;
@@ -34,6 +37,7 @@ public sealed class VerseManagement
             ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
         _logger = logger;
         _dbContext = dbContext;
+        _embeddingGenerator = embeddingGenerator;
     }
 
     public async Task MoveVerses()
@@ -82,7 +86,7 @@ public sealed class VerseManagement
         _logger.LogDebug("Finished moving verses");
     }
 
-    private List<Verse> RemoveDuplicates(List<ScriptureMemory.Server.Files.CsvRecordModels.Verse> verses)
+    private List<Verse> CreateVersesAndRemoveDuplicates(List<ScriptureMemory.Server.Files.CsvRecordModels.Verse> verses)
     {
         HashSet<string> verseIds = new();
         List<string> duplicates = new();
@@ -91,6 +95,14 @@ public sealed class VerseManagement
         foreach (var record in verses)
         {
             var verse = new Verse(record.Book, record.Chapter, record.VerseNum);
+            verse.TranslationContents = new()
+            {
+                new VerseTranslationContent()
+                {
+                    PlainText = record.Text,
+                    VerseNavigation = verse
+                }
+            };
             if (!verseIds.Add(verse.Id))
                 duplicates.Add(verse.Id);
             else
@@ -113,28 +125,35 @@ public sealed class VerseManagement
 
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                var records = RemoveDuplicates(csv.GetRecords<Files.CsvRecordModels.Verse>().ToList());
+                var verses = CreateVersesAndRemoveDuplicates(csv.GetRecords<Files.CsvRecordModels.Verse>().ToList());
                 
                 const int batchSize = 300;
             
-                for (int i = 00; ; i += batchSize)
+                for (int i = 0; ; i += batchSize)
                 {
-                    var batchedVerses = records.Skip(i).Take(batchSize);
+                    var batchedVerses = verses.Skip(i).Take(batchSize).ToList();
             
+                    _logger.LogInformation("Requesting embeddings for {i}", i);
+                    var embeddings = await _embeddingGenerator.GenerateEmbeddings(
+                        batchedVerses.Select(v => v.TranslationContents.First().GetEmbeddingText()).ToList());
+
+                    for (int j = 0; j < batchedVerses.Count; j++)
+                    {
+                        batchedVerses[j].TranslationContents.First().Embedding = embeddings[j];
+                    }
+                    
                     foreach (var batchedVerse in batchedVerses)
                     {
                         _ = batchedVerse.Reference.ReadableReference; // Call ReadableReference getter to populate it
                         versesInBatch.Add(batchedVerse);
                     }
-            
-                    // Todo: Generate embeddings
                     
                     await _dbContext.Verses.AddRangeAsync(versesInBatch);
                     await _dbContext.SaveChangesAsync();
                     
                     versesInBatch.Clear();
             
-                    if (((records.Count) - i) <= batchSize)
+                    if (((verses.Count) - i) <= batchSize)
                         break;
                 }
             }
