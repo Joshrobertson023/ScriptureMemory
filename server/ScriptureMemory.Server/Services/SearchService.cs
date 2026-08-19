@@ -62,8 +62,6 @@ public sealed class SearchService
         
         if (string.IsNullOrEmpty(userId))
             _logger.LogInformation("UserId not found.");
-        
-        _logger.LogInformation($"User #{userId} has searched for \"{request.Search}\"");
 
         if (!AvailableBibles.TryGetBible(request.Translation, out var bible))
             throw new BibleUnavailableException("The Bible {bible} is not available.", request.Translation);
@@ -84,10 +82,13 @@ public sealed class SearchService
         
         if (reference is not null)
         {
+        
+            _logger.LogInformation($"User #{userId} has searched by reference for \"{request.Search}\"");
             return Results.Ok(await GetReferenceSearchResults(request.Translation.ToLower().Trim(), reference));
         }
         else
         {
+            _logger.LogInformation($"User #{userId} has searched by keyword for \"{request.Search}\"");
             return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
         }
 
@@ -118,7 +119,7 @@ public sealed class SearchService
             .ToList();
         
         var versesResult = embeddingTexts.Count > 0
-            ? await _bibleRepository.GetKjvContentForSemanticSearch(
+            ? await _bibleRepository.GetVersesSemanticSearchResults(
                 await _embeddingGenerator.GenerateEmbeddings(embeddingTexts),
                 translation)
             : new List<Verse>();
@@ -160,7 +161,7 @@ public sealed class SearchService
 
         var searchEmbedding = await _embeddingGenerator.GenerateEmbedding(search);
 
-        var result = await _bibleRepository.GetKjvContentForSemanticSearch(searchEmbedding, translation);
+        var result = await _bibleRepository.GetVersesSemanticSearchResults(searchEmbedding, translation);
 
         foreach (var _verse in result)
         {

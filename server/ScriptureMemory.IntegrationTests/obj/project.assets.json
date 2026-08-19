@@ -519,7 +519,7 @@
           "Microsoft.AspNetCore.App"
         ]
       },
-      "Microsoft.AspNetCore.SpaProxy/8.0.29": {
+      "Microsoft.AspNetCore.SpaProxy/8.0.30": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.AspNetCore.SpaProxy.dll": {}
@@ -2342,6 +2342,20 @@
           "lib/net6.0/Pgvector.dll": {}
         }
       },
+      "Pgvector.Dapper/0.3.1": {
+        "type": "package",
+        "dependencies": {
+          "Dapper": "2.0.4",
+          "Pgvector": "0.3.1",
+          "System.Data.SqlClient": "4.8.6"
+        },
+        "compile": {
+          "lib/net6.0/Pgvector.Dapper.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/Pgvector.Dapper.dll": {}
+        }
+      },
       "Pgvector.EntityFrameworkCore/0.2.2": {
         "type": "package",
         "dependencies": {
@@ -3195,6 +3209,7 @@
           "OpenTelemetry.Instrumentation.Http": "1.16.0",
           "Oracle.ManagedDataAccess.Core": "23.26.0",
           "Pgvector": "0.3.2",
+          "Pgvector.Dapper": "0.3.1",
           "Pgvector.EntityFrameworkCore": "0.2.2",
           "RestSharp": "113.1.0",
           "SQLitePCLRaw.bundle_e_sqlite3": "3.0.2",
@@ -3930,10 +3945,10 @@
         "microsoft.aspnetcore.openapi.nuspec"
       ]
     },
-    "Microsoft.AspNetCore.SpaProxy/8.0.29": {
-      "sha512": "2GM1XdgQROwDCOJapUTsjkjplZvV3v9/K/eyGsyod5ixAWtGWcbhxIdgDoiDVlEqya8bfzAqCg9J/SuySO4Png==",
+    "Microsoft.AspNetCore.SpaProxy/8.0.30": {
+      "sha512": "0y8hv54yXWFHFYImzRXASHWl23tKuMouSWMB2AY2LKTnF/4gFl7c4fTSGk5YM9YikK8X79iNufBO6gGbGl6vCw==",
       "type": "package",
-      "path": "microsoft.aspnetcore.spaproxy/8.0.29",
+      "path": "microsoft.aspnetcore.spaproxy/8.0.30",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -3941,7 +3956,7 @@
         "THIRD-PARTY-NOTICES.TXT",
         "build/Microsoft.AspNetCore.SpaProxy.targets",
         "lib/net8.0/Microsoft.AspNetCore.SpaProxy.dll",
-        "microsoft.aspnetcore.spaproxy.8.0.29.nupkg.sha512",
+        "microsoft.aspnetcore.spaproxy.8.0.30.nupkg.sha512",
         "microsoft.aspnetcore.spaproxy.nuspec"
       ]
     },
@@ -7309,6 +7324,23 @@
         "pgvector.nuspec"
       ]
     },
+    "Pgvector.Dapper/0.3.1": {
+      "sha512": "0/nlQgrvERwX9jWUiPbxFbZl6uZI2Ny1sCwrbb1uEuqx5bfwQGxpsIrPBVyY9fzr8eJnrYCgy1XqPfIfn4w3Nw==",
+      "type": "package",
+      "path": "pgvector.dapper/0.3.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "icon.png",
+        "lib/net462/Pgvector.Dapper.dll",
+        "lib/net6.0/Pgvector.Dapper.dll",
+        "lib/netstandard2.0/Pgvector.Dapper.dll",
+        "pgvector.dapper.0.3.1.nupkg.sha512",
+        "pgvector.dapper.nuspec"
+      ]
+    },
     "Pgvector.EntityFrameworkCore/0.2.2": {
       "sha512": "U4C48O+f31y7lWlUY+fsZrOZAvzI8rCsQb/sEWF3MfGYX/153uQingO2/8YoXeLGx00Wl9na8zl89gehXtMbFg==",
       "type": "package",
@@ -8777,5 +8809,17 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'SSH.NET' 2025.1.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-q939-rpr3-3284",
+      "libraryId": "SSH.NET",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

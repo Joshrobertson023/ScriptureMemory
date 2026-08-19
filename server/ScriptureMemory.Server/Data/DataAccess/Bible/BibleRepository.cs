@@ -66,6 +66,8 @@ public class BibleRepository(
 
     public async Task<Passage> GetKjvPassageForSemanticSearch(Reference reference)
     {
+        Passage passage;
+        
         var cachedPassage = await _distributedCache.GetAsync(reference.CacheKey);
 
         if (cachedPassage is not null)
@@ -75,31 +77,34 @@ public class BibleRepository(
             return JsonSerializer.Deserialize<Passage>(cachedPassage)
                 ?? throw new Exception("Error deserializing passage");
         }
+        else
+        {
+            passage = await _verseData.GetPassage(reference);
+            
+            var cacheOptions = new DistributedCacheEntryOptions()
+                .SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration);
+            
+            await _distributedCache.SetStringAsync(reference.CacheKey, 
+                JsonSerializer.Serialize(passage),
+                cacheOptions);
         
-        var passage = await _verseData.GetPassage(reference);
-        
-        var cacheOptions = new DistributedCacheEntryOptions()
-            .SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration);
-        
-        await _distributedCache.SetStringAsync(reference.CacheKey, 
-            JsonSerializer.Serialize(passage),
-            cacheOptions);
-        
-        _logger.LogInformation("Cached passage: {Reference}", passage.Reference.ReadableReference);
+            _logger.LogInformation("Cached passage: {Reference}", passage.Reference.ReadableReference);
+        }
         
         return passage;
     }
 
-    public async Task<List<Verse>> GetKjvContentForSemanticSearch(Vector embedding, string translation)
+    /// <summary>
+    /// Gets verse content from cache, api, and sets cache
+    /// </summary>
+    /// <param name="embeddingResultVerses"></param>
+    /// <param name="translation"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    /// <exception cref="BibleUnavailableException"></exception>
+    private async Task<List<Verse>> getVersesContent(List<Verse> embeddingResultVerses, string translation)
     {
         HashSet<string> verseIdsNotFoundInCache = new();
-        
-        var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
-            embedding, 
-            translation == "kjv" ? 20 : 5);
-        
-        if (translation == "kjv")
-            return embeddingResultVerses;
         
         HashSet<string> embeddingResultVerseIds = embeddingResultVerses.Select(v => v.Id).ToHashSet();
 
@@ -114,7 +119,7 @@ public class BibleRepository(
                 verse.TranslationContents = (JsonSerializer.Deserialize<Verse>(cachedVerse)
                     ?? throw new Exception("Error deserializing cached verse")).TranslationContents;
                 
-                _logger.LogInformation("Verse found in cache: {Reference}.", verse.Id);
+                _logger.LogInformation("Verse found in cache: {Id}.", verse.Id);
             }
             else
             {
@@ -170,10 +175,27 @@ public class BibleRepository(
         return embeddingResultVerses;
     }
 
-    public async Task<List<Verse>> GetKjvContentForSemanticSearch(List<Vector> embeddings, string translation)
+    public async Task<List<Verse>> GetVersesSemanticSearchResults(Vector embedding, string translation)
     {
-        var verses = await _verseData.GetKjvContentForSemanticSearch(embeddings);
+        var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
+            embedding, 
+            translation == "kjv" ? 20 : 5);
         
-        return verses;
+        if (translation == "kjv")
+            return embeddingResultVerses;
+
+        return await getVersesContent(embeddingResultVerses, translation);
+    }
+
+    public async Task<List<Verse>> GetVersesSemanticSearchResults(List<Vector> embeddings, string translation)
+    {
+        var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
+            embeddings, 
+            translation == "kjv" ? 20 : 5);
+        
+        if (translation == "kjv")
+            return embeddingResultVerses;
+        
+        return await getVersesContent(embeddingResultVerses, translation);
     }
 }

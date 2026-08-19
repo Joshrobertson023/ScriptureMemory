@@ -62,7 +62,7 @@ public sealed class Reference
     {
         get
         {
-            if (VerseNumbers is null || VerseNumbers.Count == 0)
+            if (VerseNumbers is null || VerseNumbers.Count <= 0)
                 return null;
             
             return Book.Abbreviation.ToUpper() 
@@ -70,6 +70,28 @@ public sealed class Reference
                 + Chapter.ToString() 
                 + '.'
                 + VerseNumbers.First().ToString();
+        }
+    }
+
+    public string[] VerseIds
+    {
+        get
+        {
+            if (VerseNumbers is null || VerseNumbers.Count <= 0)
+                return null;
+            
+            string[] verseIds = new string[VerseNumbers.Count];
+
+            for (int i = 0; i < VerseNumbers.Count; i++)
+            {
+                verseIds[i] = Book.Abbreviation.ToUpper() 
+                              + '.' 
+                              + Chapter.ToString() 
+                              + '.'
+                              + VerseNumbers[i].ToString();
+            }
+            
+            return verseIds;
         }
     }
 

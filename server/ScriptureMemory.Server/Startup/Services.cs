@@ -12,6 +12,7 @@ using System.Data;
 using System.Text;
 using VerseAppNew.Server.Services;
 using Pgvector;
+using Pgvector.Dapper;
 using ScriptureMemory.Server.Data.DataAccess;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Services.BackgroundServices;
@@ -142,6 +143,9 @@ public static class Services
 
         // Data source for raw Dapper queries (pgvector-aware), used by *Dapper data access classes
         services.AddNpgsqlDataSource(connectionString, dataSourceBuilder => dataSourceBuilder.UseVector());
+        
+        // Add Vector type to dapper type handler
+        SqlMapper.AddTypeHandler(new VectorTypeHandler());
         
         //
         services.AddHttpClient("ExpoPush", client =>

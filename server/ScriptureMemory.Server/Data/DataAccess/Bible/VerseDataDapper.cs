@@ -58,14 +58,33 @@ public class VerseDataDapper
         return verse;
     }
 
+    public async Task AddVersionToAllVerses()
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+
+        const int limit = 500;
+
+        for (int offset = 0; offset <= 33000; offset += limit)
+        {
+            await connection.ExecuteAsync(
+                $"""
+                  UPDATE "VerseTranslationContents"
+                  SET "Version" = 'kjv'
+                  WHERE "VerseId" IN (
+                    SELECT "VerseId" 
+                    FROM "VerseTranslationContents" 
+                    ORDER BY "VerseId" ASC
+                    LIMIT {limit}
+                    OFFSET {offset}
+                  );
+                  """);
+        }
+
+    }
+
     public async Task<Passage> GetPassage(Reference reference)
     {
-        var verseNumbers = reference.VerseNumbers
-            ?? throw new InvalidOperationException("Reference has no verse numbers.");
-        
-        var ids = verseNumbers
-            .Select(num => reference.Book.Abbreviation.ToUpper() + '.' + reference.Chapter + '.' + num)
-            .ToArray();
+        var verseIds = reference.VerseIds;
 
         await using var connection = await _dataSource.OpenConnectionAsync();
 
@@ -84,9 +103,9 @@ public class VerseDataDapper
             from "Verses" v
             join "VerseTranslationContents" vc
                 on vc."VerseId" = v."Id"
-            where v."Id" = any(@ids)
+            where v."Id" = any(@verseIds)
             and vc."Version" = 'kjv'
-            """, new { ids });
+            """, new { verseIds });
 
         var verses = results
             .Select(dto => MapVerse(dto))
@@ -121,11 +140,31 @@ public class VerseDataDapper
                 on vc."VerseId" = v."Id"
             where vc."Version" = 'kjv'
             and vc."Embedding" is not null
-            order by vc."Embedding" <=> @queryEmbedding
+            order by vc."Embedding" <=> @queryEmbedding::vector
             limit @maxResults
             """, new { queryEmbedding, maxResults });
 
         return results.Select(dto => MapVerse(dto)).ToList();
+    }
+
+    public async Task CreateVectorIndex()
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+
+        await connection.ExecuteAsync("SET statement_timeout = '30min';");
+        await connection.ExecuteAsync("SET maintenance_work_mem = '1GB';");
+
+        await connection.ExecuteAsync(new CommandDefinition(
+            """DROP INDEX IF EXISTS "IX_VerseTranslationContents_Embedding_Hnsw";""",
+            commandTimeout: 60));
+
+        await connection.ExecuteAsync(new CommandDefinition(
+            """
+            CREATE INDEX CONCURRENTLY "IX_VerseTranslationContents_Embedding_Hnsw"
+            ON "VerseTranslationContents"
+            USING hnsw ("Embedding" vector_cosine_ops);
+            """,
+            commandTimeout: 0));
     }
 
     public async Task<List<Verse>> GetKjvContentForSemanticSearch(List<Vector> queryEmbeddings, int maxResults = 25)
@@ -154,7 +193,7 @@ public class VerseDataDapper
                 v."MemorizedCount", v."SavedCount", vc."PlainText", vc."ContentUsx", vc."LastUpdated"
             order by min(vc."Embedding" <=> q.embedding)
             limit @maxResults
-            """, new { queryEmbeddings = queryEmbeddings.ToArray(), maxResults });
+            """, new { queryEmbeddings, maxResults });
 
         return results.Select(dto => MapVerse(dto)).ToList();
     }
