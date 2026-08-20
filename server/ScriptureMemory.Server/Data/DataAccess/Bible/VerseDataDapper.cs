@@ -14,10 +14,14 @@ namespace ScriptureMemory.Server.Data.DataAccess.Bible;
 public class VerseDataDapper
 {
     private readonly NpgsqlDataSource _dataSource;
+    private readonly ILogger<VerseDataDapper> _logger;
 
-    public VerseDataDapper(NpgsqlDataSource dataSource)
+    public VerseDataDapper(
+        NpgsqlDataSource dataSource,
+        ILogger<VerseDataDapper> logger)
     {
         _dataSource = dataSource;
+        _logger = logger;
     }
 
     private sealed class VerseContentDto
@@ -62,30 +66,15 @@ public class VerseDataDapper
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
 
-        const int limit = 500;
-
-        for (int offset = 0; offset <= 33000; offset += limit)
-        {
-            await connection.ExecuteAsync(
-                $"""
-                  UPDATE "VerseTranslationContents"
-                  SET "Version" = 'kjv'
-                  WHERE "VerseId" IN (
-                    SELECT "VerseId" 
-                    FROM "VerseTranslationContents" 
-                    ORDER BY "VerseId" ASC
-                    LIMIT {limit}
-                    OFFSET {offset}
-                  );
-                  """);
-        }
-
+        await connection.ExecuteAsync(
+            $"""
+             UPDATE "VerseTranslationContents"
+             SET "Version" = @newVersion;
+             """, new { newVersion = "kjv" }, commandTimeout: 500000);
     }
 
-    public async Task<Passage> GetPassage(Reference reference)
+    public async Task<List<Verse>> GetVersesFromIds(List<string> verseIds)
     {
-        var verseIds = reference.VerseIds;
-
         await using var connection = await _dataSource.OpenConnectionAsync();
 
         var results = await connection.QueryAsync<VerseContentDto>(
@@ -99,13 +88,41 @@ public class VerseDataDapper
             v."SavedCount" as "SavedCount",
             vc."PlainText" as "PlainText",
             vc."ContentUsx" as "ContentUsx",
-            vc."LastUpdated" as "LastUpdated"
+            vc."LastUpdated" as "LastUpdated",
+            vc."Version" as "Version"
             from "Verses" v
             join "VerseTranslationContents" vc
                 on vc."VerseId" = v."Id"
             where v."Id" = any(@verseIds)
             and vc."Version" = 'kjv'
             """, new { verseIds });
+
+        return results.Select(dto => MapVerse(dto)).ToList();
+    }
+
+    public async Task<Passage> GetPassage(Reference reference)
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+
+        var results = await connection.QueryAsync<VerseContentDto>(
+            """
+            select
+            v."Id" as "VerseId",
+            v."Reference_Chapter" as "Chapter",
+            v."Reference_VerseNumbers" as "VerseNumbers",
+            v."Reference_Book_DisplayName" as "BookDisplayName",
+            v."MemorizedCount" as "MemorizedCount",
+            v."SavedCount" as "SavedCount",
+            vc."PlainText" as "PlainText",
+            vc."ContentUsx" as "ContentUsx",
+            vc."LastUpdated" as "LastUpdated",
+            vc."Version" as "Version"
+            from "Verses" v
+            join "VerseTranslationContents" vc
+                on vc."VerseId" = v."Id"
+            where v."Id" = any(@verseIds)
+            and vc."Version" = 'kjv'
+            """, new { verseIds = reference.VerseIds });
 
         var verses = results
             .Select(dto => MapVerse(dto))
@@ -167,7 +184,7 @@ public class VerseDataDapper
             commandTimeout: 0));
     }
 
-    public async Task<List<Verse>> GetKjvContentForSemanticSearch(List<Vector> queryEmbeddings, int maxResults = 25)
+    public async Task<List<Verse>> GetKjvContentForSemanticSearch(IEnumerable<Vector> queryEmbeddings, int maxResults = 25)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
 

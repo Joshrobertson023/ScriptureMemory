@@ -67,31 +67,46 @@ public class BibleRepository(
     public async Task<Passage> GetKjvPassageForSemanticSearch(Reference reference)
     {
         Passage passage;
-        
-        var cachedPassage = await _distributedCache.GetAsync(reference.CacheKey);
 
-        if (cachedPassage is not null)
+        List<Verse> versesFromCache = new();
+        List<string> versesNotFoundInCache = new();
+
+        foreach (var verseId in reference.VerseIds)
         {
-            _logger.LogInformation("Passage found in cache.");
-            
-            return JsonSerializer.Deserialize<Passage>(cachedPassage)
-                ?? throw new Exception("Error deserializing passage");
+            var cachedVerse = await _distributedCache.GetAsync(verseId);
+
+            if (cachedVerse is null)
+            {
+                versesNotFoundInCache.Add(verseId);
+            }
+            else
+            {
+                _logger.LogInformation("Verse found in cache: {Reference}", verseId);
+                
+                versesFromCache.Add(JsonSerializer.Deserialize<Verse>(cachedVerse)
+                                    ?? throw new Exception("Error deserializing cached verse"));
+            }
         }
-        else
+        
+        List<Verse> versesFetched = await _verseData.GetVersesFromIds(versesNotFoundInCache);
+            
+        var cacheOptions = new DistributedCacheEntryOptions()
+            .SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration);
+
+        foreach (var verseFetched in versesFetched)
         {
-            passage = await _verseData.GetPassage(reference);
-            
-            var cacheOptions = new DistributedCacheEntryOptions()
-                .SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration);
-            
-            await _distributedCache.SetStringAsync(reference.CacheKey, 
-                JsonSerializer.Serialize(passage),
+            await _distributedCache.SetStringAsync(verseFetched.CacheKey, 
+                JsonSerializer.Serialize(verseFetched),
                 cacheOptions);
         
-            _logger.LogInformation("Cached passage: {Reference}", passage.Reference.ReadableReference);
+            _logger.LogInformation("Cached passage: {Reference}", verseFetched.Reference.ReadableReference);
         }
-        
-        return passage;
+            
+        return new Passage()
+        {
+            Reference = reference,
+            Verses = versesFromCache.Concat(versesFetched).OrderBy(v => v.Id).ToList()
+        };
     }
 
     /// <summary>
@@ -175,7 +190,7 @@ public class BibleRepository(
         return embeddingResultVerses;
     }
 
-    public async Task<List<Verse>> GetVersesSemanticSearchResults(Vector embedding, string translation)
+    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(Vector embedding, string translation)
     {
         var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
             embedding, 
@@ -187,7 +202,7 @@ public class BibleRepository(
         return await getVersesContent(embeddingResultVerses, translation);
     }
 
-    public async Task<List<Verse>> GetVersesSemanticSearchResults(List<Vector> embeddings, string translation)
+    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(IEnumerable<Vector> embeddings, string translation)
     {
         var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
             embeddings, 

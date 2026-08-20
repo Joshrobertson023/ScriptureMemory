@@ -23,8 +23,6 @@ public class VerseTranslationContent
 
     [MaxLength(20)]
     public string VerseId { get; set; } = string.Empty;
-
-    public string CacheKey => Version + '.' + VerseId;
     
     // Back-reference to the owning verse -- excluded from JSON so caching/serializing a
     // VerseTranslationContent doesn't cycle back through Verse.TranslationContents.
@@ -36,12 +34,6 @@ public class VerseTranslationContent
         if (string.IsNullOrEmpty(PlainText))
             return null;
 
-        return VerseNavigation.Reference.Book.DisplayName
-               + " "
-               + VerseNavigation.Reference.Chapter
-               + " "
-               + VerseNavigation.Reference.VerseNumbers.FirstOrDefault()
-               + ": "
-               + PlainText;
+        return PlainText;
     }
 }

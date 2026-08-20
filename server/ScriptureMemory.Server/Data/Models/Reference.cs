@@ -52,10 +52,8 @@ public sealed class Reference
                    + Chapter.ToString();
 
     [JsonIgnore]
-    public string CacheKey => 
-        VerseNumbers is null || VerseNumbers.Count == 0
-            ? ChapterId
-            : VerseId ?? throw new InvalidOperationException("Unable to get CacheKey: VerseId was null");
+    public string CacheKey => VerseId 
+                              ?? throw new InvalidOperationException("Unable to get CacheKey: VerseId was null");
 
 
     public string? VerseId

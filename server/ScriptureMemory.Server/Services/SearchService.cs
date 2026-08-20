@@ -110,19 +110,13 @@ public sealed class SearchService
         });
 
         // Add the semantically similar to the searched passage to the search results
-        
-        var embeddingTexts = passage.Verses
-            .SelectMany(v => v.TranslationContents ?? new List<VerseTranslationContent>())
-            .Select(c => c.GetEmbeddingText())
-            .Where(t => !string.IsNullOrEmpty(t))
-            .Select(t => t!)
-            .ToList();
-        
-        var versesResult = embeddingTexts.Count > 0
-            ? await _bibleRepository.GetVersesSemanticSearchResults(
-                await _embeddingGenerator.GenerateEmbeddings(embeddingTexts),
-                translation)
-            : new List<Verse>();
+
+        IEnumerable<Vector> referenceMatchVectors = passage.Verses.Select(
+            v => v.TranslationContents?.First().Embedding 
+                 ?? throw new Exception("Embedding was null"));
+
+        IEnumerable<Verse> versesSemanticSearchResult 
+            = await _bibleRepository.GetVersesSemanticSearchResults(referenceMatchVectors, translation);
 
         if (translation != "kjv")
         {
@@ -130,7 +124,7 @@ public sealed class SearchService
             _logger.LogInformation("Fetching from api.bible verse content.");
         }
 
-        foreach (var verse in versesResult)
+        foreach (var verse in versesSemanticSearchResult)
         {
             // if (verse.Id == passage.Verses.First().Id)
             //     continue;

@@ -8,7 +8,7 @@ public sealed class Book
 {
     public string DisplayName { get; init; }
     public string Abbreviation { get; init; }
-    public List<string> FuzzyMatches { get; init; }
+    public List<string>? FuzzyMatches { get; init; }
     public int NumChapters { get; set; }
 
     /// <summary>
@@ -30,7 +30,6 @@ public sealed class Book
         var result = Books.GetBook(requestedBook);
         DisplayName = result.DisplayName;
         Abbreviation = result.Abbreviation;
-        FuzzyMatches = result.FuzzyMatches;
         NumChapters = result.NumChapters;
     }
     
