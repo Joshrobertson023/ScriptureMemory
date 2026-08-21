@@ -99,7 +99,7 @@ public class BibleRepository(
                 JsonSerializer.Serialize(verseFetched),
                 cacheOptions);
         
-            _logger.LogInformation("Cached passage: {Reference}", verseFetched.Reference.ReadableReference);
+            _logger.LogInformation("Cached verse: {Reference}", verseFetched.Reference.ReadableReference);
         }
             
         return new Passage()
@@ -202,11 +202,17 @@ public class BibleRepository(
         return await getVersesContent(embeddingResultVerses, translation);
     }
 
-    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(IEnumerable<Vector> embeddings, string translation)
+    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(
+        IEnumerable<Vector> embeddings, 
+        string[] originalVerseIds,
+        string translation)
     {
         var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
-            embeddings, 
-            translation == "kjv" ? 20 : 5);
+            embeddings,
+            originalVerseIds,
+            5);
+        // Todo: Comment out when created indexes on embeddings
+            /*translation == "kjv" ? 20 : 5);*/
         
         if (translation == "kjv")
             return embeddingResultVerses;

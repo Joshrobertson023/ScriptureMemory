@@ -7,6 +7,8 @@ using Pgvector;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 using System.ComponentModel;
+using System.Runtime.Serialization;
+
 //using static DataAccess.Data.VerseData;
 
 namespace DataAccess.Models;
@@ -65,5 +67,30 @@ public class Verse
     public Verse(string readableReference)
     {
         Reference = new Reference(readableReference);
+    }
+
+    [OnSerializing]
+    internal void ConvertVectorToArrays()
+    {
+        foreach (var content in TranslationContents)
+        {
+            if (!content.JsonEmbeddings.Any())
+            {
+                content.JsonEmbeddings = content.Embedding?.ToArray()
+                    ?? throw new ArgumentNullException(nameof(content.Embedding));
+            }
+        }
+    }
+
+    [OnDeserialized]
+    internal void ConvertArrayEmbeddingsToVector()
+    {
+        foreach (var content in TranslationContents)
+        {
+            if (content.JsonEmbeddings.Any())
+            {
+                content.Embedding = new Vector(content.JsonEmbeddings);
+            }
+        }
     }
 }

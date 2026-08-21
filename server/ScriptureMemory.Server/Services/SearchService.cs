@@ -114,9 +114,11 @@ public sealed class SearchService
         IEnumerable<Vector> referenceMatchVectors = passage.Verses.Select(
             v => v.TranslationContents?.First().Embedding 
                  ?? throw new Exception("Embedding was null"));
-
         IEnumerable<Verse> versesSemanticSearchResult 
-            = await _bibleRepository.GetVersesSemanticSearchResults(referenceMatchVectors, translation);
+            = await _bibleRepository.GetVersesSemanticSearchResults(
+                referenceMatchVectors, 
+                passage.Verses.Select(v => v.Id).ToArray(),
+                translation);
 
         if (translation != "kjv")
         {
@@ -155,7 +157,9 @@ public sealed class SearchService
 
         var searchEmbedding = await _embeddingGenerator.GenerateEmbedding(search);
 
-        var result = await _bibleRepository.GetVersesSemanticSearchResults(searchEmbedding, translation);
+        var result = await _bibleRepository.GetVersesSemanticSearchResults(
+            searchEmbedding, 
+            translation);
 
         foreach (var _verse in result)
         {

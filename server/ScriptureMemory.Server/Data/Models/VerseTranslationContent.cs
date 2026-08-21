@@ -14,10 +14,13 @@ public class VerseTranslationContent
     [Column(TypeName = "text")]
     public string ContentUsx { get; set; } = string.Empty; // USX format (Unified Scripture XML)
     
-    // Excluded from JSON: it's only needed for the pgvector ORDER BY on the DB side, and
-    // Pgvector.Vector's JSON round-trip shape isn't something we want the distributed cache to depend on.
     [JsonIgnore]
     public Vector? Embedding { get; set; }
+    
+    /// <summary>
+    /// Since Vector cannot be converted to Json, store float equivalents
+    /// </summary>
+    public float[] JsonEmbeddings { get; set; } = Array.Empty<float>();
     
     public DateTime? LastUpdated { get; set; }
 
