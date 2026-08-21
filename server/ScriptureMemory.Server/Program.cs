@@ -26,7 +26,7 @@ var app = builder.Build();
 app.UseMiddleware()
     .UseEndpoints();
 
-await app.AskToRunOptionalStartupTasks();
+_ = app.AskToRunOptionalStartupTasks();
 
 app.Run();
 

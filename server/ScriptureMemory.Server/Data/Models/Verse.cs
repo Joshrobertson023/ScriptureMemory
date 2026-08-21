@@ -68,29 +68,4 @@ public class Verse
     {
         Reference = new Reference(readableReference);
     }
-
-    [OnSerializing]
-    internal void ConvertVectorToArrays()
-    {
-        foreach (var content in TranslationContents)
-        {
-            if (!content.JsonEmbeddings.Any())
-            {
-                content.JsonEmbeddings = content.Embedding?.ToArray()
-                    ?? throw new ArgumentNullException(nameof(content.Embedding));
-            }
-        }
-    }
-
-    [OnDeserialized]
-    internal void ConvertArrayEmbeddingsToVector()
-    {
-        foreach (var content in TranslationContents)
-        {
-            if (content.JsonEmbeddings.Any())
-            {
-                content.Embedding = new Vector(content.JsonEmbeddings);
-            }
-        }
-    }
 }

@@ -20,10 +20,10 @@ public class SignalRLogger : ILogger
 
     public IDisposable BeginScope<TState>(TState state) => null;
 
-    // Stop SignalR's own logs
     public bool IsEnabled(LogLevel logLevel) => 
         !_name.StartsWith("Microsoft.AspNetCore.SignalR") &&
-        !_name.StartsWith("Microsoft.AspNetCore.Http.Connections");
+        !_name.StartsWith("Microsoft.AspNetCore.Http.Connections") &&
+        !_name.StartsWith("Npgsql.Command");
 
     public void Log<TState>(
         LogLevel logLevel, 

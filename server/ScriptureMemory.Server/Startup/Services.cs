@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DataAccess.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
@@ -29,9 +30,6 @@ namespace ScriptureMemory.Server.Startup;
 
 public static class Services
 {
-    static string otlpEndpoint = "https://<your-otlp-endpoint>";
-    static string authHeader = "Authorization=Basic <base64-token>";
-    
     /// <summary>
     /// Add authentication for Swagger
     /// </summary>
@@ -146,6 +144,11 @@ public static class Services
         
         // Add Vector type to dapper type handler
         SqlMapper.AddTypeHandler(new VectorTypeHandler());
+        
+        services.Configure<JsonOptions>(o =>
+        {
+            o.SerializerOptions.Converters.Add(new VectorJsonConverter());
+        });
         
         //
         services.AddHttpClient("ExpoPush", client =>
@@ -271,8 +274,7 @@ public static class Services
         logger.ClearProviders();
 
         logger.AddConsole(); // temp
-        
-        // Disable in development
+        // Todo: Un-comment for production
         // logger.AddOpenTelemetry(o =>
         // {
         //     o.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("verse-app"));
