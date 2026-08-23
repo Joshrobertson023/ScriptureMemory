@@ -35,6 +35,7 @@ public class VerseDataDapper
         public string PlainText { get; set; } = string.Empty;
         public string ContentUsx { get; set; } = string.Empty;
         public DateTime? LastUpdated { get; set; }
+        public string Version { get; set; }
         public Vector Embedding { get; set; }
     }
 
@@ -56,6 +57,7 @@ public class VerseDataDapper
             ContentUsx = dto.ContentUsx,
             LastUpdated = dto.LastUpdated,
             VerseNavigation = verse,
+            Version = dto.Version,
             Embedding = dto.Embedding
         };
 
@@ -72,7 +74,7 @@ public class VerseDataDapper
             $"""
              UPDATE "VerseTranslationContents"
              SET "Version" = @newVersion;
-             """, new { newVersion = "kjv" }, commandTimeout: 500000);
+             """, new { newVersion = "kjv" });
     }
 
     public async Task<List<Verse>> GetVersesFromIds(List<string> verseIds)
@@ -217,6 +219,7 @@ public class VerseDataDapper
                 select
                     nearest."VerseId",
                     nearest."Chapter",
+                    nearest."Version",
                     nearest."VerseNumbers",
                     nearest."BookDisplayName",
                     nearest."MemorizedCount",
@@ -237,6 +240,7 @@ public class VerseDataDapper
                         vc."PlainText"                       as "PlainText",
                         vc."ContentUsx"                      as "ContentUsx",
                         vc."LastUpdated"                     as "LastUpdated",
+                        vc."Version"                         as "Version",
                         vc."Embedding" <=> q.embedding        as "Distance"
                     from "VerseTranslationContents" vc
                     join "Verses" v
@@ -256,12 +260,13 @@ public class VerseDataDapper
                 "SavedCount",
                 "PlainText",
                 "ContentUsx",
+                "Version",
                 "LastUpdated",
                 min("Distance") as "Distance"
             from candidates
             group by
                 "VerseId", "Chapter", "VerseNumbers", "BookDisplayName",
-                "MemorizedCount", "SavedCount", "PlainText", "ContentUsx", "LastUpdated"
+                "MemorizedCount", "SavedCount", "PlainText", "ContentUsx", "Version", "LastUpdated"
             order by "Distance"
             limit @maxResults;
             """, new

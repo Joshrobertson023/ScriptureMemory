@@ -34,7 +34,9 @@ public class SignalRLogger : ILogger
     {
         var message = formatter(state, exception!);
 
-        if (!message.Contains("Executed DbCommand"))
+        if (!message.Contains("Executed DbCommand") 
+            && !message.Contains("Command execution completed") 
+            && !message.Contains("Executing command"))
             _ = _hubContext.Clients.All.SendAsync(
                 "ReceiveLog",
                 new { Timestamp = DateTime.UtcNow, Level = logLevel.ToString(), Message = message });

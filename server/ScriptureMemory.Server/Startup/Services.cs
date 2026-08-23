@@ -251,7 +251,6 @@ public static class Services
         services.AddScoped<VerseDataDapper>();
         services.AddScoped<BibleData>();
         services.AddScoped<BibleSyncLogData>();
-        services.AddScoped<BibleRepository>();
         // services.AddScoped<UserSettingsData>();
         // //services.AddScoped<CrossReferenceData>();
         // services.AddScoped<ActivityLoggingData>();
