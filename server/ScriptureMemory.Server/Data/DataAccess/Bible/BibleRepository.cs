@@ -64,51 +64,6 @@ public class BibleRepository(
         return apiChapterDto;
     }
 
-    public async Task<Passage> GetKjvPassageForSemanticSearch(Reference reference)
-    {
-        Passage passage;
-
-        List<Verse> versesFromCache = new();
-        List<string> versesNotFoundInCache = new();
-
-        foreach (var verseId in reference.VerseIds)
-        {
-            var cachedVerse = await _distributedCache.GetAsync(verseId);
-
-            if (cachedVerse is null)
-            {
-                versesNotFoundInCache.Add(verseId);
-            }
-            else
-            {
-                _logger.LogInformation("Verse found in cache: {Reference}", verseId);
-                
-                versesFromCache.Add(JsonSerializer.Deserialize<Verse>(cachedVerse)
-                                    ?? throw new Exception("Error deserializing cached verse"));
-            }
-        }
-        
-        List<Verse> versesFetched = await _verseData.GetVersesFromIds(versesNotFoundInCache);
-            
-        var cacheOptions = new DistributedCacheEntryOptions()
-            .SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration);
-
-        foreach (var verseFetched in versesFetched)
-        {
-            await _distributedCache.SetStringAsync(verseFetched.CacheKey, 
-                JsonSerializer.Serialize(verseFetched),
-                cacheOptions);
-        
-            _logger.LogInformation("Cached verse: {Reference}", verseFetched.Reference.ReadableReference);
-        }
-            
-        return new Passage()
-        {
-            Reference = reference,
-            Verses = versesFromCache.Concat(versesFetched).OrderBy(v => v.Id).ToList()
-        };
-    }
-
     /// <summary>
     /// Gets verse content from cache, api, and sets cache
     /// </summary>

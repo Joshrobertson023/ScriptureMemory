@@ -47,8 +47,6 @@ public class Verse
     public int? PassageId { get; set; }
     
     public Passage? PassageNavigation { get; set; } = null!;
-
-    public string CacheKey => Reference.CacheKey;
     
     public List<VerseTranslationContent>? TranslationContents { get; set; }
 
@@ -67,5 +65,10 @@ public class Verse
     public Verse(string readableReference)
     {
         Reference = new Reference(readableReference);
+    }
+
+    public Verse(Reference reference)
+    {
+        Reference = reference;
     }
 }

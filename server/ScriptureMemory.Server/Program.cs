@@ -26,7 +26,12 @@ var app = builder.Build();
 app.UseMiddleware()
     .UseEndpoints();
 
-_ = app.AskToRunOptionalStartupTasks();
+if (builder.Environment.IsDevelopment())
+{
+    app.UseHttpLogging();
+
+    //_ = app.AskToRunOptionalStartupTasks();
+}
 
 app.Run();
 

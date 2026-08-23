@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "8CL28+wCrjo=",
+  "dgSpecHash": "yYoDppoDGig=",
   "success": true,
   "projectFilePath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
   "expectedPackageFiles": [
@@ -88,7 +88,10 @@
     "C:\\Users\\Josh Robertson\\.nuget\\packages\\system.text.encodings.web\\10.0.0-rc.2.25502.107\\system.text.encodings.web.10.0.0-rc.2.25502.107.nupkg.sha512",
     "C:\\Users\\Josh Robertson\\.nuget\\packages\\system.text.json\\10.0.0-rc.2.25502.107\\system.text.json.10.0.0-rc.2.25502.107.nupkg.sha512",
     "C:\\Users\\Josh Robertson\\.nuget\\packages\\system.threading\\4.3.0\\system.threading.4.3.0.nupkg.sha512",
-    "C:\\Users\\Josh Robertson\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512"
+    "C:\\Users\\Josh Robertson\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
+    "C:\\Users\\Josh Robertson\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.30\\microsoft.windowsdesktop.app.ref.8.0.30.nupkg.sha512",
+    "C:\\Users\\Josh Robertson\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.30\\microsoft.netcore.app.ref.8.0.30.nupkg.sha512",
+    "C:\\Users\\Josh Robertson\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.30\\microsoft.aspnetcore.app.ref.8.0.30.nupkg.sha512"
   ],
   "logs": []
 }

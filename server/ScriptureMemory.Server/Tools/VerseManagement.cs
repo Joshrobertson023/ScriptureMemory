@@ -62,7 +62,7 @@ public sealed class VerseManagement
             }
         }
 
-        List<Files.CsvRecordModels.Verse> csvVerses = new();
+        List<Files.CsvRecordModels.CsvRecordVerse> csvVerses = new();
 
         foreach (var verse in allVerses)
         {
@@ -86,7 +86,7 @@ public sealed class VerseManagement
         _logger.LogDebug("Finished moving verses");
     }
 
-    private List<Verse> CreateVersesAndRemoveDuplicates(List<ScriptureMemory.Server.Files.CsvRecordModels.Verse> verses)
+    private List<Verse> CreateVersesAndRemoveDuplicates(List<ScriptureMemory.Server.Files.CsvRecordModels.CsvRecordVerse> verses)
     {
         HashSet<string> verseIds = new();
         List<string> duplicates = new();
@@ -125,7 +125,7 @@ public sealed class VerseManagement
 
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                var verses = CreateVersesAndRemoveDuplicates(csv.GetRecords<Files.CsvRecordModels.Verse>().ToList());
+                var verses = CreateVersesAndRemoveDuplicates(csv.GetRecords<Files.CsvRecordModels.CsvRecordVerse>().ToList());
                 
                 const int batchSize = 300;
             

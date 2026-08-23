@@ -1,6 +1,6 @@
 ﻿namespace ScriptureMemory.Server.Files.CsvRecordModels;
 
-public sealed class Verse
+public sealed class CsvRecordVerse
 {
     public int Id { get; set; }
     public string Book { get; set; } = string.Empty;

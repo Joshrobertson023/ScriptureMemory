@@ -1,10 +1,13 @@
 using DataAccess.Data;
 using DataAccess.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Pgvector;
 using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.DataAccess.Models;
+using ScriptureMemory.Server.Files.CsvRecordModels;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.Tools;
 using System.Security.Claims;
@@ -13,38 +16,18 @@ using JwtRegisteredClaimNames = System.IdentityModel.Tokens.Jwt.JwtRegisteredCla
 
 namespace VerseAppNew.Server.Services;
 
-public sealed class SearchService
+public sealed class SearchService(
+        IUserData _userData,
+        UserDataDapper _userDataDapper,
+        UserDataEFCore _userDataEfCore,
+        BibleRepository _bibleRepository,
+        BibleApi _bibleApi,
+        EmbeddingGenerator _embeddingGenerator,
+        ILogger<SearchService> _logger,
+        IMemoryCache _memoryCache,
+        IDistributedCache _distributedCache,
+        VerseDataDapper _verseData)
 {
-    // ActivityLogger is left out for now -- see conversation notes; it doesn't compile
-    // as of this refactor (references a nonexistent AdminData class).
-    // private readonly ActivityLogger logger;
-    private readonly IUserData _userData;
-    private readonly UserDataDapper _userDataDapper;
-    private readonly UserDataEFCore _userDataEfCore;
-    private readonly BibleRepository _bibleRepository;
-    private readonly EmbeddingGenerator _embeddingGenerator;
-    private readonly ILogger<SearchService> _logger;
-    private readonly IMemoryCache _memoryCache;
-
-    public SearchService(
-        // ActivityLogger logger,
-        IUserData userData,
-        UserDataDapper userDataDapper,
-        UserDataEFCore userDataEfCore,
-        BibleRepository bibleRepository,
-        EmbeddingGenerator embeddingGenerator,
-        ILogger<SearchService> logger,
-        IMemoryCache memoryCache)
-    {
-        // this.logger = logger;
-        _userData = userData;
-        _userDataDapper = userDataDapper;
-        _userDataEfCore = userDataEfCore;
-        _bibleRepository = bibleRepository;
-        _embeddingGenerator = embeddingGenerator;
-        _logger = logger;
-        _memoryCache = memoryCache;
-    }
 
     //public async Task TrackSearch(DataAccess.Requests.SearchRequest request)
     //{
@@ -59,7 +42,7 @@ public sealed class SearchService
     public async Task<IResult> Search(DataAccess.Requests.SearchRequest request, ClaimsPrincipal user)
     {
         var userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-        
+
         if (string.IsNullOrEmpty(userId))
             _logger.LogInformation("UserId not found.");
 
@@ -79,10 +62,10 @@ public sealed class SearchService
             reference = null;
             // Don't search by reference
         }
-        
+
         if (reference is not null)
         {
-        
+
             _logger.LogInformation($"User #{userId} has searched by reference for \"{request.Search}\"");
             return Results.Ok(await GetReferenceSearchResults(request.Translation.ToLower().Trim(), reference));
         }
@@ -95,43 +78,44 @@ public sealed class SearchService
         return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
     }
 
-    private async Task<List<SearchResult>> GetReferenceSearchResults(string translation, Reference reference)
+    private async Task<List<SearchResult>> GetReferenceSearchResults(string requestedTranslation, Reference requestedReference)
     {
-        var results = new List<SearchResult>();
-        
-        // Get the exact passage searched
-        var passage = await _bibleRepository.GetKjvPassageForSemanticSearch(reference);
+        var searchResults = new List<SearchResult>();
 
-        results.Add(new SearchResult
-        {
-            Type = SearchResultType.ExactPassage,
-            Passage = passage,
-            Rank = 1
-        });
+        // Get the exact passage searched
+        var passage = await _bibleRepository.GetKjvPassageForSemanticSearch(requestedReference, requestedTranslation);
 
         // Add the semantically similar to the searched passage to the search results
 
         IEnumerable<Vector> referenceMatchVectors = passage.Verses.Select(
-            v => v.TranslationContents?.First().Embedding 
-                 ?? throw new Exception("Embedding was null"));
-        IEnumerable<Verse> versesSemanticSearchResult 
+            v => v.TranslationContents?.First().Embedding);
+        IEnumerable<Verse> versesSemanticSearchResult
             = await _bibleRepository.GetVersesSemanticSearchResults(
-                referenceMatchVectors, 
+                referenceMatchVectors,
                 passage.Verses.Select(v => v.Id).ToArray(),
-                translation);
+                requestedTranslation);
 
-        if (translation != "kjv")
+        if (requestedTranslation != "kjv")
         {
             // Fetch verse content from api.bible
             _logger.LogInformation("Fetching from api.bible verse content.");
+        }
+        else
+        {
+            searchResults.Add(new SearchResult
+            {
+                Type = SearchResultType.ExactPassage,
+                Passage = passage,
+                Rank = 1
+            });
         }
 
         foreach (var verse in versesSemanticSearchResult)
         {
             // if (verse.Id == passage.Verses.First().Id)
             //     continue;
-            
-            results.Add(new SearchResult
+
+            searchResults.Add(new SearchResult
             {
                 Type = SearchResultType.SemanticVerse,
                 Passage = new Passage
@@ -148,18 +132,77 @@ public sealed class SearchService
             });
         }
 
+        return await EnsureAllResultsContainContent(searchResults, requestedTranslation);
+    }
+
+    /// <summary>
+    /// Double checks all search results, ensuring the correct translation, and that the plain text is in each verse
+    /// </summary>
+    /// <param name="results"></param>
+    /// <param name="requestedTranslation"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    private async Task<List<SearchResult>> EnsureAllResultsContainContent(List<SearchResult> results, string requestedTranslation)
+    {
+        Dictionary<int, string> verseIdsInResults = new(); // Track verses and index found to keep in the same location in results
+
+        for (int i = 0; i < results.Count; i++)
+        {
+            verseIdsInResults[i] = results[i].Verse?.Id
+                ?? throw new ArgumentNullException(nameof(Verse));
+        }
+
+        foreach (var result in results)
+        {
+            string resultVerseId = result.Passage.Verses.First().Id;
+
+            if (result.Passage.Verses.Count <= 0
+                || result.Passage.Verses.First().TranslationContents.Count <= 0
+                || result.Passage.Verses.First().TranslationContents.First().Version != requestedTranslation
+                || string.IsNullOrEmpty(result.Passage.Verses.First().TranslationContents.First().PlainText))
+            {
+                _logger.LogInformation("Found missing verse content from results: {Id}", resultVerseId);
+
+                results.Insert(
+                    verseIdsInResults.First(v => v.Value == resultVerseId).Key,
+                    new SearchResult
+                    {
+                        Type = SearchResultType.SemanticVerse,
+                        Passage = new Passage
+                        {
+                            Reference = result.Passage.Reference,
+                            Verses = new List<Verse> {
+                                new Verse(result.Passage.Reference)
+                                {
+                                    TranslationContents = new List<VerseTranslationContent>
+                                    {
+                                        new VerseTranslationContent
+                                        {
+                                            PlainText = await _bibleApi.GetVersePlaintext(
+                                                AvailableBibles.GetBible(requestedTranslation).Id,
+                                                result.Passage.Reference.VerseId)
+                                        }
+                                     }
+                                }
+                            }
+                        }
+                    }
+                );
+            }
+        }
+
         return results;
     }
 
-    private async Task<List<SearchResult>> GetPassageSearchResults(string search, string translation)
+    private async Task<List<SearchResult>> GetPassageSearchResults(string userSearchQuery, string requestedTranslation)
     {
         var searchResults = new List<SearchResult>();
 
-        var searchEmbedding = await _embeddingGenerator.GenerateEmbedding(search);
+        var searchEmbedding = await _embeddingGenerator.GenerateEmbedding(userSearchQuery);
 
         var result = await _bibleRepository.GetVersesSemanticSearchResults(
-            searchEmbedding, 
-            translation);
+            searchEmbedding,
+            requestedTranslation);
 
         foreach (var _verse in result)
         {
@@ -180,7 +223,67 @@ public sealed class SearchService
             });
         }
 
-        return searchResults;
+        return await EnsureAllResultsContainContent(searchResults, requestedTranslation);
+    }
+
+    /// <summary>
+    /// Gets a kjv passage for it's embeddings, used for semantic search, checking cache
+    /// </summary>
+    /// <param name="reference"></param>
+    /// <param name="translation"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    public async Task<Passage> GetKjvPassageForSemanticSearch(Reference reference, string translation)
+    {
+        Passage passage;
+
+        List<Verse> versesFromCache = new();
+        List<string> versesNotFoundInCache = new();
+
+        foreach (var verseId in reference.VerseIds)
+        {
+            var cachedVerse = await _distributedCache.GetAsync(CacheKeyGenerator.GetVerseCacheKey(verseId, translation));
+
+            if (cachedVerse is null)
+            {
+                versesNotFoundInCache.Add(verseId);
+            }
+            else
+            {
+                _logger.LogInformation("Verse found in cache: {Reference}", verseId);
+
+                var deserializedCachedVerse = JsonSerializer.Deserialize<Verse>(cachedVerse)
+                                    ?? throw new Exception("Error deserializing cached verse");
+
+                if (deserializedCachedVerse.TranslationContents.First().Version == translation)
+                {
+                    versesFromCache.Add(deserializedCachedVerse);
+                }
+
+            }
+        }
+
+        List<Verse> versesFetched = await _verseData.GetVersesFromIds(versesNotFoundInCache);
+
+        var cacheOptions = new DistributedCacheEntryOptions()
+            .SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration);
+
+        foreach (var verseFetched in versesFetched)
+        {
+            verseFetched.TranslationContents.ForEach(c => c.Version = translation);
+
+            await _distributedCache.SetStringAsync(CacheKeyGenerator.GetVerseCacheKey(verseFetched.Id, translation),
+                JsonSerializer.Serialize(verseFetched),
+                cacheOptions);
+
+            _logger.LogInformation("Cached verse: {Reference}", verseFetched.Reference.ReadableReference);
+        }
+
+        return new Passage()
+        {
+            Reference = reference,
+            Verses = versesFromCache.Concat(versesFetched).OrderBy(v => v.Id).ToList()
+        };
     }
 }
 

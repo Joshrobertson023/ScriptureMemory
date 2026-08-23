@@ -67,7 +67,7 @@ public sealed class Reference
                 + '.' 
                 + Chapter.ToString() 
                 + '.'
-                + VerseNumbers.First().ToString();
+                + string.Join(',', VerseNumbers.Select(v => v.ToString()));
         }
     }
 
@@ -186,7 +186,7 @@ public sealed class Reference
         VerseNumbers = [verseNumber];
     }
     
-    public Reference() { } // For json deserialization  
+    public Reference() { } // For json deserialization
 
     public override string ToString()
     {
