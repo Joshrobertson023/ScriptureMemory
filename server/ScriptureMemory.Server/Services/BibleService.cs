@@ -10,7 +10,6 @@ namespace ScriptureMemory.Server.Services;
 public class BibleService(
     BibleApi _bibleApi,
     BibleData _bibleData,
-    BibleRepository _bibleRepository,
     IDistributedCache _cache,
     ILogger<BibleService> _logger,
     IDistributedCache _distributedCache,
@@ -27,9 +26,42 @@ public class BibleService(
 
         book!.EnsureValidChapter(requestedChapterNum);
 
-        var result = await _bibleRepository.GetChapterDto(bible!, book!, requestedChapterNum);
+        Reference referenceToFetch = new(book, requestedChapterNum);
 
-        return result;
+        var cachedChapterDto = await _distributedCache.GetAsync(referenceToFetch.CacheKey);
+
+        if (cachedChapterDto is not null)
+        {
+            ResponseChapterDto cacheChapterDto = JsonSerializer.Deserialize<ResponseChapterDto>(cachedChapterDto)
+                ?? throw new Exception($"Error deserializing {nameof(Chapter)}");
+
+            _logger.LogInformation("Chapter found in cache: {Reference}", referenceToFetch.ReadableReference);
+
+            return cacheChapterDto;
+        }
+
+        var apiResponse = await _bibleApi.GetFullChapter(bible, referenceToFetch);
+
+        if (apiResponse.Data is null)
+        {
+            throw new InvalidOperationException("Api response returned null");
+        }
+
+        ResponseChapterDto apiChapterDto = new(
+            apiResponse.Data.Reference,
+            apiResponse.Data.Content,
+            apiResponse.Data.Copyright);
+
+        var serializedChapter = JsonSerializer.Serialize(apiChapterDto);
+
+        var cacheOptions = new DistributedCacheEntryOptions()
+            .SetAbsoluteExpiration(CacheExpirations.ChapterContentExpiration);
+
+        await _distributedCache.SetStringAsync(referenceToFetch.CacheKey, serializedChapter, cacheOptions);
+
+        _logger.LogInformation("Cached chapter: {Reference}", referenceToFetch.ReadableReference);
+
+        return apiChapterDto;
     }
 
     public async Task EnsureBibleAvailable(Server.DataAccess.Models.Bible bible)

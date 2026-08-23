@@ -20,13 +20,13 @@ public sealed class SearchService(
         IUserData _userData,
         UserDataDapper _userDataDapper,
         UserDataEFCore _userDataEfCore,
-        BibleRepository _bibleRepository,
         BibleApi _bibleApi,
         EmbeddingGenerator _embeddingGenerator,
         ILogger<SearchService> _logger,
         IMemoryCache _memoryCache,
         IDistributedCache _distributedCache,
-        VerseDataDapper _verseData)
+        VerseDataDapper _verseData,
+        IConfiguration _config)
 {
 
     //public async Task TrackSearch(DataAccess.Requests.SearchRequest request)
@@ -83,14 +83,15 @@ public sealed class SearchService(
         var searchResults = new List<SearchResult>();
 
         // Get the exact passage searched
-        var passage = await _bibleRepository.GetKjvPassageForSemanticSearch(requestedReference, requestedTranslation);
+        var passage = await getKjvPassageForSemanticSearch(requestedReference, requestedTranslation);
 
         // Add the semantically similar to the searched passage to the search results
 
         IEnumerable<Vector> referenceMatchVectors = passage.Verses.Select(
             v => v.TranslationContents?.First().Embedding);
+
         IEnumerable<Verse> versesSemanticSearchResult
-            = await _bibleRepository.GetVersesSemanticSearchResults(
+            = await GetVersesSemanticSearchResults(
                 referenceMatchVectors,
                 passage.Verses.Select(v => v.Id).ToArray(),
                 requestedTranslation);
@@ -136,6 +137,127 @@ public sealed class SearchService(
     }
 
     /// <summary>
+    /// Gets verse content from embedding results from cache, api, and sets cache
+    /// </summary>
+    /// <param name="embeddingResultVerses"></param>
+    /// <param name="translation"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
+    /// <exception cref="BibleUnavailableException"></exception>
+    private async Task<List<Verse>> getVersesContent(List<Verse> embeddingResultVerses, string translation)
+    {
+        HashSet<string> verseIdsNotFoundInCache = new();
+
+        HashSet<string> embeddingResultVerseIds = embeddingResultVerses.Select(v => v.Id).ToHashSet();
+
+        // Check cache for verse content
+        foreach (var verse in embeddingResultVerses)
+        {
+            var cachedVerse = await _distributedCache.GetStringAsync(CacheKeyGenerator.GetVerseCacheKey(verse.Reference, translation)
+                ?? throw new Exception("Error getting verse CacheKey"));
+
+            if (cachedVerse is not null)
+            {
+                verse.TranslationContents = (JsonSerializer.Deserialize<Verse>(cachedVerse)
+                    ?? throw new Exception("Error deserializing cached verse")).TranslationContents;
+
+                _logger.LogInformation("Verse found in cache: {Id}.", verse.Id);
+            }
+            else
+            {
+                verseIdsNotFoundInCache.Add(verse.Id);
+            }
+        }
+
+        List<Verse> versesFetchedFromApi = new();
+
+        // Fetch verse content for verses not found in cache
+        foreach (var verseId in verseIdsNotFoundInCache)
+        {
+            _logger.LogInformation("Verse not found in cache and fetching: {VerseId}", verseId);
+
+            var verse = embeddingResultVerses.Single(v => v.Id == verseId);
+
+            if (verse.TranslationContents is null)
+                verse.TranslationContents = new();
+
+            if (!AvailableBibles.TryGetBible(translation, out var bible))
+                throw new BibleUnavailableException("{Translation} not available", translation);
+
+            verse.TranslationContents.Add(new VerseTranslationContent
+            {
+                PlainText = await _bibleApi.GetVersePlaintext(bible!.Id, verseId)
+            });
+
+            versesFetchedFromApi.Add(verse);
+        }
+
+        // Compile list of ordered verses
+        List<Verse> returnVerses = new();
+
+        foreach (var id in embeddingResultVerseIds)
+        {
+            if (verseIdsNotFoundInCache.Contains(id))
+                returnVerses.Add(versesFetchedFromApi.Single(v => v.Id == id));
+            else
+                returnVerses.Add(embeddingResultVerses.Single(v => v.Id == id));
+        }
+
+        // Cache verses
+        foreach (var verse in returnVerses)
+        {
+            await _distributedCache.SetStringAsync(
+                CacheKeyGenerator.GetVerseCacheKey(verse.Reference, translation),
+                JsonSerializer.Serialize(verse),
+                new DistributedCacheEntryOptions().SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration));
+
+            _logger.LogInformation("Cached verse: {VerseId}", verse.Id);
+        }
+
+        return embeddingResultVerses;
+    }
+
+    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(
+    IEnumerable<Vector> embeddings,
+    string[] originalVerseIds,
+    string translation)
+    {
+        string defaultTranslation = _config["ApiContent:DefaultTranslation"] ?? "kjv";
+        int.TryParse(
+            translation == defaultTranslation
+                ? _config["ApiContent:FetchCountWhenDefault"]
+                : _config["ApiContent:FetchCountWhenNotDefault"], out var numVersesToFetch);
+
+        var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
+            embeddings,
+            originalVerseIds,
+            numVersesToFetch);
+
+        if (translation == defaultTranslation)
+            return embeddingResultVerses;
+
+        return await getVersesContent(embeddingResultVerses, translation);
+    }
+
+    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(Vector embedding, string translation)
+    {
+        string defaultTranslation = _config["ApiContent:DefaultTranslation"] ?? "kjv";
+        int.TryParse(
+            translation == defaultTranslation
+                ? _config["ApiContent:FetchCountWhenDefault"]
+                : _config["ApiContent:FetchCountWhenNotDefault"], out var numVersesToFetch);
+
+        var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
+            embedding,
+            numVersesToFetch);
+
+        if (translation == defaultTranslation)
+            return embeddingResultVerses;
+
+        return await getVersesContent(embeddingResultVerses, translation);
+    }
+
+    /// <summary>
     /// Double checks all search results, ensuring the correct translation, and that the plain text is in each verse
     /// </summary>
     /// <param name="results"></param>
@@ -148,11 +270,11 @@ public sealed class SearchService(
 
         for (int i = 0; i < results.Count; i++)
         {
-            verseIdsInResults[i] = results[i].Verse?.Id
+            verseIdsInResults[i] = results[i].Passage?.Verses.First()?.Id
                 ?? throw new ArgumentNullException(nameof(Verse));
         }
 
-        foreach (var result in results)
+        foreach (var result in results.ToList())
         {
             string resultVerseId = result.Passage.Verses.First().Id;
 
@@ -200,7 +322,7 @@ public sealed class SearchService(
 
         var searchEmbedding = await _embeddingGenerator.GenerateEmbedding(userSearchQuery);
 
-        var result = await _bibleRepository.GetVersesSemanticSearchResults(
+        var result = await GetVersesSemanticSearchResults(
             searchEmbedding,
             requestedTranslation);
 
@@ -233,7 +355,7 @@ public sealed class SearchService(
     /// <param name="translation"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public async Task<Passage> GetKjvPassageForSemanticSearch(Reference reference, string translation)
+    public async Task<Passage> getKjvPassageForSemanticSearch(Reference reference, string translation)
     {
         Passage passage;
 

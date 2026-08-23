@@ -1,4 +1,5 @@
-﻿using ScriptureMemory.Server.Data.Dtos;
+﻿using ScriptureMemory.Server.Api.Models;
+using ScriptureMemory.Server.Data.Dtos;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools.Models;
 using System.Net.Http.Headers;
@@ -26,6 +27,11 @@ public class BibleApi
     {
         _config = config;
         _logger = logger;
+    }
+
+    private string CleanVersePlainText(string content)
+    {
+        return content.Remove(content.IndexOf('['), (content.IndexOf(']') - content.IndexOf('[')) + 1).Trim();
     }
 
     public async Task<List<Bible>> GetAuthorizedBibles()
@@ -67,7 +73,7 @@ public class BibleApi
         http.DefaultRequestHeaders.Clear();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
         
-        Task<string> getUsx = http.GetStringAsync(
+        Task<ApiResponse<VerseData>> getUsx = http.GetFromJsonAsync<ApiResponse<VerseData>>(
             $"{_baseUrl}/bibles/{bibleId}" +
             $"/verses/{verseId}" + 
             "?content-type=html&" +
@@ -75,7 +81,7 @@ public class BibleApi
             "include-verse-numbers=true&" +
             "include-verse-spans=true");
         
-        Task<string> getPlaintext = http.GetStringAsync(
+        Task<ApiResponse<VerseData>> getPlaintext = http.GetFromJsonAsync<ApiResponse<VerseData>>(
             $"{_baseUrl}/bibles/{bibleId}" +
             $"/verses/{verseId}" + 
             "?content-type=text&" +
@@ -85,7 +91,9 @@ public class BibleApi
 
         await Task.WhenAll(getUsx, getPlaintext);
 
-        return (await getUsx, await getPlaintext);
+        (ApiResponse<VerseData> usx, ApiResponse<VerseData> plaintext) = (await getUsx, await getPlaintext);
+
+        return (usx.Data.Content, CleanVersePlainText(plaintext.Data.Content));
     }
 
     public async Task<string> GetVersePlaintext(string bibleId, string verseId)
@@ -94,7 +102,7 @@ public class BibleApi
         http.DefaultRequestHeaders.Clear();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
         
-        var response = await http.GetStringAsync(
+        var response = await http.GetFromJsonAsync<ApiResponse<VerseData>>(
             $"{_baseUrl}/bibles/{bibleId}" +
             // $"/chapters/{chapterReference.ChapterId}" + 
             $"/verses/{verseId}" + 
@@ -103,7 +111,7 @@ public class BibleApi
             "include-verse-numbers=true&" +
             "include-verse-spans=true");
 
-        return response;
+        return CleanVersePlainText(response.Data.Content);
     }
 
     public async Task<string> GetVerseUsx(string bibleId, string verseId)
@@ -112,7 +120,7 @@ public class BibleApi
         http.DefaultRequestHeaders.Clear();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
         
-        var response = await http.GetStringAsync(
+        var response = await http.GetFromJsonAsync<ApiResponse<VerseData>>(
             $"{_baseUrl}/bibles/{bibleId}" +
             // $"/chapters/{chapterReference.ChapterId}" + 
             $"/verses/{verseId}" + 
@@ -121,7 +129,7 @@ public class BibleApi
             "include-verse-numbers=true&" +
             "include-verse-spans=true");
 
-        return response;
+        return response.Data.Content;
     }
 
     public async Task<int> GetChaptersInBook(Bible bible, Reference bookReference)
