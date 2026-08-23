@@ -40,3 +40,4 @@ npm-debug.log*
 *.bak
 *~
 /server/ScriptureMemory.Server/docker-compose.yml
+/server/ScriptureMemory.Server/Migrations
