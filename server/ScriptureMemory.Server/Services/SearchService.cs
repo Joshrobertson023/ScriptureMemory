@@ -6,6 +6,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Pgvector;
 using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
+using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Files.CsvRecordModels;
 using ScriptureMemory.Server.Services;
@@ -26,9 +27,9 @@ public sealed class SearchService(
         IMemoryCache _memoryCache,
         IDistributedCache _distributedCache,
         VerseDataDapper _verseData,
-        IConfiguration _config)
+        IConfiguration _config,
+        VerseCacherQueue _verseCacherQueue)
 {
-
     //public async Task TrackSearch(DataAccess.Requests.SearchRequest request)
     //{
     //    switch(request.SearchType)
@@ -110,7 +111,7 @@ public sealed class SearchService(
         //if (requestedTranslation != _config["ApiContent:DefaultTranslation"])
         //{
         //    // Fetch verse content from api.bible
-        //    _logger.LogDebug("Fetching from api.bible verse content.");
+        //    _logger.LogInformation("Fetching from api.bible verse content.");
 
         //    string[] verseIdsToFetch = new string[referenceMatchVectors.Count() + 1];
         //    verseIdsToFetch[0] = passage.Verses.First().Id;
@@ -182,7 +183,7 @@ public sealed class SearchService(
         //            JsonSerializer.Serialize(fetchedVerse),
         //            new DistributedCacheEntryOptions().SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration));
 
-        //        _logger.LogDebug("Cached verse {Id}:{Translation}", fetchedVerse.Id, requestedTranslation);
+        //        _logger.LogInformation("Cached verse {Id}:{Translation}", fetchedVerse.Id, requestedTranslation);
         //    }
 
         //    searchResults.Add(new SearchResult
@@ -244,7 +245,7 @@ public sealed class SearchService(
     //    {
     //        try
     //        {
-    //            _logger.LogDebug(
+    //            _logger.LogInformation(
     //                "Fetching content for {Id}:{Translation}",
     //                verseContentFetch.verse.Id,
     //                verseContentFetch.verse.TranslationContents?.First().Version);
@@ -285,21 +286,30 @@ public sealed class SearchService(
         // Check cache for verse content
         foreach (var verse in embeddingResultVerses)
         {
-            var cachedVerse = await _distributedCache.GetStringAsync(CacheKeyGenerator.GetVerseCacheKey(verse.Reference, translation)
+            var cachedVerse = await _distributedCache.GetStringAsync(
+                CacheKeyGenerator.GetVerseCacheKey(
+                    verse.Reference, 
+                    translation,
+                    MemoryCacheType.PlainText)
                 ?? throw new Exception("Error getting verse CacheKey"));
 
             if (cachedVerse is not null)
             {
-                verse.TranslationContents = (JsonSerializer.Deserialize<Verse>(cachedVerse)
+                verse.TranslationContents = (JsonSerializer.Deserialize<Verse>(
+                    cachedVerse,
+                    new JsonSerializerOptions()
+                    {
+                        Converters = { new VectorJsonConverter() }
+                    })
                     ?? throw new Exception("Error deserializing cached verse")).TranslationContents;
 
-                _logger.LogDebug("Verse found in cache: {Id}:{Translation}.", verse.Id, translation);
+                _logger.LogInformation("Verse found in cache: {Id}:{Translation}.", verse.Id, translation);
             }
             else
             {
                 verseIdsNotFoundInCache.Add(verse.Id);
 
-                _logger.LogDebug("Verse not found in cache: {Id}:{Translation}.", verse.Id, translation);
+                _logger.LogInformation("Verse not found in cache: {Id}:{Translation}.", verse.Id, translation);
             }
         }
 
@@ -308,7 +318,7 @@ public sealed class SearchService(
         // Fetch verse content for verses not found in cache
         foreach (var verseId in verseIdsNotFoundInCache)
         {
-            _logger.LogDebug("Verse not found in cache and fetching: {VerseId}:{Translation}", verseId, translation);
+            _logger.LogInformation("Verse not found in cache and fetching: {VerseId}:{Translation}", verseId, translation);
 
             var verse = embeddingResultVerses.Single(v => v.Id == verseId);
 
@@ -317,6 +327,11 @@ public sealed class SearchService(
 
             if (!AvailableBibles.TryGetBible(translation, out var bible))
                 throw new BibleUnavailableException("{Translation} not available", translation);
+
+            if (verse.TranslationContents is null || verse.TranslationContents.Count != 0)
+            {
+                verse.TranslationContents = new List<VerseTranslationContent>();
+            }
 
             try
             {
@@ -351,21 +366,20 @@ public sealed class SearchService(
         // Cache verses
         foreach (var verse in returnVerses)
         {
-            await _distributedCache.SetStringAsync(
-                CacheKeyGenerator.GetVerseCacheKey(verse.Reference, translation),
-                JsonSerializer.Serialize(verse),
-                new DistributedCacheEntryOptions().SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration));
-
-            _logger.LogDebug("Cached verse: {VerseId}:{Translation}", verse.Id, translation);
+            _ = _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
+            {
+                Verse = verse,
+                CacheType = MemoryCacheType.PlainText
+            });
         }
 
         return embeddingResultVerses;
     }
 
     public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(
-    IEnumerable<Vector> embeddings,
-    string[] originalVerseIds,
-    string translation)
+        IEnumerable<Vector> embeddings,
+        string[] originalVerseIds,
+        string translation)
     {
         string defaultTranslation = _config["ApiContent:DefaultTranslation"] ?? "kjv";
         int.TryParse(
@@ -421,6 +435,9 @@ public sealed class SearchService(
 
         foreach (var result in results.ToList())
         {
+            // Drop vector embedding before sending over network
+            result.Passage.Verses.ForEach(v => v.TranslationContents.ForEach(c => c.Embedding = null));
+
             string resultVerseId = result.Passage?.Verses.First().Id
                 ?? throw new Exception("resultVerseId was null");
 
@@ -429,7 +446,7 @@ public sealed class SearchService(
                 || result.Passage.Verses.First().TranslationContents?.First().Version != requestedTranslation
                 || string.IsNullOrEmpty(result.Passage.Verses.First().TranslationContents?.First().PlainText))
             {
-                _logger.LogDebug("Found missing verse content from results: {Id}:{Translation}", resultVerseId, requestedTranslation);
+                _logger.LogInformation("Found missing verse content from results: {Id}:{Translation}", resultVerseId, requestedTranslation);
 
                 if (result.Passage.Reference.VerseId is null)
                 {
@@ -437,6 +454,27 @@ public sealed class SearchService(
 
                     continue;
                 }
+
+                var content = await _bibleApi.GetVersePlaintext(
+                    AvailableBibles.GetBible(requestedTranslation).Id,
+                    result.Passage.Reference.VerseId);
+
+                var newVerse = new Verse(result.Passage.Reference)
+                {
+                    TranslationContents = new List<VerseTranslationContent>
+                    {
+                        new VerseTranslationContent
+                        {
+                            PlainText = content
+                        }
+                    }
+                };
+
+                _ = _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
+                {
+                    Verse = newVerse,
+                    CacheType = MemoryCacheType.PlainText
+                });
 
                 results.Insert(
                     verseIdsInResults.First(v => v.Value == resultVerseId).Key,
@@ -446,20 +484,7 @@ public sealed class SearchService(
                         Passage = new Passage
                         {
                             Reference = result.Passage.Reference,
-                            Verses = new List<Verse> {
-                                new Verse(result.Passage.Reference)
-                                {
-                                    TranslationContents = new List<VerseTranslationContent>
-                                    {
-                                        new VerseTranslationContent
-                                        {
-                                            PlainText = await _bibleApi.GetVersePlaintext(
-                                                AvailableBibles.GetBible(requestedTranslation).Id,
-                                                result.Passage.Reference.VerseId)
-                                        }
-                                     }
-                                }
-                            }
+                            Verses = new List<Verse> { newVerse }
                         }
                     }
                 );
@@ -517,7 +542,11 @@ public sealed class SearchService(
 
         foreach (var verseId in reference.VerseIds)
         {
-            var cachedVerse = await _distributedCache.GetAsync(CacheKeyGenerator.GetVerseCacheKey(verseId, translation));
+            var cachedVerse = await _distributedCache.GetAsync(
+                CacheKeyGenerator.GetVerseCacheKey(
+                    verseId, 
+                    translation,
+                    MemoryCacheType.PlainText));
 
             if (cachedVerse is null)
             {
@@ -525,9 +554,14 @@ public sealed class SearchService(
             }
             else
             {
-                _logger.LogDebug("Verse found in cache: {Reference}:{Translation}", verseId, translation);
+                _logger.LogInformation("Verse found in cache: {Reference}:{Translation}", verseId, translation);
 
-                var deserializedCachedVerse = JsonSerializer.Deserialize<Verse>(cachedVerse)
+                var deserializedCachedVerse = JsonSerializer.Deserialize<Verse>(
+                    cachedVerse,
+                    new JsonSerializerOptions()
+                    {
+                        Converters = { new VectorJsonConverter() }
+                    })
                                     ?? throw new Exception("Error deserializing cached verse");
 
                 if (deserializedCachedVerse.TranslationContents?.First().Version == translation)
@@ -556,11 +590,11 @@ public sealed class SearchService(
                 _logger.LogError("Could not cache verse: embedding was null");
             }
 
-            await _distributedCache.SetStringAsync(CacheKeyGenerator.GetVerseCacheKey(verseFetched.Id, translation),
-                JsonSerializer.Serialize(verseFetched),
-                cacheOptions);
-
-            _logger.LogDebug("Cached verse: {Reference}:{Translation}", verseFetched.Reference.ReadableReference, translation);
+            _ = _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
+            {
+                Verse = verseFetched,
+                CacheType = MemoryCacheType.PlainText
+            });
         }
 
         return new Passage()
@@ -626,4 +660,4 @@ public sealed class SearchService(
  //      157 -            //        Verse = ranks[i].verse,                                                                                                                                                                                                                
  //      158 -            //        Rank = ranks[i].rank                                                                                                                                                                                                                   
  //      159 -            //    });                                                                                                                                                                                                                                        
- //      160 -            //}    
+ //      160 -            //}

@@ -8,7 +8,8 @@ public class Bible
     public string Id { get; set; } = string.Empty;
     
     public string Abbreviation { get; set; } = string.Empty;
-    
+
+    [Obsolete("Use Abbreviation instead")]
     public string? AbbreviationLocal { get; set; }
     
     public string Name { get; set; } = string.Empty;

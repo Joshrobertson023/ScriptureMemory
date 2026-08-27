@@ -1,6 +1,10 @@
+using ScriptureMemory.Server.Data.Models;
+
 namespace ScriptureMemory.Server.Data.Dtos;
 
 public sealed record ResponseChapterDto(
-    string reference, 
-    string contentUsx,
+    Book book,
+    int chapterNumber,
+    List<Verse> verses,
+    string? title,
     string copyright);

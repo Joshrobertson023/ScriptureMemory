@@ -15,6 +15,12 @@ namespace ScriptureMemory.Server.Tools
             SuperAdmin = 2
         }
 
+        public enum MemoryCacheType
+        {
+            PlainText,
+            Usx
+        }
+
         public static class MemoryCacheKeys
         {
             public static readonly string AvailableBibles = nameof(AvailableBibles);

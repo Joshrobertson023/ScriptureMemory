@@ -4,6 +4,7 @@ using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools.Models;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace ScriptureMemory.Server.Tools;
 
@@ -31,7 +32,11 @@ public class BibleApi
 
     private string CleanVersePlainText(string content)
     {
-        return content.Remove(content.IndexOf('['), (content.IndexOf(']') - content.IndexOf('[')) + 1).Trim();
+        content = Regex.Replace(content, @"(\\n|\s)+", " ");
+
+        content = content.Substring(content.IndexOf(']') + 1).Trim();
+
+        return content;
     }
 
     public async Task<List<Bible>> GetAuthorizedBibles()
@@ -46,7 +51,28 @@ public class BibleApi
                ?? new List<Bible>();
     }
 
-    public async Task<ApiResponse<ChapterData>> GetFullChapter(Bible bible, Reference chapterReference)
+    public async Task<ApiResponse<ChapterData>> GetChapterPlainText(Bible bible, Reference chapterReference)
+    {
+        using HttpClient http = new();
+        http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);
+
+        var response = await http.GetStringAsync(
+            $"{_baseUrl}/bibles/{bible.Id}" +
+            $"/chapters/{chapterReference.ChapterId}" +
+            "?content-type=text&" +
+            "include-titles=true&" +
+            "include-verse-numbers=true&" +
+            "include-verse-spans=true");
+
+        return JsonSerializer.Deserialize<ApiResponse<ChapterData>>(response,
+               new JsonSerializerOptions
+               {
+                   PropertyNameCaseInsensitive = true,
+               })
+            ?? throw new InvalidOperationException("response was null deserializing");
+    }
+
+    public async Task<ApiResponse<ChapterData>> GetChapterUsx(Bible bible, Reference chapterReference)
     {
         using HttpClient http = new();
         http.DefaultRequestHeaders.Add("api-key", _config["ApiBible:ApiKey"]);

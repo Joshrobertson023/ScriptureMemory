@@ -77,6 +77,22 @@ public class VerseDataDapper
              """, new { newVersion = "kjv" });
     }
 
+    public async Task<List<VerseEmbedding>> GetEmbeddingsForVerses(IEnumerable<string> verseIds)
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+
+        var verseIdArray = verseIds as string[] ?? verseIds.ToArray();
+
+        var results = await connection.QueryAsync<VerseEmbedding>(
+            """
+        select "VerseId", "Embedding"
+        from "VerseTranslationContents"
+        where "VerseId" = any(@verseIdArray)
+        """, new { verseIdArray });
+
+        return results.AsList();
+    }
+
     public async Task<List<Verse>> GetVersesFromIds(List<string> verseIds)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();

@@ -8,6 +8,7 @@ using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 using System.ComponentModel;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 //using static DataAccess.Data.VerseData;
 
@@ -17,7 +18,8 @@ namespace DataAccess.Models;
 public class Verse
 {
     private Reference _reference;
-    
+
+    [JsonIgnore] // Don't cache
     public Reference Reference 
     { 
         get => _reference;
@@ -40,12 +42,15 @@ public class Verse
     [MaxLength(20)]
     public string Id { get; set; }
 
+    [JsonIgnore] // Don't cache
     public int MemorizedCount { get; set; } = 0;
 
+    [JsonIgnore] // Don't cache
     public int SavedCount { get; set; } = 0;
 
     public int? PassageId { get; set; }
-    
+
+    [JsonIgnore] // Don't cache
     public Passage? PassageNavigation { get; set; } = null!;
     
     public List<VerseTranslationContent>? TranslationContents { get; set; }
@@ -70,5 +75,15 @@ public class Verse
     public Verse(Reference reference)
     {
         Reference = reference;
+    }
+
+    public void GenerateId(Book book, int chapter, int verseNum)
+    {
+        this.Id = book.Abbreviation.ToUpper() + '.' + chapter + '.' + verseNum;
+    }
+
+    public void GenerateId(string bookAbbreviation, int chapter, int verseNum)
+    {
+        this.Id = bookAbbreviation.Trim().ToUpper() + '.' + chapter + '.' + verseNum;
     }
 }

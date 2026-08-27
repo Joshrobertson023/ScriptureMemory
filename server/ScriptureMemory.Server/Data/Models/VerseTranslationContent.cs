@@ -13,14 +13,8 @@ public class VerseTranslationContent
     
     [Column(TypeName = "text")]
     public string ContentUsx { get; set; } = string.Empty; // USX format (Unified Scripture XML)
-    
-    [JsonIgnore]
+
     public Vector? Embedding { get; set; }
-    
-    /// <summary>
-    /// Since Vector cannot be converted to Json, store float equivalents
-    /// </summary>
-    public float[] JsonEmbeddings { get; set; } = Array.Empty<float>();
     
     public DateTime? LastUpdated { get; set; }
 

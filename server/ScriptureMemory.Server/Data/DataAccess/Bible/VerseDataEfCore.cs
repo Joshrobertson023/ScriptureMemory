@@ -1,3 +1,5 @@
+using Pgvector;
+
 namespace ScriptureMemory.Server.Data.DataAccess.Bible;
 
 public class VerseDataEfCore : IVerseData

@@ -144,12 +144,13 @@ public static class Services
         
         // Add Vector type to dapper type handler
         SqlMapper.AddTypeHandler(new VectorTypeHandler());
-        
-        services.Configure<JsonOptions>(o =>
-        {
-            o.SerializerOptions.Converters.Add(new VectorJsonConverter());
-        });
-        
+
+        // Convert Vectors to byte[] for Redis cache
+        //services.Configure<JsonOptions>(o =>
+        //{
+        //    o.SerializerOptions.Converters.Add(new VectorJsonConverter());
+        //});
+
         //
         services.AddHttpClient("ExpoPush", client =>
         {
@@ -231,10 +232,17 @@ public static class Services
         services.AddScoped<BibleSyncer>();
 
         services.AddScoped<EmbeddingGenerator>();
+        services.AddScoped<BackgroundCacher>();
 
         services.AddSingleton<BibleSyncerQueue>();
-        services.AddSingleton<AuthorizationSyncerData>();
+        services.AddSingleton<VerseCacherQueue>();
+        services.AddSingleton<VerseCacherJobQueue>();
+        services.AddScoped<BackgroundCacher>();
         services.AddHostedService<BibleSyncerBackgroundWorker>();
+        services.AddHostedService<VerseCacheJobBackgroundWorker>();
+        services.AddHostedService<VerseCacherBackgroundWorker>();
+        services.AddScoped<BibleSyncer>();
+        services.AddSingleton<AuthorizationSyncerData>();
         services.AddScoped<BibleSyncerEventDispatcher>();
 
         return services;

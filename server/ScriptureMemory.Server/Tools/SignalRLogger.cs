@@ -34,6 +34,9 @@ public class SignalRLogger : ILogger
     {
         var message = formatter(state, exception!);
 
+        if (logLevel == LogLevel.Debug)
+            return;
+
         if (!message.Contains("Executed DbCommand") 
             && !message.Contains("Command execution completed") 
             && !message.Contains("Executing command"))
