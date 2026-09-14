@@ -9,6 +9,6 @@ public class Root
     public string Reference { get; set; } // chapter reference
     public string Copyright { get; set; }
     public int VerseCount { get; set; }
-    public List<Content> Content { get; set; }
+    public List<JsonContent> Content { get; set; }
     //public string Content { get; set; }
 }

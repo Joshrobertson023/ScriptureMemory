@@ -19,13 +19,17 @@ public class Verse
 {
     private Reference _reference;
 
-    [JsonIgnore] // Don't cache
     public Reference Reference 
     { 
         get => _reference;
         set
         {
             _reference = value;
+
+            if (string.IsNullOrEmpty(Reference.Book.Abbreviation))
+            {
+                Reference.Book = Books.GetBook(Reference.Book.DisplayName);
+            }
             
             this.Id = Reference.Book.Abbreviation.ToUpper()
                       + '.'
@@ -42,13 +46,11 @@ public class Verse
     [MaxLength(20)]
     public string Id { get; set; }
 
-    [JsonIgnore] // Don't cache
     public int MemorizedCount { get; set; } = 0;
 
-    [JsonIgnore] // Don't cache
     public int SavedCount { get; set; } = 0;
 
-    public int? PassageId { get; set; }
+    public string? PassageId { get; set; }
 
     [JsonIgnore] // Don't cache
     public Passage? PassageNavigation { get; set; } = null!;

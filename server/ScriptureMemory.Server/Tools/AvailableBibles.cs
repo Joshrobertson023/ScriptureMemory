@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScriptureMemory.Server.CustomExceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,7 +54,7 @@ public static class AvailableBibles
     public static Bible GetBible(string version)
     {
         return authorizedBibles.FirstOrDefault(b => b.Abbreviation == version)
-            ?? throw new InvalidOperationException($"Bible {version} not found.");
+            ?? throw new BibleUnavailableException($"Bible {version} not found.", version);
     }
 
     public static bool TryGetBible(string version, out Bible? bible)

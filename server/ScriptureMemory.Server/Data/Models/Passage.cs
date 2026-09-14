@@ -2,9 +2,17 @@
 
 namespace ScriptureMemory.Server.DataAccess.Models;
 
-[NotMapped]
 public class Passage
 {
+    public string Id
+    {
+        get
+        {
+            return Reference.VerseId;
+        }
+        set;
+    }
+
     public Reference Reference { get; set; }
     
     public List<Verse> Verses { get; set; } = new();

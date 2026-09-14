@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Distributed;
+using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 using System.Text.Json;
@@ -23,8 +24,6 @@ public class VerseCacherBackgroundWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("{Name} is running.", nameof(VerseCacherBackgroundWorker));
-
         while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -32,45 +31,60 @@ public class VerseCacherBackgroundWorker : BackgroundService
                 var cacheItem = await _queue.DequeueAsync(stoppingToken);
 
                 using var scope = _scopeFactory.CreateScope();
+                var verseData = scope.ServiceProvider.GetRequiredService<VerseDataDapper>();
                 var distributedCache = scope.ServiceProvider.GetRequiredService<IDistributedCache>();
 
-                if (!CacheValidator.IsGoodToCache(cacheItem.Verse))
+                var verses = cacheItem.Verses;
+
+                bool embeddingsMissing = verses.Any(v => v.TranslationContents.Any(c => c.Embedding is null));
+
+                if (embeddingsMissing)
                 {
-                    _logger.LogWarning(
-                        "Cache item {Reference}:{Version} is not valid for cache, skipping...",
-                        cacheItem.Verse.Id, 
-                        cacheItem.Verse.TranslationContents.First().Version);
-                    continue;
+                    _logger.LogWarning("Embedding missing in cache item, fetching from db...");
+
+                    var embeddings = await verseData.GetEmbeddingsForVerses(verses.Select(v => v.Id));
+
+                    foreach (var verse in verses)
+                    {
+                        var embedding = embeddings.FirstOrDefault(e => e.VerseId == verse.Id);
+                        if (embedding != null && verse.TranslationContents.Any())
+                        {
+                            verse.TranslationContents.First().Embedding = embedding.Embedding;
+                        }
+                    }
                 }
 
-                await distributedCache.SetStringAsync(
-                    CacheKeyGenerator.GetVerseCacheKey(
-                        cacheItem.Verse.Id,
-                        cacheItem.Verse.TranslationContents.First().Version,
-                        cacheItem.CacheType),
-                    JsonSerializer.Serialize(
-                        cacheItem.Verse,
-                        new JsonSerializerOptions()
-                        {
-                            Converters = { new VectorJsonConverter() }
-                        }),
-                    new DistributedCacheEntryOptions().SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration));
+                foreach (var verse in verses)
+                {
+                    if (!CacheValidator.IsGoodToCache(verse))
+                    {
+                        _logger.LogWarning("Verse {Id} is not valid, skipping cache...", verse.Id);
+                        continue;
+                    }
 
-                _logger.LogInformation(
-                    "Successfully cached item from worker: {Id}:{Translation}",
-                    cacheItem.Verse.Id,
-                    cacheItem.Verse.TranslationContents.First().Version);
-            }
-            catch (OperationCanceledException)
-            {
-                break;
+                    var content = verse.TranslationContents.FirstOrDefault();
+
+                    if (content == null) 
+                        continue;
+
+                    await distributedCache.SetStringAsync(
+                        CacheKeyGenerator.GetVerseCacheKey(
+                            verse.Id,
+                            content.Version,
+                            cacheItem.CacheType),
+                        JsonSerializer.Serialize(verse, VectorJsonConverter.SerializerOptions),
+                        stoppingToken);
+
+                    _logger.LogInformation("Cached verse {Id}:{Translation}.", verse.Id, verse.TranslationContents.First().Version);
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error caching verse: " + ex.Message);
+                _logger.LogError(ex, "Error occurred background caching.");
             }
         }
     }
+
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {

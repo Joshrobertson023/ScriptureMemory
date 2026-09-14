@@ -20,7 +20,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<Chapter> Chapters { get; set; }
     public DbSet<Verse> Verses { get; set; }
     // public DbSet<Collection> Collections { get; set; }
-    // public DbSet<UserPassage> UserPassages { get; set; }
+    //public DbSet<UserPassage> UserPassages { get; set; }
+    public DbSet<Passage> Passages { get; set; }
+    public DbSet<VerseOfDay> VerseOfDays { get; set; }
     public DbSet<VerseTranslationContent> VerseTranslationContents { get; set; }
     public DbSet<SyncEvent> SyncProgressReports { get; set; }
     public DbSet<ExceptionModel> Exceptions { get; set; }
@@ -35,6 +37,8 @@ public class ApplicationDbContext : DbContext
         new UserConfiguration().Configure(modelBuilder.Entity<User>());
         new UserPreferencesConfiguration().Configure(modelBuilder.Entity<UserPreferences>());
         new VerseConfiguration().Configure(modelBuilder.Entity<Verse>());
+        new PassageConfiguration().Configure(modelBuilder.Entity<Passage>());
+        new VerseofDayConfiguration().Configure(modelBuilder.Entity<VerseOfDay>());
         new VerseContentConfiguration().Configure(modelBuilder.Entity<VerseTranslationContent>());
         new SyncProgressReportConfiguration().Configure(modelBuilder.Entity<SyncEvent>());
         new ExceptionConfiguration().Configure(modelBuilder.Entity<ExceptionModel>());

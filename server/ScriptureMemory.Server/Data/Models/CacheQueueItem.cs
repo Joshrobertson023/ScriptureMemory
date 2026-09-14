@@ -2,6 +2,7 @@
 
 public class CacheQueueItem
 {
-    public Verse Verse { get; set; } = new();
-    public MemoryCacheType CacheType { get; set; }
+    public List<Verse> Verses { get; set; } = new();
+    public string Translation { get; set; } = string.Empty;
+    public MemoryCacheType CacheType { get; set; } = MemoryCacheType.PlainText;
 }

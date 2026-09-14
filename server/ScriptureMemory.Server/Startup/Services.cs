@@ -16,15 +16,17 @@ using Pgvector;
 using Pgvector.Dapper;
 using ScriptureMemory.Server.Data.DataAccess;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
-using ScriptureMemory.Server.Services.BackgroundServices;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Providers;
 using StackExchange.Redis;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using Quartz;
 
 namespace ScriptureMemory.Server.Startup;
 
@@ -151,6 +153,16 @@ public static class Services
         //    o.SerializerOptions.Converters.Add(new VectorJsonConverter());
         //});
 
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("VodFetcherJob");
+            q.AddJob<VodBackgroundWorker>(o => o.WithIdentity(jobKey));
+            q.AddTrigger(o => o
+                .ForJob(jobKey)
+                .WithIdentity("VodFetcherJob-trigger")
+                .WithCronSchedule("0 0 3 * * ?"));
+        });
+
         //
         services.AddHttpClient("ExpoPush", client =>
         {
@@ -163,6 +175,21 @@ public static class Services
         services.ConfigureHttpJsonOptions(o =>
         {
             o.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+
+            // Exclude vector embeddings from http responses
+            o.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+                .WithAddedModifier(typeInfo =>
+                {
+                    if (typeInfo.Type != typeof(VerseTranslationContent)) return;
+
+                    var embeddingProperty = typeInfo.Properties
+                        .FirstOrDefault(p => p.Name.Equals(
+                            nameof(VerseTranslationContent.Embedding),
+                            StringComparison.OrdinalIgnoreCase));
+
+                    if (embeddingProperty is not null)
+                        embeddingProperty.ShouldSerialize = static (_, _) => false;
+                });
         });
 
         services.AddCors(options =>
@@ -225,21 +252,17 @@ public static class Services
         //services.AddScoped<CollectionService>();
         services.AddScoped<TokenProvider>();
         services.AddScoped<BibleService>();
-        //services.AddScoped<VerseOfDayService>();
+        services.AddScoped<VerseOfDayService>();
 
         services.AddScoped<VerseManagement>();
         services.AddScoped<BibleApi>();
         services.AddScoped<BibleSyncer>();
 
         services.AddScoped<EmbeddingGenerator>();
-        services.AddScoped<BackgroundCacher>();
 
         services.AddSingleton<BibleSyncerQueue>();
         services.AddSingleton<VerseCacherQueue>();
-        services.AddSingleton<VerseCacherJobQueue>();
-        services.AddScoped<BackgroundCacher>();
         services.AddHostedService<BibleSyncerBackgroundWorker>();
-        services.AddHostedService<VerseCacheJobBackgroundWorker>();
         services.AddHostedService<VerseCacherBackgroundWorker>();
         services.AddScoped<BibleSyncer>();
         services.AddSingleton<AuthorizationSyncerData>();
@@ -268,7 +291,7 @@ public static class Services
         // //services.AddScoped<UserPassageData>();
         // services.AddScoped<CollectionData>();
         //services.AddScoped<PublishedCollectionData>();
-        //services.AddScoped<VerseOfDayData>();
+        services.AddScoped<VerseOfDayData>();
         services.AddScoped<ISessionData, SessionDataEfCore>();
         services.AddScoped<BibleSyncLogData>();
         return services;

@@ -407,7 +407,7 @@ public static class ReferenceParser
         {
             string[] parts = reference.Split(' ');
             
-            if (!Books.TryGetBook(parts[0], out var book) && parts.Length > 1)
+            if (Books.TryGetBook(parts[0], out var book) && parts.Length > 1)
             {
                 var chapterPart = parts[1].Split(':')[0];
 
@@ -419,7 +419,7 @@ public static class ReferenceParser
             {
                 string bookWithNumber = parts[0] + " " + parts[1];
 
-                if (!Books.TryGetBook(bookWithNumber, out book))
+                if (Books.TryGetBook(bookWithNumber, out book))
                 {
                     var chapterPart = parts[2].Split(':')[0];
                     if (int.TryParse(chapterPart, out int chapter))
@@ -432,7 +432,7 @@ public static class ReferenceParser
                 {
                     bookWithNumber = parts[0] + " " + parts[1] + " " + parts[2];
 
-                    if (!Books.TryGetBook(bookWithNumber, out book))
+                    if (Books.TryGetBook(bookWithNumber, out book))
                     {
                         var chapterPart = parts[3].Split(':')[0];
                         if (int.TryParse(chapterPart, out int chapter))

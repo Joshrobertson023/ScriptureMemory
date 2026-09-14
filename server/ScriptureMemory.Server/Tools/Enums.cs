@@ -18,7 +18,8 @@ namespace ScriptureMemory.Server.Tools
         public enum MemoryCacheType
         {
             PlainText,
-            Usx
+            Usx,
+            Json
         }
 
         public static class MemoryCacheKeys

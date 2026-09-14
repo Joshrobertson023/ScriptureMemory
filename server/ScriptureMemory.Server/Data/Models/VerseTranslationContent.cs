@@ -16,7 +16,7 @@ public class VerseTranslationContent
 
     public Vector? Embedding { get; set; }
     
-    public DateTime? LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }  
 
     [MaxLength(20)]
     public string VerseId { get; set; } = string.Empty;

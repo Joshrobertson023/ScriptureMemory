@@ -3,11 +3,13 @@ using System.Text.Json.Serialization;
 
 namespace ScriptureMemory.Server.Tools;
 
-/// <summary>
-/// This class converts Vector (embeddings) into byte[] to store in Redis cache
-/// </summary>
 public class VectorJsonConverter : JsonConverter<Vector>
 {
+    public static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        Converters = { new VectorJsonConverter() }
+    };
+
     public override Vector? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.Null) return null;

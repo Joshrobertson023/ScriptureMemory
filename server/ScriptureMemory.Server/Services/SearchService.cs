@@ -30,16 +30,6 @@ public sealed class SearchService(
         IConfiguration _config,
         VerseCacherQueue _verseCacherQueue)
 {
-    //public async Task TrackSearch(DataAccess.Requests.SearchRequest request)
-    //{
-    //    switch(request.SearchType)
-    //    {
-    //        case SearchType.Verse:
-    //            //await
-    //            break;
-    //    }
-    //}
-
     public async Task<IResult> Search(SearchRequest request, ClaimsPrincipal user)
     {
         var userId = user.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
@@ -108,107 +98,6 @@ public sealed class SearchService(
                 requestedTranslation))
             .ToList();
 
-        //if (requestedTranslation != _config["ApiContent:DefaultTranslation"])
-        //{
-        //    // Fetch verse content from api.bible
-        //    _logger.LogInformation("Fetching from api.bible verse content.");
-
-        //    string[] verseIdsToFetch = new string[referenceMatchVectors.Count() + 1];
-        //    verseIdsToFetch[0] = passage.Verses.First().Id;
-
-        //    for (int i = 0; i < versesSemanticSearchResult.Count; i++)
-        //    {
-        //        verseIdsToFetch[i + 1] = versesSemanticSearchResult[i].Id;
-        //    }
-
-        //    List<(Verse verse, Task<string> contentTask)> verseContentFetches = versesSemanticSearchResult
-        //        .Select(v => (v, contentTask: _bibleApi.GetVersePlaintext(v.Id, requestedTranslation)))
-        //        .ToList();
-
-        //    List<string> fetchedVerseCacheKeys = new();
-
-        //    if (bool.Parse(_config["ApiContent:FetchAllAtOnce"] ?? "false"))
-        //    {
-        //        try
-        //        {
-        //            await Task.WhenAll(verseContentFetches.Select(f => f.contentTask));
-
-        //            fetchedVerseCacheKeys = verseContentFetches.Select(
-        //                v => CacheKeyGenerator.GetVerseCacheKey(v.verse.Id, requestedTranslation))
-        //                .ToList();
-        //        }
-        //        catch (HttpRequestException)
-        //        {
-        //            _logger.LogError("Failed to fetch verse content with Task.WhenAll, switching to sequential fetch...");
-
-        //            await FetchVerseContentSequentially(verseContentFetches, fetchedVerseCacheKeys, requestedTranslation);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        await FetchVerseContentSequentially(verseContentFetches, fetchedVerseCacheKeys, requestedTranslation);
-        //    }
-
-        //    List<Verse> fetchedVerses = new();
-
-        //    foreach (var verseContentFetch in verseContentFetches)
-        //    {
-        //        try
-        //        {
-        //            if (verseContentFetch.verse.TranslationContents is null ||
-        //                verseContentFetch.verse.TranslationContents.Count <= 0)
-        //            {
-        //                verseContentFetch.verse.TranslationContents = new()
-        //                {
-        //                    new VerseTranslationContent()
-        //                };
-        //            }
-
-        //            verseContentFetch.verse.TranslationContents?.First().PlainText = verseContentFetch.contentTask.Result;
-
-        //            fetchedVerses.Add(verseContentFetch.verse);
-        //        }
-        //        catch (AggregateException)
-        //        {
-        //            // Expected if a Task failed to fetch verse content earlier
-        //            continue;
-        //        }
-        //    };
-
-        //    // Cache recently fetched verses
-        //    foreach (var fetchedVerse in fetchedVerses)
-        //    {
-        //        await _distributedCache.SetStringAsync(
-        //            CacheKeyGenerator.GetVerseCacheKey(fetchedVerse.Id, requestedTranslation),
-        //            JsonSerializer.Serialize(fetchedVerse),
-        //            new DistributedCacheEntryOptions().SetAbsoluteExpiration(CacheExpirations.VerseContentExpiration));
-
-        //        _logger.LogInformation("Cached verse {Id}:{Translation}", fetchedVerse.Id, requestedTranslation);
-        //    }
-
-        //    searchResults.Add(new SearchResult
-        //    {
-        //        Type = SearchResultType.ExactPassage,
-        //        Passage = passage,
-        //        Rank = 1
-        //    });
-
-        //    foreach (var fetchedVerse in fetchedVerses)
-        //    {
-        //        searchResults.Add(new SearchResult
-        //        {
-        //            Type = SearchResultType.ExactPassage,
-        //            Passage = new Passage
-        //            {
-        //                Reference = fetchedVerse.Reference,
-        //                Verses = new List<Verse> { fetchedVerse }
-        //            },
-        //            Rank = 2
-        //        });
-        //    }
-        //}
-        //else
-        //{
         searchResults.Add(new SearchResult
         {
             Type = SearchResultType.ExactPassage,
@@ -229,45 +118,9 @@ public sealed class SearchService(
                 Rank = 2
             });
         }
-        //}
 
-        await EnsureAllResultsContainContent(searchResults, requestedTranslation);
-
-        return searchResults;
+        return await ensureAllResultsContainContent(searchResults, requestedTranslation);
     }
-
-    //private async Task FetchVerseContentSequentially(
-    //    List<(Verse verse, Task<string> contentTask)> verseContentFetches,
-    //    List<string> fetchedVerseCacheKeys,
-    //    string requestedTranslation)
-    //{
-    //    foreach (var verseContentFetch in verseContentFetches)
-    //    {
-    //        try
-    //        {
-    //            _logger.LogInformation(
-    //                "Fetching content for {Id}:{Translation}",
-    //                verseContentFetch.verse.Id,
-    //                verseContentFetch.verse.TranslationContents?.First().Version);
-
-    //            await verseContentFetch.contentTask;
-
-    //            fetchedVerseCacheKeys.Add(
-    //                CacheKeyGenerator.GetVerseCacheKey(
-    //                    verseContentFetch.verse.Id, 
-    //                    requestedTranslation));
-
-    //            break;
-    //        }
-    //        catch (HttpRequestException)
-    //        {
-    //            _logger.LogWarning(
-    //                "Failed to fetch verse content for {Id}:{Translation}",
-    //                verseContentFetch.verse.Id,
-    //                verseContentFetch.verse.TranslationContents?.First().Version);
-    //        }
-    //    }
-    //}
 
     /// <summary>
     /// Gets verse content from embedding results from cache, api, and sets cache
@@ -297,10 +150,7 @@ public sealed class SearchService(
             {
                 verse.TranslationContents = (JsonSerializer.Deserialize<Verse>(
                     cachedVerse,
-                    new JsonSerializerOptions()
-                    {
-                        Converters = { new VectorJsonConverter() }
-                    })
+                    VectorJsonConverter.SerializerOptions)
                     ?? throw new Exception("Error deserializing cached verse")).TranslationContents;
 
                 _logger.LogInformation("Verse found in cache: {Id}:{Translation}.", verse.Id, translation);
@@ -363,15 +213,12 @@ public sealed class SearchService(
                 returnVerses.Add(embeddingResultVerses.Single(v => v.Id == id));
         }
 
-        // Cache verses
-        foreach (var verse in returnVerses)
+        await _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
         {
-            _ = _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
-            {
-                Verse = verse,
-                CacheType = MemoryCacheType.PlainText
-            });
-        }
+            Verses = returnVerses.ToList(),
+            Translation = translation,
+            CacheType = MemoryCacheType.PlainText
+        });
 
         return embeddingResultVerses;
     }
@@ -423,9 +270,13 @@ public sealed class SearchService(
     /// <param name="requestedTranslation"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    private async Task EnsureAllResultsContainContent(List<SearchResult> results, string requestedTranslation)
+    private async Task<List<SearchResult>> ensureAllResultsContainContent(List<SearchResult> results, string requestedTranslation)
     {
         Dictionary<int, string> verseIdsInResults = new(); // Track verses and index found to keep in the same location in results
+
+        var _results = results.ToList();
+
+        List<Verse> versesNeedingCached = new();
 
         for (int i = 0; i < results.Count; i++)
         {
@@ -433,7 +284,7 @@ public sealed class SearchService(
                 ?? throw new ArgumentNullException(nameof(Verse));
         }
 
-        foreach (var result in results.ToList())
+        foreach (var result in _results)
         {
             // Drop vector embedding before sending over network
             result.Passage.Verses.ForEach(v => v.TranslationContents.ForEach(c => c.Embedding = null));
@@ -470,11 +321,7 @@ public sealed class SearchService(
                     }
                 };
 
-                _ = _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
-                {
-                    Verse = newVerse,
-                    CacheType = MemoryCacheType.PlainText
-                });
+                versesNeedingCached.Add(newVerse);
 
                 results.Insert(
                     verseIdsInResults.First(v => v.Value == resultVerseId).Key,
@@ -489,7 +336,18 @@ public sealed class SearchService(
                     }
                 );
             }
+            
         }
+
+        if (versesNeedingCached.Count > 0)
+            await _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
+            {
+                Verses = versesNeedingCached.ToList(),
+                Translation = requestedTranslation,
+                CacheType = MemoryCacheType.PlainText
+            });
+
+        return _results;
     }
 
     private async Task<List<SearchResult>> GetPassageSearchResults(string userSearchQuery, string requestedTranslation)
@@ -521,9 +379,7 @@ public sealed class SearchService(
             });
         }
 
-        await EnsureAllResultsContainContent(searchResults, requestedTranslation);
-
-        return searchResults;
+        return await ensureAllResultsContainContent(searchResults, requestedTranslation);
     }
 
     /// <summary>
@@ -558,10 +414,7 @@ public sealed class SearchService(
 
                 var deserializedCachedVerse = JsonSerializer.Deserialize<Verse>(
                     cachedVerse,
-                    new JsonSerializerOptions()
-                    {
-                        Converters = { new VectorJsonConverter() }
-                    })
+                    VectorJsonConverter.SerializerOptions)
                                     ?? throw new Exception("Error deserializing cached verse");
 
                 if (deserializedCachedVerse.TranslationContents?.First().Version == translation)
@@ -589,13 +442,14 @@ public sealed class SearchService(
             {
                 _logger.LogError("Could not cache verse: embedding was null");
             }
-
-            _ = _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
-            {
-                Verse = verseFetched,
-                CacheType = MemoryCacheType.PlainText
-            });
         }
+
+        await _verseCacherQueue.EnqueueAsync(new CacheQueueItem()
+        {
+            Verses = versesFetched.ToList(),
+            Translation = translation,
+            CacheType = MemoryCacheType.PlainText
+        });
 
         return new Passage()
         {

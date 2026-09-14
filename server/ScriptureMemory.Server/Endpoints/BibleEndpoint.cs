@@ -14,6 +14,19 @@ public static class BibleEndpoint
 {
     public static void ConfigureBibleEndpoints(this WebApplication app)
     {
+        app.MapGet("/bible/translations", () =>
+        {
+            var translations = new List<string>();
+
+            foreach (var bible in AvailableBibles.authorizedBibles)
+            {
+                if (AvailableBibles.TryGetBible(bible.Abbreviation, out var availableBible) && availableBible is not null)
+                    translations.Add(availableBible.Abbreviation);
+            }
+
+            return Results.Ok(translations);
+        });
+
         app.MapGet("/bible/{bibleId}", async (
             string bibleId,
             [FromServices] BibleData bibleContext) =>
@@ -91,12 +104,14 @@ public static class BibleEndpoint
         //     return Results.Ok();
         // }).RequireAuthorization("Admin");
 
+        // contentType: "plaintext" (default) or "json"
         app.MapPost("/bible/chapter/{bible}/{book}/{chapter}", async (
             string bible,
             string book,
             int chapter,
             HttpContext httpContext,
-            [FromServices] BibleService bibleService) =>
+            [FromServices] BibleService bibleService,
+            [FromQuery] string contentType = "plaintext") =>
         {
             /*var userIdClaim = httpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
@@ -104,6 +119,9 @@ public static class BibleEndpoint
             {
                 return Results.Unauthorized();
             }*/
+            if (string.Equals(contentType, "json", StringComparison.OrdinalIgnoreCase))
+                return Results.Ok(await bibleService.GetChapterJson(0, bible, book, chapter));
+
             return Results.Ok(await bibleService.GetChapter(0, bible, book, chapter));
         });
 

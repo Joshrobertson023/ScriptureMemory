@@ -2,7 +2,6 @@ using BenchmarkDotNet.Running;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Npgsql;
-using ScriptureMemory.Server.Benchmarks;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Startup;
 using ScriptureMemory.Server.Tools;

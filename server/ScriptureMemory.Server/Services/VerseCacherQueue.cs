@@ -6,9 +6,9 @@ namespace ScriptureMemory.Server.Services;
 public class VerseCacherQueue
 {
     private readonly Channel<CacheQueueItem> _queue;
-    private readonly ILogger<VerseCacherJobQueue> _logger;
+    private readonly ILogger<VerseCacherQueue> _logger;
 
-    public VerseCacherQueue(ILogger<VerseCacherJobQueue> logger)
+    public VerseCacherQueue(ILogger<VerseCacherQueue> logger)
     {
         _logger = logger;
 
@@ -23,14 +23,14 @@ public class VerseCacherQueue
 
         await _queue.Writer.WriteAsync(item);
 
-        _logger.LogInformation("Queued verse for caching: {VerseId}", item.Verse.Id);
+        _logger.LogInformation("Queued verses for caching.");
     }
 
     public async Task<CacheQueueItem> DequeueAsync(CancellationToken cancellationToken)
     {
         var item = await _queue.Reader.ReadAsync(cancellationToken);
 
-        _logger.LogInformation("Dequeued verse for caching: {VerseId}", item.Verse.Id);
+        _logger.LogInformation("Dequeued verses for caching.");
 
         return item;
     }

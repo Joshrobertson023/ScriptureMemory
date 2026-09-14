@@ -52,6 +52,8 @@
     <PackageReference Include="Pgvector" Version="0.3.2" />
     <PackageReference Include="Pgvector.Dapper" Version="0.3.1" />
     <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.2.2" />
+    <PackageReference Include="Quartz" Version="3.20.0" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.20.0" />
     <PackageReference Include="RestSharp" Version="113.1.0" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.7.33" />
@@ -70,6 +72,7 @@
 
 
 	<ItemGroup>
+	  <Folder Include="Benchmarks\" />
 	  <Folder Include="Data\ViewModels\" />
 	  <Folder Include="Filters\" />
 	</ItemGroup>
