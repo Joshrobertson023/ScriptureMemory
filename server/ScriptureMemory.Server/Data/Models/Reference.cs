@@ -46,12 +46,10 @@ public sealed class Reference
         }
     }
     
-    [JsonIgnore]
     public string ChapterId => Book.Abbreviation.ToUpper() 
                    + '.' 
                    + Chapter.ToString();
 
-    [JsonIgnore]
     public string CacheKey => VerseId 
                               ?? throw new InvalidOperationException("Unable to get CacheKey: VerseId was null");
 

@@ -125,11 +125,7 @@ public static class Services
         //
         services.AddSwaggerGenWithAuth();
 
-        //
-        //SqlMapper.AddTypeHandler(new VectorTypeHandler());
-
         
-        // Add custom exception handler that logs exceptions
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         
@@ -141,17 +137,11 @@ public static class Services
             options => options.UseNpgsql(connectionString, o => o.UseVector()),
             ServiceLifetime.Scoped);
 
-        // Data source for raw Dapper queries (pgvector-aware), used by *Dapper data access classes
+        // For Dapper
         services.AddNpgsqlDataSource(connectionString, dataSourceBuilder => dataSourceBuilder.UseVector());
         
         // Add Vector type to dapper type handler
         SqlMapper.AddTypeHandler(new VectorTypeHandler());
-
-        // Convert Vectors to byte[] for Redis cache
-        //services.Configure<JsonOptions>(o =>
-        //{
-        //    o.SerializerOptions.Converters.Add(new VectorJsonConverter());
-        //});
 
         services.AddQuartz(q =>
         {
@@ -171,9 +161,9 @@ public static class Services
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         });
         
-        // Convert all enums to strings before sending via http
         services.ConfigureHttpJsonOptions(o =>
         {
+            // Convert all enums to strings before sending via http
             o.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
 
             // Exclude vector embeddings from http responses

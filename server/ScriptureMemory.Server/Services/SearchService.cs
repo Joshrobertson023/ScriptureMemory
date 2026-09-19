@@ -40,6 +40,12 @@ public sealed class SearchService(
         if (!AvailableBibles.TryGetBible(request.Translation, out var bible))
             throw new BibleUnavailableException("The Bible {bible} is not available.", request.Translation);
 
+        if (request.LastVerseDistance <= 0.0)
+        {
+            request.LastVerseDistance = null;
+            request.LastVerseId = null;
+        }
+
         Reference? reference = null;
         var results = new List<SearchResult>();
 

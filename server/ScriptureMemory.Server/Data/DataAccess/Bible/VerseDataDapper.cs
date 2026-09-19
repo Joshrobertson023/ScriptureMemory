@@ -181,34 +181,42 @@ public class VerseDataDapper
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
 
-        var results = await connection.QueryAsync<VerseContentDto>(
-            """
-            select
-            v."Id" as "VerseId",
-            v."Reference_Chapter" as "Chapter",
-            v."Reference_VerseNumbers" as "VerseNumbers",
-            v."Reference_Book_DisplayName" as "BookDisplayName",
-            v."MemorizedCount" as "MemorizedCount",
-            v."SavedCount" as "SavedCount",
-            vc."PlainText" as "PlainText",
-            vc."ContentUsx" as "ContentUsx",
-            vc."LastUpdated" as "LastUpdated",
-            (vc."Embedding" <=> @queryEmbedding::vector) as "Distance"
-            from "Verses" v
-            join "VerseTranslationContents" vc
-                on vc."VerseId" = v."Id"
-            where vc."Version" = 'kjv'
-            and vc."Embedding" is not null
-            and (
-                @lastVerseEmbedding::vector IS NULL
-                OR (vc."Embedding" <=> @queryEmbedding::vector) > @lastVerseEmbedding
-                OR ((vc."Embedding" <=> @queryEmbedding::vector) = @lastVerseEmbedding AND v."Id" > @lastVerseId
-            )
-            order by vc."Embedding" <=> @queryEmbedding::vector
-            limit @maxResults
-            """, new { queryEmbedding, maxResults, lastVerseDistance, lastVerseId });
+        try
+        {
+            var results = await connection.QueryAsync<VerseContentDto>(
+                """
+                select
+                v."Id" as "VerseId",
+                v."Reference_Chapter" as "Chapter",
+                v."Reference_VerseNumbers" as "VerseNumbers",
+                v."Reference_Book_DisplayName" as "BookDisplayName",
+                v."MemorizedCount" as "MemorizedCount",
+                v."SavedCount" as "SavedCount",
+                vc."PlainText" as "PlainText",
+                vc."ContentUsx" as "ContentUsx",
+                vc."LastUpdated" as "LastUpdated",
+                (vc."Embedding" <=> @queryEmbedding::vector) as "Distance"
+                from "Verses" v
+                join "VerseTranslationContents" vc
+                    on vc."VerseId" = v."Id"
+                where vc."Version" = 'kjv'
+                and vc."Embedding" is not null
+                and (
+                    @lastVerseDistance::float8 IS NULL
+                    OR (vc."Embedding" <=> @queryEmbedding::vector) > @lastVerseDistance::float8
+                )
+                order by vc."Embedding" <=> @queryEmbedding::vector
+                limit @maxResults
+                """, new { queryEmbedding, maxResults, lastVerseDistance });
 
-        return results.Select(dto => MapVerse(dto)).ToList();
+            return results.Select(dto => MapVerse(dto)).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("GetKjvContentForSemanticSearch - " + ex.Message);
+
+            return new List<Verse>();
+        }
     }
 
     public async Task CreateVectorIndex()
@@ -240,77 +248,86 @@ public class VerseDataDapper
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
 
-        var results = await connection.QueryAsync<VerseContentDto>(
-            """
-            with candidates as (
-                select
-                    nearest."VerseId",
-                    nearest."Chapter",
-                    nearest."Version",
-                    nearest."VerseNumbers",
-                    nearest."BookDisplayName",
-                    nearest."MemorizedCount",
-                    nearest."SavedCount",
-                    nearest."PlainText",
-                    nearest."ContentUsx",
-                    nearest."LastUpdated",
-                    nearest."Distance"
-                from unnest(@queryEmbeddings) as q(embedding)
-                cross join lateral (
+        try
+        {
+            var results = await connection.QueryAsync<VerseContentDto>(
+                """
+                with candidates as (
                     select
-                        v."Id"                         as "VerseId",
-                        v."Reference_Chapter"          as "Chapter",
-                        v."Reference_VerseNumbers"     as "VerseNumbers",
-                        v."Reference_Book_DisplayName" as "BookDisplayName",
-                        v."MemorizedCount"             as "MemorizedCount",
-                        v."SavedCount"                 as "SavedCount",
-                        vc."PlainText"                 as "PlainText",
-                        vc."ContentUsx"                as "ContentUsx",
-                        vc."LastUpdated"               as "LastUpdated",
-                        vc."Version"                   as "Version",
-                        vc."Embedding" <=> q.embedding as "Distance"
-                    from "VerseTranslationContents" vc
-                    join "Verses" v
-                        on v."Id" = vc."VerseId"
-                    where vc."Version" = 'kjv'
-                      and NOT (v."Id" = ANY(@originalVerseIds))
-                      and (
-                        @lastVerseEmbedding::vector IS NULL
-                        OR (vc."Embedding" <=> q.embedding) > @lastVerseDistance
-                        OR ((vc."Embedding" <=> q.embedding) = @lastVerseDistance AND v."Id" > @lastVerseId
-                      )
-                    order by vc."Embedding" <=> q.embedding
-                    limit (@maxResults + 20)
-                ) as nearest
-            )
-            select
-                "VerseId",
-                "Chapter",
-                "VerseNumbers",
-                "BookDisplayName",
-                "MemorizedCount",
-                "SavedCount",
-                "PlainText",
-                "ContentUsx",
-                "Version",
-                "LastUpdated",
-                min("Distance") as "Distance"
-            from candidates
-            group by
-                "VerseId", "Chapter", "VerseNumbers", "BookDisplayName",
-                "MemorizedCount", "SavedCount", "PlainText", "ContentUsx", "Version", "LastUpdated"
-            order by "Distance", "VerseId"
-            limit @maxResults;
-            """, new
-            {
-                queryEmbeddings = queryEmbeddings.ToArray(), 
-                maxResults,
-                originalVerseIds,
-                lastVerseDistance,
-                lastVerseId
-            });
+                        nearest."VerseId",
+                        nearest."Chapter",
+                        nearest."Version",
+                        nearest."VerseNumbers",
+                        nearest."BookDisplayName",
+                        nearest."MemorizedCount",
+                        nearest."SavedCount",
+                        nearest."PlainText",
+                        nearest."ContentUsx",
+                        nearest."LastUpdated",
+                        nearest."Distance"
+                    from unnest(@queryEmbeddings) as q(embedding)
+                    cross join lateral (
+                        select
+                            v."Id"                         as "VerseId",
+                            v."Reference_Chapter"          as "Chapter",
+                            v."Reference_VerseNumbers"     as "VerseNumbers",
+                            v."Reference_Book_DisplayName" as "BookDisplayName",
+                            v."MemorizedCount"             as "MemorizedCount",
+                            v."SavedCount"                 as "SavedCount",
+                            vc."PlainText"                 as "PlainText",
+                            vc."ContentUsx"                as "ContentUsx",
+                            vc."LastUpdated"               as "LastUpdated",
+                            vc."Version"                   as "Version",
+                            vc."Embedding" <=> q.embedding as "Distance"
+                        from "VerseTranslationContents" vc
+                        join "Verses" v
+                            on v."Id" = vc."VerseId"
+                        where vc."Version" = 'kjv'
+                          and NOT (v."Id" = ANY(@originalVerseIds))
+                          and (
+                            @lastVerseDistance::float8 IS NULL
+                            OR (vc."Embedding" <=> q.embedding) > @lastVerseDistance::float8
+                            OR ((vc."Embedding" <=> q.embedding) = @lastVerseDistance::float8 AND v."Id" > @lastVerseId
+                          )
+                        order by vc."Embedding" <=> q.embedding
+                        limit (@maxResults + 20)
+                    ) as nearest
+                )
+                select
+                    "VerseId",
+                    "Chapter",
+                    "VerseNumbers",
+                    "BookDisplayName",
+                    "MemorizedCount",
+                    "SavedCount",
+                    "PlainText",
+                    "ContentUsx",
+                    "Version",
+                    "LastUpdated",
+                    min("Distance") as "Distance"
+                from candidates
+                group by
+                    "VerseId", "Chapter", "VerseNumbers", "BookDisplayName",
+                    "MemorizedCount", "SavedCount", "PlainText", "ContentUsx", "Version", "LastUpdated"
+                order by "Distance", "VerseId"
+                limit @maxResults;
+                """, new
+                {
+                    queryEmbeddings = queryEmbeddings.ToArray(), 
+                    maxResults,
+                    originalVerseIds,
+                    lastVerseDistance,
+                    lastVerseId
+                });
 
-        return results.Select(dto => MapVerse(dto)).ToList();
+            return results.Select(dto => MapVerse(dto)).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("GetKjvContentForSemanticSearch - " + ex.Message);
+
+            return new List<Verse>();
+        }
     }
 }
 

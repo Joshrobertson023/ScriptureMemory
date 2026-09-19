@@ -25,17 +25,12 @@ public class Verse
         set
         {
             _reference = value;
-
-            if (string.IsNullOrEmpty(Reference.Book.Abbreviation))
-            {
-                Reference.Book = Books.GetBook(Reference.Book.DisplayName);
-            }
             
-            this.Id = Reference.Book.Abbreviation.ToUpper()
+            this.Id = _reference.Book.Abbreviation.ToUpper()
                       + '.'
-                      + Reference.Chapter
+                      + _reference.Chapter
                       + '.'
-                      + Reference.VerseNumbers.First();
+                      + _reference.VerseNumbers.First();
         }
     }
     
