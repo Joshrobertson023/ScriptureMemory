@@ -66,19 +66,21 @@ public sealed class SearchService(
         {
             _logger.LogInformation($"User #{userId} has searched by reference for \"{request.Search}\"");
 
-            return Results.Ok(await GetReferenceSearchResults(request.Translation.ToLower().Trim(), reference));
+            return Results.Ok(await GetReferenceSearchResults(request.Translation.ToLower().Trim(), reference, request.LastVerseDistance, request.LastVerseId));
         }
         else
         {
             _logger.LogInformation($"User #{userId} has searched by keyword for \"{request.Search}\"");
 
-            return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
+            return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation, request.LastVerseDistance, request.LastVerseId));
         }
-
-        return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation));
     }
 
-    private async Task<List<SearchResult>> GetReferenceSearchResults(string requestedTranslation, Reference requestedReference)
+    private async Task<List<SearchResult>> GetReferenceSearchResults(
+        string requestedTranslation, 
+        Reference requestedReference,
+        double? lastVerseDistance,
+        int? lastVerseId)
     {
         var searchResults = new List<SearchResult>();
 
@@ -95,7 +97,9 @@ public sealed class SearchService(
             = (await GetVersesSemanticSearchResults(
                 referenceMatchVectors,
                 refernceMatchPassageResult.Verses.Select(v => v.Id).ToArray(),
-                requestedTranslation))
+                requestedTranslation,
+                lastVerseDistance,
+                lastVerseId))
             .ToList();
 
         searchResults.Add(new SearchResult
@@ -226,7 +230,9 @@ public sealed class SearchService(
     public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(
         IEnumerable<Vector> embeddings,
         string[] originalVerseIds,
-        string translation)
+        string translation,
+        double? lastVerseDistance,
+        int? lastVerseId)
     {
         string defaultTranslation = _config["ApiContent:DefaultTranslation"] ?? "kjv";
         int.TryParse(
@@ -237,6 +243,8 @@ public sealed class SearchService(
         var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
             embeddings,
             originalVerseIds,
+            lastVerseDistance,
+            lastVerseId,
             numVersesToFetch);
 
         if (translation == defaultTranslation)
@@ -245,7 +253,11 @@ public sealed class SearchService(
         return await getVersesContent(embeddingResultVerses, translation);
     }
 
-    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(Vector embedding, string translation)
+    public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(
+        Vector embedding, 
+        string translation,
+        double? lastVerseDistance,
+        int? lastVerseId)
     {
         string defaultTranslation = _config["ApiContent:DefaultTranslation"] ?? "kjv";
         int.TryParse(
@@ -255,6 +267,8 @@ public sealed class SearchService(
 
         var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
             embedding,
+            lastVerseDistance,
+            lastVerseId,
             numVersesToFetch);
 
         if (translation == defaultTranslation)
@@ -350,7 +364,11 @@ public sealed class SearchService(
         return _results;
     }
 
-    private async Task<List<SearchResult>> GetPassageSearchResults(string userSearchQuery, string requestedTranslation)
+    private async Task<List<SearchResult>> GetPassageSearchResults(
+        string userSearchQuery, 
+        string requestedTranslation,
+        double? lastVerseDistance,
+        int? lastVerseId)
     {
         var searchResults = new List<SearchResult>();
 
@@ -358,7 +376,9 @@ public sealed class SearchService(
 
         var result = await GetVersesSemanticSearchResults(
             searchEmbedding,
-            requestedTranslation);
+            requestedTranslation,
+            lastVerseDistance,
+            lastVerseId);
 
         foreach (var _verse in result)
         {

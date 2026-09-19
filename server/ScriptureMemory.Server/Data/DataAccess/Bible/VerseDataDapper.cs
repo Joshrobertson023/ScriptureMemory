@@ -36,7 +36,7 @@ public class VerseDataDapper
         public string ContentUsx { get; set; } = string.Empty;
         public DateTime? LastUpdated { get; set; }
         public string Version { get; set; }
-        public Vector Embedding { get; set; }
+        public double Distance { get; set; }
     }
 
     private static Verse MapVerse(VerseContentDto dto)
@@ -47,7 +47,8 @@ public class VerseDataDapper
         var verse = new Verse(book, dto.Chapter, verseNum)
         {
             MemorizedCount = dto.MemorizedCount,
-            SavedCount = dto.SavedCount
+            SavedCount = dto.SavedCount,
+            SearchDistance = dto.Distance
         };
 
         var content = new VerseTranslationContent
@@ -57,8 +58,7 @@ public class VerseDataDapper
             ContentUsx = dto.ContentUsx,
             LastUpdated = dto.LastUpdated,
             VerseNavigation = verse,
-            Version = dto.Version,
-            Embedding = dto.Embedding
+            Version = dto.Version
         };
 
         verse.TranslationContents = new List<VerseTranslationContent> { content };
@@ -173,7 +173,11 @@ public class VerseDataDapper
         return result;
     }
 
-    public async Task<List<Verse>> GetKjvContentForSemanticSearch(Vector queryEmbedding, int maxResults = 50)
+    public async Task<List<Verse>> GetKjvContentForSemanticSearch(
+        Vector queryEmbedding, 
+        double? lastVerseDistance,
+        int? lastVerseId,
+        int maxResults = 50)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
 
@@ -189,15 +193,20 @@ public class VerseDataDapper
             vc."PlainText" as "PlainText",
             vc."ContentUsx" as "ContentUsx",
             vc."LastUpdated" as "LastUpdated",
-            vc."Embedding" as "Embedding"
+            (vc."Embedding" <=> @queryEmbedding::vector) as "Distance"
             from "Verses" v
             join "VerseTranslationContents" vc
                 on vc."VerseId" = v."Id"
             where vc."Version" = 'kjv'
             and vc."Embedding" is not null
+            and (
+                @lastVerseEmbedding::vector IS NULL
+                OR (vc."Embedding" <=> @queryEmbedding::vector) > @lastVerseEmbedding
+                OR ((vc."Embedding" <=> @queryEmbedding::vector) = @lastVerseEmbedding AND v."Id" > @lastVerseId
+            )
             order by vc."Embedding" <=> @queryEmbedding::vector
             limit @maxResults
-            """, new { queryEmbedding, maxResults });
+            """, new { queryEmbedding, maxResults, lastVerseDistance, lastVerseId });
 
         return results.Select(dto => MapVerse(dto)).ToList();
     }
@@ -225,6 +234,8 @@ public class VerseDataDapper
     public async Task<List<Verse>> GetKjvContentForSemanticSearch(
         IEnumerable<Vector> queryEmbeddings,
         string[] originalVerseIds,
+        double? lastVerseDistance,
+        int? lastVerseId,
         int maxResults = 25)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
@@ -247,24 +258,29 @@ public class VerseDataDapper
                 from unnest(@queryEmbeddings) as q(embedding)
                 cross join lateral (
                     select
-                        v."Id"                             as "VerseId",
-                        v."Reference_Chapter"               as "Chapter",
-                        v."Reference_VerseNumbers"          as "VerseNumbers",
-                        v."Reference_Book_DisplayName"      as "BookDisplayName",
-                        v."MemorizedCount"                  as "MemorizedCount",
-                        v."SavedCount"                       as "SavedCount",
-                        vc."PlainText"                       as "PlainText",
-                        vc."ContentUsx"                      as "ContentUsx",
-                        vc."LastUpdated"                     as "LastUpdated",
-                        vc."Version"                         as "Version",
-                        vc."Embedding" <=> q.embedding        as "Distance"
+                        v."Id"                         as "VerseId",
+                        v."Reference_Chapter"          as "Chapter",
+                        v."Reference_VerseNumbers"     as "VerseNumbers",
+                        v."Reference_Book_DisplayName" as "BookDisplayName",
+                        v."MemorizedCount"             as "MemorizedCount",
+                        v."SavedCount"                 as "SavedCount",
+                        vc."PlainText"                 as "PlainText",
+                        vc."ContentUsx"                as "ContentUsx",
+                        vc."LastUpdated"               as "LastUpdated",
+                        vc."Version"                   as "Version",
+                        vc."Embedding" <=> q.embedding as "Distance"
                     from "VerseTranslationContents" vc
                     join "Verses" v
                         on v."Id" = vc."VerseId"
                     where vc."Version" = 'kjv'
                       and NOT (v."Id" = ANY(@originalVerseIds))
+                      and (
+                        @lastVerseEmbedding::vector IS NULL
+                        OR (vc."Embedding" <=> q.embedding) > @lastVerseDistance
+                        OR ((vc."Embedding" <=> q.embedding) = @lastVerseDistance AND v."Id" > @lastVerseId
+                      )
                     order by vc."Embedding" <=> q.embedding
-                    limit @maxResults
+                    limit (@maxResults + 20)
                 ) as nearest
             )
             select
@@ -283,13 +299,15 @@ public class VerseDataDapper
             group by
                 "VerseId", "Chapter", "VerseNumbers", "BookDisplayName",
                 "MemorizedCount", "SavedCount", "PlainText", "ContentUsx", "Version", "LastUpdated"
-            order by "Distance"
+            order by "Distance", "VerseId"
             limit @maxResults;
             """, new
             {
                 queryEmbeddings = queryEmbeddings.ToArray(), 
                 maxResults,
-                originalVerseIds
+                originalVerseIds,
+                lastVerseDistance,
+                lastVerseId
             });
 
         return results.Select(dto => MapVerse(dto)).ToList();

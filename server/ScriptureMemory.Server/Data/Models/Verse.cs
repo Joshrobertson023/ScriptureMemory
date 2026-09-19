@@ -54,6 +54,8 @@ public class Verse
 
     [JsonIgnore] // Don't cache
     public Passage? PassageNavigation { get; set; } = null!;
+
+    public double? SearchDistance { get; set; }
     
     public List<VerseTranslationContent>? TranslationContents { get; set; }
 

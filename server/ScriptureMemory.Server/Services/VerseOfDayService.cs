@@ -62,6 +62,7 @@ public class VerseOfDayService(
                 if (verse.TranslationContents.FirstOrDefault() == null ||
                     string.IsNullOrEmpty(verse.TranslationContents.FirstOrDefault().PlainText))
                 {
+                    verse.TranslationContents = new();
                     verse.TranslationContents.Add(new VerseTranslationContent());
                     verse.TranslationContents.First().PlainText = await _bibleApi.GetVersePlaintext(translation, verse.Id);
                 }
