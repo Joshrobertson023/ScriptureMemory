@@ -37,6 +37,7 @@ public class VerseDataDapper
         public DateTime? LastUpdated { get; set; }
         public string Version { get; set; }
         public double Distance { get; set; }
+        public Vector? Embedding { get; set; }
     }
 
     private static Verse MapVerse(VerseContentDto dto)
@@ -58,7 +59,8 @@ public class VerseDataDapper
             ContentUsx = dto.ContentUsx,
             LastUpdated = dto.LastUpdated,
             VerseNavigation = verse,
-            Version = dto.Version
+            Version = dto.Version,
+            Embedding = dto.Embedding
         };
 
         verse.TranslationContents = new List<VerseTranslationContent> { content };
@@ -176,7 +178,6 @@ public class VerseDataDapper
     public async Task<List<Verse>> GetKjvContentForSemanticSearch(
         Vector queryEmbedding, 
         double? lastVerseDistance,
-        int? lastVerseId,
         int maxResults = 50)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
@@ -243,7 +244,6 @@ public class VerseDataDapper
         IEnumerable<Vector> queryEmbeddings,
         string[] originalVerseIds,
         double? lastVerseDistance,
-        int? lastVerseId,
         int maxResults = 25)
     {
         await using var connection = await _dataSource.OpenConnectionAsync();
@@ -287,7 +287,6 @@ public class VerseDataDapper
                           and (
                             @lastVerseDistance::float8 IS NULL
                             OR (vc."Embedding" <=> q.embedding) > @lastVerseDistance::float8
-                            OR ((vc."Embedding" <=> q.embedding) = @lastVerseDistance::float8 AND v."Id" > @lastVerseId
                           )
                         order by vc."Embedding" <=> q.embedding
                         limit (@maxResults + 20)
@@ -316,8 +315,7 @@ public class VerseDataDapper
                     queryEmbeddings = queryEmbeddings.ToArray(), 
                     maxResults,
                     originalVerseIds,
-                    lastVerseDistance,
-                    lastVerseId
+                    lastVerseDistance
                 });
 
             return results.Select(dto => MapVerse(dto)).ToList();

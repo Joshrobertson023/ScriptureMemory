@@ -59,12 +59,13 @@ public class VerseOfDayService(
             }
             else
             {
-                if (verse.TranslationContents.FirstOrDefault() == null ||
-                    string.IsNullOrEmpty(verse.TranslationContents.FirstOrDefault().PlainText))
+                if (verse.TranslationContents == null ||
+                    string.IsNullOrEmpty(verse.TranslationContents.FirstOrDefault()?.PlainText))
                 {
                     verse.TranslationContents = new();
                     verse.TranslationContents.Add(new VerseTranslationContent());
-                    verse.TranslationContents.First().PlainText = await _bibleApi.GetVersePlaintext(translation, verse.Id);
+                    verse.TranslationContents.First().PlainText = await _bibleApi.GetVersePlaintext(AvailableBibles.GetBible(translation).Id, verse.Id);
+                    verse.TranslationContents.First().Version = translation;
                 }
 
                 returnPassage.Id = existingVod.PassageId;
@@ -78,7 +79,9 @@ public class VerseOfDayService(
                         verse.TranslationContents.First()
                     },
                     SavedCount = verse.SavedCount,
-                    MemorizedCount = verse.MemorizedCount
+                    MemorizedCount = verse.MemorizedCount,
+                    PassageId = returnPassage.Id,
+                    PassageNavigation = returnPassage
                 });
 
                 await _verseCacherQueue.EnqueueAsync(new Data.Models.CacheQueueItem()

@@ -67,6 +67,11 @@ public class VerseCacherBackgroundWorker : BackgroundService
                     if (content == null) 
                         continue;
 
+                    if (verse.Reference == null)
+                    {
+                        _logger.LogWarning("Cached a verse with a null reference.");
+                    }
+
                     await distributedCache.SetStringAsync(
                         CacheKeyGenerator.GetVerseCacheKey(
                             verse.Id,

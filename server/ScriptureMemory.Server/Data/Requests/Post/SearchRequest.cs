@@ -13,5 +13,4 @@ public sealed class SearchRequest
     [Required] public string Search { get; set; } = string.Empty;
     [Required] public string Translation { get; set; } = string.Empty;
     public double? LastVerseDistance { get; set; } = null;
-    public int? LastVerseId { get; set; } = null;
 }

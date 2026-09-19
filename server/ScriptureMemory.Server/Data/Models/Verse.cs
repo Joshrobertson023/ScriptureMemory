@@ -25,6 +25,11 @@ public class Verse
         set
         {
             _reference = value;
+
+            if (string.IsNullOrEmpty(_reference.Book.Abbreviation))
+            {
+                _reference.Book = Books.GetBook(_reference.Book.DisplayName);
+            }
             
             this.Id = _reference.Book.Abbreviation.ToUpper()
                       + '.'

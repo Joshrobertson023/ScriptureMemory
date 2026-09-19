@@ -104,9 +104,9 @@ public sealed class Reference
                 _verseNumbers = new List<int>(value);
         }
     }
-    private string _readableReference;
+    private string? _readableReference;
 
-    public string ReadableReference
+    public string? ReadableReference
     {
         get
         {

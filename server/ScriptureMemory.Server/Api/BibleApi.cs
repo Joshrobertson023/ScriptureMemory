@@ -149,6 +149,7 @@ public class BibleApi
         return (usx.Data.Content, CleanVersePlainText(plaintext.Data.Content));
     }
 
+    // Todo: Fallback on kjv if fails
     public async Task<string> GetVersePlaintext(string bibleId, string verseId)
     {
         using HttpClient http = new();

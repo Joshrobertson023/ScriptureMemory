@@ -64,7 +64,6 @@ public class VerseOfDayData
             .AsNoTracking()
             .Include(v => v.PassageNavigation)
                 .ThenInclude(p => p.Verses)
-                .ThenInclude(v => v.TranslationContents)
             .Where(vod => vod.PassageId == vod.PassageId)
             .OrderByDescending(v => v.Date)
             .FirstOrDefaultAsync();

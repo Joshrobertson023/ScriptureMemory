@@ -8,7 +8,12 @@ public class Passage
     {
         get
         {
-            return Reference.VerseId;
+            if (Reference == null)
+            {
+                return "";
+            }
+
+            return Reference.VerseId ?? "";
         }
         set;
     }
@@ -17,7 +22,7 @@ public class Passage
     
     public List<Verse> Verses { get; set; } = new();
 
-    public string CacheKey => Reference.CacheKey;
+    public string? CacheKey => Reference?.CacheKey ?? "";
 
     public Passage(Reference reference)
     {

@@ -43,7 +43,6 @@ public sealed class SearchService(
         if (request.LastVerseDistance <= 0.0)
         {
             request.LastVerseDistance = null;
-            request.LastVerseId = null;
         }
 
         Reference? reference = null;
@@ -72,21 +71,20 @@ public sealed class SearchService(
         {
             _logger.LogInformation($"User #{userId} has searched by reference for \"{request.Search}\"");
 
-            return Results.Ok(await GetReferenceSearchResults(request.Translation.ToLower().Trim(), reference, request.LastVerseDistance, request.LastVerseId));
+            return Results.Ok(await GetReferenceSearchResults(request.Translation.ToLower().Trim(), reference, request.LastVerseDistance));
         }
         else
         {
             _logger.LogInformation($"User #{userId} has searched by keyword for \"{request.Search}\"");
 
-            return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation, request.LastVerseDistance, request.LastVerseId));
+            return Results.Ok(await GetPassageSearchResults(request.Search, request.Translation, request.LastVerseDistance));
         }
     }
 
     private async Task<List<SearchResult>> GetReferenceSearchResults(
         string requestedTranslation, 
         Reference requestedReference,
-        double? lastVerseDistance,
-        int? lastVerseId)
+        double? lastVerseDistance)
     {
         var searchResults = new List<SearchResult>();
 
@@ -104,8 +102,7 @@ public sealed class SearchService(
                 referenceMatchVectors,
                 refernceMatchPassageResult.Verses.Select(v => v.Id).ToArray(),
                 requestedTranslation,
-                lastVerseDistance,
-                lastVerseId))
+                lastVerseDistance))
             .ToList();
 
         searchResults.Add(new SearchResult
@@ -237,8 +234,7 @@ public sealed class SearchService(
         IEnumerable<Vector> embeddings,
         string[] originalVerseIds,
         string translation,
-        double? lastVerseDistance,
-        int? lastVerseId)
+        double? lastVerseDistance)
     {
         string defaultTranslation = _config["ApiContent:DefaultTranslation"] ?? "kjv";
         int.TryParse(
@@ -250,7 +246,6 @@ public sealed class SearchService(
             embeddings,
             originalVerseIds,
             lastVerseDistance,
-            lastVerseId,
             numVersesToFetch);
 
         if (translation == defaultTranslation)
@@ -262,8 +257,7 @@ public sealed class SearchService(
     public async Task<IEnumerable<Verse>> GetVersesSemanticSearchResults(
         Vector embedding, 
         string translation,
-        double? lastVerseDistance,
-        int? lastVerseId)
+        double? lastVerseDistance)
     {
         string defaultTranslation = _config["ApiContent:DefaultTranslation"] ?? "kjv";
         int.TryParse(
@@ -274,7 +268,6 @@ public sealed class SearchService(
         var embeddingResultVerses = await _verseData.GetKjvContentForSemanticSearch(
             embedding,
             lastVerseDistance,
-            lastVerseId,
             numVersesToFetch);
 
         if (translation == defaultTranslation)
@@ -373,8 +366,7 @@ public sealed class SearchService(
     private async Task<List<SearchResult>> GetPassageSearchResults(
         string userSearchQuery, 
         string requestedTranslation,
-        double? lastVerseDistance,
-        int? lastVerseId)
+        double? lastVerseDistance)
     {
         var searchResults = new List<SearchResult>();
 
@@ -383,8 +375,7 @@ public sealed class SearchService(
         var result = await GetVersesSemanticSearchResults(
             searchEmbedding,
             requestedTranslation,
-            lastVerseDistance,
-            lastVerseId);
+            lastVerseDistance);
 
         foreach (var _verse in result)
         {
