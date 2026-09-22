@@ -45,3 +45,4 @@ npm-debug.log*
 /server/ScriptureMemory.Server/Services/BibleService.cs
 /server/ScriptureMemory.Server/Services/ChapterFormatterBackgroundWorker.cs
 /server/ScriptureMemory.Server/Services/ChapterFormatterQueue.cs
+/server/ScriptureMemory.Server/Tools/VerseManagement.cs
