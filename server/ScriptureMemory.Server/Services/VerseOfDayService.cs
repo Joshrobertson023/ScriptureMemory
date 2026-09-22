@@ -68,8 +68,6 @@ public class VerseOfDayService(
                     verse.TranslationContents.First().Version = translation;
                 }
 
-                returnPassage.Id = existingVod.PassageId;
-                returnPassage.Reference = existingReference;
                 returnPassage.Verses.Add(new Verse()
                 {
                     Id = verse.Id,
@@ -81,7 +79,7 @@ public class VerseOfDayService(
                     SavedCount = verse.SavedCount,
                     MemorizedCount = verse.MemorizedCount,
                     PassageId = returnPassage.Id,
-                    PassageNavigation = returnPassage
+                    Passages = new List<Passage> { returnPassage }
                 });
 
                 await _verseCacherQueue.EnqueueAsync(new Data.Models.CacheQueueItem()
@@ -92,6 +90,9 @@ public class VerseOfDayService(
                 });
             }
         }
+
+        returnPassage.Id = existingVod.PassageId;
+        returnPassage.Reference = existingReference;
 
         return returnPassage;
     }

@@ -20,7 +20,6 @@ public class PassageConfiguration : IEntityTypeConfiguration<Passage>
             });
         });
         builder.HasMany(b => b.Verses)
-            .WithOne(v => v.PassageNavigation)
-            .HasForeignKey(v => v.PassageId);
+            .WithMany(v => v.Passages);
     }
 }

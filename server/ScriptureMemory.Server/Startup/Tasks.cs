@@ -16,7 +16,8 @@ public static class Tasks
         {
             ("Upload verses from csv", () => UploadVersesFromCsv(scope)),
             ("Recreate vector index in database", () => CreateIndex(scope)),
-            ("Add Version column to all verses", () => UpdateVersionInVerses(scope))
+            ("Add Version column to all verses", () => UpdateVersionInVerses(scope)),
+            ("Upload Cross References", () => UploadCrossReferences(scope))
         };
 
         if (tasks.Count == 0)
@@ -67,5 +68,11 @@ public static class Tasks
     {
         var service = scope.ServiceProvider.GetRequiredService<VerseDataDapper>();
         await service.AddVersionToAllVerses();
+    }
+
+    public static async Task UploadCrossReferences(IServiceScope scope)
+    {
+        var service = scope.ServiceProvider.GetRequiredService<VerseManagement>();
+        await service.UploadCrossReferences();
     }
 }

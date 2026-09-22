@@ -459,6 +459,11 @@ public sealed class SearchService(
             {
                 _logger.LogError("Could not cache verse: embedding was null");
             }
+
+            if (verseFetched.Reference == null)
+            {
+                _ = 1;
+            }
         }
 
         await _verseCacherQueue.EnqueueAsync(new CacheQueueItem()

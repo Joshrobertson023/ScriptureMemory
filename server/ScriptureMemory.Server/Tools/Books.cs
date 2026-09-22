@@ -118,7 +118,7 @@ public static class Books
     {
         return AllBooks.FirstOrDefault(book => book.DisplayName == input)?.Abbreviation;
     }
-    
+
     /// <summary>
     /// Tries to get the display name for a book by abbreviation, fuzzy match, or the full book's name.
     /// </summary>
@@ -130,14 +130,21 @@ public static class Books
     /// </returns>
     public static bool TryGetBook(string input, out Book? book)
     {
-        return bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out book);
+        if (bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out var found))
+        {
+            book = new Book(found.DisplayName, found.NumChapters, found.Abbreviation, found.FuzzyMatches ?? new());
+            return true;
+        }
+        book = null;
+        return false;
     }
 
     public static Book GetBook(string input)
     {
-        return bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out var _book) is false
-            ? throw new BookNotFoundException($"Book not found.", input)
-            : _book;
+        if (!bookDisplayNameAbbreviationMap.TryGetValue(input.Trim(), out var found))
+            throw new BookNotFoundException("Book not found.", input);
+
+        return new Book(found.DisplayName, found.NumChapters, found.Abbreviation, found.FuzzyMatches ?? new());
     }
 
     public static Book EnsureValidChapter(this Book book, int chapter)

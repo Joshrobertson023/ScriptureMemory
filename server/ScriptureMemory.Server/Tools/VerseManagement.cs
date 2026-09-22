@@ -9,6 +9,8 @@ using ScriptureMemory.Server.Tools;
 using System.Data;
 using System.Globalization;
 using Pgvector;
+using ScriptureMemory.Server.Data.Models;
+using Pgvector.EntityFrameworkCore;
 
 namespace ScriptureMemory.Server.Tools;
 
@@ -19,16 +21,16 @@ public sealed class VerseManagement
     private readonly IConfiguration _config;
     private readonly string _connectionString;
     private readonly ILogger<VerseManagement> _logger;
-    private readonly ApplicationDbContext _dbContext;
     private readonly EmbeddingGenerator _embeddingGenerator;
+    private readonly NpgsqlDataSource _dataSource;
 
     public VerseManagement(
         VerseDataEfCore verseData,
         ApplicationDbContext context,
         IConfiguration config,
         ILogger<VerseManagement> logger,
-        ApplicationDbContext dbContext,
-        EmbeddingGenerator embeddingGenerator)
+        EmbeddingGenerator embeddingGenerator,
+        NpgsqlDataSource dataSource)
     {
         _verseData = verseData;
         _context = context;
@@ -36,8 +38,8 @@ public sealed class VerseManagement
         _connectionString = _config.GetConnectionString("PostgresConnection")
             ?? throw new InvalidOperationException("Connection string 'PostgresConnection' not found");
         _logger = logger;
-        _dbContext = dbContext;
         _embeddingGenerator = embeddingGenerator;
+        _dataSource = dataSource;
     }
 
     public async Task MoveVerses()
@@ -148,8 +150,8 @@ public sealed class VerseManagement
                         versesInBatch.Add(batchedVerse);
                     }
                     
-                    await _dbContext.Verses.AddRangeAsync(versesInBatch);
-                    await _dbContext.SaveChangesAsync();
+                    await _context.Verses.AddRangeAsync(versesInBatch);
+                    await _context.SaveChangesAsync();
                     
                     versesInBatch.Clear();
             
@@ -177,135 +179,221 @@ public sealed class VerseManagement
         public string Text { get; set; } = string.Empty;
     }
 
-    // public async Task UploadCrossReferences()
-    // {
-    //     string[] lines = File.ReadAllLines(@"C:\Users\there\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.txt");
-    //     int total = lines.Length;
-    //     int processed = 0;
-    //
-    //     _logger.LogDebug("Loading all verses into memory...");
-    //     using var pgConn = new NpgsqlConnection(_connectionString);
-    //     // var allVerses = (await pgConn.QueryAsync<VerseDto>(
-    //     //     """
-    //     //     select id as Id, book as Book, chapter as Chapter, text as Text, verse_num as VerseNum
-    //     //     from verses
-    //     //     """)).ToList();
-    //     var allVerses = await _context.Verses.ToListAsync();
-    //     var versesByKey = allVerses.ToDictionary(v => (v.Reference));
-    //     _logger.LogDebug("Loaded {Count} verses", allVerses.Count);
-    //
-    //     SQLitePCL.Batteries.Init();
-    //     using var connection = new SqliteConnection(@"Data Source=C:\Users\there\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.db");
-    //     await connection.OpenAsync();
-    //
-    //     using var cmd = connection.CreateCommand();
-    //     cmd.CommandText =
-    //         """
-    //     create table if not exists cross_references (
-    //         id integer primary key autoincrement,
-    //         from_verse_id integer,
-    //         to_passage_id integer,
-    //         votes integer
-    //     );
-    //     create table if not exists cross_reference_passages (
-    //         id integer primary key autoincrement,
-    //         reference text
-    //     );
-    //     create table if not exists cross_reference_passages_verses (
-    //         passage_id integer,
-    //         verse_id integer
-    //     );
-    //     """;
-    //     await cmd.ExecuteNonQueryAsync();
-    //
-    //     using var _cmd = connection.CreateCommand();
-    //     _cmd.CommandText =
-    //         """
-    //         delete from cross_references;
-    //         delete from cross_reference_passages;
-    //         delete from cross_reference_passages_verses;
-    //         """;
-    //     await _cmd.ExecuteNonQueryAsync();
-    //
-    //     using var transaction = await connection.BeginTransactionAsync();
-    //     cmd.Transaction = (SqliteTransaction)transaction;
-    //
-    //     try
-    //     {
-    //         //bool skip = true;
-    //         foreach (string line in lines)
-    //         {
-    //             //if (line == "Gen.1.27\t1Cor.11.7-1Cor.11.9\t21") skip = false;
-    //             //if (skip) continue;
-    //
-    //             string[] parts = line.Split('\t');
-    //             if (parts[0] == "From Verse") continue;
-    //
-    //             Reference reference = ReferenceParser.Parse(parts[0]);
-    //             Reference crossReference = ReferenceParser.Parse(parts[1]);
-    //             int votes = int.Parse(parts[2]);
-    //
-    //             cmd.CommandText =
-    //                 """
-    //             insert into cross_reference_passages (reference)
-    //             values ($Reference);
-    //             select last_insert_rowid();
-    //             """;
-    //             cmd.Parameters.Clear();
-    //             cmd.Parameters.AddWithValue("$Reference", crossReference.ReadableReference);
-    //             long newPassageId = (long)(await cmd.ExecuteScalarAsync())!;
-    //
-    //             foreach (int verseNum in crossReference.VerseNumbers)
-    //             {
-    //                 if (!versesByKey.TryGetValue((crossReference.Book, crossReference.Chapter, verseNum), out var crossVerse))
-    //                 {
-    //                     _logger.LogInformation("Verse not found: {Book} {Chapter}:{Verse}", crossReference.Book, crossReference.Chapter, verseNum);
-    //                     continue;
-    //                 }
-    //
-    //                 cmd.CommandText =
-    //                     """
-    //                 insert into cross_reference_passages_verses (passage_id, verse_id)
-    //                 values ($PassageId, $VerseId)
-    //                 """;
-    //                 cmd.Parameters.Clear();
-    //                 cmd.Parameters.AddWithValue("$PassageId", newPassageId);
-    //                 cmd.Parameters.AddWithValue("$VerseId", crossVerse.Id);
-    //                 await cmd.ExecuteNonQueryAsync();
-    //             }
-    //
-    //             if (!versesByKey.TryGetValue((reference.Book, reference.Chapter, reference.VerseNumbers.First()), out var fromVerse))
-    //             {
-    //                 _logger.LogInformation("From verse not found: {Book} {Chapter}:{Verse}", reference.Book, reference.Chapter, reference.VerseNumbers.First());
-    //                 continue;
-    //             }
-    //
-    //             cmd.CommandText =
-    //                 """
-    //             insert into cross_references (from_verse_id, to_passage_id, votes)
-    //             values ($FromVerseId, $ToPassageId, $Votes)
-    //             """;
-    //             cmd.Parameters.Clear();
-    //             cmd.Parameters.AddWithValue("$FromVerseId", fromVerse.Id);
-    //             cmd.Parameters.AddWithValue("$ToPassageId", newPassageId);
-    //             cmd.Parameters.AddWithValue("$Votes", votes);
-    //             await cmd.ExecuteNonQueryAsync();
-    //
-    //             processed++;
-    //             if (processed % 50 == 0 || processed == total)
-    //             {
-    //                 double percent = (double)processed / total * 100;
-    //                 _logger.LogInformation("Progress: {Processed}/{Total} ({Percent:F1}%)", processed, total, percent);
-    //             }
-    //         }
-    //
-    //         await transaction.CommitAsync();
-    //         _logger.LogInformation("Finished uploading cross references");
-    //     }
-    //     catch
-    //     {
-    //         await transaction.RollbackAsync();
-    //         throw;
-    //     }
-    // }
+    public async Task UploadCrossReferences()
+    {
+        string[] lines = File.ReadAllLines(@"C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\ScriptureMemory.Server\Files\CrossReferences\cross_references.txt");
+        int total = lines.Length;
+        int processed = 0;
+
+        _logger.LogInformation("Loading all verses into memory...");
+        var allVerses = await _context.Verses.ToListAsync();
+        _logger.LogInformation("Loaded {Count} verses", allVerses.Count);
+
+        List<string> passagesWithoutBook = new();
+        List<string> versesWithoutToPassageReference = new();
+        HashSet<string> uniqueBooks = new();
+        Dictionary<string, Passage> passagesAdded = new();
+
+        try
+        {
+            //bool skip = true;
+            foreach (string line in lines)
+            {
+                //if (line == "Gen.1.27\t1Cor.11.7-1Cor.11.9\t21") skip = false;
+                //if (skip) continue;
+
+                string[] parts = line.Split('\t');
+                if (parts[0] == "From Verse") continue;
+
+                Reference fromVerseReference = ReferenceParser.Parse(parts[0]);
+
+                string book = "";
+                string parts1 = parts[1].ToLower();
+                for (int i = 0; i < parts1.Length; i++)
+                {
+                    if (parts1[i] == '.')
+                        break;
+                    book += parts1[i];
+                    if (book == "Ps") book = "psa";
+                    else if (book == "Prov") book = "pro";
+                    else if (book == "1john") book = "1jn";
+                    else if (book == "acts") book = "act";
+                    else if (book == "heb") book = "heb";
+                    else if (book == "eph") book = "eph";
+                    else if (book == "exod") book = "exo";
+                    else if (book == "neh") book = "neh";
+                    else if (book == "rev") book = "rev";
+                    else if (book == "eccl") book = "ecc";
+                    else if (book == "prov") book = "pro";
+                    else if (book == "jer") book = "jer";
+                    else if (book == "ps") book = "psa";
+                    else if (book == "isa") book = "isa";
+                    else if (book == "john") book = "jhn";
+                    else if (book == "job") book = "job";
+                    else if (book == "2pet") book = "2pe";
+                    else if (book == "zech") book = "zec";
+                    else if (book == "mark") book = "mrk";
+                    else if (book == "col") book = "col";
+                    else if (book == "matt") book = "mat";
+                    else if (book == "1cor") book = "1co";
+                    else if (book == "rom") book = "rom";
+                    else if (book == "1chr") book = "1ch";
+                    else if (book == "nah") book = "nam";
+                    else if (book == "2cor") book = "2co";
+                    else if (book == "1tim") book = "1ti";
+                    else if (book == "gen") book = "gen";
+                    else if (book == "1thess") book = "1th";
+                    else if (book == "jonah") book = "jon";
+                    else if (book == "deut") book = "deu";
+                    else if (book == "luke") book = "luk";
+                    else if (book == "jas") book = "jas";
+                    else if (book == "gal") book = "gal";
+                    else if (book == "amos") book = "amo";
+                    else if (book == "joel") book = "jol";
+                    else if (book == "ezek") book = "ezk";
+                    else if (book == "josh") book = "jos";
+                    else if (book == "hab") book = "hab";
+                    else if (book == "1kgs") book = "1ki";
+                    else if (book == "lev") book = "lev";
+                    else if (book == "mal") book = "mal";
+                    else if (book == "hos") book = "hos";
+                    else if (book == "lam") book = "lam";
+                    else if (book == "2chr") book = "2ch";
+                    else if (book == "2kgs") book = "2ki";
+                    else if (book == "num") book = "num";
+                    else if (book == "1sam") book = "1sa";
+                    else if (book == "dan") book = "dan";
+                    else if (book == "1pet") book = "1pe";
+                    else if (book == "ruth") book = "rut";
+                    else if (book == "2sam") book = "2sa";
+                    else if (book == "judg") book = "jdg";
+                    else if (book == "2thess") book = "2th";
+                    else if (book == "mic") book = "mic";
+                    else if (book == "titus") book = "tit";
+                    else if (book == "esth") book = "est";
+                    else if (book == "jude") book = "jud";
+                    else if (book == "zeph") book = "zep";
+                    else if (book == "song") book = "sng";
+                    else if (book == "ezra") book = "ezr";
+                    else if (book == "2tim") book = "2ti";
+                    else if (book == "phil") book = "php";
+                    else if (book == "obad") book = "oba";
+                    else if (book == "hag") book = "hag";
+                    else if (book == "phlm") book = "phm";
+                    else if (book == "3john") book = "3jn";
+                    else if (book == "2john") book = "2jn";
+                }
+
+                Reference toPassageReference;
+                if (parts1.Contains('-'))
+                {
+                    string[] rangeParts = parts1.Split('-');
+
+                    int firstDot = rangeParts[0].IndexOf('.');
+                    string[] firstSegments = rangeParts[0].Substring(firstDot + 1).Split('.');
+                    int chapter1 = int.Parse(firstSegments[0]);
+                    int verse1 = int.Parse(firstSegments[1]);
+
+                    int secondDot = rangeParts[1].IndexOf('.');
+                    string rawBook2 = rangeParts[1].Substring(0, secondDot);
+                    string[] secondSegments = rangeParts[1].Substring(secondDot + 1).Split('.');
+                    int chapter2 = int.Parse(secondSegments[0]);
+                    int verse2 = int.Parse(secondSegments[1]);
+
+                    if (book == rawBook2 && chapter1 == chapter2)
+                    {
+                        var verseNumbers = Enumerable.Range(verse1, verse2 - verse1 + 1).ToList();
+                        toPassageReference = new Reference(new Book(book), chapter1, verseNumbers);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Cross-chapter/book range hit fallback parser: {Line}", parts1);
+                        toPassageReference = ReferenceParser.Parse(
+                            book + rangeParts[0].Substring(firstDot) + "-" + book + rangeParts[1].Substring(secondDot));
+                    }
+                }
+                else
+                {
+                    int dotIndex = parts1.IndexOf('.');
+                    string versesSegment = parts1.Substring(dotIndex + 1);
+                    string[] chapterAndVerses = versesSegment.Split('.');
+                    int chapter = int.Parse(chapterAndVerses[0]);
+                    var verseNumbers = chapterAndVerses[1]
+                        .Split(',')
+                        .Select(v => int.Parse(v.Trim()))
+                        .ToList();
+
+                    toPassageReference = new Reference(new Book(book), chapter, verseNumbers);
+                }
+
+                List<Verse> versesInPassage = new();
+                if (toPassageReference == null)
+                {
+                    _logger.LogInformation("toPassageReference was null: " + parts[1]);
+                }
+                else
+                {
+                    versesWithoutToPassageReference.Add(parts[1]);
+                    versesInPassage = allVerses.Where(v => toPassageReference.VerseIds.Contains(v.Id)).ToList();
+                    int votes = int.Parse(parts[2]);
+                    if (toPassageReference.Book == null)
+                    {
+                        _logger.LogInformation("toPassageReference.Book was null.");
+                        passagesWithoutBook.Add(toPassageReference.ReadableReference);
+                    }
+                    else
+                    {
+                        _ = toPassageReference.ReadableReference;
+                        _ = fromVerseReference.ReadableReference;
+                        var toPassage = new Passage
+                        {
+                            Reference = toPassageReference,
+                            Verses = versesInPassage
+                        };
+                        if (!passagesAdded.TryGetValue(toPassage.Id, out var existingPassage))
+                        {
+                            _context.Passages.Add(toPassage);
+                            passagesAdded[toPassage.Id] = toPassage;
+                        }
+                        else
+                        {
+                            toPassage = existingPassage;
+                        }
+                        var newCrossReference = new CrossReference()
+                        {
+                            FromVerse = allVerses.Single(v => v.Id == fromVerseReference.VerseId),
+                            ToPassage = toPassage,
+                            Votes = votes
+                        };
+                        _context.CrossReferences.Add(newCrossReference);
+                    }
+                }
+
+                processed++;
+                if (processed % 50 == 0 || processed == total)
+                {
+                    await _context.SaveChangesAsync();
+
+                    double percent = (double)processed / total * 100;
+                    _logger.LogInformation("Progress: {Processed}/{Total} ({Percent:F1}%)", processed, total, percent);
+                }
+            }
+
+            _logger.LogInformation("Finished uploading cross references");
+            _logger.LogInformation("Passages not added: ");
+            foreach (var passage in passagesWithoutBook)
+            {
+                _logger.LogInformation($"{passage}");
+            }
+            _logger.LogInformation("Verses not added: ");
+            foreach (var passage in versesWithoutToPassageReference)
+            {
+                _logger.LogInformation($"{passage}");
+            }
+        }
+        catch
+        {
+            throw;
+        }
+    }
 }

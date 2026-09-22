@@ -26,6 +26,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<VerseTranslationContent> VerseTranslationContents { get; set; }
     public DbSet<SyncEvent> SyncProgressReports { get; set; }
     public DbSet<ExceptionModel> Exceptions { get; set; }
+    public DbSet<CrossReference> CrossReferences { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +43,7 @@ public class ApplicationDbContext : DbContext
         new VerseContentConfiguration().Configure(modelBuilder.Entity<VerseTranslationContent>());
         new SyncProgressReportConfiguration().Configure(modelBuilder.Entity<SyncEvent>());
         new ExceptionConfiguration().Configure(modelBuilder.Entity<ExceptionModel>());
+        new CrossReferencesConfiguration().Configure(modelBuilder.Entity<CrossReference>());
     }
     
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

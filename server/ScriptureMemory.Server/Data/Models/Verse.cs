@@ -53,7 +53,7 @@ public class Verse
     public string? PassageId { get; set; }
 
     [JsonIgnore] // Don't cache
-    public Passage? PassageNavigation { get; set; } = null!;
+    public List<Passage> Passages { get; set; } = null!;
 
     public double? SearchDistance { get; set; }
     

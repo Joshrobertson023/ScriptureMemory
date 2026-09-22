@@ -31,7 +31,7 @@ if (builder.Environment.IsDevelopment())
 {
     app.UseHttpLogging();
 
-    //_ = app.AskToRunOptionalStartupTasks();
+    _ = app.AskToRunOptionalStartupTasks();
 }
 
 app.Run();
