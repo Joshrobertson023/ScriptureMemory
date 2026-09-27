@@ -1,23 +1,36 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import useGlobalStyles from "../../styles/gobalStyles";
-import useAppTheme from "../../theme";
-import { Alert, StyleSheet, TextInput, Text, TouchableOpacity, View } from "react-native";
-import { Collection } from "../../../types/collection/collection";
-import { initialCollection, useCollectionsStore } from "../../stores/collections.store";
-import { useNavigation } from "@react-navigation/native";
-import { HeaderTitle } from "@react-navigation/elements";
-import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { TrueSheet } from "@lodev09/react-native-true-sheet";
-import { Check, ChevronRight } from "lucide-react-native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { BottomSheet, Button } from "heroui-native";
+import { CirclePlus, FileText } from "lucide-react-native";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import ReorderableList, { reorderItems } from "react-native-reorderable-list";
-import NewCollectionPassage from "../../components/passage/newCollectionPassage";
-import CollectionNote from "../../components/collection/newCollectionNote";
-import VisibilityBottomSheet from "../../components/bottom-sheets/visibilityBottomSheet";
-import AddPassageBottomSheet from "../../components/bottom-sheets/addPassageBottomSheet";
-import AddNoteBottomSheet from "../../components/bottom-sheets/addNoteBottomSheet";
-import { Note } from "../../../types/note";
+import { Collection } from "../../../types/collection/collection";
 import { CollectionItem } from "../../../types/collection/collectionItem";
 import { Passage } from "../../../types/passages/passage";
+import { RootStackParamList } from "../../../types/router";
+import AddNoteBottomSheet from "../../components/bottom-sheets/addNoteBottomSheet";
+import AddPassageBottomSheet from "../../components/bottom-sheets/addPassageBottomSheet";
+import NoteComponent from "../../components/note/note";
+import PassageComponent from "../../components/passage/passage";
+import { applyCollectionEdit } from "../../database/repositories/collections.repository";
+import { useCollection } from "../../hooks/useCollections";
+import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
+import { initialCollection } from "../../stores/collections.store";
+import useGlobalStyles from "../../styles/gobalStyles";
+import useAppTheme from "../../theme";
+import { VISIBILITY_OPTIONS } from "../../utils/collectionSortUtils";
+
+const visibilityLabel = (value: string) => {
+    switch (value) {
+        case 'Friends':
+            return 'Visible to Friends';
+        case 'Public':
+            return 'Public';
+        default:
+            return 'Not Visible to Friends';
+    }
+};
 
 const EditCollectionScreen = () => {
     const theme = useAppTheme();
@@ -28,39 +41,39 @@ const EditCollectionScreen = () => {
         }
     }), [theme]);
     const styles = useLocalStyles();
-    const {setNoteBottomSheet, setNoteSheetOpen, noteSheetOpen} = useBottomSheetsStore();
+    const setNoteBottomSheet = useBottomSheetsStore((state) => state.setNoteBottomSheet);
+    const setNoteSheetOpen = useBottomSheetsStore((state) => state.setNoteSheetOpen);
+    const noteSheetOpen = useBottomSheetsStore((state) => state.noteSheetOpen);
 
     const navigation = useNavigation();
-    const visibilityBottomSheet = useRef<TrueSheet>(null);
+    const route = useRoute<RouteProp<RootStackParamList, 'editCollection'>>();
+    const [visibilitySheetOpen, setVisibilitySheetOpen] = useState(false);
     const addPassageBottomSheet = useRef<TrueSheet>(null);
     const addNoteBottomSheet = useRef<TrueSheet>(null);
 
     const [collection, setLocalCollection] = useState<Collection>(initialCollection);
     const collectionRef = useRef(collection);
     const isSavingRef = useRef(false);
-    const {setEditingCollection, clearEditingCollection, editingCollection, setCollection} = useCollectionsStore();
+    const seededRef = useRef(false);
+    // Seeded once from the stored collection - after that this screen owns its own
+    // working copy until Save/Discard, same as before.
+    const { collection: storedCollection } = useCollection(route.params?.id);
 
     useEffect(() => {
-        setLocalCollection(editingCollection);
-    }, []);
+        if (storedCollection && !seededRef.current) {
+            setLocalCollection(storedCollection);
+            seededRef.current = true;
+        }
+    }, [storedCollection]);
 
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: collection.title,
-            headerRight: () => (
-                <TouchableOpacity onPress={() => {
-                    isSavingRef.current = true;
-                    saveCollection(collectionRef.current);
-                    navigation.goBack();
-                }}>
-                    <Check size={28} color={theme.colors.onBackground} />
-                </TouchableOpacity>
-            )
+            headerTitle: collection.title
         });
     }, [collection.title]);
 
     const saveCollection = (col: Collection) => {
-        setCollection(col);
+        applyCollectionEdit(col);
     }
 
     useEffect(() => {
@@ -98,12 +111,6 @@ const EditCollectionScreen = () => {
     }, [navigation]);
 
     useEffect(() => {
-        navigation.setOptions({
-            HeaderTitle: collection.title
-        })
-    }, [navigation]);
-
-    useEffect(() => {
         if (noteSheetOpen) {
             addNoteBottomSheet.current?.present();
         } else {
@@ -120,8 +127,9 @@ const EditCollectionScreen = () => {
                 return prev;
             }
 
-            const minId = prev.items.reduce((min, item) => Math.min(min, item.id), 0);
-            const nextLocalId = minId <= 0 ? minId - 1 : -1;
+            // Locally-unique id for this editing session only - applyCollectionEdit
+            // mints real UUIDs for every item when the edit is saved.
+            const nextLocalId = `local-${Date.now()}-${Math.random()}`;
 
             const newItem: CollectionItem = {
                 type: 'passage',
@@ -139,7 +147,7 @@ const EditCollectionScreen = () => {
         });
     };
 
-    const removeEditingCollectionPassage = (itemId: number) => {
+    const removeEditingCollectionPassage = (itemId: string) => {
         setLocalCollection((prev) => ({
             ...prev,
             items: prev.items.filter((i) => i.id !== itemId)
@@ -147,74 +155,110 @@ const EditCollectionScreen = () => {
     };
 
     return (
-            <View style={[globalStyles.screen, styles.screen]}>
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 15}}>
-                    <TextInput
-                        value={collection.title}
-                        onChangeText={(text) => setLocalCollection({...collection, title: text})}
-                        maxLength={20}
-                        style={globalStyles.input}
-                    />
-                    {/* <TouchableOpacity style={{...styles.elevationButton, width: '35%', flexDirection: 'column', padding: -10}}>
-                        <BadgePlus size={22} color={theme.colors.onBackground} />
-                        <Text style={styles.p3}>Create</Text>
-                    </TouchableOpacity> */}
-                </View>
-
-                <TouchableOpacity 
-                    onPress={() => visibilityBottomSheet.current?.present()}>
-                    <View style={{backgroundColor: theme.colors.elevation, paddingVertical: 10, paddingHorizontal: 25, borderRadius: 5, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
-                        <Text style={globalStyles.p3}>Visibility</Text>
-                        <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10}}>
-                            <Text style={{...globalStyles.p3, color: theme.colors.onBackgroundSuperSoft}}>
-                                {collection.visibility === 0 && 'Private'}
-                                {collection.visibility === 1 && 'Friends'}
-                                {collection.visibility === 2 && 'Public'}
-                            </Text>
-                            <ChevronRight size={28} color={theme.colors.onBackground} />
-                        </View>
-                    </View>
-                </TouchableOpacity>
-
-                <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '100%', gap: 10}}>
-                    <TouchableOpacity style={{...globalStyles.elevationButton, width: '49%'}} onPress={() => addPassageBottomSheet.current?.present()}>
-                        <Text style={globalStyles.p3}>Add Passage</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={{...globalStyles.elevationButton, width: '49%'}} onPress={() => {
-                        setNoteBottomSheet({ id: 0, text: '' }, null);
-                        setNoteSheetOpen(true);
-                    }}>
-                        <Text style={globalStyles.p3}>Add Note</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={{height: 10}} />
-                
+        <>
                 <ReorderableList
                     data={collection.items}
                     keyExtractor={(item) => `${item.type}-${item.id}`}
                     renderItem={({item}) => {
                         if (item.type === 'passage')
-                            return <NewCollectionPassage userPassage={item.passage} itemId={item.id} />;
+                            return (
+                                <PassageComponent
+                                    userPassage={item.passage}
+                                    itemId={item.id}
+                                    collectionId={collection.id}
+                                    onRemove={removeEditingCollectionPassage}
+                                />
+                            );
                         if (item.type === 'note')
-                            return <CollectionNote note={item.note} itemId={item.id} />;
+                            return <NoteComponent note={item.note} itemId={item.id} />;
                         return null;
                     }}
                     onReorder={({from, to}) => {
                         const updated = reorderItems(collection.items, from, to);
                         setLocalCollection({...collection, items: updated});
                     }}
+                    ListHeaderComponent={
+
+                        <View style={[globalStyles.screen, styles.screen]}>
+
+                            <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 15}}>
+                                <TextInput
+                                    value={collection.title}
+                                    onChangeText={(text) => setLocalCollection({...collection, title: text})}
+                                    maxLength={20}
+                                    style={globalStyles.input}
+                                />
+                            </View>
+
+                            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: 15}}>
+                                <Text style={globalStyles.p3}>Visibility: {visibilityLabel(collection.visibility)}</Text>
+                                <BottomSheet isOpen={visibilitySheetOpen} onOpenChange={setVisibilitySheetOpen}>
+                                    <BottomSheet.Trigger asChild>
+                                        <Button variant="outline" size="sm" className="rounded-full">
+                                            <Button.Label>Change</Button.Label>
+                                        </Button>
+                                    </BottomSheet.Trigger>
+                                    <BottomSheet.Portal disableFullWindowOverlay>
+                                        <BottomSheet.Overlay />
+                                        <BottomSheet.Content>
+                                            <BottomSheet.Title>Visibility</BottomSheet.Title>
+                                            <View style={{marginTop: 16, gap: 8}}>
+                                                {VISIBILITY_OPTIONS.map((option) => (
+                                                    <Button
+                                                        key={option.label}
+                                                        variant={collection.visibility === option.label ? 'secondary' : 'ghost'}
+                                                        size="md"
+                                                        className="w-full justify-start"
+                                                        onPress={() => {
+                                                            setLocalCollection({...collection, visibility: option.label});
+                                                            setVisibilitySheetOpen(false);
+                                                        }}
+                                                    >
+                                                        <Button.Label>{option.label}</Button.Label>
+                                                    </Button>
+                                                ))}
+                                            </View>
+                                        </BottomSheet.Content>
+                                    </BottomSheet.Portal>
+                                </BottomSheet>
+                            </View>
+
+                            <View style={{flexDirection: 'row', justifyContent: 'space-evenly', width: '100%', marginTop: 10}}>
+                                <Button variant="ghost" size="sm" onPress={() => addPassageBottomSheet.current?.present()}>
+                                    <CirclePlus size={18} color={theme.colors.onBackground} />
+                                    <Button.Label>Add Passage</Button.Label>
+                                </Button>
+
+                                <Button variant="ghost" size="sm" onPress={() => {
+                                    setNoteBottomSheet({ id: '', text: '' }, null);
+                                    setNoteSheetOpen(true);
+                                }}>
+                                    <FileText size={18} color={theme.colors.onBackground} />
+                                    <Button.Label>Add Note</Button.Label>
+                                </Button>
+                            </View>
+
+                            <View style={{height: 10}} />
+                    </View>
+                    }
+                    ListFooterComponent={<View style={{height: 100}} />}
                 />
 
-                {/* <TouchableOpacity style={{...styles.elevationButton, position: 'absolute', bottom: 40}}>
-                    <Text style={styles.p3}>Create</Text>
-                </TouchableOpacity> */}
+                <View style={{position: 'absolute', bottom: 20, left: 15, right: 15}}>
+                    <Button
+                        variant="primary"
+                        size="lg"
+                        className="rounded-full"
+                        onPress={() => {
+                            isSavingRef.current = true;
+                            saveCollection(collectionRef.current);
+                            navigation.goBack();
+                        }}
+                    >
+                        <Button.Label>Save</Button.Label>
+                    </Button>
+                </View>
 
-                <VisibilityBottomSheet 
-                    ref={visibilityBottomSheet}
-                    currentVisibility={collection.visibility}
-                />
                 <AddPassageBottomSheet
                     ref={addPassageBottomSheet}
                     collectionItems={collection.items}
@@ -236,8 +280,8 @@ const EditCollectionScreen = () => {
                         } else {
                             const newItem: CollectionItem = {
                                 type: 'note',
-                                id: Date.now() * -1,
-                                note: { id: 0, text }
+                                id: `local-${Date.now()}-${Math.random()}`,
+                                note: { id: '', text }
                             };
                             setLocalCollection((prev) => ({
                                 ...prev,
@@ -253,7 +297,7 @@ const EditCollectionScreen = () => {
                             }));
                     }}
                 />
-            </View>
+            </>
     )
 }
 

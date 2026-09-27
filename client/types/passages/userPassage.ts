@@ -2,9 +2,9 @@ import { Passage } from "./passage";
 
 export interface UserPassage {
     passage: Passage;
-    id?: number;
-    userId?: number;
-    collectionId?: number;
+    id?: string;
+    userId?: string;
+    collectionId?: string;
     orderPosition?: number;
     dateAdded?: Date;
     progressPercent?: number;

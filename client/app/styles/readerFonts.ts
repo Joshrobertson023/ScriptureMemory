@@ -1,6 +1,3 @@
-// Font and background options for the Bible read screen's personalize sheet.
-// Font families here must match a key registered in useCustomFonts (styles/fonts.ts).
-
 export type ReaderFontId = 'inter' | 'notoSerif' | 'merriweather' | 'lora' | 'literata' | 'libreBaskerville';
 
 export interface ReaderFontOption {
@@ -9,8 +6,6 @@ export interface ReaderFontOption {
     fontFamily: string;
 }
 
-// A mix of clean sans and the serif faces most common in e-readers and Bible apps
-// (Kindle, Apple Books, Google Play Books all lean on serifs like these for long-form reading).
 export const READER_FONTS: ReaderFontOption[] = [
     { id: 'inter', label: 'Inter', fontFamily: 'Inter' },
     { id: 'notoSerif', label: 'Noto Serif', fontFamily: 'Noto Serif' },

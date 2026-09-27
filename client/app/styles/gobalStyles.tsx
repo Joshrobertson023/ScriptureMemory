@@ -1,6 +1,6 @@
+import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import useAppTheme from '../theme';
-import { useMemo } from 'react';
 
 export default function useGlobalStyles() {  
   const theme = useAppTheme();
@@ -43,9 +43,15 @@ export default function useGlobalStyles() {
 
     h1: {
       color: theme.colors.onBackgroundSoft,
-      fontSize: 28,
+      fontSize: 26,
       fontFamily: 'Inter',
       fontWeight: 800
+    },
+    h2: {
+      color: theme.colors.onBackgroundSoft,
+      fontSize: 22,
+      fontFamily: 'Inter',
+      fontWeight: 700
     },
 
     p1: {
@@ -55,7 +61,7 @@ export default function useGlobalStyles() {
     },
     p2: {
       color: theme.colors.onBackgroundSoft,
-      fontSize: 18,
+      fontSize: 16,
       fontFamily: 'Inter',
     },
     p3: {
@@ -94,7 +100,8 @@ export default function useGlobalStyles() {
       alignItems: 'center'
     },
     elevationButtomSquare: {
-      width: '19%',
+      width: 72,
+      flexShrink: 0,
       borderRadius: 5,
       backgroundColor: theme.colors.elevation,
       display: 'flex',
@@ -159,7 +166,16 @@ export default function useGlobalStyles() {
       color: theme.colors.onBackgroundSuperSoft,
       lineHeight: 29
     },
-    
+    verseVersionLabel: {
+      fontFamily: 'Inter',
+      fontSize: 10,
+      fontWeight: 600,
+      letterSpacing: 0.5,
+      textTransform: 'uppercase',
+      color: theme.colors.verseHint,
+      marginTop: 4,
+    },
+
     /**
      * Collection cards
      */
@@ -171,9 +187,10 @@ export default function useGlobalStyles() {
     },
     collectionCard: {
       backgroundColor: theme.colors.elevation,
-      width: '100%',
+      width: 'auto',
       borderRadius: 10,
       height: 75,
+      marginHorizontal: 15,
       paddingHorizontal: 17,
       paddingVertical: 12,
       flexDirection: 'row',

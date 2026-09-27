@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { getVod } from "../api/vod.api";
+import { getVerseOfDay } from "../api/vod.api";
 
-export function useVod() {
+export function useVod(translation: string) {
     return useQuery({
-        queryKey: ["vod"],
-        queryFn: getVod,
+        queryKey: ["vod", translation],
+        queryFn: () => getVerseOfDay(translation),
 
         staleTime: 1000 * 60 * 60 * 2,
 

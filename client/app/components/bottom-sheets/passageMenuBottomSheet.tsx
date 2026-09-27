@@ -8,11 +8,9 @@ import { useBottomSheetsStore } from '../../stores/bottomSheets.store';
 const DELETE_COLOR = '#E25D5D';
 
 const PassageMenuBottomSheet = () => {
-    const {
-        passageMenuBottomSheet: item,
-        passageMenuSheetOpen,
-        setPassageMenuSheetOpen,
-    } = useBottomSheetsStore();
+    const item = useBottomSheetsStore((state) => state.passageMenuBottomSheet);
+    const passageMenuSheetOpen = useBottomSheetsStore((state) => state.passageMenuSheetOpen);
+    const setPassageMenuSheetOpen = useBottomSheetsStore((state) => state.setPassageMenuSheetOpen);
 
     const close = () => setPassageMenuSheetOpen(false);
 

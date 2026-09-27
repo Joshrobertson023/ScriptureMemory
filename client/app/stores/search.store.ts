@@ -6,9 +6,11 @@ import { Passage } from "../../types/passages/passage";
 interface SearchStore {
     searchQuery: string;
     searchResults: Passage[];
+    lastVerseDistance: number;
 
     setSearchQuery: (query: string) => void;
     setSearchResults: (results: Passage[]) => void;
+    setLastVerse: (distance: number) => void;
     clearSearchResults: () => void;
     clearSearch: () => void;
 }
@@ -18,6 +20,7 @@ export const useSearchStore = create<SearchStore>()(
         (set) => ({
             searchQuery: '',
             searchResults: [],
+            lastVerseDistance: 0.0,
 
             setSearchQuery(query: string) {
                 set({ searchQuery: query });
@@ -27,12 +30,16 @@ export const useSearchStore = create<SearchStore>()(
                 set({ searchResults: results });
             },
 
+            setLastVerse(distance: number) {
+                set({ lastVerseDistance: distance});
+            },
+
             clearSearchResults() {
-                set({ searchResults: [] });
+                set({ searchResults: [], lastVerseDistance: 0.0 });
             },
 
             clearSearch() {
-                set({ searchQuery: '', searchResults: [] });
+                set({ searchQuery: '', searchResults: [], lastVerseDistance: 0.0 });
             },
         }),
         {

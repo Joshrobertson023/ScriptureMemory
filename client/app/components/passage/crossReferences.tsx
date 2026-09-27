@@ -1,10 +1,11 @@
+import React from "react";
 import { Text, View } from "react-native";
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
 import { Passage } from "../../../types/passages/passage";
 import Skeleton from "react-native-reanimated-skeleton";
-import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
+import { getVerseNumbers } from "../../utils/referenceUtils";
 import { UserPassage } from "../../../types/passages/userPassage";
 import { CrossReferenceGroup } from "../../../types/verse/verseCard";
 
@@ -13,16 +14,13 @@ export interface CrossReferencesProps {
     loading: boolean;
 }
 
-const CrossReferences = ({ crossReferences, loading }: CrossReferencesProps) => {
+const CrossReferences = React.memo(({ crossReferences, loading }: CrossReferencesProps) => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
     const skeletonProps = {
         boneColor: theme.colors.elevation,
         highlightColor: theme.colors.elevation3,
     };
-    const {
-        setPassageSheetOpen,
-    } = useBottomSheetsStore();
 
     const skeletonStyle = { width: '90%' as const };
     const skeletonLayout = [{ width: '100%' as const, height: 75, borderRadius: 4 }];
@@ -65,7 +63,7 @@ const CrossReferences = ({ crossReferences, loading }: CrossReferencesProps) => 
                             >
                                 {crossReferences.length > 1 && (
                                     <Text style={{ ...globalStyles.p3, lineHeight: 25 }}>
-                                        {'v. ' + group.fromVerse.reference.verses.at(0) + ': '}
+                                        {'v. ' + getVerseNumbers(group.fromVerse.reference).at(0) + ': '}
                                     </Text>
                                 )} 
                                 {group.crossReferences.map((passage, index) => (
@@ -93,6 +91,6 @@ const CrossReferences = ({ crossReferences, loading }: CrossReferencesProps) => 
             </View>
         </Skeleton>
     );
-};
+});
 
 export default CrossReferences;

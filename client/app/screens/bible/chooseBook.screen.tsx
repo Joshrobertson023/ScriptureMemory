@@ -1,12 +1,12 @@
-import { FlatList, StyleSheet, View, Text, TouchableOpacity, SectionList } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { ArrowRight } from "lucide-react-native";
+import { useMemo } from "react";
+import { SectionList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { newTestamentBooks, oldTestamentBooks } from "../../../types/bibleData";
+import { RootStackParamList } from "../../../types/router";
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
-import { useContext, useMemo } from "react";
-import { ArrowRight } from "lucide-react-native";
-import { NavigationContext, useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../../types/router";
-import { newTestamentBooks, oldTestamentBooks } from "../../../types/bibleData";
 
 interface BookProps {
     book: string;
@@ -22,7 +22,7 @@ const Book = ({book}: BookProps) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'stretch',
-            paddingVertical: 15,
+            paddingBottom: 25,
             width: '100%'
         },
         book: {
@@ -57,8 +57,8 @@ const ChooseBookScreen = () => {
             fontWeight: 600
         },
         container: {
-            paddingHorizontal: 15,
-            paddingTop: 40
+            paddingTop: 40,
+            paddingBottom: 100
         }
     }), [theme]);
     const styles = useLocalStyles();
@@ -72,7 +72,7 @@ const ChooseBookScreen = () => {
                 renderSectionHeader={({ section: { title } }) => (
                     <Text style={[globalStyles.p2, styles.title]}>{title}</Text>
                 )}
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 15 }}
             />
         </View>
     )

@@ -1,11 +1,10 @@
-import { CollectionVisibility } from "../enums";
 import { CollectionItem } from "./collectionItem";
 
 export interface Collection {
-    id: number;
-    userId: number;
+    id: string;
+    userId: string;
     title: string;
-    visibility: CollectionVisibility;
+    visibility: string;
     dateCreated: Date;
     orderPosition: number;
     isFavorites: boolean;
@@ -14,4 +13,5 @@ export interface Collection {
     description: string;
     progressPercent: number;
     items: CollectionItem[];
+    passageCount?: number;
 }

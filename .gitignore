@@ -1,6 +1,9 @@
 # Visual Studio
 .vs/
 .vscode/
+.expo/
+/android
+/ios
 *.suo
 *.user
 *.userosscache

@@ -1,7 +1,8 @@
-import { View, Text, FlatList } from "react-native";
+import React from "react";
+import { Text, View } from "react-native";
 import { Collection } from "../../../types/collection/collection";
-import useAppTheme from "../../theme";
 import useGlobalStyles from "../../styles/gobalStyles";
+import useAppTheme from "../../theme";
 import { CollectionCard } from "../collection/collectionCard";
 
 interface CollectionsProps {
@@ -9,7 +10,7 @@ interface CollectionsProps {
     onCollectionPress?: (collection: Collection) => void;
 }
 
-const Collections = ({collections, onCollectionPress}: CollectionsProps) => {
+const Collections = React.memo(({collections, onCollectionPress}: CollectionsProps) => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
 
@@ -19,12 +20,11 @@ const Collections = ({collections, onCollectionPress}: CollectionsProps) => {
                 In {collections.length} Collections
             </Text>
 
-            <FlatList
-                data={collections}
-                renderItem={({item}) => <CollectionCard collection={item} onPress={onCollectionPress} />}
-            />
+            {collections.map((item) => (
+                <CollectionCard key={item.id} collection={item} onPress={onCollectionPress} />
+            ))}
         </View>
     )
-}
+})
 
 export default Collections;

@@ -1,7 +1,7 @@
 import { BottomSheet, ListGroup, Separator } from 'heroui-native';
 import { Archive, ArchiveRestore, Pencil, Trash } from 'lucide-react-native';
 import React from 'react';
-import { Alert, View } from 'react-native';
+import { Alert } from 'react-native';
 import { archiveCollection, deleteCollection, unarchiveCollection } from '../../database/repositories/collections.repository';
 import { pushEditCollectionRoute } from '../../navigation';
 import { useBottomSheetsStore } from '../../stores/bottomSheets.store';
@@ -11,11 +11,9 @@ const DELETE_COLOR = '#E25D5D';
 
 const CollectionMenuBottomSheet = () => {
     const theme = useAppTheme();
-    const {
-        collectionMenuBottomSheet: collection,
-        collectionMenuSheetOpen,
-        setCollectionMenuSheetOpen,
-    } = useBottomSheetsStore();
+    const collection = useBottomSheetsStore((state) => state.collectionMenuBottomSheet);
+    const collectionMenuSheetOpen = useBottomSheetsStore((state) => state.collectionMenuSheetOpen);
+    const setCollectionMenuSheetOpen = useBottomSheetsStore((state) => state.setCollectionMenuSheetOpen);
 
     const close = () => setCollectionMenuSheetOpen(false);
 
@@ -24,10 +22,6 @@ const CollectionMenuBottomSheet = () => {
             <BottomSheet.Portal disableFullWindowOverlay>
                 <BottomSheet.Overlay />
                 <BottomSheet.Content>
-                    <View className="flex-row items-center justify-between px-5 pb-2">
-                        <BottomSheet.Title>{collection?.title}</BottomSheet.Title>
-                        <BottomSheet.Close />
-                    </View>
 
                     <ListGroup className="mx-4 mb-6">
                         <ListGroup.Item

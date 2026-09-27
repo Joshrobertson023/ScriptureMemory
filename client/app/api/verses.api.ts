@@ -1,19 +1,16 @@
+import { ResponseChapterJson } from "../../types/bible/chapterJson";
+import { ChapterResponse } from "../../types/ChapterResponse";
 import { Passage } from "../../types/passages/passage";
-import { Verse } from "../../types/verse/verse";
 import { VerseCardResponse } from "../../types/verse/verseCard";
-import { useUserStore } from "../stores/user.store";
-import { useUserAuthStore } from "../stores/userAuth.store";
+import { allBooks } from "../hooks/useBooks";
+import { getVerseNumbers } from "../utils/referenceUtils";
 import { baseUrl } from "./baseUrl";
 
 interface SearchResult {
     passage: Passage;
 }
 
-export async function searchPassage(search: string, userId: number, jwt: string): Promise<Passage[]> {
-    const searchType = 2;
-    console.log(userId + " " + jwt)
-    console.log("\n\n" + search)
-
+export async function searchPassage(search: string, translation: string, lastVerseDistance: number, jwt: string): Promise<Passage[]> {
     try {
         const response = await fetch(`${baseUrl}/search`, {
             method: 'POST',
@@ -22,14 +19,15 @@ export async function searchPassage(search: string, userId: number, jwt: string)
                 'Authorization': `Bearer ${jwt}`
             },
             body: JSON.stringify({
-                userId,
                 search,
-                searchType
+                translation,
+                lastVerseDistance
             }),
         });
         if (response.ok) {
             const data: SearchResult[] = await response.json();
-            return data.map(r => r.passage);
+            const passages = data.map(r => r.passage);
+            return passages;
         } else {
             const text = await response.text();
 
@@ -49,9 +47,9 @@ export async function searchPassage(search: string, userId: number, jwt: string)
     }
 }
 
-export async function getVerseCard(userId: number, verseIds: number[], jwt: string): Promise<VerseCardResponse> {
+export async function getVerseCard(userId: number, verseIds: string[], jwt: string): Promise<VerseCardResponse> {
     try {
-        const response = await fetch(`${baseUrl}/verses/verse-card`, {
+        const response = await fetch(`${baseUrl}/passage-card`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -73,20 +71,30 @@ export async function getVerseCard(userId: number, verseIds: number[], jwt: stri
             throw new Error(errorMessage);
         }
     } catch (error) {
+        console.error('Error fetching verse card:', error);
         throw error;
     }
 }
 
-export async function getSimilarVerses(passage: Passage, jwt: string): Promise<Passage[]> {
+export async function getSimilarPassages(passage: Passage, translation: string, lastVerseDistance: number | null, jwt: string): Promise<Passage[]> {
+    const reference = {
+        book: {
+            displayName: passage.reference.book,
+            abbreviation: passage.verses.at(0)?.id.split('.').at(0) ?? '',
+            numChapters: allBooks.find((b) => b.displayName === passage.reference.book)?.numChapters ?? 0,
+        },
+        chapter: passage.reference.chapter,
+        verseNumbers: getVerseNumbers(passage.reference),
+        readableReference: passage.reference.readableReference,
+    };
     try {
-        console.log('requesting similar for ' + passage.reference.readableReference)
-        const response = await fetch(`${baseUrl}/verses/similar`, {
+        const response = await fetch(`${baseUrl}/similar`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${jwt}`
             },
-            body: JSON.stringify(passage),
+            body: JSON.stringify({ reference, translation, lastVerseDistance }),
         });
 
         if (!response.ok) {
@@ -101,27 +109,22 @@ export async function getSimilarVerses(passage: Passage, jwt: string): Promise<P
             throw new Error(errorMessage);
         }
 
-        const data = await response.json();
-        console.log(data.length);
-
-        return data as Passage[];
+        const data: (Passage | SearchResult)[] = await response.json();
+        return data.map((r) => 'passage' in r ? r.passage : r);
     } catch (error) {
+        console.error('Error fetching similar passages:', error);
         throw error;
     }
 }
 
-export async function getChapterVerses(book: string, chapter: number, jwt: string): Promise<Verse[]> {
+export async function getChapterResponse(book: string, chapter: number, bible: string, jwt: string): Promise<ChapterResponse> {
     try {
-        const response = await fetch(`${baseUrl}/verses/chapter`, {
+        const response = await fetch(`${baseUrl}/bible/chapter/${bible.toLowerCase()}/${book}/${chapter}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${jwt}`
             },
-            body: JSON.stringify({
-                book,
-                chapter
-            }),
         });
 
         if (!response.ok) {
@@ -129,7 +132,7 @@ export async function getChapterVerses(book: string, chapter: number, jwt: strin
             let errorMessage = 'Error fetching chapter verses';
             try {
                 const data = JSON.parse(text);
-                errorMessage = data?.message || text;
+                errorMessage = data?.message || data?.title || text;
             } catch {
                 errorMessage = text;
             }
@@ -139,7 +142,43 @@ export async function getChapterVerses(book: string, chapter: number, jwt: strin
         const data = await response.json();
         console.log(data.length);
 
-        return data as Verse[];
+        return data as ChapterResponse;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function getChapterJson(
+    bible: string,
+    book: string,
+    chapter: number,
+    jwt: string
+): Promise<ResponseChapterJson> {
+    try {
+        const response = await fetch(
+            `${baseUrl}/bible/chapter/${encodeURIComponent(bible.toLowerCase())}/${encodeURIComponent(book)}/${chapter}?contentType=json`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+            }
+        );
+
+        if (!response.ok) {
+            const text = await response.text();
+            let errorMessage = 'Error fetching chapter';
+            try {
+                const data = JSON.parse(text);
+                errorMessage = data?.message || data?.title || text;
+            } catch {
+                errorMessage = text;
+            }
+            throw new Error(errorMessage);
+        }
+
+        return await response.json() as ResponseChapterJson;
     } catch (error) {
         throw error;
     }

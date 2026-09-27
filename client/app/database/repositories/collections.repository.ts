@@ -47,7 +47,7 @@ export function collectionByIdQuery(id: string) {
     return db.select().from(collectionsTable).where(eq(collectionsTable.id, id));
 }
 
-export async function getCollectionsContainingVerses(verseIds: number[]): Promise<Collection[]> {
+export async function getCollectionsContainingVerses(verseIds: string[]): Promise<Collection[]> {
     if (verseIds.length === 0) return [];
 
     const userId = getUserId();

@@ -81,9 +81,31 @@ export const notesTable = sqliteTable("notes", {
     dateAdded: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 })
 
+export const passageNotesTable = sqliteTable("passage_notes", {
+    id: text().primaryKey(),
+    passageKey: text().notNull(),
+    userId: text().references(() => usersTable.userId),
+    text: text().notNull().default(''),
+    dateAdded: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+})
+
+export const practiceInfoTable = sqliteTable("practice_info", {
+    id: text().primaryKey(),
+    passageId: text().notNull().references(() => passagesTable.id, { onDelete: "cascade" }),
+    userId: text().references(() => usersTable.userId),
+    dateOpened: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
+    datePracticed: text(),
+    stage1Percent: integer(),
+    stage2Percent: integer(),
+    stage3Percent: integer(),
+    stage4Percent: integer(),
+    nextDueDate: text(),
+})
+
 export const highlightsTable = sqliteTable("highlights", {
     id: text().primaryKey(),
     verseId: text().notNull(),
     userId: text().references(() => usersTable.userId),
+    color: text().notNull().default("yellow"),
     dateCreated: text().default(sql`(CURRENT_TIMESTAMP)`).notNull(),
 })

@@ -65,7 +65,7 @@ const ReaderSettingsDialog: React.FC<ReaderSettingsDialogProps> = ({ isOpen, onO
                         <Separator />
 
                         {/* Font family */}
-                        <View style={{ gap: 10 }}>
+                        <View style={{ gap: 10, paddingTop: 10, paddingBottom: 10 }}>
                             <Label>Font</Label>
                             <Surface variant="secondary" className="p-0">
                                 <RadioGroup value={fontId} onValueChange={(v) => setFontId(v as typeof fontId)}>

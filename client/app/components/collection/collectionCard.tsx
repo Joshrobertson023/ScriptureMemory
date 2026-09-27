@@ -1,24 +1,22 @@
-import { StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
-import { useCollectionsStore } from "../../stores/collections.store"
-import { Collection } from "../../../types/collection/collection";
-import { useContext, useMemo } from "react";
-import useAppTheme from "../../theme";
-import useGlobalStyles from "../../styles/gobalStyles";
-import { Archive, Clock, List, Pencil, Trash } from "lucide-react-native";
-import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { NavigationContext } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Clock, EllipsisVertical, List } from "lucide-react-native";
+import React, { useContext, useMemo } from "react";
+import { StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from "react-native";
+import { useReorderableDrag } from "react-native-reorderable-list";
+import { Collection } from "../../../types/collection/collection";
 import { RootStackParamList } from "../../../types/router";
+import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
+import useGlobalStyles from "../../styles/gobalStyles";
+import useAppTheme from "../../theme";
 
 interface CollecitonCardProps {
     collection: Collection;
-    onLongPress?: () => void;
-    longPressDisabled?: boolean;
+    drag?: () => void;
     onPress?: (collection: Collection) => void;
 }
 
-export const CollectionCard = ({collection, onLongPress, longPressDisabled = false, onPress}: CollecitonCardProps) => {
+export const CollectionCard = React.memo(({collection, drag, onPress}: CollecitonCardProps) => {
     const navigation = useContext(NavigationContext) as NativeStackNavigationProp<RootStackParamList> | null;
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
@@ -69,132 +67,83 @@ export const CollectionCard = ({collection, onLongPress, longPressDisabled = fal
             justifyContent: 'center',
             alignItems: 'center'
         },
-        sideDelete: {
-            backgroundColor: '#E25D5D',
-            justifyContent: 'center',
-            padding: 20,
-            marginTop: 10,
-            borderRadius: 10,
-            marginLeft: 5
-        },
-        sideArchive: {
-            backgroundColor: '#4D6CC7',
-            justifyContent: 'center',
-            padding: 20,
-            marginTop: 10,
-            borderRadius: 10,
-            marginRight: 5
-        },
-        sideEdit: {
-            backgroundColor: '#6b6f7c',
-            justifyContent: 'center',
-            padding: 20,
-            marginTop: 10,
-            borderRadius: 10,
-            marginLeft: 5
+        menuButton: {
+            position: 'absolute',
+            top: 6,
+            right: 6,
+            padding: 8
         }
     }), [theme])
     const styles = useLocalStyles();
+    const { setCollectionMenuBottomSheet, setCollectionMenuSheetOpen } = useBottomSheetsStore.getState();
 
-    const totalPassages = (collection.items.map((item) => item.type === 'passage')).reduce((prev, next) => prev + 1, 0);
+    const totalPassages = useMemo(
+        () => collection.passageCount ?? collection.items.filter((item) => item.type === 'passage').length,
+        [collection]
+    );
     const totalOverdue = 0;
-    let visibility = '';
-    switch (collection.visibility) {
-        case 0: 
-            visibility = 'Private'
-            break;
-        case 1:
-            visibility = 'Friends'
-            break;
-        case 2: 
-            visibility = 'Public'
-            break;
-    }
-
-    const {deleteCollection, setEditingCollection, addCollectionToArchived} = useCollectionsStore();
-
-    const RightActions = () => (
-        <>
-            <TouchableOpacity style={styles.sideDelete}
-                onPress={() => {
-                    deleteCollection(collection.id);
-                }}
-            >
-                <Trash size={25} color={theme.colors.background} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.sideEdit}
-                onPress={() => {
-                    setEditingCollection(collection);
-                    navigation?.navigate('editCollection');
-                }}
-            >
-                <Pencil size={25} color={theme.colors.background} />
-            </TouchableOpacity>
-        </>
-    )
-
-    const LeftActions = () => (
-            <TouchableOpacity style={styles.sideArchive}
-                onPress={() => {
-                    addCollectionToArchived(collection.id);
-                }}
-            >
-                <Archive size={25} color={theme.colors.background} />
-            </TouchableOpacity>
-    )
+    const visibility = collection.visibility;
 
     return (
-        <Swipeable renderRightActions={() => <RightActions />} renderLeftActions={() => <LeftActions />}>
-            <TouchableHighlight onLongPress={onLongPress} disabled={longPressDisabled} style={styles.highlight} 
-                onPress={() => {
-                    if (onPress) {
-                        onPress(collection);
-                        return;
-                    }
-                    navigation?.navigate('collection', { id: collection.id })
-            }}>
-                <View style={globalStyles.collectionCard}>
-                    <View style={styles.section}>
-                        
-                        <Text style={globalStyles.collectionCardTitle}>{collection.title}</Text>
-                        <View style={styles.passagesChip}>
-                            <List size={12} color={theme.colors.onBackground} />
-                            <Text style={globalStyles.p4}>{totalPassages}</Text>
-                        </View>
+        <TouchableHighlight onLongPress={drag} delayLongPress={150} style={styles.highlight}
+            onPress={drag ? undefined : () => {
+                if (onPress) {
+                    onPress(collection);
+                    return;
+                }
+                navigation?.navigate('collection', { id: collection.id })
+        }}>
+            <View style={globalStyles.collectionCard}>
+                <View style={styles.section}>
 
+                    <Text style={globalStyles.collectionCardTitle}>{collection.title}</Text>
+                    <View style={styles.passagesChip}>
+                        <List size={12} color={theme.colors.onBackground} />
+                        <Text style={globalStyles.p4}>{totalPassages}</Text>
                     </View>
-                    <View style={styles.section2}>
 
-                        {totalOverdue > 0 ? (
-                            <View style={styles.overdueChip}>
-                                <Clock size={16} color={theme.colors.onBackground} />
-                                <Text style={globalStyles.p3}>{totalOverdue}</Text>
-                            </View>
-                        ) : (
-                            <View />
-                        )}
+                </View>
+                <View style={styles.section2}>
 
-                        <View style={styles.visibility}>
-                            <Text style={styles.visibilityText}>
-                                {visibility}
-                            </Text>
+                    {totalOverdue > 0 ? (
+                        <View style={styles.overdueChip}>
+                            <Clock size={16} color={theme.colors.onBackground} />
+                            <Text style={globalStyles.p3}>{totalOverdue}</Text>
                         </View>
+                    ) : (
+                        <View />
+                    )}
+
+                    <View style={styles.visibility}>
+                        <Text style={styles.visibilityText}>
+                            {visibility}
+                        </Text>
                     </View>
                 </View>
-            </TouchableHighlight>
-        </Swipeable>
-    )
-}
 
-export const ReorderableCollectionCard = ({ collection }: { collection: Collection }) => {
+                <TouchableOpacity
+                    style={styles.menuButton}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    disabled={!!drag}
+                    onPress={() => {
+                        setCollectionMenuBottomSheet(collection);
+                        setCollectionMenuSheetOpen(true);
+                    }}
+                >
+                    <EllipsisVertical size={18} color={theme.colors.onBackgroundSoft} />
+                </TouchableOpacity>
+            </View>
+        </TouchableHighlight>
+    )
+})
+
+export const ReorderableCollectionCard = ({ collection, reordering }: { collection: Collection; reordering: boolean }) => {
     const drag = useReorderableDrag();
-    const isActive = useIsActive();
 
     return (
         <CollectionCard
             collection={collection}
-            onLongPress={drag}
-            longPressDisabled={isActive}
+            drag={reordering ? drag : undefined}
         />
     );
 };

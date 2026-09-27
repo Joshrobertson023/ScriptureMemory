@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import {
     highlightsQuery,
@@ -7,18 +7,24 @@ import {
 } from "../database/repositories/highlights.repository";
 import { HighlightColorId } from "../styles/highlightColors";
 
-/** Live-query wrapper over persisted verse highlights, backing the read-Bible screen. */
-export function useChapterHighlights(): {
+export function useChapterHighlights(verseIds: string[] = []): {
     highlightColorByVerseId: Map<string, HighlightColorId>;
-    addHighlights: (verseIds: string[], color?: HighlightColorId) => Promise<void>;
-    removeHighlights: (verseIds: string[]) => Promise<void>;
+    toggleHighlights: (verseIds: string[], color: HighlightColorId) => void;
 } {
-    const { data } = useLiveQuery(highlightsQuery());
+    const verseKey = verseIds.join(",");
+    const { data } = useLiveQuery(highlightsQuery(verseIds), [verseKey]);
 
     const highlightColorByVerseId = useMemo(
         () => new Map((data ?? []).map((row) => [row.verseId, row.color as HighlightColorId])),
         [data]
     );
 
-    return { highlightColorByVerseId, addHighlights, removeHighlights };
+    const toggleHighlights = useCallback((ids: string[], color: HighlightColorId) => {
+        const versesToRemove = ids.filter((id) => highlightColorByVerseId.get(id) === color);
+
+        if (versesToRemove.length > 0) removeHighlights(versesToRemove);
+        else addHighlights(ids, color);
+    }, [highlightColorByVerseId]);
+
+    return { highlightColorByVerseId, toggleHighlights };
 }

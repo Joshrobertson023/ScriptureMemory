@@ -1,16 +1,11 @@
-import { useColorScheme, Appearance } from 'react-native';
-import { DefaultTheme } from '@react-navigation/native';
+import { useColorScheme } from 'react-native';
+import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useUserStore } from './stores/user.store';
 
-export default function useAppTheme() {
-    const systemScheme = useColorScheme();
-    const themePreference = useUserStore((state) => state.user.preferences.theme);
-    const scheme = themePreference === 0 ? (systemScheme || 'light') : themePreference;
-
-    return scheme === 'dark' ? {
-      ...DefaultTheme,
-      colors: {
-        ...DefaultTheme.colors,
+const darkTheme = {
+    ...DarkTheme,
+    colors: {
+        ...DarkTheme.colors,
         primary: '#834343',
         brightPrimary: '#CF4F4F',
         background: '#101010',
@@ -24,24 +19,35 @@ export default function useAppTheme() {
         white: '#F4F4F4',
         verseHint: '#959595ff',
         inactiveTab: 'rgb(207, 207, 207)'
-      }
-    } : {
-      ...DefaultTheme,
-      colors: {
+    }
+};
+
+const lightTheme = {
+    ...DefaultTheme,
+    colors: {
         ...DefaultTheme.colors,
         primary: '#834343',
         brightPrimary: '#CF4F4F',
-        background: '#101010',
-        background2: '#1e1e1e',
-        onBackground: '#F4F4F4',
-        onBackgroundSoft: '#D9D9D9',
-        onBackgroundSuperSoft: '#C3C3C3',
-        elevation: '#1f1f1f',
-        elevation2: '#383838',
-        elevation3: '#696969',
+        background: '#FAFAFA',
+        background2: '#EFEFEF',
+        onBackground: '#141414',
+        onBackgroundSoft: '#2B2B2B',
+        onBackgroundSuperSoft: '#474747',
+        elevation: '#E8E8E8',
+        elevation2: '#D4D4D4',
+        elevation3: '#ABABAB',
         white: '#F4F4F4',
-        verseHint: '#959595ff',
-        inactiveTab: '#959595ff'
-      }
-    };
+        verseHint: '#8C8C8C',
+        inactiveTab: '#8C8C8C'
+    }
+};
+
+export function useIsDarkMode() {
+    const systemScheme = useColorScheme();
+    const themePreference = useUserStore((state) => state.user.preferences.theme);
+    return themePreference === 0 ? systemScheme === 'dark' : themePreference === 2;
+}
+
+export default function useAppTheme() {
+    return useIsDarkMode() ? darkTheme : lightTheme;
 }

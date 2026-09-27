@@ -1,20 +1,28 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { Collection } from "../../types/collection/collection";
 import { CollectionItem } from "../../types/collection/collectionItem";
-import { createJSONStorage, persist } from "zustand/middleware";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Note } from "../../types/note";
 import { Passage } from "../../types/passages/passage";
 import { UserPassage } from "../../types/passages/userPassage";
 import { Reference } from "../../types/verse/reference";
-import { Note } from "../../types/note";
+
+// NOTE: This store is no longer wired into the app - collections now live in
+// SQLite (see app/database/repositories/collections.repository.ts and
+// app/hooks/useCollections.ts). Left in place, unused, as a reference for the
+// local-id/reconcile pattern the DB-backed version replaced. Ids below were
+// switched from number -> string only to keep this file compiling against
+// the shared Collection/CollectionItem/UserPassage/Note types (which changed
+// to string ids for UUIDv7) - no other logic here was touched.
 
 const LOCAL_ID_PREFIX = -1;
 
 export const initialCollection: Collection = {
-    id: 0,
+    id: '',
     userId: 0,
     title: '',
-    visibility: 0,
+    visibility: 'Private',
     dateCreated: new Date(),
     orderPosition: 0,
     isFavorites: false,
@@ -51,33 +59,30 @@ interface CollectionsStore {
 
     setCollections: (c: Collection[]) => void;
     setCollection: (c: Collection) => void;
-    deleteCollection: (id: number) => void;
-    setCollectionItems: (cId: number, i: CollectionItem[]) => void;
-    removeItemFromCollection: (cId: number, itemId: number) => void;
+    deleteCollection: (id: string) => void;
+    setCollectionItems: (cId: string, i: CollectionItem[]) => void;
+    removeItemFromCollection: (cId: string, itemId: string) => void;
 
-    addNoteToCollection: (cId: number, note: Note) => void;
-    updateNoteInCollection: (cId: number, itemId: number, text: string) => void;
-    removeNoteFromCollection: (cId: number, itemId: number) => void;
+    addNoteToCollection: (cId: string, note: Note) => void;
+    updateNoteInCollection: (cId: string, itemId: string, text: string) => void;
+    removeNoteFromCollection: (cId: string, itemId: string) => void;
 
     setNewCollection: (nc: Collection) => void;
     clearNewCollection: () => void;
-    setNewCollectionVisibility: (v: number) => void;
+    setNewCollectionVisibility: (v: string) => void;
     setNewCollectionItems: (items: CollectionItem[]) => void;
     addPassageToNewCollection: (p: Passage) => void;
-    addPassageToCollection: (cId: number, p: Passage) => void;
+    addPassageToCollection: (cId: string, p: Passage) => void;
     addNoteToNewCollection: (note: Note) => void;
-    updateNoteInNewCollection: (itemId: number, text: string) => void;
-    removeItemFromNewCollection: (id: number) => void;
+    updateNoteInNewCollection: (itemId: string, text: string) => void;
+    removeItemFromNewCollection: (id: string) => void;
     addCollection: (c: Omit<Collection, 'id'>) => Collection;
-
-    reconcileServerId: (localId: number, serverId: number) => void;
-    reconcilePassageServerId: (localId: number, serverId: number) => void;
 
     setEditingCollection: (c: Collection) => void;
     clearEditingCollection: () => void;
 
-    addCollectionToArchived: (id: number) => void;
-    removeCollectionFromArchived: (id: number) => void;
+    addCollectionToArchived: (id: string) => void;
+    removeCollectionFromArchived: (id: string) => void;
 }
 
 export const useCollectionsStore = create<CollectionsStore>()(
@@ -104,7 +109,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 const nextCounter = state._localIdCounter + 1;
                 const newCollection: Collection = {
                     ...partialCollection,
-                    id: nextCounter * LOCAL_ID_PREFIX
+                    id: String(nextCounter * LOCAL_ID_PREFIX)
                 };
                 set((state) => ({
                     _localIdCounter: nextCounter,
@@ -112,7 +117,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 }));
                 return newCollection;
             },
-            setCollectionItems(cId: number, i: CollectionItem[]) {
+            setCollectionItems(cId: string, i: CollectionItem[]) {
                 const state = get();
                 const collectionExists = state.userCollections.some((col) => col.id === cId);
                 if (!collectionExists)
@@ -122,7 +127,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     col.id === cId ? {...col, items: i } : col)
                 }))
             },
-            removeItemFromCollection(cId: number, itemId: number) {
+            removeItemFromCollection(cId: string, itemId: string) {
                 const state = get();
                 const collection = state.userCollections.find((col) => col.id === cId);
                 if (!collection)
@@ -137,11 +142,11 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 }));
             },
 
-            addNoteToCollection(cId: number, note: Note) {
+            addNoteToCollection(cId: string, note: Note) {
                 const nextCounter = get()._localPassageIdCounter + 1;
                 const item: CollectionItem = {
                     type: 'note',
-                    id: nextCounter * LOCAL_ID_PREFIX,
+                    id: String(nextCounter * LOCAL_ID_PREFIX),
                     note,
                 };
                 set((state) => ({
@@ -151,7 +156,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     )
                 }));
             },
-            updateNoteInCollection(cId: number, itemId: number, text: string) {
+            updateNoteInCollection(cId: string, itemId: string, text: string) {
                 set((state) => ({
                     userCollections: state.userCollections.map((c) =>
                         c.id !== cId ? c : {
@@ -163,7 +168,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     )
                 }));
             },
-            removeNoteFromCollection(cId: number, itemId: number) {
+            removeNoteFromCollection(cId: string, itemId: string) {
                 set((state) => ({
                     userCollections: state.userCollections.map((c) =>
                         c.id !== cId ? c : {
@@ -174,34 +179,10 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 }));
             },
 
-            deleteCollection(id: number) {
+            deleteCollection(id: string) {
                 set((state) => ({
                     userCollections: state.userCollections.filter((c) => c.id !== id)
                 }))
-            },
-            reconcileServerId(localId: number, serverId: number) {
-                set((state) => ({
-                    userCollections: state.userCollections.map((c) =>
-                        c.id === localId ? { ...c, id: serverId } : c)
-                }));
-            },
-            /**
-             * Called after a successful server sync, replaces temporary local passage id with server-assigned id
-             * Updates the passage both in userCollections and newCollection
-             */
-            reconcilePassageServerId(localId: number, serverId: number) {
-                set((state) => ({
-                    userCollections: state.userCollections.map((c) => ({
-                        ...c,
-                        items: c.items.map((i) =>
-                            i.id === localId ? { ...i, id: serverId } : i)
-                    })),
-                    newCollection: {
-                        ...state.newCollection,
-                        items: state.newCollection.items.map((i) =>
-                            i.id === localId ? { ...i, id: serverId } : i)
-                    }
-                }));
             },
             setNewCollection(nc: Collection) {
                 set({ newCollection: nc })
@@ -213,7 +194,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
              * Adds a passage to newCollection with a unique local (negative) id
              * Ignores the passage if it already exists
              */
-            setNewCollectionVisibility(v: number) {
+            setNewCollectionVisibility(v: string) {
                 set((state) => ({
                     newCollection: {
                         ...state.newCollection,
@@ -240,9 +221,9 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 const nextCounter = state._localPassageIdCounter + 1;
                 const item: CollectionItem = {
                     type: 'passage',
-                    id: nextCounter * LOCAL_ID_PREFIX,
+                    id: String(nextCounter * LOCAL_ID_PREFIX),
                     passage: {
-                        id: nextCounter * LOCAL_ID_PREFIX,
+                        id: String(nextCounter * LOCAL_ID_PREFIX),
                         passage: p,
                     },
                 };
@@ -254,7 +235,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     }
                 }));
             },
-            addPassageToCollection(cId: number, p: Passage) {
+            addPassageToCollection(cId: string, p: Passage) {
                 const state = get();
                 const collection = state.userCollections.find((col) => col.id === cId);
                 if (!collection) {
@@ -271,9 +252,9 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 const nextCounter = state._localPassageIdCounter + 1;
                 const item: CollectionItem = {
                     type: 'passage',
-                    id: nextCounter * LOCAL_ID_PREFIX,
+                    id: String(nextCounter * LOCAL_ID_PREFIX),
                     passage: {
-                        id: nextCounter * LOCAL_ID_PREFIX,
+                        id: String(nextCounter * LOCAL_ID_PREFIX),
                         collectionId: cId,
                         passage: p,
                     },
@@ -290,7 +271,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 const nextCounter = get()._localPassageIdCounter + 1;
                 const item: CollectionItem = {
                     type: 'note',
-                    id: nextCounter * LOCAL_ID_PREFIX,
+                    id: String(nextCounter * LOCAL_ID_PREFIX),
                     note,
                 };
                 set((state) => ({
@@ -301,7 +282,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     }
                 }));
             },
-            updateNoteInNewCollection(itemId: number, text: string) {
+            updateNoteInNewCollection(itemId: string, text: string) {
                 set((state) => ({
                     newCollection: {
                         ...state.newCollection,
@@ -319,7 +300,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     }
                 }));
             },
-            removeItemFromNewCollection(id: number) {
+            removeItemFromNewCollection(id: string) {
                 set((state) => ({
                     newCollection: {
                         ...state.newCollection,
@@ -339,7 +320,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                 }))
             },
 
-            addCollectionToArchived(id: number) {
+            addCollectionToArchived(id: string) {
                 const state = get();
                 const collection = state.userCollections.find((col) => col.id === id);
                 if (!collection) return;
@@ -351,7 +332,7 @@ export const useCollectionsStore = create<CollectionsStore>()(
                     ]
                 }))
             },
-            removeCollectionFromArchived(id: number) {
+            removeCollectionFromArchived(id: string) {
                 const state = get();
                 const collection = state.archivedCollections.find((col) => col.id === id);
                 if (!collection) return;

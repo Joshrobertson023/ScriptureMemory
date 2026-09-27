@@ -1,8 +1,3 @@
-// Mirrors the server's json content-type DTOs (Data/Dtos/ChapterJsonDtos.cs).
-// This preserves the original paragraph formatting from the Bible API (paragraph style,
-// poetry indentation, italicized "added" words) and tags every span of text with the verse
-// it belongs to, so the client can render formatted text and still know which verse was tapped.
-
 export interface BookInfo {
     displayName: string;
     abbreviation: string;

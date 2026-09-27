@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import * as Crypto from 'expo-crypto';
 import { DEFAULT_HIGHLIGHT_COLOR, HighlightColorId } from "../../styles/highlightColors";
 import { useUserStore } from "../../stores/user.store";
@@ -9,8 +9,15 @@ function getUserId(): string {
     return useUserStore.getState().userId;
 }
 
-export function highlightsQuery() {
-    return db.select().from(highlightsTable).where(eq(highlightsTable.userId, getUserId()));
+export function highlightsQuery(verseIds?: string[]) {
+    const userId = getUserId();
+    if (verseIds && verseIds.length > 0) {
+        return db.select().from(highlightsTable).where(and(
+            eq(highlightsTable.userId, userId),
+            inArray(highlightsTable.verseId, verseIds)
+        ));
+    }
+    return db.select().from(highlightsTable).where(eq(highlightsTable.userId, userId));
 }
 
 export async function addHighlights(verseIds: string[], color: HighlightColorId = DEFAULT_HIGHLIGHT_COLOR): Promise<void> {

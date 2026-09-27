@@ -1,82 +1,48 @@
-import { TouchableWithoutFeedback, Text, View, StyleProp, ViewStyle, StyleSheet, DimensionValue } from "react-native"
+import { Trash2 } from "lucide-react-native";
+import React from "react";
+import { StyleProp, Text, TouchableOpacity, View, ViewStyle } from "react-native";
+import { UserPassage } from "../../../types/passages/userPassage";
+import { useBibleVersion } from "../../hooks/useBibleVersion";
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
-import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
-import { UserPassage } from "../../../types/passages/userPassage";
-import Categories from "./categories";
-import React from "react";
-import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
 
 interface PassageContentProps {
     userPassage: UserPassage;
     style?: StyleProp<ViewStyle>;
-    maxWidth?: DimensionValue;
-    onLongPress?: () => void;
-    disabled?: boolean;
+    onRemove?: (itemId: string) => void;
 }
 
-const useLocalStyles = () => {
-    return StyleSheet.create({
-        container: {
-            
-        },
-        row1: {
-            flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginVertical: 10
-        },
-        row2: {
-            flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 7
-        }
-    })
-}
-
-const PassageContent = React.memo(({userPassage, maxWidth, onLongPress, disabled}: PassageContentProps) => {
+const PassageContent = React.memo(({userPassage, onRemove}: PassageContentProps) => {
     const styles = useGlobalStyles();
-    const localStyles = useLocalStyles();
-    const theme = useAppTheme();
-    const { setPassageSheetOpen, setPassageBottomSheet, pushPassage, passageSheetStack } = useBottomSheetsStore();
-    const { goToNextPassage } = useBottomSheetStack();
+    const { version: bibleVersion } = useBibleVersion();
     const passage = userPassage.passage;
+    const theme = useAppTheme();
 
     if (!passage) {
         return null;
     }
 
-    const allCategories = React.useMemo(() =>
-        Array.from(new Map(passage.verses.flatMap(v => v.categories).map(c => [c.id, c])).values()),
-        [passage]
-    );
+    const displayedVersion = passage.verses[0]?.translationContents?.at(0)?.version;
 
     return (
-        <TouchableWithoutFeedback onLongPress={onLongPress} disabled={disabled} onPress={() => {
-            const selectedUserPassage: UserPassage = userPassage;
-
-            if (passageSheetStack.length === 0) {
-                pushPassage(selectedUserPassage);
-                setPassageBottomSheet(selectedUserPassage);
-                setPassageSheetOpen(true);
-                return;
-            }
-
-            goToNextPassage(selectedUserPassage);
-        }}>
-            <View style={[localStyles.container, {maxWidth}]}>
-                <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>
-                <View>
-                    {passage.verses.map((verse, index) => (
-                        <Text key={verse.id} style={styles.p3}>
-                            {passage.verses.length > 1 && (verse.reference.verses.at(0) + ": ")}{verse.text}
-                        </Text>
-                    ))}
-                </View>
-                
-                <View style={[localStyles.row1]}>
-                    <View style={[localStyles.row2]}>
-                    </View>
-                </View>
-
-                <Categories categories={allCategories} multiline={false} />
+        <View>
+            <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>
+            <View>
+                {passage.verses.map((verse) => (
+                    <Text key={verse.id} style={styles.p3}>
+                        {passage.verses.length > 1 && (verse.reference.verses.at(0) + ": ")}{verse.translationContents?.at(0)?.plainText}
+                    </Text>
+                ))}
             </View>
-        </TouchableWithoutFeedback>
+            {displayedVersion && (
+                <Text style={styles.verseVersionLabel}>{displayedVersion.toUpperCase()}</Text>
+            )}
+            {onRemove && (
+                <TouchableOpacity onPress={() => onRemove(userPassage.id || '')}>
+                    <Trash2 size={20} color={theme.colors.onBackground} />
+                </TouchableOpacity>
+            )}
+        </View>
     )
 }
 )

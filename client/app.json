@@ -11,6 +11,9 @@
       "supportsTablet": false,
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CADisableMinimumFrameDurationOnPhone": true
       }
     },
     "android": {
@@ -387,7 +390,8 @@
             ]
           }
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": false,

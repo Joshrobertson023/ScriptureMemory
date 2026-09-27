@@ -6,8 +6,8 @@ import useGlobalStyles from "../../styles/gobalStyles";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 
 interface AddNoteBottomSheetProps {
-    onSave: (text: string, itemId: number | null) => void;
-    onDelete: (itemId: number | null) => void;
+    onSave: (text: string, itemId: string | null) => void;
+    onDelete: (itemId: string | null) => void;
 }
 
 const AddNoteBottomSheet = forwardRef<TrueSheet, AddNoteBottomSheetProps>(
@@ -38,12 +38,10 @@ const AddNoteBottomSheet = forwardRef<TrueSheet, AddNoteBottomSheetProps>(
         const styles = useLocalStyles();
 
         const [noteText, setNoteText] = useState('');
-        const {
-            noteBottomSheet,
-            noteBottomSheetItemId,
-            setNoteSheetOpen,
-            clearNoteBottomSheet,
-        } = useBottomSheetsStore();
+        const noteBottomSheet = useBottomSheetsStore((state) => state.noteBottomSheet);
+        const noteBottomSheetItemId = useBottomSheetsStore((state) => state.noteBottomSheetItemId);
+        const setNoteSheetOpen = useBottomSheetsStore((state) => state.setNoteSheetOpen);
+        const clearNoteBottomSheet = useBottomSheetsStore((state) => state.clearNoteBottomSheet);
 
         useEffect(() => {
             setNoteText(noteBottomSheet.text || '');

@@ -1,14 +1,15 @@
-import { Category } from "../category";
 import { Reference } from "./reference";
+import { VerseTranslationContent } from "./translationContent";
 
 export interface Verse {
-    id: number;
+    id: string;
     reference: Reference;
     readableReference?: string;
     votes?: number;
     text: string;
-    usersSavedCount: number;
-    usersMemorizedCount: number;
+    translationContents?: VerseTranslationContent[];
+    savedCount: number;
+    memorizedCount: number;
     verseNumbers: string;
-    categories: Category[];
+    searchDistance: number;
 }

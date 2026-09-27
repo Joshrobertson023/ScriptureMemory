@@ -1,42 +1,39 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Collection } from "../../types/collection/collection";
+import { Verse } from "../../types/verse/verse";
 import {
     activeCollectionsQuery,
-    archivedCollectionsQuery,
-    allPassagesQuery,
     allNotesQuery,
-    collectionByIdQuery,
-    mapCollectionRow,
+    allPassagesQuery,
+    archivedCollectionsQuery,
     assembleItems,
-    createDraftCollection,
+    collectionByIdQuery,
     commitDraftCollection,
+    createDraftCollection,
     deleteCollection,
     getCollectionsContainingVerses,
+    mapCollectionRow,
 } from "../database/repositories/collections.repository";
-import { Collection } from "../../types/collection/collection";
-
-// Reactive read hooks - the DB-backed replacement for reading `useCollectionsStore`.
-// Writes don't need a hook (they're plain async functions with no internal React
-// state); call the collections.repository functions directly from event handlers,
-// same as the old store's methods were called directly.
-
 function useAssembledCollections(status: "active" | "archived"): Collection[] {
     const collectionsLQ = useLiveQuery(status === "active" ? activeCollectionsQuery() : archivedCollectionsQuery());
     const passagesLQ = useLiveQuery(allPassagesQuery());
-    const notesLQ = useLiveQuery(allNotesQuery());
 
     return useMemo(() => {
         const collectionRows = collectionsLQ.data ?? [];
-        const passageRows = passagesLQ.data ?? [];
-        const noteRows = notesLQ.data ?? [];
+        const counts = new Map<string, number>();
+        for (const row of passagesLQ.data ?? []) {
+            if (!row.collectionId) continue;
+            counts.set(row.collectionId, (counts.get(row.collectionId) ?? 0) + 1);
+        }
         return collectionRows.map((row) => ({
             ...mapCollectionRow(row),
-            items: assembleItems(passageRows, noteRows, row.id),
+            items: [],
+            passageCount: counts.get(row.id) ?? 0,
         }));
-    }, [collectionsLQ.data, passagesLQ.data, notesLQ.data]);
+    }, [collectionsLQ.data, passagesLQ.data]);
 }
 
-/** Active (non-draft, non-archived) collections for the current user, in orderPosition order. */
 export function useUserCollections(): Collection[] {
     return useAssembledCollections("active");
 }
@@ -45,13 +42,6 @@ export function useArchivedCollections(): Collection[] {
     return useAssembledCollections("archived");
 }
 
-/**
- * A single collection (any status - active, archived, or draft) assembled with its items.
- * `isLoading` is true until the underlying live query has resolved at least once, so
- * callers can tell "hasn't loaded yet" apart from "genuinely doesn't exist" - useLiveQuery
- * starts out with an empty result before its first resolution, which would otherwise look
- * identical to a real not-found.
- */
 export function useCollection(id: string | null | undefined): { collection: Collection | undefined; isLoading: boolean } {
     const rowLQ = useLiveQuery(collectionByIdQuery(id ?? ""), [id]);
     const passagesLQ = useLiveQuery(allPassagesQuery());
@@ -69,21 +59,27 @@ export function useCollection(id: string | null | undefined): { collection: Coll
     return { collection, isLoading: rowLQ.updatedAt === undefined };
 }
 
-/** Collections containing a passage that includes any of the given (shared, numeric) verse ids. */
-export function useCollectionsContainingVerses(verseIds: Set<number>): Collection[] {
-    const collections = useUserCollections();
-    return useMemo(
-        () =>
-            collections.filter((c) =>
-                c.items.some(
-                    (i) => i.type === "passage" && i.passage.passage.verses.some((v) => verseIds.has(v.id))
-                )
-            ),
-        [collections, verseIds]
-    );
+export function useCollectionsContainingVerses(verseIds: Set<string>): Collection[] {
+    const collectionsLQ = useLiveQuery(activeCollectionsQuery());
+    const passagesLQ = useLiveQuery(allPassagesQuery());
+
+    return useMemo(() => {
+        const matchingIds = new Set(
+            (passagesLQ.data ?? [])
+                .filter((row) => {
+                    if (!row.collectionId) return false;
+                    return (JSON.parse(row.verses) as Verse[]).some((verse) => verseIds.has(verse.id));
+                })
+                .map((row) => row.collectionId as string)
+        );
+
+        return (collectionsLQ.data ?? [])
+            .filter((row) => matchingIds.has(row.id))
+            .map((row) => ({ ...mapCollectionRow(row), items: [] }));
+    }, [collectionsLQ.data, passagesLQ.data, verseIds]);
 }
 
-export function useCollectionsContainingVersesOnce(cacheKey: string, verseIds: number[], enabled: boolean): Collection[] {
+export function useCollectionsContainingVersesOnce(cacheKey: string, verseIds: string[], enabled: boolean): Collection[] {
     const [collections, setCollections] = useState<Collection[]>([]);
 
     useEffect(() => {
@@ -99,19 +95,11 @@ export function useCollectionsContainingVersesOnce(cacheKey: string, verseIds: n
         return () => {
             cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cacheKey, enabled]);
 
     return collections;
 }
 
-/**
- * The current "in progress" new-collection draft - a real collectionsTable row
- * (status='draft') created fresh each time this hook mounts, so it's a real,
- * reorderable, browsable collection while it's being built and survives the app
- * being backgrounded/killed mid-edit. If the screen/sheet using it unmounts without
- * calling `commit`, the draft (and any items added to it) is deleted.
- */
 export function useDraftCollection(enabled: boolean = true): {
     draftId: string | null;
     collection: Collection | undefined;
@@ -120,7 +108,7 @@ export function useDraftCollection(enabled: boolean = true): {
 } {
     const [draftId, setDraftId] = useState<string | null>(null);
     const draftIdRef = useRef<string | null>(null);
-    const settledRef = useRef(false); // true once committed or explicitly discarded
+    const settledRef = useRef(false);
 
     useEffect(() => {
         if (!enabled) return;
@@ -129,7 +117,7 @@ export function useDraftCollection(enabled: boolean = true): {
         settledRef.current = false;
         createDraftCollection().then((id) => {
             if (cancelled) {
-                deleteCollection(id); // flow was disabled/unmounted before the insert resolved
+                deleteCollection(id); 
                 return;
             }
             draftIdRef.current = id;

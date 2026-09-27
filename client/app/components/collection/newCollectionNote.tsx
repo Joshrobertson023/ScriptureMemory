@@ -10,7 +10,7 @@ import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 
 interface CollectionNoteProps {
     note: Note;
-    itemId: number;
+    itemId: string;
 }
 
 const CollectionNote = ({ note, itemId }: CollectionNoteProps) => {
@@ -33,7 +33,8 @@ const CollectionNote = ({ note, itemId }: CollectionNoteProps) => {
     const styles = useLocalStyles();
     const drag = useReorderableDrag();
     const isActive = useIsActive();
-    const {setNoteBottomSheet, setNoteSheetOpen} = useBottomSheetsStore();
+    const setNoteBottomSheet = useBottomSheetsStore((state) => state.setNoteBottomSheet);
+    const setNoteSheetOpen = useBottomSheetsStore((state) => state.setNoteSheetOpen);
 
     const RightActions = () => (
         <TouchableOpacity

@@ -1,12 +1,11 @@
-import { Button, Text, View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import useStyles from '../../styles/gobalStyles';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import * as React from "react";
+import { RootStackParamList } from "../../../types/router";
+import useStyles from '../../styles/gobalStyles';
+import useAppTheme from "../../theme";
 import ChooseBookScreen from "../bible/chooseBook.screen";
 import ChooseChapterScreen from "../bible/chooseChapter.screen";
 import ReadScreen from "../bible/read.screen";
-import { RootStackParamList } from "../../../types/router";
-import useAppTheme from "../../theme";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
