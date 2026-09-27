@@ -4,19 +4,8 @@ namespace ScriptureMemory.Server.DataAccess.Models;
 
 public class Passage
 {
-    public string Id
-    {
-        get
-        {
-            if (Reference == null)
-            {
-                return "";
-            }
+    public string Id { get; set; } = string.Empty;
 
-            return Reference.VerseId ?? "";
-        }
-        set;
-    }
     private Reference _reference;
 
     public Reference Reference
@@ -31,13 +20,16 @@ public class Passage
                 _reference.Book = Books.GetBook(_reference.Book.DisplayName);
             }
 
-            this.Id = _reference.VerseId;
+            if (string.IsNullOrEmpty(Id))
+            {
+                Id = _reference.VerseId ?? string.Empty;
+            }
         }
     }
 
     public List<Verse> Verses { get; set; } = new();
 
-    public string? CacheKey => Reference?.CacheKey ?? "";
+    public string? CacheKey => Reference?.CacheKey ?? string.Empty;
 
     public Passage(Reference reference)
     {
@@ -48,6 +40,6 @@ public class Passage
     {
         Reference = new Reference(readableReference);
     }
-    
+
     public Passage() { }
 }

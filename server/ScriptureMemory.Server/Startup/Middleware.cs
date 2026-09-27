@@ -59,8 +59,8 @@ public static class Middleware
     public static WebApplication UseEndpoints(this WebApplication app)
     {
         // app.ConfigureUserEndpoints();
-         app.ConfigureVerseOfDayEndpoints();
-        // app.ConfigureVerseEndpoints();
+        app.ConfigureVerseOfDayEndpoints();
+        app.ConfigureVerseEndpoints();
         app.ConfigureSearchEndpoints();
         app.ConfigureAdminEndpoints();
         app.ConfigureBibleEndpoints();

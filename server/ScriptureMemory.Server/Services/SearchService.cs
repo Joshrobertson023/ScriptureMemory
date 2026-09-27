@@ -1,3 +1,4 @@
+using Azure.Core;
 using DataAccess.Data;
 using DataAccess.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -81,11 +82,16 @@ public sealed class SearchService(
         }
     }
 
-    private async Task<List<SearchResult>> GetReferenceSearchResults(
+    public async Task<List<SearchResult>> GetReferenceSearchResults(
         string requestedTranslation, 
         Reference requestedReference,
         double? lastVerseDistance)
     {
+        if (lastVerseDistance <= 0.0)
+        {
+            lastVerseDistance = null;
+        }
+
         var searchResults = new List<SearchResult>();
 
         // Get the exact passage searched

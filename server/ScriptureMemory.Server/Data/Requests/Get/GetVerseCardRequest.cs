@@ -5,5 +5,5 @@ namespace ScriptureMemory.Server.DataAccess.Requests;
 public class GetVerseCardRequest
 {
     [Required] public int UserId { get; set; }
-    [Required] public List<int> VerseIds { get; set; } = new();
+    [Required] public List<string> VerseIds { get; set; } = new();
 }
