@@ -1,26 +1,21 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BottomTabBar, BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import * as SystemUI from 'expo-system-ui';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Pressable, Text, TouchableOpacity, View } from 'react-native';
-import { Drawer } from 'react-native-drawer-layout';
+import React, { useContext, useEffect, useState } from 'react';
+import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useAppTheme from '../../theme';
 
-// Import your screen components
-import {BibleScreen} from './bible.screen';
-import {ProfileScreen} from './profile.screen';
-import {HomeScreen} from './home.screen';
-import { CollectionsScreen } from './collections.screen';
-import useGlobalStyles from '../../styles/gobalStyles';
-import { CloudAlert, CloudCheck, CloudSync, Plus, Users } from 'lucide-react-native';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { TabBarVisibilityContext } from '../../components/bottomTabWrapper';
 import { useAppStore } from '../../stores/appState.store';
 import { useBottomSheetsStore } from '../../stores/bottomSheets.store';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../../types/router';
-import { TabBarVisibilityContext } from '../../components/bottomTabWrapper';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import useGlobalStyles from '../../styles/gobalStyles';
+import { BibleScreen } from './bible.screen';
+import { CollectionsScreen } from './collections.screen';
+import { HomeScreen } from './home.screen';
+import { PracticeScreen } from './practice.screen';
+import { ProfileScreen } from './profile.screen';
 
 const Tab = createBottomTabNavigator();
 
@@ -30,11 +25,9 @@ export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const inactiveColor = theme.colors.elevation3;
 
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
-  const {syncStatus} = useAppStore();
-  const {setSyncSheetOpen} = useBottomSheetsStore();
+  const syncStatus = useAppStore((state) => state.syncStatus);
+  const setSyncSheetOpen = useBottomSheetsStore((state) => state.setSyncSheetOpen);
 
   useEffect(() => {
     SystemUI.setBackgroundColorAsync(theme.colors.background).catch(() => {});
@@ -107,44 +100,13 @@ export default function TabLayout() {
             headerTintColor: theme.colors.onBackground,
           }}
         >
-          {/* ── Home ── */}
-          <Tab.Screen
-            name="KJV Bible"
-            component={HomeScreen}
-            options={{
-              headerShown: true,
-              headerRight: () => (
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 15, marginRight: 10 }}>
-                  <TouchableOpacity onPress={() => { /* navigate to notifications */ }}>
-                    <Users color={theme.colors.onBackground} size={28} />
-                  </TouchableOpacity>
-                  <Pressable onPress={() => setIsProfileDrawerOpen(true)}>
-                    <Ionicons style={{ }} name="person-circle" size={36} color={theme.colors.onBackground} />
-                  </Pressable>
-                </View>
-              ),
-              tabBarIcon: ({ focused }) => (
-                <Ionicons
-                  name={focused ? 'home' : 'home-outline'}
-                  color={focused ? theme.colors.onBackground : inactiveColor}
-                  size={28}
-                />
-              ),
-              tabBarLabel: ({ focused }) => (
-                <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
-                  Home
-                </Text>
-              ),
-            }}
-          />
-
-          {/* ── Practice ── */}
+          {/* ── Collections ── */}
           <Tab.Screen
             name="Collections"
             component={CollectionsScreen}
             options={{
               headerShown: true,
-              headerTitle: '',
+              headerTitle: 'Collections',
               tabBarIcon: ({ focused }) => (
                 <View style={{ position: 'relative' }}>
                   <Ionicons
@@ -159,27 +121,41 @@ export default function TabLayout() {
                   Collections
                 </Text>
               ),
-              headerLeft: () => (
-                <TouchableOpacity style={{marginLeft: 10}} onPress={() => navigation.navigate('createCollection')}>
-                    <Plus size={28} color={theme.colors.onBackground} />
-                </TouchableOpacity>
-              ),
-              headerRight: () => (
-                <TouchableOpacity style={{marginRight: 10}} onPress={() => { setSyncSheetOpen(true) }}>
-                        {syncStatus === 'Synced' ? (
-                            <CloudCheck size={28} color={theme.colors.onBackground} />
-                        ) : syncStatus === 'Syncing' ? (
-                            <CloudSync size={28} color={theme.colors.onBackground} />
-                        ) : (
-                            <CloudAlert size={28} color={theme.colors.onBackground} />
-                        )}
-                    </TouchableOpacity>
-              ),
+              // headerRight: () => (
+              //   <TouchableOpacity style={{marginLeft: -30}} onPress={() => { setSyncSheetOpen(true) }}>
+              //           {syncStatus === 'Synced' ? (
+              //               <CloudCheck size={28} color={theme.colors.onBackground} />
+              //           ) : syncStatus === 'Syncing' ? (
+              //               <CloudSync size={28} color={theme.colors.onBackground} />
+              //           ) : (
+              //               <CloudAlert size={28} color={theme.colors.onBackground} />
+              //           )}
+              //       </TouchableOpacity>
+              // ),
               headerSearchBarOptions: {
                 placeholder: "Search Collections...",
-                onChangeText: (event) => 
-                    console.log(event.nativeEvent.text),
               }
+            }}
+          />
+
+          {/* ── Practice ── */}
+          <Tab.Screen
+            name="Practice"
+            component={PracticeScreen}
+            options={{
+              headerShown: true,
+              tabBarIcon: ({ focused }) => (
+                <Ionicons
+                  name={focused ? 'barbell' : 'barbell-outline'}
+                  color={focused ? theme.colors.onBackground : inactiveColor}
+                  size={28}
+                />
+              ),
+              tabBarLabel: ({ focused }) => (
+                <Text style={{ fontSize: 14, fontWeight: '600', color: focused ? theme.colors.onBackground : inactiveColor, textAlign: 'center' }}>
+                  Practice
+                </Text>
+              ),
             }}
           />
 

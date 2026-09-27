@@ -1,107 +1,117 @@
 import 'react-native-gesture-handler'; // MUST be at the very top
 
-import Ionicons from '@expo/vector-icons/Ionicons';
 
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
-import { createNativeStackNavigator, NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import { TouchableOpacity, View } from 'react-native';
+import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Uniwind } from 'uniwind';
 
 import useAppTheme from './theme';
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
-import TabsNavigator from './screens/(tabs)/TabsNavigator';
-import { useUserAuthStore } from './stores/userAuth.store';
-import { createUser, loginUserWithToken } from './api/user.api';
-import useStyles from './styles/gobalStyles';
-import { HomeScreen } from './screens/(tabs)/home.screen';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCustomFonts } from './styles/fonts';
-import { Session, useUserStore } from './stores/user.store';
-import * as Device from 'expo-device';
-import { CreateCollectionScreen } from './screens/collections/createNew.screen';
-import PassageBottomSheet from './components/bottom-sheets/passageBottomSheet';
-import ViewNotesBottomSheet from './components/bottom-sheets/viewNotesBottomSheet';
-import SaveToCollectionBottomSheet from './components/bottom-sheets/saveToCollectionBottomSheet';
-import CategoriesBottomSheet from './components/bottom-sheets/categoriesBottomSheet';
-import { useBottomSheetsStore } from './stores/bottomSheets.store';
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
-import { useSearchStore } from './stores/search.store';
-import CollectionScreen from './screens/collections/collection';
-import AddNoteBottomSheet from './components/bottom-sheets/addNoteBottomSheet';
+import { migrate } from 'drizzle-orm/expo-sqlite/migrator';
+import * as Crypto from 'expo-crypto';
+import { RootStackParamList } from '../types/router';
+import CollectionMenuBottomSheet from './components/bottom-sheets/collectionMenuBottomSheet';
+import PassageBottomSheet from './components/bottom-sheets/passageBottomSheet';
+import PassageMenuBottomSheet from './components/bottom-sheets/passageMenuBottomSheet';
 import SyncBottomSheet from './components/bottom-sheets/syncBottomSheet';
-import EditCollectionScreen from './screens/collections/editCollection.screen';
-import { useVod } from './hooks/useVod';
-import { useAppStore } from './stores/appState.store';
-import { navigationRef } from './navigation';
+import SaveToCollectionDialog from './components/dialogs/saveToCollectionDialog';
+import ViewNotesDialog from './components/dialogs/viewNotesDialog';
 import { BottomTabWrapper } from './components/bottomTabWrapper';
-import { PaperProvider } from 'react-native-paper';
+import { db } from './database/client';
+import { userPreferencesTable, usersTable } from './database/schema';
+import migrationsBundle from './drizzle/migrations';
+import { navigationRef } from './navigation';
+import TabsNavigator from './screens/(tabs)/TabsNavigator';
+import ReadScreen from './screens/bible/read.screen';
+import CollectionScreen from './screens/collections/collection';
+import { CreateCollectionScreen } from './screens/collections/createNew.screen';
+import EditCollectionScreen from './screens/collections/editCollection.screen';
+import { CreditsScreen } from './screens/credits';
+import PracticeSessionScreen from './screens/practiceSession/practiceSession.screen';
+import { useBottomSheetsStore } from './stores/bottomSheets.store';
+import { useUserStore } from './stores/user.store';
+import { useCustomFonts } from './styles/fonts';
+import useStyles from './styles/gobalStyles';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // ─── Root component ───────────────────────────────────────────────────────────
 export default function AppShell() {
   const theme = useAppTheme();
   const styles = useStyles();
   const fontsLoaded = useCustomFonts();
-  const authStore = useUserAuthStore();
-  const userStore = useUserStore();
 
   const [appIsReady, setAppIsReady] = useState(false);
 
-  const { data: vod, isFetched: vodLoaded } = useVod();
-  const {setVod} = useAppStore();
+  //const { data: vod, isFetched: vodLoaded } = useVod();
+  //const {setVod} = useAppStore();
 
   const passageSheet = React.useRef<TrueSheet>(null);
-  const passageSheet2 = React.useRef<TrueSheet>(null);
-  const viewNotesSheet = React.useRef<TrueSheet>(null);
-  const saveToCollectionSheet = React.useRef<TrueSheet>(null);
   const noteSheet = React.useRef<TrueSheet>(null);
   const syncSheet = React.useRef<TrueSheet>(null);
-  const categoriesSheet = React.useRef<TrueSheet>(null);
-  const {
-    passageSheetOpen,
-    noteSheetOpen,
-    syncSheetOpen,
-    viewNotesSheetOpen,
-    saveToCollectionSheetOpen,
-    categoriesSheetOpen,
-  } = useBottomSheetsStore();
-  
-  // ─── Startup ──────────────────────────────────────────────────────────────────
-  // On startup try to login user with auth token, retry if could not, then navigate
+  const passageSheetOpen = useBottomSheetsStore((state) => state.passageSheetOpen);
+  const syncSheetOpen = useBottomSheetsStore((state) => state.syncSheetOpen);
+
+  const [migrationsError, setMigrationsError] = useState(false);
+  const setUserId = useUserStore((state) => state.setUserId);
+  const themePreference = useUserStore((state) => state.user.preferences.theme);
+
+
   async function runStartup() {
+    // try {
+    //   const session: Session = {
+    //     deviceName: Device.deviceName || '',
+    //     model: Device.modelId,
+    //   }
+    //   if (authStore.refreshToken) { // If refresh token, automatically login (only users who created an account have a refresh token)
+    //     console.log('logging in with token')
+    //     await loginUserWithToken(session);
+    //   } else if (authStore.session.deviceId) {
+    //     // Get new jwt if internet connection
+    //     console.log('requesting new jwt')
+    //   } else if (!authStore.session.deviceId) {
+    //     // New user
+    //     console.log('creating new user')
+    //     await createUser(session);
+    //   }
+    // } catch (Error) {
+    //   console.error(Error);
+    // }
+
     try {
-      const session: Session = {
-        deviceName: Device.deviceName || '',
-        model: Device.modelId,
+      console.log("Running db migrations")
+      await migrate(db, migrationsBundle);
+      console.log("Db migrations completed")
+
+      const existingUserId = await db.select().from(usersTable);
+      console.log("Existing user IDs:", existingUserId);
+
+      if (existingUserId.length === 0) {
+        console.log("No user found, creating new user")
+
+        const newUserId = Crypto.randomUUID();
+
+        setUserId(newUserId);
+        await db.insert(usersTable).values({ userId: newUserId }).onConflictDoNothing();
+        await db.insert(userPreferencesTable)
+          .values({ userId: newUserId, preferredBibleVersion: 'kjv' })
+          .onConflictDoNothing();
       }
-      if (authStore.refreshToken) { // If refresh token, automatically login (only users who created an account have a refresh token)
-        console.log('logging in with token')
-        await loginUserWithToken(session);
-      } else if (authStore.session.deviceId) {
-        // Get new jwt if internet connection
-        console.log('requesting new jwt')
-      } else if (!authStore.session.deviceId) {
-        // New user
-        console.log('creating new user')
-        await createUser(session);
-      }
-    } catch (Error) {
-      console.error(Error);
+
+    } catch (error) {
+      setMigrationsError(true);
+      console.error("Failed to initialize database", error);
+      return;
     }
 
     setAppIsReady(true);
@@ -109,8 +119,12 @@ export default function AppShell() {
   
   useEffect(() => {
       runStartup();
-    }, []); // ← IMPORTANT
+    }, []);
     
+    useEffect(() => {
+      Uniwind.setTheme(themePreference === 0 ? 'system' : themePreference === 2 ? 'dark' : 'light');
+    }, [themePreference]);
+
     // ── Android system background ──────────────────────────────────────────────────
     useEffect(() => {
       SystemUI.setBackgroundColorAsync(theme.colors.background).catch((e) =>
@@ -121,16 +135,28 @@ export default function AppShell() {
   
     // ── Hide splash screen once ready ────────────────────────────────────────
     useEffect(() => {
-      if (appIsReady) 
-        if (fontsLoaded) 
-          if (vodLoaded)
-            SplashScreen.hideAsync().catch(() => {});
-    }, [appIsReady, fontsLoaded, vodLoaded]);
+      if (!appIsReady) {
+        console.log("App is not ready")
+        return;
+      }
 
-    useEffect(() => {
-      if (vod)
-        setVod(vod);
-    }, [vod, setVod]);
+      if (migrationsError) {
+        console.log("No migrations error")
+        return;
+      }
+
+      if (!fontsLoaded) {
+        console.log("Fonts not loaded")
+        return;
+      }
+
+      // if (!vodLoaded)
+      //   return;
+
+      console.log("App is ready, hiding splash");
+
+      SplashScreen.hideAsync().catch(() => {});
+    }, [appIsReady, fontsLoaded, migrationsError]);
 
     // set passage bottom sheet ref
     useEffect(() => {
@@ -141,22 +167,6 @@ export default function AppShell() {
       }
     }, [passageSheetOpen]);
 
-    useEffect(() => {
-      if (viewNotesSheetOpen) {
-        viewNotesSheet.current?.present();
-      } else {
-        viewNotesSheet.current?.dismiss();
-      }
-    }, [viewNotesSheetOpen]);
-
-    useEffect(() => {
-      if (saveToCollectionSheetOpen) {
-        saveToCollectionSheet.current?.present();
-      } else {
-        saveToCollectionSheet.current?.dismiss();
-      }
-    }, [saveToCollectionSheetOpen]);
-
     // set sync bottom sheet ref
     useEffect(() => {
       if (syncSheetOpen) {
@@ -166,15 +176,7 @@ export default function AppShell() {
       }
     }, [syncSheetOpen])
 
-    useEffect(() => {
-      if (categoriesSheetOpen) {
-        categoriesSheet.current?.present();
-      } else {
-        categoriesSheet.current?.dismiss();
-      }
-    }, [categoriesSheetOpen]);
-
-  if (!appIsReady || !fontsLoaded || !vodLoaded) {
+  if (!appIsReady || !fontsLoaded) {
     return null;
   } 
 
@@ -182,7 +184,7 @@ export default function AppShell() {
     return (
         
       <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <PaperProvider>
+        <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
         <BottomTabWrapper>
             <NavigationContainer theme={theme} ref={navigationRef}>
               <Stack.Navigator
@@ -247,16 +249,37 @@ export default function AppShell() {
                     headerTintColor: theme.colors.onBackground,
                   }}
                 />
+                <Stack.Screen
+                  name="read"
+                  component={ReadScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="practiceSession"
+                  component={PracticeSessionScreen}
+                  options={{
+                    headerShown: true,
+                    headerStyle: {
+                      backgroundColor: theme.colors.background2,
+                    },
+                    headerTintColor: theme.colors.onBackground,
+                    headerShadowVisible: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="credits"
+                  component={CreditsScreen}
+                  options={{ headerShown: false }}
+                />
               </Stack.Navigator>
             </NavigationContainer>
           <PassageBottomSheet ref={passageSheet}/>
-          <PassageBottomSheet ref={passageSheet2}/>
-          <ViewNotesBottomSheet ref={viewNotesSheet} />
-          <SaveToCollectionBottomSheet ref={saveToCollectionSheet} />
-          <SyncBottomSheet ref={syncSheet}/>
-          <CategoriesBottomSheet ref={categoriesSheet} />
+          <ViewNotesDialog />
+          <SaveToCollectionDialog />
+          <SyncBottomSheet />
+          <CollectionMenuBottomSheet />
+          <PassageMenuBottomSheet />
         </BottomTabWrapper>
-        </PaperProvider>
       </GestureHandlerRootView>
     )
 }

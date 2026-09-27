@@ -1,12 +1,13 @@
-import { UserPassage } from "./passages/userPassage"
+import { UserPassage } from "./passages/userPassage";
 
 export type RootStackParamList = {
     '(tabs)': undefined,
     'createCollection': undefined,
-    'collection': {id: number},
-    'editCollection': undefined,
-    'practiceSession': {practicingPassage: UserPassage},
+    'collection': {id: string},
+    'editCollection': {id: string},
+    'practiceSession': {userPassage: UserPassage},
     'chooseBook': undefined,
     'chooseChapter': {book: string},
-    'read': {book: string, chapter: number},
+    'read': {book: string, chapter: number, highlightVerses?: number[]},
+    'credits': undefined
 }

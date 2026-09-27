@@ -1,9 +1,9 @@
-import { Vod } from "../../types/verse/vod";
+import { Passage } from "../../types/passages/passage";
 import { baseUrl } from "./baseUrl";
 
-export async function getVod(): Promise<Vod> {
+export async function getVerseOfDay(translation: string): Promise<Passage> {
     try {
-        const response = await fetch(`${baseUrl}/verseofday`, {
+        const response = await fetch(`${baseUrl}/verseofday/${translation}`, {
             method: 'GET'
         });
         if (response.ok) {

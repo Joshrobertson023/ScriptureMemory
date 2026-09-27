@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { BibleVersion, CollectionsSort, ThemePreference } from "../../types/enums";
 
 export interface Session {
@@ -15,7 +15,7 @@ export interface Session {
 }
 
 interface User {
-    id: number;
+    id: string;
     username?: string;
     firstName?: string;
     lastName?: string;
@@ -37,8 +37,11 @@ interface UserPreferences {
 
 interface UserStore {
     user: User;
+    userId: string;
+    setUserId: (id: string) => void;
 
     setUser: (user: User) => void;
+    setThemePreference: (theme: ThemePreference) => void;
     logout: () => void;
 }
 
@@ -50,7 +53,7 @@ const initialPreferences: UserPreferences = {
 }
 
 const initialUser: User = {
-    id: 0,
+    id: '',
     points: 0,
     memorizedCount: 0,
     preferences: initialPreferences
@@ -60,13 +63,23 @@ export const useUserStore = create<UserStore>()(
     persist(
         (set, get) => ({
             user: initialUser,
+            userId: '',
             
             setUser(u: User) {
                 set({user: u})
             },
 
+            setThemePreference(theme: ThemePreference) {
+                const user = get().user;
+                set({user: {...user, preferences: {...user.preferences, theme}}})
+            },
+
             logout() {
                 set({user: initialUser})
+            },
+
+            setUserId(id: string) {
+                set({userId: id})
             }
         }),
         {

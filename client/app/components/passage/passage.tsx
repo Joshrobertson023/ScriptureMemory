@@ -1,62 +1,105 @@
+import { PressableFeedback } from "heroui-native";
+import React from "react";
 import { StyleSheet, View } from "react-native";
+import { useReorderableDrag } from "react-native-reorderable-list";
 import { UserPassage } from "../../../types/passages/userPassage";
-import { useIsActive, useReorderableDrag } from "react-native-reorderable-list";
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import PassageContent from "./passageContent";
-import { TouchableOpacity } from "react-native";
-import { Trash } from "lucide-react-native";
+import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
+import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import useAppTheme from "../../theme";
-import { useCollectionsStore } from "../../stores/collections.store";
+import PassageContent from "./passageContent";
 
 interface PassageProps {
     userPassage: UserPassage;
-    itemId: number;
-    collectionId: number;
+    itemId: string;
+    collectionId: string;
+    onRemove?: (itemId: string) => void;
+    reordering?: boolean;
 }
 
 const useLocalStyles = () => StyleSheet.create({
     container: {
         maxWidth: '100%', flexDirection: 'row', alignItems: 'center'
     },
-    sideDelete: {
-        backgroundColor: '#E25D5D',
-        justifyContent: 'center',
-        padding: 20,
-        marginTop: 10,
-        borderRadius: 10,
-        marginLeft: 5
+    content: {
+        flex: 1
+    },
+    menuButton: {
+        padding: 8
     }
 })
 
-const PassageComponent = ({userPassage, itemId, collectionId}: PassageProps) => {
+const PassageComponent = React.memo(({userPassage, itemId, collectionId, onRemove, reordering = false}: PassageProps) => {
     const theme = useAppTheme();
     const drag = useReorderableDrag();
-    const isActive = useIsActive();
     const styles = useLocalStyles();
-    const { removeItemFromCollection } = useCollectionsStore();
+    const setPassageSheetOpen = useBottomSheetsStore((state) => state.setPassageSheetOpen);
+    const setPassageBottomSheet = useBottomSheetsStore((state) => state.setPassageBottomSheet);
+    const pushPassage = useBottomSheetsStore((state) => state.pushPassage);
+    const { goToNextPassage } = useBottomSheetStack();
+    const passage = userPassage.passage;
 
-    const RightActions = () => (
-        <TouchableOpacity
-            style={styles.sideDelete}
-            onPress={() => {
-                removeItemFromCollection(collectionId, itemId);
-            }}
-        >
-            <Trash size={25} color={theme.colors.background} />
-        </TouchableOpacity>
-    );
+    if (!passage) {
+        return null;
+    }
 
     return (
-        <Swipeable renderRightActions={() => <RightActions />}>
-            <View style={styles.container}>
-                <PassageContent
-                    userPassage={userPassage}
-                    onLongPress={drag}
-                    disabled={isActive}
+        <PressableFeedback onLongPress={reordering ? drag : undefined} delayLongPress={150} onPress={reordering ? undefined : () => {
+                    const selectedUserPassage: UserPassage = userPassage;
+                    const stackLength = useBottomSheetsStore.getState().passageSheetStack.length;
+        
+                    if (stackLength === 0) {
+                        pushPassage(selectedUserPassage);
+                        setPassageBottomSheet(selectedUserPassage);
+                        setPassageSheetOpen(true);
+                        return;
+                    }
+        
+                    goToNextPassage(selectedUserPassage);
+                }}
+                style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}
+                animation={{
+                        scale: {
+                            value: 0.99,
+                            timingConfig: {
+                                duration: 400,
+                            },
+                            ignoreScaleCoefficient: true,
+                        },
+                    }}
+                >
+                <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', margin: 10}}>
+                    <View>
+                        <PassageContent
+                            userPassage={userPassage}
+                            onRemove={onRemove}
+                        />
+                    </View>
+
+                </View>
+                <PressableFeedback.Ripple
+                    styles={{
+                        container: {
+                            borderRadius: 20,
+                            overflow: 'hidden',
+                        },
+                        ripple: {
+                            borderRadius: 999,
+                        },
+                    }}
+                    animation={{
+                        backgroundColor: {
+                            value: theme.colors.onBackground,
+                        },
+                        opacity: {
+                            value: [0, 0.15, 0],
+                        },
+                        progress: {
+                            baseDuration: 200,
+                        },
+                    }}
                 />
-            </View>
-        </Swipeable>
+        </PressableFeedback>
     )
-}
+});
 
 export default PassageComponent;

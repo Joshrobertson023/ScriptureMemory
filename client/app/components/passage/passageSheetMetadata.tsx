@@ -1,34 +1,22 @@
-import { StyleSheet, View, Text } from "react-native";
-import { UserPassage } from "../../../types/passages/userPassage";
-import useAppTheme from "../../theme";
-import useGlobalStyles from "../../styles/gobalStyles";
-import { useMemo } from "react";
-import Skeleton from "react-native-reanimated-skeleton";
-import { VerseCardResponse } from "../../../types/verse/verseCard";
 import { Brain, Check, Clock, Users } from "lucide-react-native";
-import { useCollectionsStore } from "../../stores/collections.store";
+import React, { useMemo } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import Skeleton from "react-native-reanimated-skeleton";
+import { UserPassage } from "../../../types/passages/userPassage";
+import { VerseCardResponse } from "../../../types/verse/verseCard";
+import useGlobalStyles from "../../styles/gobalStyles";
+import useAppTheme from "../../theme";
 
 interface PassageSheetMetadataProps {
     passage: UserPassage;
     data: VerseCardResponse;
     loading: boolean;
+    collectionsCount: number;
 }
 
-const PassageSheetMetadata = ({ passage, data, loading }: PassageSheetMetadataProps) => {
+const PassageSheetMetadata = React.memo(({ passage, data, loading, collectionsCount }: PassageSheetMetadataProps) => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
-    const { userCollections } = useCollectionsStore();
-
-    const passageVerseIds = useMemo(
-        () => new Set(passage.passage.verses.map((verse) => verse.id)),
-        [passage]
-    );
-
-    const collectionsCount = userCollections.filter(c =>
-        c.items.some(i =>
-            i.type === 'passage' && i.passage.passage.verses.some((verse) => passageVerseIds.has(verse.id))
-        )
-    ).length;
 
     const styles = useMemo(() => StyleSheet.create({
         container: { flexDirection: 'row' },
@@ -102,6 +90,6 @@ const PassageSheetMetadata = ({ passage, data, loading }: PassageSheetMetadataPr
             </View>
         </View>
     );
-};
+});
 
 export default PassageSheetMetadata;

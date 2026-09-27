@@ -1,19 +1,20 @@
+import { Spinner } from "heroui-native";
+import React from "react";
 import { Text, View } from "react-native";
-import useAppTheme from "../../theme";
-import useGlobalStyles from "../../styles/gobalStyles";
-import { Passage } from "../../../types/passages/passage";
-import { UserPassage } from "../../../types/passages/userPassage";
-import { FlatList } from "react-native-gesture-handler";
-import PassageContent from "./passageContent";
 import Skeleton from "react-native-reanimated-skeleton";
+import { Passage } from "../../../types/passages/passage";
+import useGlobalStyles from "../../styles/gobalStyles";
+import useAppTheme from "../../theme";
+import AddPassageContent from "./addPassageContent";
 
 interface SimilarProps {
     reference: string;
     similarPassages?: Passage[];
     isLoading: boolean;
+    isFetchingMore: boolean;
 }
 
-const Similar = ({reference, similarPassages = [], isLoading}: SimilarProps) => {
+const Similar = React.memo(({reference, similarPassages = [], isLoading, isFetchingMore}: SimilarProps) => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
     const skeletonProps = {
@@ -44,22 +45,13 @@ const Similar = ({reference, similarPassages = [], isLoading}: SimilarProps) => 
                     </Text>
                 )}
 
-                {!isLoading && similarPassages.length > 0 && (
-                    <FlatList
-                        data={similarPassages}
-                        renderItem={({item}) => {
-                            const userPassage: UserPassage = {
-                                passage: item,
-                                id: 0,
-                            };
-
-                            return <PassageContent userPassage={userPassage} />;
-                        }}
-                    />
-                )}
+                {!isLoading && similarPassages.map((item, index) => (
+                    <AddPassageContent key={`${item.reference.readableReference}-${index}`} passage={item} />
+                ))}
             </Skeleton>
-        </View>
+
+            {isFetchingMore && <Spinner style={{ marginTop: 10, alignSelf: 'center' }} />}        </View>
     )
-}
+})
 
 export default Similar;

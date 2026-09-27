@@ -1,0 +1,12 @@
+diff --git a/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/.gradle/buildOutputCleanup/buildOutputCleanup.lock b/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+new file mode 100644
+index 0000000..9b8e721
+Binary files /dev/null and b/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/.gradle/buildOutputCleanup/buildOutputCleanup.lock differ
+diff --git a/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/.gradle/buildOutputCleanup/cache.properties b/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/.gradle/buildOutputCleanup/cache.properties
+new file mode 100644
+index 0000000..4ca9237
+--- /dev/null
++++ b/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/.gradle/buildOutputCleanup/cache.properties
+@@ -0,0 +1,2 @@
++#Sun Aug 02 12:33:15 CDT 2026
++gradle.version=9.0.0

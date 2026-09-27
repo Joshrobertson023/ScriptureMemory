@@ -1,16 +1,19 @@
-import { TouchableWithoutFeedback, Text, View, StyleProp, ViewStyle, StyleSheet, DimensionValue } from "react-native"
-import { Passage } from "../../../types/passages/passage"
+import { useMappingHelper } from "@shopify/flash-list";
+import { Check } from "lucide-react-native";
+import React, { useMemo } from "react";
+import { DimensionValue, StyleProp, StyleSheet, Text, TouchableWithoutFeedback, View, ViewStyle } from "react-native";
+import { Passage } from "../../../types/passages/passage";
+import { UserPassage } from "../../../types/passages/userPassage";
+import { useBibleVersion } from "../../hooks/useBibleVersion";
+import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
+import { useCollectionsContainingVerses } from "../../hooks/useCollections";
+import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import useGlobalStyles from "../../styles/gobalStyles";
 import useAppTheme from "../../theme";
-import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
-import { UserPassage } from "../../../types/passages/userPassage";
-import Categories from "./categories";
-import React from "react";
-import { Check } from "lucide-react-native";
 
 interface PassageContentProps {
     passage: Passage;
-    userPassageId?: number;
+    userPassageId?: string;
     style?: StyleProp<ViewStyle>;
     maxWidth?: DimensionValue;
 }
@@ -18,7 +21,7 @@ interface PassageContentProps {
 const useLocalStyles = () => {
     return StyleSheet.create({
         container: {
-            
+            maxWidth: '100%'
         },
         row1: {
             flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginVertical: 10
@@ -33,45 +36,58 @@ const AddPassageContent = React.memo(({passage, userPassageId, maxWidth}: Passag
     const styles = useGlobalStyles();
     const localStyles = useLocalStyles();
     const theme = useAppTheme();
-    const {setPassageSheetOpen, setPassageBottomSheet, pushPassage, passageSheetStack} = useBottomSheetsStore();
+    const { version: bibleVersion } = useBibleVersion();
+    const setPassageSheetOpen = useBottomSheetsStore((state) => state.setPassageSheetOpen);
+    const setPassageBottomSheet = useBottomSheetsStore((state) => state.setPassageBottomSheet);
+    const pushPassage = useBottomSheetsStore((state) => state.pushPassage);
+    const { goToNextPassage } = useBottomSheetStack();
+    const displayedVersion = passage.verses[0]?.translationContents?.at(0)?.version;
 
-    const allCategories = React.useMemo(() =>
-        Array.from(new Map(passage.verses.flatMap(v => v.categories).map(c => [c.id, c])).values()),
+    const passageVerseIds = useMemo(
+        () => new Set(passage.verses.map((verse) => verse.id)),
         [passage]
     );
+    const collectionsCount = useCollectionsContainingVerses(passageVerseIds).length;
+
+    const { getMappingKey } = useMappingHelper();
 
     return (
         <TouchableWithoutFeedback onPress={() => {
             const userPassage: UserPassage = {
                 passage: passage,
-                id: userPassageId ?? 0,
+                id: userPassageId,
             }
-            if (passageSheetStack.length === 0) {
-                pushPassage(userPassage);
+            if (useBottomSheetsStore.getState().passageSheetStack.length > 0) {
+                goToNextPassage(userPassage);
+                return;
             }
+            pushPassage(userPassage);
             setPassageBottomSheet(userPassage);
             setPassageSheetOpen(true);
         }}>
-            <View style={[localStyles.container, {maxWidth}]}>
+            <View style={[localStyles.container]}>
                 <Text style={{...styles.p3, fontWeight: 600}}>{passage.reference.readableReference}</Text>
                 <View>
                     {passage.verses.map((verse, index) => (
-                        <Text key={verse.id} style={styles.p3}>
-                            {passage.verses.length > 1 && (verse.reference.verses.at(0) + ": ")}{verse.text}
+                        <Text key={getMappingKey(verse.id, index)} style={styles.p3}>
+                            {passage.verses.length > 1 && (verse.reference.verses.at(0) + ": ")}{verse.translationContents?.at(0)?.plainText}
                         </Text>
                     ))}
                 </View>
-                
+                {displayedVersion && (
+                    <Text style={styles.verseVersionLabel}>{displayedVersion.toUpperCase()}</Text>
+                )}
+
                 <View style={[localStyles.row1]}>
                     <View style={[localStyles.row2]}>
                     </View>
                     <View style={[localStyles.row2]}>
-                        <Check size={16} color={theme.colors.onBackground} />
-                        <Text style={styles.p4}>In 1 Collection</Text>
+                        {collectionsCount > 0 && <Check size={16} color={theme.colors.onBackground} />}
+                        <Text style={styles.p4}>
+                            In {collectionsCount} {collectionsCount === 1 ? 'Collection' : 'Collections'}
+                        </Text>
                     </View>
                 </View>
-
-                <Categories categories={allCategories} multiline={false} />
             </View>
         </TouchableWithoutFeedback>
     )

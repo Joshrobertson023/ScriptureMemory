@@ -1,14 +1,14 @@
+import React from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import { Passage } from "../../../types/passages/passage";
 import useGlobalStyles from "../../styles/gobalStyles";
 import AddPassageContent from "./addPassageContent";
-import React from "react";
 
 interface AddPassageProps {
     passage: Passage;
-    savedItemId: number | null;
+    savedItemId: string | null;
     savePassage: (passage: Passage) => void;
-    removePassage: (itemId: number) => void;
+    removePassage: (itemId: string) => void;
 }
 
 const useLocalStyles = () => StyleSheet.create({

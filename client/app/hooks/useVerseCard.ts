@@ -7,11 +7,11 @@ import { Verse } from '../../types/verse/verse';
 import { useVerseCardCacheStore } from '../stores/verseCardCache.store';
 
 export const useVerseCard = (verses: Verse[], passageKey: string) => {
-    const { user } = useUserStore();
-    const { jwt } = useUserAuthStore();
+    const user = useUserStore((state) => state.user);
+    const jwt = useUserAuthStore((state) => state.jwt);
     const setVerseCard = useVerseCardCacheStore((state) => state.setVerseCard);
 
-    const verseIds = useMemo(() => verses.map(v => v.id).sort((a, b) => a - b), [verses]);
+    const verseIds = useMemo(() => verses.map(v => v.id).sort(), [verses]);
     const verseKey = useMemo(() => verseIds.join(','), [verseIds]);
     const normalizedPassageKey = useMemo(() => passageKey.trim(), [passageKey]);
     const cacheKey = useMemo(
@@ -22,7 +22,7 @@ export const useVerseCard = (verses: Verse[], passageKey: string) => {
 
     const query = useQuery({
         queryKey: ['verseCard', cacheKey],
-        queryFn: () => getVerseCard(user.id, verseIds, jwt),
+        queryFn: () => getVerseCard(Number(user.id) || 0, verseIds, jwt),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnMount: false,

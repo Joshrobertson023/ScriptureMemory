@@ -1,8 +1,8 @@
-import { Button, Text, View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import useStyles from '../../styles/gobalStyles';
 import * as SystemUI from 'expo-system-ui';
+import * as React from "react";
+import { Text, View } from "react-native";
 import { VerseOfDayHomeCard } from "../../components/home/vod";
+import useStyles from '../../styles/gobalStyles';
 
 SystemUI.setBackgroundColorAsync('#181818')
 
