@@ -20,10 +20,10 @@ public class SignalRLogger : ILogger
 
     public IDisposable BeginScope<TState>(TState state) => null;
 
-    // Stop SignalR's own logs
-    public bool IsEnabled(LogLevel logLevel) => 
+    public bool IsEnabled(LogLevel logLevel) =>
         !_name.StartsWith("Microsoft.AspNetCore.SignalR") &&
-        !_name.StartsWith("Microsoft.AspNetCore.Http.Connections");
+        !_name.StartsWith("Microsoft.AspNetCore.Http.Connections") &&
+        !_name.StartsWith("Npgsql.Command");
 
     public void Log<TState>(
         LogLevel logLevel, 
@@ -34,8 +34,14 @@ public class SignalRLogger : ILogger
     {
         var message = formatter(state, exception!);
 
-        _ = _hubContext.Clients.All.SendAsync(
-            "ReceiveLog",
-            new { Timestamp = DateTime.UtcNow, Level = logLevel.ToString(), Message = message });
+        if (logLevel == LogLevel.Debug)
+            return;
+
+        if (!message.Contains("Executed DbCommand") 
+            && !message.Contains("Command execution completed") 
+            && !message.Contains("Executing command"))
+            _ = _hubContext.Clients.All.SendAsync(
+                "ReceiveLog",
+                new { Timestamp = DateTime.UtcNow, Level = logLevel.ToString(), Message = message });
     }
 }

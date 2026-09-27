@@ -1,9 +1,9 @@
 {
 "SpaProxyServer": {
-"ServerUrl": "https://localhost:54573",
+"ServerUrl": "",
 "RedirectUrl": "",
-"LaunchCommand": "npm run dev",
-"WorkingDirectory": "C:\\Users\\there\\source\\repos\\VerseAppNew\\VerseAppNew.Server\\..\\verseappnew.client",
+"LaunchCommand": "",
+"WorkingDirectory": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.Server",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }

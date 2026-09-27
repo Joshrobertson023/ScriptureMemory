@@ -1,29 +1,36 @@
 {
   "format": 1,
   "restore": {
-    "/home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/DataAccess.csproj": {}
+    "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {}
   },
   "projects": {
-    "/home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/DataAccess.csproj": {
+    "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/DataAccess.csproj",
+        "projectUniqueName": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
         "projectName": "DataAccess",
-        "projectPath": "/home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/DataAccess.csproj",
-        "packagesPath": "/home/joshr/.nuget/packages/",
-        "outputPath": "/home/joshr/RiderProjects/ScriptureMemory/server/DataAccess/obj/",
+        "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
+        "packagesPath": "C:\\Users\\Josh Robertson\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/home/joshr/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\Josh Robertson\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
+            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -38,10 +45,11 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net8.0": {
+          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Dapper": {
@@ -111,11 +119,15 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
+              "version": "[8.0.31, 8.0.31]"
             },
             {
               "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.26, 8.0.26]"
+              "version": "[8.0.31, 8.0.31]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.31, 8.0.31]"
             }
           ],
           "frameworkReferences": {
@@ -123,7 +135,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/joshr/.local/share/mise/dotnet-root/sdk/10.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

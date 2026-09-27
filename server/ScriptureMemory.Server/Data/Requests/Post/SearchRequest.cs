@@ -10,7 +10,7 @@ namespace DataAccess.Requests;
 
 public sealed class SearchRequest
 {
-    [Required] public int UserId { get; set; }
     [Required] public string Search { get; set; } = string.Empty;
-    [Required] public SearchType SearchType { get; set; }
+    [Required] public string Translation { get; set; } = string.Empty;
+    public double? LastVerseDistance { get; set; } = null;
 }

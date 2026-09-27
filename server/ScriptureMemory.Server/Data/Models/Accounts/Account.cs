@@ -14,6 +14,8 @@ public class Account
     
     public List<Session> Sessions { get; set; } = new();
     
+    public int LoginCount { get; set; }
+    
     public DateTime DateCreated { get; set; } // Date user opened app for the first time
     
     public DateTime? DateRegistered { get; set; }

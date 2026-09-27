@@ -2,6 +2,7 @@ using BenchmarkDotNet.Running;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Npgsql;
+using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Startup;
 using ScriptureMemory.Server.Tools;
 using System.Text;
@@ -18,7 +19,7 @@ builder.Logging.ConfigureOpenTelemetrySignalRLogging(builder.Configuration);
 builder.Services
     .AddServices(builder.Configuration) 
     .AddAuthenticationAndAuthorization(builder.Configuration)
-    .ConfigureTracingAndMetricsExporting(builder.Configuration)
+    /*.ConfigureTracingAndMetricsExporting(builder.Configuration)*/
     .AddDataAccess();
 
 var app = builder.Build();
@@ -26,7 +27,12 @@ var app = builder.Build();
 app.UseMiddleware()
     .UseEndpoints();
 
-await app.AskToRunOptionalStartupTasks();
+if (builder.Environment.IsDevelopment())
+{
+    app.UseHttpLogging();
+
+    _ = app.AskToRunOptionalStartupTasks();
+}
 
 app.Run();
 

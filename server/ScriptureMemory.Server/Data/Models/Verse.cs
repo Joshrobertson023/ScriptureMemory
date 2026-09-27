@@ -7,6 +7,9 @@ using Pgvector;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.Tools;
 using System.ComponentModel;
+using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
+
 //using static DataAccess.Data.VerseData;
 
 namespace DataAccess.Models;
@@ -15,19 +18,24 @@ namespace DataAccess.Models;
 public class Verse
 {
     private Reference _reference;
-    
+
     public Reference Reference 
     { 
         get => _reference;
-        private set
+        set
         {
             _reference = value;
+
+            if (string.IsNullOrEmpty(_reference.Book.Abbreviation))
+            {
+                _reference.Book = Books.GetBook(_reference.Book.DisplayName);
+            }
             
-            this.Id = Reference.Book.Abbreviation.ToUpper()
+            this.Id = _reference.Book.Abbreviation.ToUpper()
                       + '.'
-                      + Reference.Chapter
+                      + _reference.Chapter
                       + '.'
-                      + Reference.VerseNumbers.First();
+                      + _reference.VerseNumbers.First();
         }
     }
     
@@ -42,9 +50,12 @@ public class Verse
 
     public int SavedCount { get; set; } = 0;
 
-    public int? PassageId { get; set; }
-    
-    public Passage? PassageNavigation { get; set; } = null!;
+    public string? PassageId { get; set; }
+
+    [JsonIgnore] // Don't cache
+    public List<Passage> Passages { get; set; } = null!;
+
+    public double? SearchDistance { get; set; }
     
     public List<VerseTranslationContent>? TranslationContents { get; set; }
 
@@ -63,5 +74,20 @@ public class Verse
     public Verse(string readableReference)
     {
         Reference = new Reference(readableReference);
+    }
+
+    public Verse(Reference reference)
+    {
+        Reference = reference;
+    }
+
+    public void GenerateId(Book book, int chapter, int verseNum)
+    {
+        this.Id = book.Abbreviation.ToUpper() + '.' + chapter + '.' + verseNum;
+    }
+
+    public void GenerateId(string bookAbbreviation, int chapter, int verseNum)
+    {
+        this.Id = bookAbbreviation.Trim().ToUpper() + '.' + chapter + '.' + verseNum;
     }
 }

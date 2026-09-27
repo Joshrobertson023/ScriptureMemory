@@ -34,4 +34,4 @@ public class UserPassage : Passage
     public DateTime? DueDate { get; set; }
     
     public bool NotifyMemorized { get; set; }
-}
+}  

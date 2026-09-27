@@ -8,7 +8,8 @@ public class Bible
     public string Id { get; set; } = string.Empty;
     
     public string Abbreviation { get; set; } = string.Empty;
-    
+
+    [Obsolete("Use Abbreviation instead")]
     public string? AbbreviationLocal { get; set; }
     
     public string Name { get; set; } = string.Empty;
@@ -31,7 +32,7 @@ public class Bible
 
     public Bible(string translation)
     { // Todo: refactor to fill all required fields once data access is set up for getting Bibles from db
-        var result = Bibles.GetBible(translation);
+        var result = AvailableBibles.GetBible(translation);
         Id = result.Id;
         Abbreviation = result.Abbreviation;
         Name = result.Name;

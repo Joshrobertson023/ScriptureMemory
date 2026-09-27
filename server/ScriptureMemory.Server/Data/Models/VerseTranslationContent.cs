@@ -1,6 +1,7 @@
 using DataAccess.Models;
 using Pgvector;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace ScriptureMemory.Server.DataAccess.Models;
 
@@ -12,29 +13,24 @@ public class VerseTranslationContent
     
     [Column(TypeName = "text")]
     public string ContentUsx { get; set; } = string.Empty; // USX format (Unified Scripture XML)
-    
+
     public Vector? Embedding { get; set; }
     
-    public DateTime? LastUpdated { get; set; }
+    public DateTime? LastUpdated { get; set; }  
 
     [MaxLength(20)]
     public string VerseId { get; set; } = string.Empty;
-
-    public string CacheKey => Version + '.' + VerseId;
     
+    // Back-reference to the owning verse -- excluded from JSON so caching/serializing a
+    // VerseTranslationContent doesn't cycle back through Verse.TranslationContents.
+    [JsonIgnore]
     public Verse VerseNavigation { get; set; } = null!;
 
     public string? GetEmbeddingText()
     {
         if (string.IsNullOrEmpty(PlainText))
             return null;
-        
-        return VerseNavigation.Reference.Book  
-               + " "                  
-               + VerseNavigation.Reference.Chapter 
-               + " " 
-               + VerseNavigation.Reference.VerseNumbers.FirstOrDefault()
-               + ": " 
-               + PlainText;
+
+        return PlainText;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using DataAccess.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Configuration;
@@ -12,25 +13,25 @@ using System.Data;
 using System.Text;
 using VerseAppNew.Server.Services;
 using Pgvector;
+using Pgvector.Dapper;
 using ScriptureMemory.Server.Data.DataAccess;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
-using ScriptureMemory.Server.Services.BackgroundServices;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Providers;
 using StackExchange.Redis;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using Quartz;
 
 namespace ScriptureMemory.Server.Startup;
 
 public static class Services
 {
-    static string otlpEndpoint = "https://<your-otlp-endpoint>";
-    static string authHeader = "Authorization=Basic <base64-token>";
-    
     /// <summary>
     /// Add authentication for Swagger
     /// </summary>
@@ -124,11 +125,7 @@ public static class Services
         //
         services.AddSwaggerGenWithAuth();
 
-        //
-        //SqlMapper.AddTypeHandler(new VectorTypeHandler());
-
         
-        // Add custom exception handler that logs exceptions
         services.AddExceptionHandler<GlobalExceptionHandler>();
         services.AddProblemDetails();
         
@@ -139,10 +136,23 @@ public static class Services
         services.AddDbContextFactory<ApplicationDbContext>(
             options => options.UseNpgsql(connectionString, o => o.UseVector()),
             ServiceLifetime.Scoped);
+
+        // For Dapper
+        services.AddNpgsqlDataSource(connectionString, dataSourceBuilder => dataSourceBuilder.UseVector());
         
-        // Add postgres data source for integration tests
-        // services.AddNpgsqlDataSource(connectionString);
-        
+        // Add Vector type to dapper type handler
+        SqlMapper.AddTypeHandler(new VectorTypeHandler());
+
+        services.AddQuartz(q =>
+        {
+            var jobKey = new JobKey("VodFetcherJob");
+            q.AddJob<VodBackgroundWorker>(o => o.WithIdentity(jobKey));
+            q.AddTrigger(o => o
+                .ForJob(jobKey)
+                .WithIdentity("VodFetcherJob-trigger")
+                .WithCronSchedule("0 0 3 * * ?"));
+        });
+
         //
         services.AddHttpClient("ExpoPush", client =>
         {
@@ -151,10 +161,25 @@ public static class Services
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
         });
         
-        // Convert all enums to strings before sending via http
         services.ConfigureHttpJsonOptions(o =>
         {
+            // Convert all enums to strings before sending via http
             o.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+
+            // Exclude vector embeddings from http responses
+            o.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+                .WithAddedModifier(typeInfo =>
+                {
+                    if (typeInfo.Type != typeof(VerseTranslationContent)) return;
+
+                    var embeddingProperty = typeInfo.Properties
+                        .FirstOrDefault(p => p.Name.Equals(
+                            nameof(VerseTranslationContent.Embedding),
+                            StringComparison.OrdinalIgnoreCase));
+
+                    if (embeddingProperty is not null)
+                        embeddingProperty.ShouldSerialize = static (_, _) => false;
+                });
         });
 
         services.AddCors(options =>
@@ -210,23 +235,27 @@ public static class Services
         // services.AddScoped<ActivityLogger>();
         //services.AddScoped<PasswordResetService>();
         //services.AddScoped<PopulateDatabase>();
-        //services.AddScoped<SearchService>();
+        services.AddScoped<SearchService>();
         // services.AddScoped<NotificationService>();
         //services.AddScoped<VerseService>();
         //services.AddScoped<UserPassageService>();
         //services.AddScoped<CollectionService>();
         services.AddScoped<TokenProvider>();
-        //services.AddScoped<VerseOfDayService>();
+        services.AddScoped<BibleService>();
+        services.AddScoped<VerseOfDayService>();
 
-        //services.AddScoped<VerseManagement>();
+        services.AddScoped<VerseManagement>();
         services.AddScoped<BibleApi>();
         services.AddScoped<BibleSyncer>();
 
-        //services.AddScoped<EmbeddingGenerator>();
+        services.AddScoped<EmbeddingGenerator>();
 
         services.AddSingleton<BibleSyncerQueue>();
-        services.AddSingleton<AuthorizationSyncerData>();
+        services.AddSingleton<VerseCacherQueue>();
         services.AddHostedService<BibleSyncerBackgroundWorker>();
+        services.AddHostedService<VerseCacherBackgroundWorker>();
+        services.AddScoped<BibleSyncer>();
+        services.AddSingleton<AuthorizationSyncerData>();
         services.AddScoped<BibleSyncerEventDispatcher>();
 
         return services;
@@ -235,8 +264,12 @@ public static class Services
     public static IServiceCollection AddDataAccess(this IServiceCollection services)
     {
         services.AddScoped<IUserData, UserDataEFCore>();
+        services.AddScoped<UserDataEFCore>();
+        services.AddScoped<UserDataDapper>();
         services.AddScoped<IAdminData, AdminDataEfCore>();
         services.AddScoped<IVerseData, VerseDataEfCore>();
+        services.AddScoped<VerseDataEfCore>();
+        services.AddScoped<VerseDataDapper>();
         services.AddScoped<BibleData>();
         services.AddScoped<BibleSyncLogData>();
         // services.AddScoped<UserSettingsData>();
@@ -248,7 +281,7 @@ public static class Services
         // //services.AddScoped<UserPassageData>();
         // services.AddScoped<CollectionData>();
         //services.AddScoped<PublishedCollectionData>();
-        //services.AddScoped<VerseOfDayData>();
+        services.AddScoped<VerseOfDayData>();
         services.AddScoped<ISessionData, SessionDataEfCore>();
         services.AddScoped<BibleSyncLogData>();
         return services;
@@ -261,8 +294,7 @@ public static class Services
         logger.ClearProviders();
 
         logger.AddConsole(); // temp
-        
-        // Disable in development
+        // Todo: Un-comment for production
         // logger.AddOpenTelemetry(o =>
         // {
         //     o.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("verse-app"));
@@ -284,7 +316,8 @@ public static class Services
         return logger;
     }
 
-    public static IServiceCollection ConfigureTracingAndMetricsExporting(this IServiceCollection services, IConfiguration configuration)
+    // TODO: Add config fields to secrets
+    /*public static IServiceCollection ConfigureTracingAndMetricsExporting(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOpenTelemetry()
             .WithTracing(tracing => tracing
@@ -302,5 +335,5 @@ public static class Services
                 }));
 
         return services;
-    }
+    }*/
 }

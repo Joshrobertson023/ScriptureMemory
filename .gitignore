@@ -42,3 +42,10 @@ npm-debug.log*
 *.tmp
 *.bak
 *~
+/server/ScriptureMemory.Server/docker-compose.yml
+/server/ScriptureMemory.Server/Migrations
+/server/ScriptureMemory.Server/Tools/p.cs
+/server/ScriptureMemory.Server/Services/BibleService.cs
+/server/ScriptureMemory.Server/Services/ChapterFormatterBackgroundWorker.cs
+/server/ScriptureMemory.Server/Services/ChapterFormatterQueue.cs
+/server/ScriptureMemory.Server/Tools/VerseManagement.cs

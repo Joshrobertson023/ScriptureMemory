@@ -27,3 +27,17 @@ C:\Users\there\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.d
 C:\Users\there\ScriptureMemory\server\DataAccess\obj\Release\net8.0\refint\DataAccess.dll
 C:\Users\there\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.pdb
 C:\Users\there\ScriptureMemory\server\DataAccess\obj\Release\net8.0\ref\DataAccess.dll
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\bin\Release\net8.0\DataAccess.deps.json
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\bin\Release\net8.0\DataAccess.dll
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\bin\Release\net8.0\DataAccess.pdb
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.csproj.AssemblyReference.cache
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.AssemblyInfoInputs.cache
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.AssemblyInfo.cs
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.csproj.CoreCompileInputs.cache
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\EFCoreNpgsqlPgvector.cs
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.sourcelink.json
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.dll
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\refint\DataAccess.dll
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\DataAccess.pdb
+C:\Users\Josh Robertson\RiderProjects\ScriptureMemory\server\DataAccess\obj\Release\net8.0\ref\DataAccess.dll

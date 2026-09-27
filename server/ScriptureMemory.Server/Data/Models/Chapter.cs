@@ -22,7 +22,7 @@ public class Chapter
 
             return _id;
         }
-        private set
+        set
         {
             _id = value;
         }

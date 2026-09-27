@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.JsonWebTokens;
 using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
+using ScriptureMemory.Server.Data.DtoMappings;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.SignalR;
 using StackExchange.Redis;
@@ -12,6 +14,19 @@ public static class BibleEndpoint
 {
     public static void ConfigureBibleEndpoints(this WebApplication app)
     {
+        app.MapGet("/bible/translations", () =>
+        {
+            var translations = new List<string>();
+
+            foreach (var bible in AvailableBibles.authorizedBibles)
+            {
+                if (AvailableBibles.TryGetBible(bible.Abbreviation, out var availableBible) && availableBible is not null)
+                    translations.Add(availableBible.Abbreviation);
+            }
+
+            return Results.Ok(translations);
+        });
+
         app.MapGet("/bible/{bibleId}", async (
             string bibleId,
             [FromServices] BibleData bibleContext) =>
@@ -89,14 +104,25 @@ public static class BibleEndpoint
         //     return Results.Ok();
         // }).RequireAuthorization("Admin");
 
+        // contentType: "plaintext" (default) or "json"
         app.MapPost("/bible/chapter/{bible}/{book}/{chapter}", async (
             string bible,
             string book,
             int chapter,
-            [FromBody] int userId,
-            [FromServices] BibleService bibleService) =>
+            HttpContext httpContext,
+            [FromServices] BibleService bibleService,
+            [FromQuery] string contentType = "plaintext") =>
         {
-            return Results.Ok(await bibleService.GetChapter(userId, bible, book, chapter));
+            /*var userIdClaim = httpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            if (userIdClaim is null/* || !int.TryParse(userIdClaim, out var userId#1#)
+            {
+                return Results.Unauthorized();
+            }*/
+            if (string.Equals(contentType, "json", StringComparison.OrdinalIgnoreCase))
+                return Results.Ok(await bibleService.GetChapterJson(0, bible, book, chapter));
+
+            return Results.Ok(await bibleService.GetChapter(0, bible, book, chapter));
         });
 
         // app.MapGet("/bible/verse/{bible}/{book}/{chapter}/{verse}", async (
