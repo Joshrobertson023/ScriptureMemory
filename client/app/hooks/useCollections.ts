@@ -4,11 +4,12 @@ import { Collection } from "../../types/collection/collection";
 import { Verse } from "../../types/verse/verse";
 import {
     activeCollectionsQuery,
-    allNotesQuery,
     allPassagesQuery,
     archivedCollectionsQuery,
     assembleItems,
     collectionByIdQuery,
+    notesForCollectionQuery,
+    passagesForCollectionQuery,
     commitDraftCollection,
     createDraftCollection,
     deleteCollection,
@@ -43,9 +44,10 @@ export function useArchivedCollections(): Collection[] {
 }
 
 export function useCollection(id: string | null | undefined): { collection: Collection | undefined; isLoading: boolean } {
-    const rowLQ = useLiveQuery(collectionByIdQuery(id ?? ""), [id]);
-    const passagesLQ = useLiveQuery(allPassagesQuery());
-    const notesLQ = useLiveQuery(allNotesQuery());
+    const collectionId = id ?? "";
+    const rowLQ = useLiveQuery(collectionByIdQuery(collectionId), [collectionId]);
+    const passagesLQ = useLiveQuery(passagesForCollectionQuery(collectionId), [collectionId]);
+    const notesLQ = useLiveQuery(notesForCollectionQuery(collectionId), [collectionId]);
 
     const collection = useMemo(() => {
         const row = rowLQ.data?.[0];

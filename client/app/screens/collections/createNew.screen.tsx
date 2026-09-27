@@ -5,6 +5,7 @@ import { BottomSheet, Button, Input } from 'heroui-native';
 import { CirclePlus, FileText } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ReorderableList, { reorderItems } from "react-native-reorderable-list";
 import { RootStackParamList } from "../../../types/router";
 import AddNoteBottomSheet from "../../components/bottom-sheets/addNoteBottomSheet";
@@ -40,6 +41,7 @@ const visibilityLabel = (key: string) => {
 export const CreateCollectionScreen = () => {
     const styles = useGlobalStyles();
     const theme = useAppTheme();
+    const insets = useSafeAreaInsets();
     const { draftId, collection: draftCollection, commit: commitDraft } = useDraftCollection();
     const setNoteBottomSheet = useBottomSheetsStore((state) => state.setNoteBottomSheet);
     const setNoteSheetOpen = useBottomSheetsStore((state) => state.setNoteSheetOpen);
@@ -122,8 +124,9 @@ export const CreateCollectionScreen = () => {
     };
 
     return (
-        <View>
+        <View style={{ flex: 1 }}>
             <ReorderableList
+                style={{ flex: 1 }}
                 data={draftCollection?.items ?? []}
                 keyExtractor={(item) => `${item.type}-${item.id}`}
                 renderItem={({item}) => {
@@ -206,7 +209,7 @@ export const CreateCollectionScreen = () => {
                     ListFooterComponent={<View style={{height: 100}} />}
                 />
 
-                <View style={{position: 'absolute', bottom: 30, left: 15, right: 15}}>
+                <View style={{ position: 'absolute', bottom: insets.bottom + 16, left: 15, right: 15 }}>
                     <Button
                         variant="primary"
                         size="md"

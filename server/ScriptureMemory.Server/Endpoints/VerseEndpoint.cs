@@ -9,6 +9,7 @@ using ScriptureMemory.Server.DataAccess.Requests;
 using Pgvector;
 using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
+using VerseAppNew.Server.Services;
 
 namespace VerseAppNew.Server.Endpoints;
 
@@ -60,14 +61,12 @@ public static class VerseEndpoint
         //    return Results.Ok(await crossReferenceData.GetCrossReferences(new List<Reference> { parsedReference }));
         //});//.RequireAuthorization("User");
 
-        // Todo: old route: "verses/verse-card"
-        // Gets content for the passage bottom sheet card on the client
-        //app.MapPost("/passage-card", async (
-        //    [FromBody] GetVerseCardRequest request,
-        //    [FromServices] VerseDataDapper data) =>
-        //{
-        //    return Results.Ok(await data.GetVerseCardResponse(request.UserId, request.VerseIds));
-        //});//.RequireAuthorization("User");
+        app.MapPost("/passage-card", async (
+            [FromBody] GetVerseCardRequest request,
+            [FromServices] SearchService service) =>
+        {
+            return Results.Ok(await service.GetVerseCard(request));
+        });
 
         // Todo: refactor to receive List<string> since that's all that's required
         // Makes it easier for client to know what to send

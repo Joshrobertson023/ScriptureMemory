@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj": {}
+    "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {
+    "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
+        "projectUniqueName": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
         "projectName": "DataAccess",
-        "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
+        "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
         "packagesPath": "C:\\Users\\Josh Robertson\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\obj\\",
+        "outputPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -139,14 +139,14 @@
         }
       }
     },
-    "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj": {
+    "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj",
+        "projectUniqueName": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj",
         "projectName": "ScriptureMemory.Server",
-        "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj",
+        "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj",
         "packagesPath": "C:\\Users\\Josh Robertson\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\obj\\",
+        "outputPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -168,8 +168,8 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {
-                "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj"
+              "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj"
               }
             }
           }
@@ -791,14 +791,14 @@
         }
       }
     },
-    "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj": {
+    "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+        "projectUniqueName": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
         "projectName": "ScriptureMemory.UnitTests",
-        "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+        "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
         "packagesPath": "C:\\Users\\Josh Robertson\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\obj\\",
+        "outputPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -820,11 +820,11 @@
             "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {
-                "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj"
+              "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj": {
+                "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj"
               },
-              "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj": {
-                "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj"
+              "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj": {
+                "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.Server\\ScriptureMemory.Server.csproj"
               }
             }
           }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+YfHwfZfATk=",
+  "dgSpecHash": "ZjGbSQ3VNEw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+  "projectFilePath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Josh Robertson\\.nuget\\packages\\azure.ai.openai\\2.9.0-beta.1\\azure.ai.openai.2.9.0-beta.1.nupkg.sha512",
     "C:\\Users\\Josh Robertson\\.nuget\\packages\\azure.core\\1.53.0\\azure.core.1.53.0.nupkg.sha512",
@@ -170,10 +170,22 @@
     {
       "code": "NU1903",
       "level": "Warning",
-      "message": "Package 'SSH.NET' 2025.1.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-q939-rpr3-3284",
-      "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "message": "Package 'SSH.NET' 2025.1.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-mggc-4xg6-vcxf",
+      "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "filePath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "libraryId": "SSH.NET",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'SSH.NET' 2025.1.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-q939-rpr3-3284",
+      "projectPath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\ScriptureMemory.IntegrationTests\\ScriptureMemory.IntegrationTests.csproj",
       "libraryId": "SSH.NET",
       "targetGraphs": [
         "net10.0"

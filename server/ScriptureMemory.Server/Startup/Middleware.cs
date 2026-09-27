@@ -60,7 +60,7 @@ public static class Middleware
     {
         // app.ConfigureUserEndpoints();
          app.ConfigureVerseOfDayEndpoints();
-        // app.ConfigureVerseEndpoints();
+        app.ConfigureVerseEndpoints();
         app.ConfigureSearchEndpoints();
         app.ConfigureAdminEndpoints();
         app.ConfigureBibleEndpoints();

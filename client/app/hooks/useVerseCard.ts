@@ -5,29 +5,33 @@ import { useUserAuthStore } from '../stores/userAuth.store';
 import { getVerseCard } from '../api/verses.api';
 import { Verse } from '../../types/verse/verse';
 import { useVerseCardCacheStore } from '../stores/verseCardCache.store';
+import { useBibleVersion } from './useBibleVersion';
 
 export const useVerseCard = (verses: Verse[], passageKey: string) => {
-    const user = useUserStore((state) => state.user);
+    const userId = useUserStore((state) => state.user.id);
     const jwt = useUserAuthStore((state) => state.jwt);
+    const { version: bibleVersion } = useBibleVersion();
     const setVerseCard = useVerseCardCacheStore((state) => state.setVerseCard);
 
     const verseIds = useMemo(() => verses.map(v => v.id).sort(), [verses]);
     const verseKey = useMemo(() => verseIds.join(','), [verseIds]);
     const normalizedPassageKey = useMemo(() => passageKey.trim(), [passageKey]);
     const cacheKey = useMemo(
-        () => `${user.id}:${normalizedPassageKey}:${verseKey}`,
-        [user.id, normalizedPassageKey, verseKey]
+        () => `${userId}:${normalizedPassageKey}:${verseKey}`,
+        [userId, normalizedPassageKey, verseKey]
     );
     const cachedData = useVerseCardCacheStore((state) => state.cache[cacheKey]);
+    const translation = verses[0]?.translationContents?.at(0)?.version ?? bibleVersion;
+    const fetchVerseText = verses.some((verse) => !verse.translationContents?.at(0)?.plainText);
 
     const query = useQuery({
-        queryKey: ['verseCard', cacheKey],
-        queryFn: () => getVerseCard(Number(user.id) || 0, verseIds, jwt),
+        queryKey: ['verseCard', cacheKey, translation, fetchVerseText],
+        queryFn: () => getVerseCard(Number(userId) || 0, verseIds, translation, fetchVerseText, jwt),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
-        enabled: verseIds.length > 0 && !!user.id && !!jwt && !cachedData,
+        enabled: verseIds.length > 0 && !!userId && !!jwt && !cachedData,
     });
 
     useEffect(() => {

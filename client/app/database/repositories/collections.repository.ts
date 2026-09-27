@@ -43,6 +43,18 @@ export function allNotesQuery() {
         .orderBy(asc(notesTable.orderPosition));
 }
 
+export function passagesForCollectionQuery(collectionId: string) {
+    return db.select().from(passagesTable)
+        .where(eq(passagesTable.collectionId, collectionId))
+        .orderBy(asc(passagesTable.orderPosition));
+}
+
+export function notesForCollectionQuery(collectionId: string) {
+    return db.select().from(notesTable)
+        .where(eq(notesTable.collectionId, collectionId))
+        .orderBy(asc(notesTable.orderPosition));
+}
+
 export function collectionByIdQuery(id: string) {
     return db.select().from(collectionsTable).where(eq(collectionsTable.id, id));
 }

@@ -16,7 +16,7 @@ interface NoteProps {
     reordering?: boolean;
 }
 
-const useLocalStyles = () => StyleSheet.create({
+const noteStyles = StyleSheet.create({
     container: {
         maxWidth: '100%', flexDirection: 'row', alignItems: 'center'
     },
@@ -32,12 +32,12 @@ const useLocalStyles = () => StyleSheet.create({
         borderRadius: 10,
         marginLeft: 5
     }
-})
+});
 
 const NoteComponent = React.memo(({ note, itemId, reordering = false }: NoteProps) => {
     const globalStyles = useGlobalStyles();
     const theme = useAppTheme();
-    const styles = useLocalStyles();
+    const styles = noteStyles;
     const drag = useReorderableDrag();
     const isActive = useIsActive();
     const setNoteBottomSheet = useBottomSheetsStore((state) => state.setNoteBottomSheet);

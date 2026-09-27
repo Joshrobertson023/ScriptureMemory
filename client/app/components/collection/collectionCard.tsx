@@ -8,7 +8,7 @@ import { Collection } from "../../../types/collection/collection";
 import { RootStackParamList } from "../../../types/router";
 import { useBottomSheetsStore } from "../../stores/bottomSheets.store";
 import useGlobalStyles from "../../styles/gobalStyles";
-import useAppTheme from "../../theme";
+import useAppTheme, { darkTheme, lightTheme, useIsDarkMode } from "../../theme";
 
 interface CollecitonCardProps {
     collection: Collection;
@@ -16,11 +16,10 @@ interface CollecitonCardProps {
     onPress?: (collection: Collection) => void;
 }
 
-export const CollectionCard = React.memo(({collection, drag, onPress}: CollecitonCardProps) => {
-    const navigation = useContext(NavigationContext) as NativeStackNavigationProp<RootStackParamList> | null;
-    const theme = useAppTheme();
-    const globalStyles = useGlobalStyles();
-    const useLocalStyles = () => useMemo(() => StyleSheet.create({
+type AppTheme = typeof lightTheme;
+
+function createCardStyles(theme: AppTheme) {
+    return StyleSheet.create({
         highlight: {
             marginTop: 10,
             borderRadius: 10
@@ -58,7 +57,6 @@ export const CollectionCard = React.memo(({collection, drag, onPress}: Collecito
             alignItems: 'center'
         },
         visibilityText: {
-            ...globalStyles.p3,
             color: theme.colors.onBackgroundSuperSoft,
             marginBottom: -3
         },
@@ -73,8 +71,17 @@ export const CollectionCard = React.memo(({collection, drag, onPress}: Collecito
             right: 6,
             padding: 8
         }
-    }), [theme])
-    const styles = useLocalStyles();
+    });
+}
+
+const lightCardStyles = createCardStyles(lightTheme);
+const darkCardStyles = createCardStyles(darkTheme);
+
+export const CollectionCard = React.memo(({collection, drag, onPress}: CollecitonCardProps) => {
+    const navigation = useContext(NavigationContext) as NativeStackNavigationProp<RootStackParamList> | null;
+    const theme = useAppTheme();
+    const globalStyles = useGlobalStyles();
+    const styles = useIsDarkMode() ? darkCardStyles : lightCardStyles;
     const { setCollectionMenuBottomSheet, setCollectionMenuSheetOpen } = useBottomSheetsStore.getState();
 
     const totalPassages = useMemo(
@@ -115,7 +122,7 @@ export const CollectionCard = React.memo(({collection, drag, onPress}: Collecito
                     )}
 
                     <View style={styles.visibility}>
-                        <Text style={styles.visibilityText}>
+                        <Text style={[globalStyles.p3, styles.visibilityText]}>
                             {visibility}
                         </Text>
                     </View>

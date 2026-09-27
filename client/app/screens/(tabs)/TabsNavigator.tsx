@@ -1,7 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { BottomTabBar, BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import * as SystemUI from 'expo-system-ui';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useAppTheme from '../../theme';
@@ -28,10 +27,6 @@ export default function TabLayout() {
   const [isProfileDrawerOpen, setIsProfileDrawerOpen] = useState(false);
   const syncStatus = useAppStore((state) => state.syncStatus);
   const setSyncSheetOpen = useBottomSheetsStore((state) => state.setSyncSheetOpen);
-
-  useEffect(() => {
-    SystemUI.setBackgroundColorAsync(theme.colors.background).catch(() => {});
-  }, [theme.colors.background]);
 
   const context = useContext(TabBarVisibilityContext);
   const fallbackTranslateY = useSharedValue(0);

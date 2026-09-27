@@ -10,6 +10,12 @@ export interface CrossReferenceGroup {
     crossReferences: Passage[];
 }
 
+export type VerseText = {
+    verseId: string;
+    plainText: string;
+    version: string;
+}
+
 export type VerseCardResponse = {
     totalSaved: number;
     totalMemorized: number;
@@ -17,6 +23,7 @@ export type VerseCardResponse = {
     nextDue: Date;
     crossReferences: CrossReferenceGroup[];
     similar: Verse[];
+    verseTexts: VerseText[];
 }
 
 export const initialVerseCardResponse: VerseCardResponse = {
@@ -25,5 +32,6 @@ export const initialVerseCardResponse: VerseCardResponse = {
     numPracticed: 0,
     nextDue: new Date(),
     crossReferences: [],
-    similar: []
+    similar: [],
+    verseTexts: []
 }

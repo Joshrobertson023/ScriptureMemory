@@ -44,8 +44,6 @@ const emptyUserPassage: UserPassage = {
     }
 };
 
-const keyExtractor = (_: ChapterParagraph, index: number) => `para-${index}`;
-
 const ReadScreen: React.FC<Props> = ({ route }: Props) => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
@@ -212,10 +210,12 @@ const ReadScreen: React.FC<Props> = ({ route }: Props) => {
 
     const { version: preferredBibleVersion } = useBibleVersion();
     const bibleVersion = translationOverride ?? preferredBibleVersion;
-    const {
-        setPassageSheetOpen, setPassageBottomSheet, pushPassage, passageSheetOpen,
-        setSaveToCollectionBottomSheet, setSaveToCollectionSheetOpen,
-    } = useBottomSheetsStore();
+    const setPassageSheetOpen = useBottomSheetsStore((state) => state.setPassageSheetOpen);
+    const setPassageBottomSheet = useBottomSheetsStore((state) => state.setPassageBottomSheet);
+    const pushPassage = useBottomSheetsStore((state) => state.pushPassage);
+    const passageSheetOpen = useBottomSheetsStore((state) => state.passageSheetOpen);
+    const setSaveToCollectionBottomSheet = useBottomSheetsStore((state) => state.setSaveToCollectionBottomSheet);
+    const setSaveToCollectionSheetOpen = useBottomSheetsStore((state) => state.setSaveToCollectionSheetOpen);
     const { closePassages } = useBottomSheetStack();
 
     const [isPersonalizeOpen, setIsPersonalizeOpen] = useState(false);
@@ -240,13 +240,13 @@ const ReadScreen: React.FC<Props> = ({ route }: Props) => {
         transform: [{ translateY: actionBarTranslateY.value }],
     }));
 
-    const showActionBar = () => {
+    const showActionBar = useCallback(() => {
         actionBarTranslateY.value = withTiming(0, { duration: 250 });
-    };
+    }, [actionBarTranslateY]);
 
-    const hideActionBar = () => {
+    const hideActionBar = useCallback(() => {
         actionBarTranslateY.value = withTiming(200, { duration: 250 });
-    };
+    }, [actionBarTranslateY]);
 
     const versesById = useMemo(() => {
         const map: Record<string, ChapterVerseJson> = {};
@@ -278,6 +278,8 @@ const ReadScreen: React.FC<Props> = ({ route }: Props) => {
     }), [currentBook, currentChapter, bibleVersion]);
 
     const [highlightedPassage, setHighlightedPassage] = useState<UserPassage>(emptyUserPassage);
+    const highlightedPassageRef = useRef(highlightedPassage);
+    highlightedPassageRef.current = highlightedPassage;
     const { convertToReadableReference } = useReferenceParser();
 
     const {next, previous} = useBooks();
@@ -298,7 +300,7 @@ const ReadScreen: React.FC<Props> = ({ route }: Props) => {
         console.log(nextBook.book, nextBook.nextChapter);
         setCurrentBook(nextBook.book);
         setCurrentChapter(nextBook.nextChapter);
-    }, [currentBook, currentChapter, previous]);
+    }, [currentBook, currentChapter, next]);
 
     const selectedVerseNumbers = useMemo(
         () => new Set(highlightedPassage.passage.verses.map(v => v.reference.verses[0])),
@@ -311,60 +313,71 @@ const ReadScreen: React.FC<Props> = ({ route }: Props) => {
         if (passageSheetOpen) {
             hideActionBar();
         } else {
+            highlightedPassageRef.current = emptyUserPassage;
             setHighlightedPassage(emptyUserPassage);
         }
-    }, [passageSheetOpen]);
+    }, [passageSheetOpen, hideActionBar]);
+
+    const readerActionsRef = useRef({
+        currentBook,
+        currentChapter,
+        convertToReadableReference,
+        closePassages,
+        showActionBar,
+        hideActionBar,
+    });
+    readerActionsRef.current = {
+        currentBook,
+        currentChapter,
+        convertToReadableReference,
+        closePassages,
+        showActionBar,
+        hideActionBar,
+    };
 
     const handleVerseTap = useCallback((verse: Verse) => {
-        const alreadySelected = highlightedPassage.passage.verses.some(v => v.id === verse.id);
+        const {
+            currentBook: bookName,
+            currentChapter: chapterNumber,
+            convertToReadableReference: toReference,
+            closePassages: close,
+            showActionBar: show,
+            hideActionBar: hide,
+        } = readerActionsRef.current;
 
-        if (alreadySelected) {
-            const updatedVerses = highlightedPassage.passage.verses.filter(v => v.id !== verse.id);
-            const updatedVerseNumbers = updatedVerses.flatMap(v => v.reference.verses);
+        const current = highlightedPassageRef.current;
+        const alreadySelected = current.passage.verses.some((v) => v.id === verse.id);
+        const updatedVerses = alreadySelected
+            ? current.passage.verses.filter((v) => v.id !== verse.id)
+            : [...current.passage.verses, verse];
+        const updatedVerseNumbers = updatedVerses.flatMap((v) => v.reference.verses);
 
-            setHighlightedPassage({
-                ...highlightedPassage,
-                passage: {
-                    ...highlightedPassage.passage,
-                    verses: updatedVerses,
-                    reference: {
-                        book,
-                        chapter,
-                        verses: updatedVerseNumbers,
-                        readableReference: updatedVerses.length === 0
-                            ? ''
-                            : convertToReadableReference(currentBook, currentChapter, updatedVerseNumbers),
-                    },
+        const nextPassage: UserPassage = {
+            ...current,
+            passage: {
+                ...current.passage,
+                verses: updatedVerses,
+                reference: {
+                    book: bookName,
+                    chapter: chapterNumber,
+                    verses: updatedVerseNumbers,
+                    readableReference: updatedVerses.length === 0
+                        ? ''
+                        : toReference(bookName, chapterNumber, updatedVerseNumbers),
                 },
-            });
+            },
+        };
 
-            if (updatedVerses.length === 0) {
-                hideActionBar();
-                closePassages();
-            }
-        } else {
-            if (highlightedPassage.passage.verses.length === 0) {
-                showActionBar();
-            }
+        highlightedPassageRef.current = nextPassage;
+        setHighlightedPassage(nextPassage);
 
-            const updatedVerses = [...highlightedPassage.passage.verses, verse];
-            const updatedVerseNumbers = updatedVerses.flatMap(v => v.reference.verses);
-
-            setHighlightedPassage({
-                ...highlightedPassage,
-                passage: {
-                    ...highlightedPassage.passage,
-                    verses: updatedVerses,
-                    reference: {
-                        book,
-                        chapter,
-                        verses: updatedVerseNumbers,
-                        readableReference: convertToReadableReference(currentBook, currentChapter, updatedVerseNumbers),
-                    },
-                },
-            });
+        if (updatedVerses.length === 0) {
+            hide();
+            close();
+        } else if (!alreadySelected && current.passage.verses.length === 0) {
+            show();
         }
-    }, [highlightedPassage, currentBook, currentChapter, convertToReadableReference, closePassages]);
+    }, []);
 
     const handleOpenPassageSheet = useCallback(() => {
         if (highlightedPassage.passage.verses.length === 0) return;
@@ -375,9 +388,10 @@ const ReadScreen: React.FC<Props> = ({ route }: Props) => {
     }, [highlightedPassage, pushPassage, setPassageBottomSheet, setPassageSheetOpen]);
 
     const handleCloseSelection = useCallback(() => {
+        highlightedPassageRef.current = emptyUserPassage;
         setHighlightedPassage(emptyUserPassage);
         hideActionBar();
-    }, []);
+    }, [hideActionBar]);
 
     const handleSelectHighlightColor = (color: HighlightColorId) => {
         toggleHighlights(highlightedPassage.passage.verses.map((verse) => verse.id), color);
@@ -398,12 +412,22 @@ const ReadScreen: React.FC<Props> = ({ route }: Props) => {
         pushPracticeSessionRoute(passage);
     };
 
+    const versesByIdRef = useRef(versesById);
+    versesByIdRef.current = versesById;
+    const verseFromJsonRef = useRef(verseFromJson);
+    verseFromJsonRef.current = verseFromJson;
+
     const handleSpanTap = useCallback((verseId: string) => {
-        const jsonVerse = versesById[verseId];
+        const jsonVerse = versesByIdRef.current[verseId];
         if (!jsonVerse) return;
 
-        handleVerseTap(verseFromJson(jsonVerse));
-    }, [versesById, verseFromJson, handleVerseTap]);
+        handleVerseTap(verseFromJsonRef.current(jsonVerse));
+    }, [handleVerseTap]);
+
+    const keyExtractor = useCallback(
+        (_: ChapterParagraph, index: number) => `${currentBook}-${currentChapter}-${index}`,
+        [currentBook, currentChapter],
+    );
 
     useEffect(() => {
         if (!chapterData) return;

@@ -99,16 +99,28 @@ const PassageBottomSheet = forwardRef<TrueSheet>(
             () => passageBottomSheet.passage.verses.map((verse) => verse.id),
             [passageBottomSheet]
         );
-        const displayedVersion = passageBottomSheet.passage.verses[0]?.translationContents?.at(0)?.version;
-        const translation = displayedVersion ?? bibleVersion;
+        const localVersion = passageBottomSheet.passage.verses[0]?.translationContents?.at(0)?.version;
+        const translation = localVersion ?? bibleVersion;
+        const fetchVerseText = useMemo(
+            () => passageBottomSheet.passage.verses.some((verse) => !verse.translationContents?.at(0)?.plainText),
+            [passageBottomSheet]
+        );
 
         const { data: passageCardData, error: passageCardError } = useQuery({
-            queryKey: ['passageCard', passageKey],
-            queryFn: () => getVerseCard(Number(userId) || 0, passageVerseIds, jwt),
+            queryKey: ['passageCard', passageKey, translation, fetchVerseText],
+            queryFn: () => getVerseCard(Number(userId) || 0, passageVerseIds, translation, fetchVerseText, jwt),
             enabled: passageVerseIds.length > 0,
             staleTime: Infinity,
         });
         const crossReferences = passageCardData?.crossReferences ?? emptyCrossReferences;
+        const displayedVersion = localVersion ?? passageCardData?.verseTexts?.find((text) => text.version)?.version;
+        const verseTextById = useMemo(() => {
+            const map = new Map<string, string>();
+            passageCardData?.verseTexts?.forEach((text) => {
+                if (text.plainText) map.set(text.verseId, text.plainText);
+            });
+            return map;
+        }, [passageCardData]);
 
         const [similarVisible, setSimilarVisible] = useState(false);
         const similarY = useRef(Infinity);
@@ -157,11 +169,11 @@ const PassageBottomSheet = forwardRef<TrueSheet>(
                     {passageBottomSheet.passage.verses.length > 1 && (
                         <Text style={styles.verseNumber}>{getVerseNumbers(verse.reference).at(0)} </Text>
                     )}
-                    {verse.translationContents?.at(0)?.plainText}
+                    {verse.translationContents?.at(0)?.plainText || verseTextById.get(verse.id)}
                     {index < passageBottomSheet.passage.verses.length - 1 ? ' ' : ''}
                 </Text>
             ))
-        ), [passageBottomSheet, styles]);
+        ), [passageBottomSheet, styles, verseTextById]);
 
         const handleCollectionPress = useCallback((collection: Collection) => {
             const isCurrentCollection = isCurrentCollectionRoute(collection.id);

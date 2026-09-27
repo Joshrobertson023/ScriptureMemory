@@ -8,6 +8,7 @@ using ScriptureMemory.Server.CustomExceptions;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using ScriptureMemory.Server.Data.Models;
 using ScriptureMemory.Server.DataAccess.Models;
+using ScriptureMemory.Server.DataAccess.Requests;
 using ScriptureMemory.Server.Files.CsvRecordModels;
 using ScriptureMemory.Server.Services;
 using ScriptureMemory.Server.Tools;
@@ -397,6 +398,41 @@ public sealed class SearchService(
         }
 
         return await ensureAllResultsContainContent(searchResults, requestedTranslation);
+    }
+
+    public async Task<VerseCardResponse> GetVerseCard(GetVerseCardRequest request)
+    {
+        string translation = request.Translation?.ToLower().Trim() ?? string.Empty;
+        string defaultTranslation = (_config["ApiContent:DefaultTranslation"] ?? "kjv").ToLower().Trim();
+        bool fetchFromDb = request.FetchVerseText && translation == defaultTranslation;
+
+        var response = await _verseData.GetVerseCardResponse(
+            request.UserId,
+            request.VerseIds,
+            fetchFromDb,
+            translation);
+
+        if (request.FetchVerseText && !fetchFromDb && !string.IsNullOrEmpty(translation))
+        {
+            var versesToFetch = response.RequestedVerses
+                .Select(verse => new Verse(verse.Reference))
+                .ToList();
+
+            var verses = await getVersesContent(versesToFetch, translation);
+
+            response.VerseTexts = verses
+                .Select(verse => (verse, content: verse.TranslationContents?.FirstOrDefault()))
+                .Where(pair => !string.IsNullOrEmpty(pair.content?.PlainText))
+                .Select(pair => new VerseTranslationContent
+                {
+                    VerseId = pair.verse.Id,
+                    PlainText = pair.content!.PlainText,
+                    Version = pair.content.Version
+                })
+                .ToList();
+        }
+
+        return response;
     }
 
     /// <summary>
