@@ -26,7 +26,7 @@ public class VerseOfDayData
     {
         var verseOfDayReference = new Reference(verseOfDay.Reference);
 
-        var existingPassage = _context.Passages.AsNoTracking().FirstOrDefault(p => p.Id == verseOfDayReference.VerseId);
+        var existingPassage = _context.Passages.FirstOrDefault(p => p.Id == verseOfDayReference.VerseId);
 
         Passage newPassage;
 

@@ -68,28 +68,18 @@ public static class VerseEndpoint
             return Results.Ok(await service.GetVerseCard(request));
         });
 
-        // Todo: refactor to receive List<string> since that's all that's required
-        // Makes it easier for client to know what to send
-        //Gets semantically similar verses to a passage
-         //app.MapPost("/verses/similar", async (
-         //    [FromBody] Passage passage,
-         //    [FromServices] VerseData data,
-         //    [FromServices] EmbeddingGenerator embeddingGenerator) =>
-         //{
-         //    List<string> references = new();
-         //    passage.Verses.ForEach(v => references.Add(v.GetEmbeddingText()));
+       app.MapPost("/passage-card", async (
+           [FromBody] GetVerseCardRequest request,
+           [FromServices] VerseDataDapper data) =>
+       {
+           return Results.Ok(await data.GetVerseCardResponse(request.UserId, request.VerseIds));
+       });//.RequireAuthorization("User");
 
-         //    var similarVerses = await data.GetVersesSemanticSearch(
-         //            await embeddingGenerator.GenerateEmbeddings(references));
-
-         //    List<Passage> results = new();
-         //    similarVerses.ForEach(v => results.Add(new Passage
-         //    {
-         //        Reference = v.Reference,
-         //        Verses = new List<Verse> { v }
-         //    }));
-
-         //    return Results.Ok(results);
-         //});
+        app.MapPost("/similar", async (
+            [FromBody] GetSimilarRequest request,
+            [FromServices] SearchService service) =>
+        {
+            return Results.Ok(await service.GetReferenceSearchResults(request.Translation, request.Reference, request.LastVerseDistance));
+        });
     }
 }

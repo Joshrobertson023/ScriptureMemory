@@ -51,6 +51,11 @@ public class VerseCacherBackgroundWorker : BackgroundService
                         {
                             verse.TranslationContents.First().Embedding = embedding.Embedding;
                         }
+
+                        if (verse.Reference is null || string.IsNullOrEmpty(verse.Reference.ReadableReference) || string.IsNullOrEmpty(verse.Reference.ChapterId))
+                        {
+                            throw new Exception("Reference was not set properly before caching.");
+                        }
                     }
                 }
 
