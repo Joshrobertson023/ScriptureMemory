@@ -21,9 +21,7 @@ public class BibleData
 
         return result.Select(bible =>
         {
-            bible.AbbreviationLocal = string.IsNullOrEmpty(bible.AbbreviationLocal)
-                ? bible.Abbreviation
-                : bible.AbbreviationLocal;
+            bible.Abbreviation = bible.AbbreviationLocal ?? bible.Abbreviation;
 
             return bible;
         })
@@ -59,7 +57,9 @@ public class BibleData
         foreach (var bible in biblesToSet)
         {
             if (!bibleIdsInDb.Contains(bible.Id))
+            {
                 await _dbContext.Bibles.AddAsync(bible);
+            }
             else
             {
                 var bibleToUpdate = biblesToUpdate.Single(b => b.Id == bible.Id);
@@ -71,7 +71,7 @@ public class BibleData
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<List<Server.DataAccess.Models.Bible>> GetAvailableBibles()
+    public async Task<List<Server.DataAccess.Models.Bible>> GetAvailableBiblesInDb()
     {
         var result = await _dbContext.Bibles
             .AsNoTracking()
@@ -80,15 +80,20 @@ public class BibleData
         
         return result.Select(bible =>
             {
-                bible.AbbreviationLocal = string.IsNullOrEmpty(bible.AbbreviationLocal)
-                    ? bible.Abbreviation
-                    : bible.AbbreviationLocal;
+                bible.Abbreviation = bible.AbbreviationLocal ?? bible.Abbreviation;
 
                 return bible;
             })
             .OrderBy(b => b.Abbreviation)
             .ThenBy(b => b.Id)
             .ToList();
+    }
+
+    public async Task<List<ScriptureMemory.Server.DataAccess.Models.Bible>> GetActiveBiblesInDb()
+    {
+        var result = await _dbContext.Bibles.AsNoTracking().Where(b => b.Active == true).ToListAsync();
+
+        return result;
     }
 
     public async Task<string> GetBibleNameById(string bibleId)

@@ -325,11 +325,11 @@ public sealed class SearchService(
                     continue;
                 }
 
-                var content = await _bibleApi.GetVersePlaintext(
+                string content = await _bibleApi.GetVersePlaintext(
                     AvailableBibles.GetBible(requestedTranslation).Id,
                     result.Passage.Reference.VerseId);
 
-                var newVerse = new Verse(result.Passage.Reference)
+                Verse newVerse = new Verse(result.Passage.Reference)
                 {
                     TranslationContents = new List<VerseTranslationContent>
                     {

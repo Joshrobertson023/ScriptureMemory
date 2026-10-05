@@ -14,17 +14,10 @@ public static class BibleEndpoint
 {
     public static void ConfigureBibleEndpoints(this WebApplication app)
     {
-        app.MapGet("/bible/translations", () =>
+        app.MapGet("/bible/translations", async (
+            [FromServices] BibleService bibleService) =>
         {
-            var translations = new List<string>();
-
-            foreach (var bible in AvailableBibles.authorizedBibles)
-            {
-                if (AvailableBibles.TryGetBible(bible.Abbreviation, out var availableBible) && availableBible is not null)
-                    translations.Add(availableBible.Abbreviation);
-            }
-
-            return Results.Ok(translations);
+            return Results.Ok(await bibleService.GetActiveBibles());
         });
 
         app.MapGet("/bible/{bibleId}", async (

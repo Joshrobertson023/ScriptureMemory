@@ -29,14 +29,4 @@ public class Bible
     public DateTime? NextScheduledAutoSync { get; set; }
     
     public Bible() { }
-
-    public Bible(string translation)
-    { // Todo: refactor to fill all required fields once data access is set up for getting Bibles from db
-        var result = AvailableBibles.GetBible(translation);
-        Id = result.Id;
-        Abbreviation = result.Abbreviation;
-        Name = result.Name;
-        Copyright = result.Copyright;
-        Info = result.Info;
-    }
 }

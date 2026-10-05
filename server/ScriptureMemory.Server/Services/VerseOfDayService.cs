@@ -17,7 +17,8 @@ public class VerseOfDayService(
     IDistributedCache _distributedCache,
     BibleApi _bibleApi,
     VerseCacherQueue _verseCacherQueue,
-    IConfiguration _config)
+    IConfiguration _config,
+    BibleService bibleService)
 {
     public async Task<Passage> GetVod(string translation)
     {
@@ -64,7 +65,7 @@ public class VerseOfDayService(
                 {
                     verse.TranslationContents = new();
                     verse.TranslationContents.Add(new VerseTranslationContent());
-                    verse.TranslationContents.First().PlainText = await _bibleApi.GetVersePlaintext(AvailableBibles.GetBible(translation).Id, verse.Id);
+                    verse.TranslationContents.First().PlainText = await _bibleApi.GetVersePlaintext(bibleService.GetBible(translation).Id, verse.Id);
                     verse.TranslationContents.First().Version = translation;
                 }
 

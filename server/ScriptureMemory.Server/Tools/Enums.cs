@@ -25,12 +25,14 @@ namespace ScriptureMemory.Server.Tools
         public static class MemoryCacheKeys
         {
             public static readonly string AvailableBibles = nameof(AvailableBibles);
+            public static readonly string ActiveBibles = nameof(ActiveBibles);
             public static readonly string Search = nameof(Search);
         }
 
         public static class CacheExpirations
         {
             public static TimeSpan AvailableBiblesExpiration = TimeSpan.FromHours(12);
+            public static TimeSpan ActiveBiblesExpiration = TimeSpan.FromHours(12);
             public static TimeSpan ChapterContentExpiration = TimeSpan.FromDays(29);
             public static TimeSpan VerseContentExpiration = TimeSpan.FromDays(29);
             public static TimeSpan SearchExpiration = TimeSpan.FromDays(60);

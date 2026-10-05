@@ -8,6 +8,21 @@ namespace ScriptureMemory.Server.Startup;
 /// </summary>
 public static class Tasks
 {
+    public static async Task<WebApplication> PopulateMemoryCache(this WebApplication app)
+    {
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var result = await scope.ServiceProvider.GetRequiredService<BibleService>().GetActiveBibles();
+            Console.WriteLine("Populated active Bibles in memory cache.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error populating active Bibles in memory cache: {ex.Message}");
+        }
+        return app;
+    }
+    
     public static async Task<WebApplication> AskToRunOptionalStartupTasks(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();

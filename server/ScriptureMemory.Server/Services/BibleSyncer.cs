@@ -159,7 +159,7 @@ public class BibleSyncer
 
         var cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(CacheExpirations.AvailableBiblesExpiration);
-        _memoryCache.Set(MemoryCacheKeys.AvailableBibles, await _bibleContext.GetAvailableBibles(), cacheEntryOptions);
+        _memoryCache.Set(MemoryCacheKeys.AvailableBibles, await _bibleContext.GetAvailableBiblesInDb(), cacheEntryOptions);
         
         _authorizationSyncerActive.SetInactive();
 

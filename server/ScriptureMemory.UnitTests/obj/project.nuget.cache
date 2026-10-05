@@ -168,6 +168,18 @@
     {
       "code": "NU1903",
       "level": "Warning",
+      "message": "Package 'SSH.NET' 2025.1.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-mggc-4xg6-vcxf",
+      "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
+      "libraryId": "SSH.NET",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
       "message": "Package 'SSH.NET' 2025.1.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-q939-rpr3-3284",
       "projectPath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\ScriptureMemory.UnitTests\\ScriptureMemory.UnitTests.csproj",
       "warningLevel": 1,
