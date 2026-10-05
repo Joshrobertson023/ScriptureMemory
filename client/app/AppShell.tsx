@@ -8,9 +8,8 @@ import { useEffect, useState } from 'react';
 
 import * as SplashScreen from 'expo-splash-screen';
 import * as SystemUI from 'expo-system-ui';
-import { StatusBar } from 'react-native';
+import { InteractionManager, StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { Uniwind } from 'uniwind';
 
 import useAppTheme from './theme';
 
@@ -64,7 +63,6 @@ export default function AppShell() {
 
   const [migrationsError, setMigrationsError] = useState(false);
   const setUserId = useUserStore((state) => state.setUserId);
-  const themePreference = useUserStore((state) => state.user.preferences.theme);
 
 
   async function runStartup() {
@@ -122,14 +120,12 @@ export default function AppShell() {
     }, []);
     
     useEffect(() => {
-      Uniwind.setTheme(themePreference === 0 ? 'system' : themePreference === 2 ? 'dark' : 'light');
-    }, [themePreference]);
-
-    // ── Android system background ──────────────────────────────────────────────────
-    useEffect(() => {
-      SystemUI.setBackgroundColorAsync(theme.colors.background).catch((e) =>
-        console.warn('Failed to set system UI background:', e),
-      );
+      const task = InteractionManager.runAfterInteractions(() => {
+        SystemUI.setBackgroundColorAsync(theme.colors.background).catch((e) =>
+          console.warn('Failed to set system UI background:', e),
+        );
+      });
+      return () => task.cancel();
     }, [theme.colors.background]);
   
   

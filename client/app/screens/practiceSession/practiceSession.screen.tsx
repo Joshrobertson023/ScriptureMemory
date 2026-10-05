@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
-import React, { JSX, useEffect, useLayoutEffect, useState } from 'react';
+import React, { JSX, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Dimensions, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { RootStackParamList } from '../../../types/router';
 import { completePractice } from '../../database/repositories/practice.repository';
@@ -16,6 +16,29 @@ const TOTAL_STAGES = 4;
 
 const NUMBER_KEYS = '1234567890'.split('');
 const LETTER_ROWS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'].map((row) => row.split(''));
+
+const KeyboardButton = React.memo(function KeyboardButton({
+  char,
+  height,
+  onPress,
+  backgroundColor,
+  textColor,
+}: {
+  char: string;
+  height: number;
+  onPress: (char: string) => void;
+  backgroundColor: string;
+  textColor: string;
+}) {
+  return (
+    <Pressable
+      onPress={() => onPress(char)}
+      style={{ width: '8%', height, backgroundColor, borderRadius: 8, justifyContent: 'center', alignItems: 'center', margin: 3 }}
+    >
+      <Text style={{ color: textColor, fontSize: 24 }}>{char}</Text>
+    </Pressable>
+  );
+});
 
 interface Word {
   id: number;
@@ -344,6 +367,12 @@ export default function PracticeSessionScreen() {
     }
   };
 
+  const keyboardPressRef = useRef(handleKeyboardPress);
+  keyboardPressRef.current = handleKeyboardPress;
+  const onKeyboardPress = useCallback((char: string) => {
+    keyboardPressRef.current(char);
+  }, []);
+
   const retryStage = () => {
     const hiddenSet = new Set(stageHiddenIndeces[currentStage - 1] ?? []);
     setAllWords(
@@ -429,11 +458,8 @@ export default function PracticeSessionScreen() {
     });
   }, [navigation, typeOutReference, readableReference, currentStage, stageHiddenIndeces, firstStageWords, theme]);
 
-  const KeyboardButton = ({ char, height }: { char: string; height: number }) => (
-    <Pressable onPress={() => handleKeyboardPress(char)} style={{ width: '8%', height, backgroundColor: theme.colors.elevation, borderRadius: 8, justifyContent: 'center', alignItems: 'center', margin: 3 }}>
-      <Text style={{ color: theme.colors.onBackground, fontSize: 24 }}>{char}</Text>
-    </Pressable>
-  );
+  const keyBackground = theme.colors.elevation;
+  const keyText = theme.colors.onBackground;
 
   return (
     <>
@@ -481,11 +507,15 @@ export default function PracticeSessionScreen() {
 
         <View style={{ position: 'absolute', bottom: 0, width: '100%', justifyContent: 'center', alignItems: 'center', paddingBottom: 40 }}>
           <View style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
-            {NUMBER_KEYS.map((char) => <KeyboardButton key={char} char={char} height={40} />)}
+            {NUMBER_KEYS.map((char) => (
+              <KeyboardButton key={char} char={char} height={40} onPress={onKeyboardPress} backgroundColor={keyBackground} textColor={keyText} />
+            ))}
           </View>
           {LETTER_ROWS.map((row) => (
             <View key={row.join('')} style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'row' }}>
-              {row.map((char) => <KeyboardButton key={char} char={char} height={50} />)}
+              {row.map((char) => (
+                <KeyboardButton key={char} char={char} height={50} onPress={onKeyboardPress} backgroundColor={keyBackground} textColor={keyText} />
+              ))}
             </View>
           ))}
         </View>

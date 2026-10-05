@@ -1,8 +1,7 @@
-import { useColorScheme } from 'react-native';
 import { DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { useUserStore } from './stores/user.store';
 
-const darkTheme = {
+export const darkTheme = {
     ...DarkTheme,
     colors: {
         ...DarkTheme.colors,
@@ -22,7 +21,7 @@ const darkTheme = {
     }
 };
 
-const lightTheme = {
+export const lightTheme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
@@ -43,9 +42,7 @@ const lightTheme = {
 };
 
 export function useIsDarkMode() {
-    const systemScheme = useColorScheme();
-    const themePreference = useUserStore((state) => state.user.preferences.theme);
-    return themePreference === 0 ? systemScheme === 'dark' : themePreference === 2;
+    return useUserStore((state) => state.resolvedDark);
 }
 
 export default function useAppTheme() {

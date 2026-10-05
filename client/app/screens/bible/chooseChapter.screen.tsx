@@ -1,8 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
-import React, { useEffect, useMemo } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { FlatList, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { getChaptersForBook } from "../../../types/bibleData";
 import { RootStackParamList } from "../../../types/router";
 import useGlobalStyles from "../../styles/gobalStyles";
@@ -10,49 +9,39 @@ import useAppTheme from "../../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'chooseChapter'>;
 
+const GAP = 10;
+const HORIZONTAL_PADDING = 10;
+const MIN_BUTTON = 78;
+
 const ChooseChapterScreen: React.FC<Props> = ({route}: Props) => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
-    const useLocalStyles = () => useMemo(() => StyleSheet.create({
-        title: {
-            marginVertical: 20,
-            fontSize: 22,
-            fontWeight: 600
-        },
+    const { width: windowWidth } = useWindowDimensions();
+    const available = windowWidth - HORIZONTAL_PADDING * 2;
+    const numColumns = Math.max(3, Math.floor(available / MIN_BUTTON));
+    const itemWidth = (available - GAP * (numColumns - 1)) / numColumns;
+    const styles = useMemo(() => StyleSheet.create({
         container: {
-            display: 'flex',
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            padding: 10,
-            gap: 10
+            padding: HORIZONTAL_PADDING,
+        },
+        row: {
+            gap: GAP,
+            marginBottom: GAP,
         },
         chapterButton: {
-            padding: 15,
+            height: 80,
             borderRadius: 5,
-            marginBottom: 2,
             borderColor: theme.colors.elevation3,
             borderWidth: 2,
-            minWidth: 60,
-            flexGrow: 1,
-            minHeight: 80,
-            display: 'flex',
             justifyContent: 'center',
-            alignItems: 'center'
-        },
-        spacer: {
-            minWidth: 80,
-            height: 0,
-            padding: 15,
-            marginBottom: 10,
+            alignItems: 'center',
         },
         bookNumber: {
             ...globalStyles.p3,
             fontSize: 16,
             fontWeight: 300
         }
-    }), [theme]);
-    const styles = useLocalStyles();
+    }), [theme, globalStyles.p3]);
     const {book} = route.params;
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -73,22 +62,30 @@ const ChooseChapterScreen: React.FC<Props> = ({route}: Props) => {
         });
     }, [navigation, book]);
 
+    const renderChapter = useCallback(({ item }: { item: number }) => (
+        <TouchableOpacity
+            style={[styles.chapterButton, { width: itemWidth }]}
+            onPress={() => navigation.navigate('read', { book, chapter: item })}
+        >
+            <Text style={styles.bookNumber}>{item}</Text>
+        </TouchableOpacity>
+    ), [styles, itemWidth, navigation, book]);
+
+    if (chapters.length === 0) return null;
+
     return (
-        chapters.length > 0 && (
-            <ScrollView contentContainerStyle={styles.container}>
-                {chapters.map((c) => (
-                    <TouchableOpacity key={c} style={styles.chapterButton} onPress={() => {
-                        navigation.navigate('read', {book, chapter: c})
-                    }}>
-                        <Text style={styles.bookNumber}>{c}</Text>
-                    </TouchableOpacity>
-                ))}
-                {Array.from({ length: 5 }).map((_, i) => (
-                    <View key={`spacer-${i}`} style={styles.spacer} />
-                ))}
-                <View style={{height: 100}} />
-            </ScrollView>
-        )
+        <FlatList
+            key={numColumns}
+            data={chapters}
+            keyExtractor={(chapter) => String(chapter)}
+            numColumns={numColumns}
+            contentContainerStyle={styles.container}
+            columnWrapperStyle={numColumns > 1 ? styles.row : undefined}
+            renderItem={renderChapter}
+            initialNumToRender={numColumns * 8}
+            windowSize={7}
+            ListFooterComponent={<View style={{ height: 100 }} />}
+        />
     );
 }
 

@@ -1,6 +1,6 @@
 import { PressableFeedback } from "heroui-native";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { UserPassage } from "../../../types/passages/userPassage";
 import { useBottomSheetStack } from "../../hooks/useBottomSheetStack";
@@ -16,22 +16,9 @@ interface PassageProps {
     reordering?: boolean;
 }
 
-const useLocalStyles = () => StyleSheet.create({
-    container: {
-        maxWidth: '100%', flexDirection: 'row', alignItems: 'center'
-    },
-    content: {
-        flex: 1
-    },
-    menuButton: {
-        padding: 8
-    }
-})
-
 const PassageComponent = React.memo(({userPassage, itemId, collectionId, onRemove, reordering = false}: PassageProps) => {
     const theme = useAppTheme();
     const drag = useReorderableDrag();
-    const styles = useLocalStyles();
     const setPassageSheetOpen = useBottomSheetsStore((state) => state.setPassageSheetOpen);
     const setPassageBottomSheet = useBottomSheetsStore((state) => state.setPassageBottomSheet);
     const pushPassage = useBottomSheetsStore((state) => state.pushPassage);

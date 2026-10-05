@@ -3,7 +3,7 @@ import { ChapterResponse } from "../../types/ChapterResponse";
 import { Passage } from "../../types/passages/passage";
 import { VerseCardResponse } from "../../types/verse/verseCard";
 import { allBooks } from "../hooks/useBooks";
-import { getVerseNumbers } from "../utils/referenceUtils";
+import { getBookName, getVerseNumbers } from "../utils/referenceUtils";
 import { baseUrl } from "./baseUrl";
 
 interface SearchResult {
@@ -47,7 +47,13 @@ export async function searchPassage(search: string, translation: string, lastVer
     }
 }
 
-export async function getVerseCard(userId: number, verseIds: string[], jwt: string): Promise<VerseCardResponse> {
+export async function getVerseCard(
+    userId: number,
+    verseIds: string[],
+    translation: string,
+    fetchVerseText: boolean,
+    jwt: string
+): Promise<VerseCardResponse> {
     try {
         const response = await fetch(`${baseUrl}/passage-card`, {
             method: 'POST',
@@ -55,7 +61,7 @@ export async function getVerseCard(userId: number, verseIds: string[], jwt: stri
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${jwt}`
             },
-            body: JSON.stringify({ userId, verseIds }),
+            body: JSON.stringify({ userId, verseIds, translation, fetchVerseText }),
         });
         if (response.ok) {
             return await response.json();
@@ -77,11 +83,13 @@ export async function getVerseCard(userId: number, verseIds: string[], jwt: stri
 }
 
 export async function getSimilarPassages(passage: Passage, translation: string, lastVerseDistance: number | null, jwt: string): Promise<Passage[]> {
+    const displayName = getBookName(passage.reference);
+    const bookInfo = typeof passage.reference.book === 'string' ? undefined : passage.reference.book;
     const reference = {
         book: {
-            displayName: passage.reference.book,
-            abbreviation: passage.verses.at(0)?.id.split('.').at(0) ?? '',
-            numChapters: allBooks.find((b) => b.displayName === passage.reference.book)?.numChapters ?? 0,
+            displayName,
+            abbreviation: bookInfo?.abbreviation || passage.verses.at(0)?.id.split('.').at(0) || '',
+            numChapters: bookInfo?.numChapters || allBooks.find((b) => b.displayName === displayName)?.numChapters || 0,
         },
         chapter: passage.reference.chapter,
         verseNumbers: getVerseNumbers(passage.reference),

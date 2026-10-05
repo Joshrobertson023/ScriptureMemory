@@ -66,7 +66,7 @@ const CollectionScreen = () => {
                 </View>
             )
         })
-    }, [collection, reordering]);
+    }, [navigation, collection, reordering, globalStyles, theme, setCollectionMenuBottomSheet, setCollectionMenuSheetOpen]);
 
     useEffect(() => {
         if (noteSheetOpen)

@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import useAppTheme from '../theme';
+import { darkTheme, lightTheme, useIsDarkMode } from '../theme';
 
-export default function useGlobalStyles() {  
-  const theme = useAppTheme();
-  return useMemo(() => StyleSheet.create({
+type AppTheme = typeof lightTheme;
+
+function createGlobalStyles(theme: AppTheme) {
+  return StyleSheet.create({
     screen: {
       flex: 1,
       backgroundColor: theme.colors.background,
@@ -203,6 +203,12 @@ export default function useGlobalStyles() {
       fontFamily: 'Inter',
       marginTop: -2
     }
-  }), [theme]);
+  });
+}
 
+export const lightGlobalStyles = createGlobalStyles(lightTheme);
+export const darkGlobalStyles = createGlobalStyles(darkTheme);
+
+export default function useGlobalStyles() {
+  return useIsDarkMode() ? darkGlobalStyles : lightGlobalStyles;
 }

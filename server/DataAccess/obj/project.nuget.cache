@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+kZdq1SoqPI=",
+  "dgSpecHash": "3TGmVdBRXSc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Josh Robertson\\RiderProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
+  "projectFilePath": "C:\\Users\\Josh Robertson\\WebstormProjects\\ScriptureMemory\\server\\DataAccess\\DataAccess.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Josh Robertson\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\Josh Robertson\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",

@@ -4,6 +4,7 @@ import { BottomSheet, Button } from "heroui-native";
 import { CirclePlus, FileText } from "lucide-react-native";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ReorderableList, { reorderItems } from "react-native-reorderable-list";
 import { Collection } from "../../../types/collection/collection";
 import { CollectionItem } from "../../../types/collection/collectionItem";
@@ -35,6 +36,7 @@ const visibilityLabel = (value: string) => {
 const EditCollectionScreen = () => {
     const theme = useAppTheme();
     const globalStyles = useGlobalStyles();
+    const insets = useSafeAreaInsets();
     const useLocalStyles = () => useMemo(() => StyleSheet.create({
         screen: {
             gap: 5
@@ -155,8 +157,9 @@ const EditCollectionScreen = () => {
     };
 
     return (
-        <>
+        <View style={{ flex: 1 }}>
                 <ReorderableList
+                    style={{ flex: 1 }}
                     data={collection.items}
                     keyExtractor={(item) => `${item.type}-${item.id}`}
                     renderItem={({item}) => {
@@ -244,7 +247,7 @@ const EditCollectionScreen = () => {
                     ListFooterComponent={<View style={{height: 100}} />}
                 />
 
-                <View style={{position: 'absolute', bottom: 20, left: 15, right: 15}}>
+                <View style={{ position: 'absolute', bottom: insets.bottom + 16, left: 15, right: 15 }}>
                     <Button
                         variant="primary"
                         size="lg"
@@ -297,7 +300,7 @@ const EditCollectionScreen = () => {
                             }));
                     }}
                 />
-            </>
+        </View>
     )
 }
 

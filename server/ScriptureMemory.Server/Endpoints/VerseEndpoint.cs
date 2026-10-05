@@ -10,7 +10,6 @@ using Pgvector;
 using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
 using VerseAppNew.Server.Services;
-using ScriptureMemory.Server.Data.Requests.Post;
 
 namespace VerseAppNew.Server.Endpoints;
 
@@ -62,8 +61,12 @@ public static class VerseEndpoint
         //    return Results.Ok(await crossReferenceData.GetCrossReferences(new List<Reference> { parsedReference }));
         //});//.RequireAuthorization("User");
 
-        // Todo: old route: "verses/verse-card"
-        //Gets content for the passage bottom sheet card on the client
+        app.MapPost("/passage-card", async (
+            [FromBody] GetVerseCardRequest request,
+            [FromServices] SearchService service) =>
+        {
+            return Results.Ok(await service.GetVerseCard(request));
+        });
 
        app.MapPost("/passage-card", async (
            [FromBody] GetVerseCardRequest request,

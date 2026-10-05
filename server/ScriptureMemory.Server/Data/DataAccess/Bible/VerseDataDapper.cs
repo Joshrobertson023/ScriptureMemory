@@ -350,9 +350,15 @@ public class VerseDataDapper
         public int? CRVerseChapter { get; set; }
         public int[]? CRVerseVerseNumbers { get; set; }
         public string? CRVerseReadableReference { get; set; }
+        public string? PlainText { get; set; }
+        public string? ContentVersion { get; set; }
     }
 
-    public async Task<VerseCardResponse> GetVerseCardResponse(int userId, List<string> verseIds)
+    public async Task<VerseCardResponse> GetVerseCardResponse(
+        int userId,
+        List<string> verseIds,
+        bool fetchVerseTextFromDb = false,
+        string translation = "")
     {
         await using var conn = await _dataSource.OpenConnectionAsync();
 
@@ -376,74 +382,97 @@ public class VerseDataDapper
             crv."Reference_Book_DisplayName" as "CRVerseBookDisplayName",
             crv."Reference_Chapter" as "CRVerseChapter",
             crv."Reference_VerseNumbers" as "CRVerseVerseNumbers",
-            crv."Reference_ReadableReference" as "CRVerseReadableReference"
+            crv."Reference_ReadableReference" as "CRVerseReadableReference",
+            vc."PlainText" as "PlainText",
+            vc."Version" as "ContentVersion"
             from "Verses" v
             left join "CrossReferences" cr on cr."FromVerseId" = v."Id"
             left join "Passages" p on p."Id" = cr."ToPassageId"
             left join "PassageVerse" crpv on crpv."PassagesId" = cr."ToPassageId"
             left join "Verses" crv on crv."Id" = crpv."VersesId"
+            left join "VerseTranslationContents" vc
+                on @fetchVerseTextFromDb
+                and vc."VerseId" = v."Id"
+                and lower(vc."Version") = @translation
             where v."Id" = any(@verseIds)
         """, new
         {
-            verseIds = verseIds.ToArray()
+            verseIds = verseIds.ToArray(),
+            fetchVerseTextFromDb,
+            translation
         })).GroupBy(dto => dto.VerseId).ToList();
+
+        var groups = result
+            .Select(g => new CrossReferenceResponse
+            {
+                FromVerse = new Verse
+                {
+                    Reference = new Reference(
+                        new Book(g.First().VerseBookDisplayName),
+                        g.First().VerseChapter,
+                        g.First().VerseVerseNumbers?.ToList() ?? new List<int>())
+                    {
+                        ReadableReference = g.First().VerseReadableReference
+                    }
+                },
+                CrossReferences = g
+                    .Where(r => r.CrossReferencePassageId is not null)
+                    .GroupBy(r => r.CrossReferencePassageId!)
+                    .Select(cr =>
+                    {
+                        var firstCr = cr.First();
+
+                        return new Passage
+                        {
+                            Reference = new Reference(
+                                new Book(firstCr.CRPassageBookDisplayName),
+                                firstCr.CRPassageChapter.Value,
+                                firstCr.CRPassageVerseNumbers?.ToList() ?? new List<int>())
+                            {
+                                ReadableReference = firstCr.CRPassageReadableReference
+                            },
+                            Verses = cr
+                                .DistinctBy(r => r.CRVerseId)
+                                .Where(r => r.CRVerseId is not null && r.CRVerseBookDisplayName is not null && r.CRVerseChapter is not null)
+                                .Select(r => new Verse
+                                {
+                                    Reference = new Reference(
+                                        new Book(r.CRVerseBookDisplayName!),
+                                        r.CRVerseChapter!.Value,
+                                        r.CRVerseVerseNumbers?.ToList() ?? new List<int>())
+                                    {
+                                        ReadableReference = r.CRVerseReadableReference
+                                    }
+                                })
+                                .ToList()
+                        };
+                    })
+                    .Where(p => p != null)
+                    .Cast<Passage>()
+                    .Where(p => p.Verses.Count > 0 && !verseIds.Contains(p.Verses.First().Id))
+                    .ToList()
+            })
+            .ToList();
 
         return new VerseCardResponse
         {
             TotalSaved = result.Sum(g => g.Max(r => r.VerseTotalSavedCount)),
             TotalMemorized = result.Sum(g => g.Max(r => r.VerseTotalMemorizedCount)),
-            CrossReferences = result
-                .Select(g => new CrossReferenceResponse
-                {
-                    FromVerse = new Verse
-                    {
-                        Reference = new Reference(
-                            new Book(g.First().VerseBookDisplayName),
-                            g.First().VerseChapter,
-                            g.First().VerseVerseNumbers?.ToList() ?? new List<int>())
-                        {
-                            ReadableReference = g.First().VerseReadableReference
-                        }
-                    },
-                    CrossReferences = g
-                        .Where(r => r.CrossReferencePassageId is not null)
-                        .GroupBy(r => r.CrossReferencePassageId!)
-                        .Select(cr =>
-                        {
-                            var firstCr = cr.First();
-
-                            return new Passage
-                            {
-                                Reference = new Reference(
-                                    new Book(firstCr.CRPassageBookDisplayName),
-                                    firstCr.CRPassageChapter.Value,
-                                    firstCr.CRPassageVerseNumbers?.ToList() ?? new List<int>())
-                                {
-                                    ReadableReference = firstCr.CRPassageReadableReference
-                                },
-                                Verses = cr
-                                    .DistinctBy(r => r.CRVerseId)
-                                    .Where(r => r.CRVerseId is not null && r.CRVerseBookDisplayName is not null && r.CRVerseChapter is not null)
-                                    .Select(r => new Verse
-                                    {
-                                        Reference = new Reference(
-                                            new Book(r.CRVerseBookDisplayName!),
-                                            r.CRVerseChapter!.Value,
-                                            r.CRVerseVerseNumbers?.ToList() ?? new List<int>())
-                                        {
-                                            ReadableReference = r.CRVerseReadableReference
-                                        }
-                                    })
-                                    .ToList()
-                            };
-                        })
-                        .Where(p => p != null)
-                        .Cast<Passage>()
-                        .Where(p => p.Verses.Count > 0 && !verseIds.Contains(p.Verses.First().Id))
-                        .ToList()
-                })
+            CrossReferences = groups
                 .Where(group => group.CrossReferences.Count > 0)
                 .ToList(),
+            RequestedVerses = groups.Select(group => group.FromVerse).ToList(),
+            VerseTexts = fetchVerseTextFromDb
+                ? result
+                    .Select(g => new VerseTranslationContent
+                    {
+                        VerseId = g.Key,
+                        PlainText = g.First().PlainText ?? string.Empty,
+                        Version = g.First().ContentVersion ?? translation
+                    })
+                    .Where(content => !string.IsNullOrEmpty(content.PlainText))
+                    .ToList()
+                : new List<VerseTranslationContent>()
         };
     }
 }
