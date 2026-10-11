@@ -9,6 +9,7 @@ using ScriptureMemory.Server.DataAccess.Requests;
 using Pgvector;
 using ScriptureMemory.Server.DataAccess.Models;
 using ScriptureMemory.Server.Data.DataAccess.Bible;
+using ScriptureMemory.Server.Data.Requests.Post;
 using VerseAppNew.Server.Services;
 
 namespace VerseAppNew.Server.Endpoints;
@@ -66,14 +67,7 @@ public static class VerseEndpoint
             [FromServices] SearchService service) =>
         {
             return Results.Ok(await service.GetVerseCard(request));
-        });
-
-       app.MapPost("/passage-card", async (
-           [FromBody] GetVerseCardRequest request,
-           [FromServices] VerseDataDapper data) =>
-       {
-           return Results.Ok(await data.GetVerseCardResponse(request.UserId, request.VerseIds));
-       });//.RequireAuthorization("User");
+        });//.RequireAuthorization("User");
 
         app.MapPost("/similar", async (
             [FromBody] GetSimilarRequest request,

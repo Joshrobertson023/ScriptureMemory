@@ -357,8 +357,8 @@ public class VerseDataDapper
     public async Task<VerseCardResponse> GetVerseCardResponse(
         int userId,
         List<string> verseIds,
-        bool fetchVerseTextFromDb = false,
-        string translation = "")
+        bool fetchVerseTextFromDb,
+        string translation)
     {
         await using var conn = await _dataSource.OpenConnectionAsync();
 
@@ -462,7 +462,7 @@ public class VerseDataDapper
                 .Where(group => group.CrossReferences.Count > 0)
                 .ToList(),
             RequestedVerses = groups.Select(group => group.FromVerse).ToList(),
-            VerseTexts = fetchVerseTextFromDb
+            TranslationContents = fetchVerseTextFromDb
                 ? result
                     .Select(g => new VerseTranslationContent
                     {

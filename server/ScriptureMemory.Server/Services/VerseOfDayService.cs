@@ -65,7 +65,8 @@ public class VerseOfDayService(
                 {
                     verse.TranslationContents = new();
                     verse.TranslationContents.Add(new VerseTranslationContent());
-                    verse.TranslationContents.First().PlainText = await _bibleApi.GetVersePlaintext(bibleService.GetBible(translation).Id, verse.Id);
+                    var bible = await bibleService.GetBible(translation);
+                    verse.TranslationContents.First().PlainText = await _bibleApi.GetVersePlaintext(bible.Id, verse.Id);
                     verse.TranslationContents.First().Version = translation;
                 }
 

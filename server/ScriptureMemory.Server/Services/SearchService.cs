@@ -24,6 +24,7 @@ public sealed class SearchService(
         UserDataDapper _userDataDapper,
         UserDataEFCore _userDataEfCore,
         BibleApi _bibleApi,
+        BibleService _bibleService,
         EmbeddingGenerator _embeddingGenerator,
         ILogger<SearchService> _logger,
         IMemoryCache _memoryCache,
@@ -39,8 +40,7 @@ public sealed class SearchService(
         if (string.IsNullOrEmpty(userId))
             _logger.LogWarning("UserId not found.");
 
-        if (!AvailableBibles.TryGetBible(request.Translation, out var bible))
-            throw new BibleUnavailableException("The Bible {bible} is not available.", request.Translation);
+        var bible = await _bibleService.GetBible(request.Translation);
 
         if (request.LastVerseDistance <= 0.0)
         {
@@ -189,8 +189,7 @@ public sealed class SearchService(
             if (verse.TranslationContents is null)
                 verse.TranslationContents = new();
 
-            if (!AvailableBibles.TryGetBible(translation, out var bible))
-                throw new BibleUnavailableException("{Translation} not available", translation);
+            var bible = await _bibleService.GetBible(translation);
 
             if (verse.TranslationContents is null || verse.TranslationContents.Count != 0)
             {
@@ -325,9 +324,11 @@ public sealed class SearchService(
 
                     continue;
                 }
+                
+                var bible = await _bibleService.GetBible(requestedTranslation);
 
                 string content = await _bibleApi.GetVersePlaintext(
-                    AvailableBibles.GetBible(requestedTranslation).Id,
+                    bible.Id,
                     result.Passage.Reference.VerseId);
 
                 Verse newVerse = new Verse(result.Passage.Reference)
@@ -408,25 +409,25 @@ public sealed class SearchService(
 
     public async Task<VerseCardResponse> GetVerseCard(GetVerseCardRequest request)
     {
-        string translation = request.Translation?.ToLower().Trim() ?? string.Empty;
-        string defaultTranslation = (_config["ApiContent:DefaultTranslation"] ?? "kjv").ToLower().Trim();
-        bool fetchFromDb = request.FetchVerseText && translation == defaultTranslation;
+        bool fetchFromDb = request.FetchVerseText 
+                           && request.Translation.ToLower().Trim() == (_config["ApiContent:DefaultTranslation"] 
+                                                                       ?? "kjv").ToLower().Trim();
 
         var response = await _verseData.GetVerseCardResponse(
             request.UserId,
             request.VerseIds,
             fetchFromDb,
-            translation);
+            request.Translation);
 
-        if (request.FetchVerseText && !fetchFromDb && !string.IsNullOrEmpty(translation))
+        if (fetchFromDb && !string.IsNullOrEmpty(request.Translation))
         {
             var versesToFetch = response.RequestedVerses
                 .Select(verse => new Verse(verse.Reference))
                 .ToList();
 
-            var verses = await getVersesContent(versesToFetch, translation);
+            var verses = await getVersesContent(versesToFetch, request.Translation);
 
-            response.VerseTexts = verses
+            response.TranslationContents = verses
                 .Select(verse => (verse, content: verse.TranslationContents?.FirstOrDefault()))
                 .Where(pair => !string.IsNullOrEmpty(pair.content?.PlainText))
                 .Select(pair => new VerseTranslationContent

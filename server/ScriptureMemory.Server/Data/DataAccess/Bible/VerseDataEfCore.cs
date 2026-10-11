@@ -1,4 +1,5 @@
 using Pgvector;
+using ScriptureMemory.Server.Services;
 
 namespace ScriptureMemory.Server.Data.DataAccess.Bible;
 
@@ -6,11 +7,16 @@ public class VerseDataEfCore : IVerseData
 {
     private readonly IConfiguration _config;
     private readonly ApplicationDbContext _dbContext;
+    private readonly BibleService _bibleService;
     
-    public VerseDataEfCore(IConfiguration config, ApplicationDbContext dbContext)
+    public VerseDataEfCore(
+        IConfiguration config,
+        ApplicationDbContext dbContext,
+        BibleService bibleService)
     {
         _config = config;
         _dbContext = dbContext;
+        _bibleService = bibleService;
     }
 
     /// <summary>
@@ -95,9 +101,8 @@ public class VerseDataEfCore : IVerseData
     {
         if (!Books.TryGetBook(book, out var bookResult))
             throw new InvalidOperationException($"{book} is not a valid book.");
-
-        if (!Tools.AvailableBibles.TryGetBible(version, out var bibleResult))
-            throw new InvalidOperationException($"{version} Bible not found.");
+        
+        var bibleResult = await _bibleService.GetBible(version);
 
         return _dbContext.VerseTranslationContents
             .First(c =>
